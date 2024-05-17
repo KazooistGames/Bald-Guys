@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://cxh4be4uwbmtf"]
+
+[ext_resource type="PlaneMesh" uid="uid://bkcwl7e51sjbe" path="res://Scenes/environment/wall.tres" id="1_88uwo"]
+[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/environment/wall.material" id="1_eebqw"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
+size = Vector3(50, 1, 50)
+
+[node name="floor" type="MeshInstance3D"]
+mesh = ExtResource("1_88uwo")
+skeleton = NodePath("../..")
+surface_material_override/0 = ExtResource("1_eebqw")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_a03rp")

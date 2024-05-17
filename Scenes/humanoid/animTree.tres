@@ -1,0 +1,99 @@
+[gd_resource type="AnimationNodeBlendTree" load_steps=17 format=3 uid="uid://o282sfra1obc"]
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_go2qy"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_f10qu"]
+animation = &"run"
+
+[sub_resource type="AnimationNodeTransition" id="AnimationNodeTransition_ddl4p"]
+input_0/name = "stand"
+input_0/auto_advance = false
+input_0/reset = true
+input_1/name = "crouch"
+input_1/auto_advance = false
+input_1/reset = true
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_otya5"]
+animation = &"stand"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_tvx1k"]
+animation = &"jump"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_wrp0w"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_otya5")
+blend_point_0/pos = 0.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_tvx1k")
+blend_point_1/pos = 1.0
+min_space = 0.0
+
+[sub_resource type="AnimationNodeTransition" id="AnimationNodeTransition_v0tyw"]
+xfade_time = 0.1
+input_0/name = "walking"
+input_0/auto_advance = false
+input_0/reset = true
+input_1/name = "falling"
+input_1/auto_advance = false
+input_1/reset = true
+
+[sub_resource type="AnimationNodeAdd2" id="AnimationNodeAdd2_yjerc"]
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_4y5dl"]
+
+[sub_resource type="AnimationNodeTransition" id="AnimationNodeTransition_b3c15"]
+xfade_time = 0.5
+input_0/name = "walking"
+input_0/auto_advance = false
+input_0/reset = true
+input_1/name = "running"
+input_1/auto_advance = false
+input_1/reset = true
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_x60od"]
+animation = &"breathe"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hrhor"]
+animation = &"crouch"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bbpvv"]
+animation = &"ease"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_apagl"]
+animation = &"stand"
+
+[sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_ms7p5"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_vhf1k"]
+animation = &"walk"
+
+[resource]
+graph_offset = Vector2(-748.727, -406.588)
+nodes/Add2/node = SubResource("AnimationNodeAdd2_go2qy")
+nodes/Add2/position = Vector2(-80, 220)
+"nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_f10qu")
+"nodes/Animation 2/position" = Vector2(-800, -400)
+nodes/IdleStance/node = SubResource("AnimationNodeTransition_ddl4p")
+nodes/IdleStance/position = Vector2(-400, -200)
+nodes/Jump/node = SubResource("AnimationNodeBlendSpace1D_wrp0w")
+nodes/Jump/position = Vector2(-200, 0)
+nodes/MoveState/node = SubResource("AnimationNodeTransition_v0tyw")
+nodes/MoveState/position = Vector2(0, -200)
+nodes/UpperLower/node = SubResource("AnimationNodeAdd2_yjerc")
+nodes/UpperLower/position = Vector2(200, 0)
+nodes/WalkSpeed/node = SubResource("AnimationNodeTimeScale_4y5dl")
+nodes/WalkSpeed/position = Vector2(-400, -600)
+nodes/WalkStance/node = SubResource("AnimationNodeTransition_b3c15")
+nodes/WalkStance/position = Vector2(-600, -600)
+nodes/breathe/node = SubResource("AnimationNodeAnimation_x60od")
+nodes/breathe/position = Vector2(-340, 260)
+nodes/crouch/node = SubResource("AnimationNodeAnimation_hrhor")
+nodes/crouch/position = Vector2(-600, 80)
+nodes/ease/node = SubResource("AnimationNodeAnimation_bbpvv")
+nodes/ease/position = Vector2(-271.069, 414.646)
+nodes/output/position = Vector2(400, 0)
+nodes/stand/node = SubResource("AnimationNodeAnimation_apagl")
+nodes/stand/position = Vector2(-600, -400)
+nodes/velocity/node = SubResource("AnimationNodeBlend2_ms7p5")
+nodes/velocity/position = Vector2(-200, -400)
+nodes/walk/node = SubResource("AnimationNodeAnimation_vhf1k")
+nodes/walk/position = Vector2(-800, -800)
+node_connections = [&"Add2", 0, &"breathe", &"Add2", 1, &"ease", &"IdleStance", 0, &"stand", &"IdleStance", 1, &"crouch", &"MoveState", 0, &"velocity", &"MoveState", 1, &"Jump", &"UpperLower", 0, &"MoveState", &"UpperLower", 1, &"Add2", &"WalkSpeed", 0, &"WalkStance", &"WalkStance", 0, &"walk", &"WalkStance", 1, &"Animation 2", &"output", 0, &"UpperLower", &"velocity", 0, &"WalkSpeed", &"velocity", 1, &"IdleStance"]

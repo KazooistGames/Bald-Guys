@@ -1,0 +1,98 @@
+[gd_scene load_steps=13 format=3 uid="uid://c2bxkh05oa1qf"]
+
+[ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="1_5c6k7"]
+[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/environment/wall.material" id="1_qib3r"]
+[ext_resource type="Script" path="res://Scenes/environment/Stage/stage.gd" id="2_d2r1i"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
+resource_local_to_scene = true
+size = Vector3(45, 0.5, 17.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hj5wy"]
+resource_local_to_scene = true
+size = Vector3(17.5, 1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kry8w"]
+resource_local_to_scene = true
+size = Vector3(45, 1, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vlnrn"]
+resource_local_to_scene = true
+size = Vector3(45, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_f5l3u"]
+resource_local_to_scene = true
+size = Vector3(17.5, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_2i0pq"]
+resource_local_to_scene = true
+size = Vector3(45, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_u5srs"]
+resource_local_to_scene = true
+size = Vector3(45, 0.5, 17.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l7m8g"]
+resource_local_to_scene = true
+size = Vector3(45, 5, 17.5)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_5dtqu"]
+properties/0/path = NodePath(".:humanoids_onboard")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+
+[node name="Stage" type="AnimatableBody3D"]
+collision_mask = 6
+script = ExtResource("2_d2r1i")
+
+[node name="floor_collider" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_a03rp")
+
+[node name="rail_collider_x" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0.707107, 0.707107, 0, 0.707107, -0.707107, -1, -3.09086e-08, -3.09086e-08, 22.5, 0, 0)
+shape = SubResource("BoxShape3D_hj5wy")
+
+[node name="rail_collider2_x" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0.707107, 0.707107, 0, 0.707107, -0.707107, -1, -3.09086e-08, -3.09086e-08, -22.5, 0, 0)
+shape = SubResource("BoxShape3D_hj5wy")
+
+[node name="rail_collider_z" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 8.75)
+shape = SubResource("BoxShape3D_kry8w")
+
+[node name="rail_collider2_z" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, -8.75)
+shape = SubResource("BoxShape3D_vlnrn")
+
+[node name="rail_x" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0.707107, 0.707107, 0, 0.707107, -0.707107, -1, -3.09086e-08, -3.09086e-08, 22.5, 0, 0)
+mesh = SubResource("BoxMesh_f5l3u")
+surface_material_override/0 = ExtResource("1_5c6k7")
+
+[node name="rail2_x" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0.707107, 0.707107, 0, 0.707107, -0.707107, -1, -3.09086e-08, -3.09086e-08, -22.5, 0, 0)
+mesh = SubResource("BoxMesh_f5l3u")
+surface_material_override/0 = ExtResource("1_5c6k7")
+
+[node name="rail_z" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 8.75)
+mesh = SubResource("BoxMesh_2i0pq")
+surface_material_override/0 = ExtResource("1_5c6k7")
+
+[node name="rail2_z" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, -8.75)
+mesh = SubResource("BoxMesh_2i0pq")
+surface_material_override/0 = ExtResource("1_5c6k7")
+
+[node name="floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_u5srs")
+surface_material_override/0 = ExtResource("1_qib3r")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_mask = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_l7m8g")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_5dtqu")

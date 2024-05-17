@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://jdvdhg8sqgv1"]
+
+[ext_resource type="Script" path="res://Scenes/player/player.gd" id="1_mjaip"]
+[ext_resource type="PackedScene" uid="uid://yaefhdh5sdlv" path="res://Scenes/cameras/FPS_Camera.tscn" id="3_d063n"]
+
+[node name="player_character" type="Node3D"]
+script = ExtResource("1_mjaip")
+
+[node name="Camera3D" parent="." instance=ExtResource("3_d063n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.754, 0)
+near = 0.05

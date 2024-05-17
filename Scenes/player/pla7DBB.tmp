@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://jdvdhg8sqgv1"]
+
+[ext_resource type="Script" path="res://Scenes/player/player.gd" id="1_mjaip"]
+[ext_resource type="Shader" path="res://shaders/outline.gdshader" id="2_ff2fo"]
+[ext_resource type="PackedScene" uid="uid://cqub038ubmm2h" path="res://Scenes/humanoid/humanoid.tscn" id="3_fkiky"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fg7bk"]
+render_priority = 0
+shader = ExtResource("2_ff2fo")
+shader_parameter/depth_threshold = 0.01
+shader_parameter/reverse_depth_threshold = 0.25
+shader_parameter/normal_threshold = 0.6
+shader_parameter/darken_amount = 0.3
+shader_parameter/lighten_amount = 1.5
+shader_parameter/normal_edge_bias = Vector3(1, 1, 1)
+shader_parameter/light_direction = Vector3(0, -1, 0)
+
+[sub_resource type="QuadMesh" id="QuadMesh_q65sc"]
+material = SubResource("ShaderMaterial_fg7bk")
+flip_faces = true
+size = Vector2(2, 2)
+
+[node name="player_character" type="Node3D"]
+script = ExtResource("1_mjaip")
+
+[node name="character" parent="." instance=ExtResource("3_fkiky")]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="character"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.76221, 0)
+spring_length = -0.115
+
+[node name="Camera3D" type="Camera3D" parent="character/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0520221, 0)
+current = true
+near = 0.15
+
+[node name="postprocessing" type="MeshInstance3D" parent="character/SpringArm3D/Camera3D"]
+mesh = SubResource("QuadMesh_q65sc")
+skeleton = NodePath("../../../..")
