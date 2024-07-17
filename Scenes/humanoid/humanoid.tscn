@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=37 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="Script" path="res://Scenes/humanoid/skeleton.gd" id="2_ldi4p"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://Scenes/humanoid/ragdoll.gd" id="4_1erm7"]
 [ext_resource type="Script" path="res://Scenes/humanoid/animTree.tres.gd" id="5_6swf7"]
 [ext_resource type="ArrayMesh" uid="uid://dkrvskqnfamyw" path="res://Scenes/humanoid/humanoid.tres" id="5_b5sbe"]
+[ext_resource type="Shader" path="res://shaders/object_outline2.gdshader" id="6_tfsu2"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_l6yus"]
 radius = 0.1
@@ -181,9 +182,17 @@ bind/54/name = &"toes.r"
 bind/54/bone = -1
 bind/54/pose = Transform3D(0.978403, -0.206646, -0.00492008, -1.33645e-07, -0.0238024, 0.999716, -0.206704, -0.978126, -0.0232884, 0.185986, -0.0441104, -0.0146671)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qqun5"]
+render_priority = 0
+shader = ExtResource("6_tfsu2")
+shader_parameter/shadow_strength = 0.3
+shader_parameter/outline_width = 2.0
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_krbc4"]
 resource_local_to_scene = true
+next_pass = SubResource("ShaderMaterial_qqun5")
 diffuse_mode = 3
+albedo_color = Color(0.870588, 0.537255, 0.52549, 1)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wvkh2"]
 radius = 0.03
@@ -4775,8 +4784,8 @@ transform = Transform3D(0.999999, -5.81145e-07, -5.06639e-07, -2.08616e-07, 0.99
 collision_layer = 4
 collision_mask = 5
 joint_type = 5
-joint_offset = Transform3D(0.791237, 0.554031, 0.258818, -0.573574, 0.81915, -3.66191e-08, -0.212011, -0.148452, 0.965923, 2.44215e-07, -2.51693e-08, -1.10268e-08)
-joint_rotation = Vector3(6.10319e-08, 0.261799, -0.610865)
+joint_offset = Transform3D(0.791237, 0.554031, 0.258818, -0.573574, 0.81915, -6.10317e-08, -0.212011, -0.148452, 0.965923, 2.44215e-07, -2.51693e-08, -1.10268e-08)
+joint_rotation = Vector3(6.46913e-08, 0.261799, -0.610865)
 body_offset = Transform3D(0.401755, -0.502792, -0.765369, -0.559846, -0.79626, 0.229214, -0.724681, 0.336402, -0.601389, -1.19209e-07, 1.19209e-07, 1.78814e-07)
 mass = 5.0
 bone_name = "lowerArm.r"

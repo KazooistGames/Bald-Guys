@@ -1,7 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://yaefhdh5sdlv"]
+[gd_scene load_steps=5 format=3 uid="uid://yaefhdh5sdlv"]
 
 [ext_resource type="Script" path="res://Scenes/cameras/FPS_Camera.gd" id="1_12e8i"]
-[ext_resource type="Shader" path="res://shaders/outline.gdshader" id="2_qiyia"]
 [ext_resource type="Texture2D" uid="uid://6p02e8vrmean" path="res://icon.svg" id="3_p33es"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_e76kf"]
@@ -9,15 +8,7 @@ flip_faces = true
 size = Vector2(2, 2)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5v4dx"]
-render_priority = 0
-shader = ExtResource("2_qiyia")
-shader_parameter/depth_threshold = 0.01
-shader_parameter/reverse_depth_threshold = 0.25
-shader_parameter/normal_threshold = 0.6
-shader_parameter/darken_amount = 0.3
-shader_parameter/lighten_amount = 1.5
-shader_parameter/normal_edge_bias = Vector3(1, 1, 1)
-shader_parameter/light_direction = Vector3(0, -1, 0)
+resource_local_to_scene = true
 
 [node name="Camera3D" type="Camera3D"]
 current = true
