@@ -186,7 +186,7 @@ bind/54/pose = Transform3D(0.978403, -0.206646, -0.00492008, -1.33645e-07, -0.02
 render_priority = 0
 shader = ExtResource("6_tfsu2")
 shader_parameter/shadow_strength = 0.3
-shader_parameter/outline_width = 2.0
+shader_parameter/outline_width = 5.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_krbc4"]
 resource_local_to_scene = true
