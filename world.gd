@@ -19,7 +19,7 @@ var enet_peer = ENetMultiplayerPeer.new()
 func _ready():
 	spawner.spawned.connect(map.set_spawn_position)
 	
-func _process(delta):
+func _process(_delta):
 	if not is_multiplayer_authority(): return
 	hud.set_public_service_announcement.rpc()
 	match map.State:

@@ -61,7 +61,7 @@ func _process(delta):
 	if Main_Trigger or WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
 		RUNNING = false
 	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
-	TOPSPEED_MOD = 0.75 if Main_Trigger else 1
+	TOPSPEED_MOD = 0.75 if Main_Trigger else 1.0
 	animation.walkAnimBlendScalar = TOPSPEED
 	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
@@ -69,10 +69,11 @@ func _process(delta):
 		MoveState.FALLING:
 			IMPACT_THRESHOLD = 10
 			animation.updateFalling(velocity)
+			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 		MoveState.WALKING:
 			IMPACT_THRESHOLD = 4.5
 			animation.updateWalking(TOPSPEED, get_real_velocity(), is_back_pedaling())
-	skeleton.processSkeletonRotation(LOOK_VECTOR)
+			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)
 
 func _physics_process(delta):
 	physics_collisions(delta)
@@ -98,7 +99,7 @@ func physics_falling(delta):
 	if WALK_VECTOR:
 		velocity.x += WALK_VECTOR.x * velocityStep
 		velocity.z += WALK_VECTOR.z * velocityStep
-	skeleton.processFallOrientation(delta, LOOK_VECTOR)
+	skeleton.processFallOrientation(delta, LOOK_VECTOR, WALK_VECTOR)
 
 func physics_walking(delta):
 	var velocityStep = acceleration() * delta
@@ -151,15 +152,19 @@ func handle_collision(delta):
 		match layer:
 			2:
 				impact = sqrt(pow(relativeVelocity.dot(collision.get_normal()), 2)/2)
-				otherCollider.ragdoll_if_impact_meets_threshold(impact)
+				if otherCollider.check_if_impact_meets_threshold(impact):
+					otherCollider.ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
+					otherCollider.ragdoll.rpc()
 			4:
 				pass
-		if not ragdoll_if_impact_meets_threshold(impact): move_and_slide()
+		if  check_if_impact_meets_threshold(impact): 
+			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
+			ragdoll.rpc()
+		else:
+			move_and_slide()
 
-func ragdoll_if_impact_meets_threshold(impact):
+func check_if_impact_meets_threshold(impact):
 	if impact > IMPACT_THRESHOLD:
-		ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
-		ragdoll.rpc()
 		return true
 	else:
 		return false

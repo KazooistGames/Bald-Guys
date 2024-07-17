@@ -14,7 +14,7 @@ func _ready():
 	area.body_entered.connect(add_humanoid_to_onboard)
 	area.body_exited.connect(remove_humanoid_from_onboard)
 	
-func _process(delta):
+func _process(_delta):
 	if Size != cached_Size:
 		process_size_change()
 		cached_Size = Size

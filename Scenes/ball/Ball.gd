@@ -12,7 +12,7 @@ func _enter_tree():
 	contact_monitor = true
 	max_contacts_reported = 10
 
-func _process(delta):
+func _process(_delta):
 	mesh.mesh.radius = radius
 	mesh.mesh.height = radius * 2
 	collider.shape.radius = radius

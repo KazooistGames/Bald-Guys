@@ -18,21 +18,31 @@ func _physics_process(delta):
 		ragdollSkeleton.animate_physical_bones(delta)
 		ragdollSkeleton.set_gravity(0.0)
 	
-func processRagdollOrientation(delta):
+func processRagdollOrientation(_delta):
 	#position = ragdollSkeleton.position
 	pass
 	
-func processFallOrientation(delta, look_vector):
-	ragdollSkeleton.LINEAR_STIFFNESS = 800.0
-	ragdollSkeleton.ANGULAR_STIFFNESS = 1200.0
-	var timeStep = LERP_VAL * delta
+func processFallOrientation(delta, look_vector, walk_vector):
+	ragdollSkeleton.LINEAR_STIFFNESS = 400.0
+	ragdollSkeleton.ANGULAR_STIFFNESS = 400.0
+	ragdollSkeleton.LINEAR_DAMPING = 20
+	ragdollSkeleton.ANGULAR_DAMPING = 80
+	var timeStep = LERP_VAL * delta	
 	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
-	rotation.y = lerp_angle(rotation.y, atan2(-look_vector.x, -look_vector.z), timeStep/3)
-
+	if(walk_vector == Vector3.ZERO):
+		pass
+	elif (is_back_pedaling(look_vector, walk_vector)):
+		rotation.y = lerp_angle(rotation.y, atan2(-walk_vector.x, -walk_vector.z), timeStep/3)
+	else:
+		rotation.y = lerp_angle(rotation.y, atan2(walk_vector.x, walk_vector.z), timeStep/3)
+		
+		
 func processIdleOrientation(delta, look_vector):
 	ragdollSkeleton.LINEAR_STIFFNESS = 400.0
 	ragdollSkeleton.ANGULAR_STIFFNESS = 600.0
+	ragdollSkeleton.LINEAR_DAMPING = 40
+	ragdollSkeleton.ANGULAR_DAMPING = 80
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
@@ -44,34 +54,39 @@ func processIdleOrientation(delta, look_vector):
 func processWalkOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.LINEAR_STIFFNESS = 900.0
 	ragdollSkeleton.ANGULAR_STIFFNESS = 1200.0
+	ragdollSkeleton.LINEAR_DAMPING = 40
+	ragdollSkeleton.ANGULAR_DAMPING = 80
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")))
 	var actual = rotation.y
 	var target = atan2(-walk_vector.x, -walk_vector.z) if is_back_pedaling(look_vector, walk_vector) else atan2(walk_vector.x, walk_vector.z)
 	var lookTarget = atan2(-look_vector.x, -look_vector.z)
-	var diff = get_true_difference(actual, target)
+	#var diff = get_true_difference(actual, target)
 	var lookDiff = get_true_difference(actual, lookTarget)
 	if lookDiff > PI/2:
 		rotation.y = lerp_angle(actual, lookTarget, timeStep)
 	else: 
 		rotation.y = lerp_angle(actual, target, timeStep)
 		
-func processSkeletonRotation(look_vector):
+func processSkeletonRotation(look_vector, ratio, scalar):
 	var lookAngle = get_relative_look_angle(look_vector)
 	var look_relative = Vector3(-look_vector.y, lookAngle, 0)
-	var upperBody_rotation = look_relative * Vector3(0.4, 0.4, 0)
-	var head_rotation = look_relative * Vector3(0.6, 0.6, 0)
+	var headScale = ratio * scalar
+	var bodyScale = (1.0-ratio)*scalar
+	var upperBody_rotation = look_relative * Vector3(bodyScale, bodyScale, 0)
+	var head_rotation = look_relative * Vector3(headScale, headScale, 0)
 	set_bone_pose_rotation(find_bone("upperBody"), Quaternion.from_euler(upperBody_rotation))
 	set_bone_pose_rotation(find_bone("head"), Quaternion.from_euler(head_rotation + Vector3.BACK * -lookAngle/4))
+	
 
 @onready var currentReacher = rightHand
 func processReach(look_vector):
 	var lookAngle = get_relative_look_angle(look_vector)
-	var deadBand = PI/4
-	if lookAngle > deadBand:
+	var deadband = PI/5
+	if lookAngle > deadband:
 		currentReacher = leftHand
-	elif lookAngle < -deadBand:
+	elif lookAngle < -deadband:
 		currentReacher = rightHand
 	currentReacher.process_arm_forward(get_bone_global_pose_no_override(find_bone("head")))
 

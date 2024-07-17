@@ -52,7 +52,7 @@ func process_setup_state(delta):
 	else:
 		countdownTimer += delta
 
-func process_playing_state(delta):
+func process_playing_state(_delta):
 	if not all_humanoids_have_team():
 		State = GameState.Setup
 	else:
@@ -111,7 +111,7 @@ func set_spawn_position(object):
 	if not available_spawns.is_empty():
 		object.position = available_spawns.pick_random().transform.origin
 
-func handle_ball_impact(newCollidingObject):
+func handle_ball_impact(_newCollidingObject):
 	var collidingNodes = BALL.get_colliding_bodies()
 	for node in collidingNodes:
 		if node_is_team_stage(node):

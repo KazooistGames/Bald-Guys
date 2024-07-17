@@ -11,7 +11,7 @@ func _ready():
 	set_current(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
-func _process(delta):
+func _process(_delta):
 	reticle.expand_mode = 1
 	reticle.size = Vector2.ONE * 4
 	reticle.position = get_center_of_screen() - reticle.size/2

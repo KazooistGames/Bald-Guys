@@ -52,8 +52,8 @@ func process_arm_idle(footTransform):
 func process_arm_falling(footTransform):
 	var targetTransform = footTransform
 	targetTransform.origin.x *= 3.25
-	targetTransform.origin.y = 1 + footTransform.origin.y/1.5
-	targetTransform.origin.z *= 1.25
+	targetTransform.origin.y = 0.9 + footTransform.origin.y/1.5
+	targetTransform.origin.z *= 2.5
 	var side = sign(idleOffset.x)
 	targetTransform.basis = get_hand_rest().basis.rotated(Vector3(-1,0,0).normalized(), PI/3 * (footTransform.origin.y*2))
 	targetTransform.basis = targetTransform.basis.rotated(Vector3.FORWARD, side * PI * footTransform.origin.y)
