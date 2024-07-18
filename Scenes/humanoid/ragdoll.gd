@@ -37,9 +37,9 @@ func animate_physical_bones(delta):
 		var animated_transform = get_animated_transform(physical_bone)	
 		var linear_displacement = animated_transform.origin - physical_transform.origin
 		var angular_displacement = animated_transform.basis * physical_transform.basis.inverse()
-		var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
-		var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
-		var tooBent = angular_displacement.get_euler().length() >= MAX_ANGULAR_DISPLACEMENT
+		#var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
+		#var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
+		#var tooBent = angular_displacement.get_euler().length() >= MAX_ANGULAR_DISPLACEMENT
 		#if tooFast or tooFar:
 			#physical_bone.linear_velocity = Vector3.ZERO
 			#physical_bone.angular_velocity = Vector3.ZERO

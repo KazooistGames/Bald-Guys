@@ -5,15 +5,18 @@ uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nea
 uniform sampler2D depth_texture : source_color, hint_depth_texture, filter_nearest;
 uniform sampler2D normal_texture : source_color, hint_normal_roughness_texture, filter_nearest;
 
-uniform float depth_threshold : hint_range(0, 1) = 0.05;
+uniform float depth_threshold : hint_range(0, 1) = 0.03;
 uniform float reverse_depth_threshold : hint_range(0, 1) = 0.25;
-uniform float normal_threshold : hint_range(0, 1) = 0.6;
+uniform float normal_threshold : hint_range(0, 1) = 0.3;
 
 uniform float darken_amount : hint_range(0, 1, 0.01) = 0.3;
 uniform float lighten_amount : hint_range(0, 10, 0.01) = 1.5;
 
 uniform vec3 normal_edge_bias = vec3(1, 1, 1);
-uniform vec3 light_direction = vec3(-0.96, -0.18, 0.2);
+uniform vec3 light_direction = vec3(-0.0, -1.0, 0.0);
+
+uniform float range : hint_range(10,100) = 25;
+
 
 float get_depth(vec2 screen_uv, mat4 inv_projection_matrix) {
 	float depth = texture(depth_texture, screen_uv).r;
@@ -82,9 +85,9 @@ void fragment() {
 	);
 	float ld = dot((view_to_world_normal_mat * normal), normalize(light_direction));
 	
-	vec3 depth_col = nearest * darken_amount;
-	vec3 normal_col = original * (ld > 0.0 ? darken_amount : lighten_amount);
+	vec3 depth_col = nearest;
+	vec3 normal_col = original * (ld > 0.0 ? darken_amount : lighten_amount ) ;
 	vec3 edge_mix = mix(normal_col, depth_col, depth_edge);
 	
-	ALBEDO = mix(original, edge_mix, (depth_edge > 0.0 ? depth_edge : normal_edge));
+	ALBEDO = mix(original, edge_mix, (depth_edge > 0.0 ? depth_edge : normal_edge) * (1.0-step(range, depth)));
 }

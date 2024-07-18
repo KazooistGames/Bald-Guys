@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://ccecv7ucyb87r"]
+[gd_scene load_steps=11 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
-[ext_resource type="Shader" path="res://shaders/outline.gdshader" id="2_76mdc"]
+[ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="2_76mdc"]
 [ext_resource type="PackedScene" uid="uid://by3wuudn8soe" path="res://Scenes/games/wigArena.tscn" id="3_bts5d"]
+[ext_resource type="PackedScene" uid="uid://bplpok0vdxb3l" path="res://Scenes/humanoid/humanoid.tscn" id="5_hvgsc"]
 [ext_resource type="PackedScene" uid="uid://dxmbdi6kjhx8i" path="res://Scenes/UI/HUD.tscn" id="9_hcw72"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ddwpy"]
@@ -15,6 +16,7 @@ shader_parameter/darken_amount = 0.3
 shader_parameter/lighten_amount = 1.5
 shader_parameter/normal_edge_bias = Vector3(1, 1, 1)
 shader_parameter/light_direction = Vector3(-0.96, -0.18, 0.2)
+shader_parameter/range = 25.0
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_mgx0w"]
 
@@ -41,11 +43,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
-stretch_shrink = 3
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(384, 216)
+size = Vector2i(1152, 648)
 render_target_update_mode = 4
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
@@ -121,6 +122,9 @@ alignment = 1
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn", "res://Scenes/ball/Ball.tscn")
 spawn_path = NodePath("../SubViewportContainer/SubViewport")
+
+[node name="Armature" parent="." instance=ExtResource("5_hvgsc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 2, -7)
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="_on_join_button_pressed"]
