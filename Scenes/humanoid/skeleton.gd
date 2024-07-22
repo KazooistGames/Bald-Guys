@@ -1,6 +1,13 @@
 extends Skeleton3D
 
-@export var RAGDOLLED = false
+@export var RAGDOLLED: bool = false:
+	get:
+		return RAGDOLLED
+	set(value):
+		RAGDOLLED = value
+		if value == false:
+			ragdollSkeleton.reset_skeleton()
+	
 @onready var leftHand = $leftHandIK
 @onready var rightHand = $rightHandIK
 @onready var ragdollSkeleton = $Ragdoll
@@ -30,14 +37,21 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	var timeStep = LERP_VAL * delta	
 	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
-	if(walk_vector == Vector3.ZERO):
+	var target_angle = rotation.y
+	if(isLookingBack(look_vector)):
+		target_angle = atan2(-look_vector.x, -look_vector.z)
+	elif(walk_vector == Vector3.ZERO):
 		pass
 	elif (is_back_pedaling(look_vector, walk_vector)):
-		rotation.y = lerp_angle(rotation.y, atan2(-walk_vector.x, -walk_vector.z), timeStep/3)
+		target_angle = atan2(-walk_vector.x, -walk_vector.z)
 	else:
-		rotation.y = lerp_angle(rotation.y, atan2(walk_vector.x, walk_vector.z), timeStep/3)
-		
-		
+		target_angle = atan2(walk_vector.x, walk_vector.z)
+	rotation.y = lerp_angle(rotation.y, target_angle, timeStep/3)
+
+var turn_velocity = 0
+var turn_acceleration = 4
+var turn_locked_in = falsew
+var turn_top_speed = 3
 func processIdleOrientation(delta, look_vector):
 	ragdollSkeleton.LINEAR_STIFFNESS = 400.0
 	ragdollSkeleton.ANGULAR_STIFFNESS = 600.0
@@ -46,11 +60,18 @@ func processIdleOrientation(delta, look_vector):
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
-	if isLookingBack(look_vector):
-		var difference = abs(atan2(-look_vector.x, -look_vector.z) - rotation.y)
-		#var smoothStep = difference*timeStep/100
-		rotation.y = lerp_angle(rotation.y, atan2(-look_vector.x, -look_vector.z), min(difference,timeStep/3))
-
+	var target_angle = atan2(-look_vector.x, -look_vector.z)
+	var difference = get_true_difference(rotation.y, target_angle)
+	if isLookingBack(look_vector) or turn_locked_in:
+		turn_velocity = min(turn_velocity + delta * turn_acceleration, turn_top_speed)
+		var step_scale = 2	
+		var step_size = delta * step_scale * turn_velocity
+		rotation.y = lerp_angle(rotation.y, target_angle, step_size)
+		if(difference <= 0.1):
+			turn_locked_in = false
+	else:
+		turn_velocity = 0
+		
 func processWalkOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.LINEAR_STIFFNESS = 900.0
 	ragdollSkeleton.ANGULAR_STIFFNESS = 1200.0
@@ -65,8 +86,15 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	#var diff = get_true_difference(actual, target)
 	var lookDiff = get_true_difference(actual, lookTarget)
 	if lookDiff > PI/2:
-		rotation.y = lerp_angle(actual, lookTarget, timeStep)
+		turn_velocity = min(turn_velocity + delta*turn_acceleration, turn_top_speed)
+		var step_scale = 6
+		var step_size = delta*step_scale* turn_velocity
+		rotation.y = lerp_angle(actual, lookTarget, step_size * turn_velocity)
+	elif lookDiff == 0:
+		turn_velocity = 0
+		turn_locked_in = false
 	else: 
+		turn_locked_in = true
 		rotation.y = lerp_angle(actual, target, timeStep)
 		
 func processSkeletonRotation(look_vector, ratio, scalar):

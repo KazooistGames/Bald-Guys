@@ -6,8 +6,8 @@ uniform sampler2D OBJECT_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 uniform sampler2D depth_texture : source_color, hint_depth_texture, filter_nearest;
 
-uniform float outline_multiplier = 0.4;
-uniform float outline_width = 1.0;
+uniform float outline_multiplier = 0.3;
+uniform float outline_width = 2.0;
 
 float get_depth(vec2 screen_uv, mat4 inv_projection_matrix) {
 	float depth = texture(depth_texture, screen_uv).r;

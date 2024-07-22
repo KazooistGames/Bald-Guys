@@ -49,5 +49,3 @@ func handle_keyboard(_event):
 		character.ragdoll.rpc()
 	if Input.is_action_just_pressed("drop"):
 		character.unragdoll.rpc()
-
-

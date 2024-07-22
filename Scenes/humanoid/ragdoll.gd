@@ -18,7 +18,6 @@ const MAX_VELOCITY = 100
 const MAX_DISPLACEMENT = 2
 const MAX_ANGULAR_DISPLACEMENT = PI*2
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	physical_bones_start_simulation()	
 	for index in range(0, get_bone_count()-1):
@@ -76,3 +75,7 @@ func set_physical_transform(physical_bone, new_transform):
 func instantly_match_animated_bone(boneIndex):
 	set_bone_pose_position(boneIndex, Animated_Skeleton.get_bone_pose_position(boneIndex))
 	set_bone_pose_rotation(boneIndex, Animated_Skeleton.get_bone_pose_rotation(boneIndex))
+
+func reset_skeleton():
+	for index in range(0, get_bone_count()-1):
+		instantly_match_animated_bone(index)
