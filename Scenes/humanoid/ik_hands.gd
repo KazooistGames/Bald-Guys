@@ -20,10 +20,7 @@ func process_arm_forward(headTransform):
 	var scalar = Vector3(.8,2,1)
 	targetTransform.origin = headTransform.basis.z * scalar + headTransform.origin + offset
 	targetTransform.basis = headTransform.basis.rotated(Vector3.FORWARD, PI)
-	#targetTransform.basis = targetTransform.basis.rotated(Vector3.RIGHT, forwardRotation.x*xSign)
-	#targetTransform.basis = get_hand_rest().basis.rotated(Vector3.UP, forwardRotation.y*xSign)
-	#targetTransform.basis = get_hand_rest().basis.rotated(Vector3.FORWARD, forwardRotation.z*xSign)
-	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, .2)
+	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, .25)
 	
 func process_arm_sway(footTransform):
 	var targetTransform = footTransform

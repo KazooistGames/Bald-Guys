@@ -56,10 +56,14 @@ shadow_blur = 0.5
 
 [node name="map" parent="SubViewportContainer/SubViewport" instance=ExtResource("3_bts5d")]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewportContainer/SubViewport"]
-mesh = SubResource("CylinderMesh_mgx0w")
+[node name="StaticBody3D" type="StaticBody3D" parent="SubViewportContainer/SubViewport"]
+collision_layer = 6
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewportContainer/SubViewport/MeshInstance3D"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/StaticBody3D"]
+mesh = SubResource("CylinderMesh_mgx0w")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewportContainer/SubViewport/StaticBody3D"]
 shape = SubResource("CylinderShape3D_kal7r")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]

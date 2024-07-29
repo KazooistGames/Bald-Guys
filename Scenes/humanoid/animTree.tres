@@ -66,7 +66,7 @@ animation = &"stand"
 animation = &"walk"
 
 [resource]
-graph_offset = Vector2(-748.727, -406.588)
+graph_offset = Vector2(-464.266, -170.432)
 nodes/Add2/node = SubResource("AnimationNodeAdd2_go2qy")
 nodes/Add2/position = Vector2(-80, 220)
 "nodes/Animation 2/node" = SubResource("AnimationNodeAnimation_f10qu")

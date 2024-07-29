@@ -15,6 +15,7 @@ extends CharacterBody3D
 @export var MOVE_STATE = MoveState.WALKING
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
+@export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.0, 6.0)
 @export var JUMP_SPEED = 4.5
 @export var RUNNING = false
@@ -73,7 +74,11 @@ func _process(delta):
 		MoveState.WALKING:
 			IMPACT_THRESHOLD = 4.5
 			animation.updateWalking(TOPSPEED, get_real_velocity(), is_back_pedaling())
-			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)
+			if(WALK_VECTOR):
+				skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)
+			else:
+				skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
+	FACING_VECTOR = Vector3(sin(skeleton.rotation.y), skeleton.rotation.x, cos(skeleton.rotation.y))
 
 func _physics_process(delta):
 	physics_collisions(delta)
@@ -81,12 +86,18 @@ func _physics_process(delta):
 	match MOVE_STATE:
 		MoveState.FALLING:
 			physics_falling(delta)
+			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
+			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale), 1.0, 1.5)
+			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale), 0.75, 1.0)
 		MoveState.WALKING:
 			physics_walking(delta)
+			var scalar = 2
+			collider.shape.height = move_toward(collider.shape.height, 1.5, delta * scalar)
+			collider.position.y = move_toward(collider.position.y, 0.75, delta * scalar)
 		MoveState.RAGDOLL:
 			physics_ragdoll(delta)
-	if Main_Trigger:
-		skeleton.processReach(LOOK_VECTOR)
+	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
+	rotation.y = fmod(rotation.y, 2*PI)
 
 ##### PHYSICS UPDATES FOR DIFFERENT MOVEMENT TYPES #####
 func physics_ragdoll(delta):
@@ -151,7 +162,7 @@ func handle_collision(delta):
 		var impact = relativeVelocity.dot(collision.get_normal())
 		match layer:
 			2:
-				impact = sqrt(pow(relativeVelocity.dot(collision.get_normal()), 2)/2)
+				#impact = sqrt(pow(relativeVelocity.dot(collision.get_normal()), 2)/2)
 				if otherCollider.check_if_impact_meets_threshold(impact):
 					otherCollider.ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 					otherCollider.ragdoll.rpc()

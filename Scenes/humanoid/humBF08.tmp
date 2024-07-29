@@ -4702,6 +4702,7 @@ joint_constraints/z/angular_equilibrium_point = 0.0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Skeleton3D/Ragdoll/Physical Bone head"]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.0781233, 0.0393642)
 shape = SubResource("CapsuleShape3D_usxk3")
+disabled = true
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
 transform = Transform3D(0.99995, -4.92781e-05, -1.23978e-05, 8.71122e-05, 0.999978, 9.47714e-06, 2.05636e-05, -9.32813e-06, 0.999983, -0.208618, 1.54967, -0.0231976)
