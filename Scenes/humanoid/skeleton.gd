@@ -33,6 +33,8 @@ func processRagdollOrientation(_delta):
 	
 func processFallOrientation(delta, look_vector, walk_vector):
 	#ragdollSkeleton.toggle_physical_bone_collider("head", false)
+	walk_vector.y = 0
+	walk_vector = walk_vector.normalized()
 	ragdollSkeleton.LINEAR_STIFFNESS = 400.0
 	ragdollSkeleton.ANGULAR_STIFFNESS = 400.0
 	ragdollSkeleton.LINEAR_DAMPING = 20
@@ -41,14 +43,15 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
 	var target_angle = rotation.y
-	if(isLookingBack(look_vector, 0.5)):
-		target_angle = atan2(-look_vector.x, -look_vector.z)
-	elif(walk_vector == Vector3.ZERO):
-		pass
+
+	if(walk_vector == Vector3.ZERO):
+		if(isLookingBack(look_vector, 0.5)):
+			target_angle = atan2(-look_vector.x, -look_vector.z)
 	elif (is_back_pedaling(look_vector, walk_vector)):
 		target_angle = atan2(-walk_vector.x, -walk_vector.z)
 	else:
 		target_angle = atan2(walk_vector.x, walk_vector.z)
+	#print("target: " + str(target_angle) + " actual: " + str(rotation.y))
 	rotation.y = lerp_angle(rotation.y, target_angle, timeStep/3)
 	
 func processIdleOrientation(delta, look_vector):
@@ -105,6 +108,9 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	else: 
 		turn_locked_in = true
 		rotation.y = lerp_angle(actual, target, timeStep)
+	if(target == 0):
+		print(walk_vector)
+	
 		
 func processSkeletonRotation(look_vector, ratio, scalar):
 	var lookAngle = get_relative_look_angle(look_vector)

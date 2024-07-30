@@ -118,7 +118,7 @@ func physics_walking(delta):
 	if WALK_VECTOR:
 		velocity.x = lerp(velocity.x, WALK_VECTOR.x * speed_target, velocityStep)
 		velocity.z = lerp(velocity.z, WALK_VECTOR.z * speed_target, velocityStep)
-		skeleton.processWalkOrientation(delta, LOOK_VECTOR, WALK_VECTOR if is_on_floor() else Vector3.ZERO)
+		skeleton.processWalkOrientation(delta, LOOK_VECTOR, WALK_VECTOR)
 	else:
 		velocity.x = lerp(velocity.x, 0.0, velocityStep)
 		velocity.z = lerp(velocity.z, 0.0, velocityStep)
