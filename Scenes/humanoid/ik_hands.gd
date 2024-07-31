@@ -17,7 +17,7 @@ func process_arm_forward(headTransform):
 	magnet = Vector3(2 * xSign, 0, 0)
 	var targetTransform = get_node(target_node).transform
 	var offset = Vector3(.2 * xSign, 1, 0)
-	var scalar = Vector3(.8,2,1)
+	var scalar = Vector3(1,2,1)
 	targetTransform.origin = headTransform.basis.z * scalar + headTransform.origin + offset
 	targetTransform.basis = headTransform.basis.rotated(Vector3.FORWARD, PI)
 	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, .25)

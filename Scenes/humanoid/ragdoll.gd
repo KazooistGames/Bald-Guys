@@ -9,17 +9,17 @@ extends Skeleton3D
 @export var ANGULAR_DAMPING = 80.0
 
 var bone_modifiers = {
-	"head":0.75,
+	"head":1.0,
 	"upperBody":1.0,
-	"upperArm.r":0.75,
-	"upperArm.l":0.75,
+	"upperArm.r":0.5,
+	"upperArm.l":0.5,
 	"lowerArm.r":0.25,
 	"lowerArm.l":0.25,
 	"lowerBody":1.5,
 	"upperLeg.r":0.75,
 	"upperLeg.l":0.75,
-	"lowerLeg.r":0.25,
-	"lowerLeg.l":0.25,
+	"lowerLeg.r":0.5,
+	"lowerLeg.l":0.5,
 }
 
 @onready var Animated_Skeleton : Skeleton3D = get_parent()

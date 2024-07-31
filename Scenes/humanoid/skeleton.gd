@@ -98,18 +98,17 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	#var diff = get_true_difference(actual, target)
 	var lookDiff = get_true_difference(actual, lookTarget)
 	if lookDiff > PI/2:
-		turn_velocity = min(turn_velocity + delta*turn_acceleration, turn_top_speed)
-		var step_scale = 5
-		var step_size = delta*step_scale* turn_velocity
-		rotation.y = lerp_angle(actual, lookTarget, step_size * turn_velocity)
-	elif lookDiff == 0:
+		rotation.y = lerp_angle(actual, lookTarget, timeStep/5)
+	if lookDiff == 0:
 		turn_velocity = 0
 		turn_locked_in = false
 	else: 
 		turn_locked_in = true
+		turn_velocity = min(turn_velocity + delta*turn_acceleration, turn_top_speed)
+		var step_scale = 4
+		var step_size = delta*step_scale* turn_velocity
 		rotation.y = lerp_angle(actual, target, timeStep)
-	if(target == 0):
-		print(walk_vector)
+
 	
 		
 func processSkeletonRotation(look_vector, ratio, scalar):

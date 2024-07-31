@@ -4516,13 +4516,13 @@ skin = SubResource("Skin_vic1c")
 surface_material_override/0 = SubResource("StandardMaterial3D_17cil")
 
 [node name="Physical Bone lowerLeg_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.997163, 0.0752702, -0.00018325, 0.0728388, -0.964312, 0.254509, 0.0189802, -0.253802, -0.96707, 0.144959, 0.539175, 0.0564373)
+transform = Transform3D(0.997163, 0.0752702, -0.000182938, 0.0728388, -0.964312, 0.254508, 0.0189802, -0.253802, -0.96707, 0.144959, 0.539175, 0.0564373)
 collision_layer = 4
 collision_mask = 5
 joint_type = 3
 joint_offset = Transform3D(-3.61999e-06, 0, -1, 0, 1, 0, 1, 0, -3.61999e-06, 0, 0, 0)
 joint_rotation = Vector3(0, -1.5708, 0)
-body_offset = Transform3D(1, 4.00469e-08, 5.7742e-07, 7.26432e-08, 0.999989, 4.03821e-06, -3.33413e-07, 5.81145e-07, 0.999999, 0, 0, 0)
+body_offset = Transform3D(1, 4.00469e-08, 7.93487e-07, 7.26432e-08, 0.999989, 5.31971e-06, -3.33413e-07, 5.81145e-07, 0.999999, 0, 0, 0)
 mass = 5.0
 bone_name = "lowerLeg.l"
 joint_constraints/angular_limit_enabled = true
@@ -4785,7 +4785,7 @@ transform = Transform3D(0.999999, -5.81145e-07, -5.06639e-07, -2.08616e-07, 0.99
 collision_layer = 4
 collision_mask = 5
 joint_type = 5
-joint_offset = Transform3D(0.791237, 0.554031, 0.258818, -0.573574, 0.81915, -7.68974e-08, -0.212011, -0.148452, 0.965923, 2.44215e-07, -2.51693e-08, -1.10268e-08)
+joint_offset = Transform3D(0.791237, 0.554031, 0.258818, -0.573574, 0.81915, -1.0131e-07, -0.212011, -0.148452, 0.965923, 2.44215e-07, -2.51693e-08, -1.10268e-08)
 joint_rotation = Vector3(1.0131e-07, 0.261799, -0.610865)
 body_offset = Transform3D(0.401755, -0.502792, -0.765369, -0.559846, -0.79626, 0.229214, -0.724681, 0.336402, -0.601389, -1.19209e-07, 1.19209e-07, 1.78814e-07)
 mass = 5.0
@@ -4859,12 +4859,12 @@ transform = Transform3D(0.819151, 0.573576, 0, -0.573576, 0.819151, 5.68434e-14,
 shape = SubResource("CapsuleShape3D_1ny34")
 
 [node name="Physical Bone upperArm_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(1, -2.98023e-07, 1.19209e-07, 2.83122e-07, 1, -4.17233e-07, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
+transform = Transform3D(1, -2.98023e-07, 1.49012e-07, 2.83122e-07, 1, -4.76837e-07, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
 collision_layer = 4
 collision_mask = 5
 joint_type = 5
 joint_offset = Transform3D(0.999999, 0, 0, 0, 0.999999, 0, 0, 0, 0.999998, 0, 0, 0)
-body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916282, 0.453957, 0.317173, -0.832661, 0, 0, 0)
+body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916275, 0.453957, 0.317173, -0.832661, 0, 0, 0)
 mass = 5.0
 bone_name = "upperArm.l"
 joint_constraints/x/linear_limit_enabled = true
