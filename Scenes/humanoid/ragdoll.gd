@@ -20,6 +20,10 @@ var bone_modifiers = {
 	"upperLeg.l":0.75,
 	"lowerLeg.r":0.5,
 	"lowerLeg.l":0.5,
+	"foot.r":1.0,
+	"foot.l":1.0,
+	"toes.r":0.125,
+	"toes.l":0.125,
 }
 
 @onready var Animated_Skeleton : Skeleton3D = get_parent()
