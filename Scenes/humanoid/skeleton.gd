@@ -39,6 +39,8 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.ANGULAR_STIFFNESS = 400.0
 	ragdollSkeleton.LINEAR_DAMPING = 20
 	ragdollSkeleton.ANGULAR_DAMPING = 100
+	ragdollSkeleton.bone_modifiers["foot.r"] = 0.25
+	ragdollSkeleton.bone_modifiers["foot.l"] = 0.25
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
@@ -59,6 +61,8 @@ func processIdleOrientation(delta, look_vector):
 	ragdollSkeleton.ANGULAR_STIFFNESS = 600.0
 	ragdollSkeleton.LINEAR_DAMPING = 40
 	ragdollSkeleton.ANGULAR_DAMPING = 60
+	ragdollSkeleton.bone_modifiers["foot.r"] = 1.0
+	ragdollSkeleton.bone_modifiers["foot.l"] = 1.0
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
@@ -89,6 +93,8 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.ANGULAR_STIFFNESS = 1000.0
 	ragdollSkeleton.LINEAR_DAMPING = 40
 	ragdollSkeleton.ANGULAR_DAMPING = 80
+	ragdollSkeleton.bone_modifiers["foot.r"] = 1.0
+	ragdollSkeleton.bone_modifiers["foot.l"] = 1.0
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")))
