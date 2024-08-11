@@ -16,11 +16,12 @@ func process_arm_forward(headTransform):
 	var xSign = sign(idleOffset.x)
 	magnet = Vector3(2 * xSign, 0, 0)
 	var targetTransform = get_node(target_node).transform
-	var offset = Vector3(.2 * xSign, 1, 0)
-	var scalar = Vector3(1,2,1)
+	var offset = Vector3(.2 * xSign, .2, 0)
+	var scalar = 1.25
 	targetTransform.origin = headTransform.basis.z * scalar + headTransform.origin + offset
-	targetTransform.basis = headTransform.basis.rotated(Vector3.FORWARD, PI)
-	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, .25)
+	targetTransform.origin.z = max(targetTransform.origin.z, 0.2)
+	#targetTransform.basis = headTransform.basis.rotated(Vector3.FORWARD, PI)
+	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.95)
 	
 func process_arm_sway(footTransform):
 	var targetTransform = footTransform

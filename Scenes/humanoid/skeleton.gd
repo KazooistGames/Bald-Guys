@@ -41,6 +41,8 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.ANGULAR_DAMPING = 100
 	ragdollSkeleton.bone_modifiers["foot.r"] = 0.25
 	ragdollSkeleton.bone_modifiers["foot.l"] = 0.25
+	ragdollSkeleton.bone_modifiers["toes.r"] = 1.0
+	ragdollSkeleton.bone_modifiers["toes.l"] = 1.0
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
@@ -61,8 +63,10 @@ func processIdleOrientation(delta, look_vector):
 	ragdollSkeleton.ANGULAR_STIFFNESS = 600.0
 	ragdollSkeleton.LINEAR_DAMPING = 40
 	ragdollSkeleton.ANGULAR_DAMPING = 60
-	ragdollSkeleton.bone_modifiers["foot.r"] = 1.0
-	ragdollSkeleton.bone_modifiers["foot.l"] = 1.0
+	ragdollSkeleton.bone_modifiers["foot.r"] = 1.5
+	ragdollSkeleton.bone_modifiers["foot.l"] = 1.5
+	ragdollSkeleton.bone_modifiers["toes.r"] = 0.125
+	ragdollSkeleton.bone_modifiers["toes.l"] = 0.125
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
@@ -95,6 +99,8 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.ANGULAR_DAMPING = 80
 	ragdollSkeleton.bone_modifiers["foot.r"] = 1.0
 	ragdollSkeleton.bone_modifiers["foot.l"] = 1.0
+	ragdollSkeleton.bone_modifiers["toes.r"] = 0.125
+	ragdollSkeleton.bone_modifiers["toes.l"] = 0.125
 	var timeStep = LERP_VAL * delta
 	leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")))
@@ -116,7 +122,6 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 		rotation.y = lerp_angle(actual, target, timeStep)
 
 	
-		
 func processSkeletonRotation(look_vector, ratio, scalar):
 	var lookAngle = get_relative_look_angle(look_vector)
 	var look_relative = Vector3(-look_vector.y, lookAngle, 0)
@@ -136,6 +141,8 @@ func processReach(look_vector, reaching):
 	var deadband = PI/5
 	if !reaching && currentReacher != null:
 		currentReacher = null
+		get_node(str(leftHand.target_node).trim_prefix('../')).remote_path = "../../Force"
+		get_node(str(rightHand.target_node).trim_prefix('../')).remote_path = "../../Force"
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
@@ -143,12 +150,14 @@ func processReach(look_vector, reaching):
 	elif !reaching:
 		pass
 	elif lookAngle > deadband && currentReacher != leftHand:
+		swap_which_hand_has_force(rightHand, leftHand)
 		currentReacher = leftHand
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", false)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", false)
 	elif lookAngle < -deadband && currentReacher != rightHand:
+		swap_which_hand_has_force(leftHand, rightHand)
 		currentReacher = rightHand
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", false)
@@ -156,6 +165,7 @@ func processReach(look_vector, reaching):
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", true)
 	elif currentReacher == null:
 		currentReacher = rightHand
+		swap_which_hand_has_force(leftHand, rightHand)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
@@ -202,3 +212,11 @@ func get_shortest_path(actual, target):
 		return sign(difference)
 	else:
 		return sign(overlapDifference)
+		
+func swap_which_hand_has_force(old, new):
+	#print(old.target_node)
+	#print(new.target_node)
+	var old_target_node = get_node(str(old.target_node).trim_prefix('../'))
+	var new_target_node = get_node(str(new.target_node).trim_prefix('../'))
+	new_target_node.remote_path = old_target_node.remote_path
+	old_target_node.remote_path = ''

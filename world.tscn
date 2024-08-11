@@ -1,8 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://ccecv7ucyb87r"]
+[gd_scene load_steps=7 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
 [ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="2_76mdc"]
-[ext_resource type="PackedScene" uid="uid://by3wuudn8soe" path="res://Scenes/games/wigArena.tscn" id="3_bts5d"]
 [ext_resource type="PackedScene" uid="uid://dxmbdi6kjhx8i" path="res://Scenes/UI/HUD.tscn" id="9_hcw72"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ddwpy"]
@@ -16,10 +15,6 @@ shader_parameter/lighten_amount = 1.5
 shader_parameter/normal_edge_bias = Vector3(1, 1, 1)
 shader_parameter/light_direction = Vector3(-0.96, -0.18, 0.2)
 shader_parameter/maximum_range = 5.0
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_mgx0w"]
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_kal7r"]
 
 [sub_resource type="Environment" id="Environment_yfxrc"]
 background_mode = 1
@@ -50,21 +45,14 @@ render_target_update_mode = 4
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 34.1522, 0)
+light_color = Color(1, 1, 0.921569, 1)
+light_energy = 0.75
+light_angular_distance = 0.5
 shadow_enabled = true
-shadow_opacity = 0.75
+shadow_bias = 0.01
+shadow_normal_bias = 3.0
+shadow_opacity = 0.5
 shadow_blur = 0.5
-
-[node name="map" parent="SubViewportContainer/SubViewport" instance=ExtResource("3_bts5d")]
-
-[node name="StaticBody3D" type="StaticBody3D" parent="SubViewportContainer/SubViewport"]
-collision_layer = 6
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/StaticBody3D"]
-mesh = SubResource("CylinderMesh_mgx0w")
-skeleton = NodePath("../..")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="SubViewportContainer/SubViewport/StaticBody3D"]
-shape = SubResource("CylinderShape3D_kal7r")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_yfxrc")
@@ -123,7 +111,7 @@ placeholder_text = "Enter Address to join Here"
 alignment = 1
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn", "res://Scenes/ball/Ball.tscn")
+_spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn", "res://Scenes/games/wigArena.tscn")
 spawn_path = NodePath("../SubViewportContainer/SubViewport")
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="_on_host_button_pressed"]

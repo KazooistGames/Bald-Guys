@@ -1,7 +1,5 @@
 extends RigidBody3D
 
-@export var LastTeamTouch = -1
-
 @export var radius = 0.25
 
 @onready var mesh = $MeshInstance3D

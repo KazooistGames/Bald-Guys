@@ -1,6 +1,6 @@
 extends Node3D
 
-const Ball_Prefab = preload("res://Scenes/ball/Ball.tscn")
+const Ball_Prefab = preload("res://Scenes/objects/ball/Ball.tscn")
 
 @export var PlayerTeamAssignments = {1:-1}
 

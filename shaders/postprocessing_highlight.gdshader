@@ -9,8 +9,8 @@ uniform float depth_threshold : hint_range(0, 1) = 0.03;
 uniform float reverse_depth_threshold : hint_range(0, 1) = 0.2;
 uniform float normal_threshold : hint_range(0, 1) = 0.3;
 
-uniform float darken_amount : hint_range(0, 1, 0.01) = 0.3;
-uniform float lighten_amount : hint_range(0, 10, 0.01) = 1.5;
+uniform float darken_amount : hint_range(0, 1, 0.01) = 0.25;
+uniform float lighten_amount : hint_range(0, 10, 0.01) = 1.25;
 
 uniform vec3 normal_edge_bias = vec3(0, 1, 0);
 uniform vec3 light_direction = vec3(0.0, -1.0, 0.0);

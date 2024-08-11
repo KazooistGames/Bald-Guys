@@ -71,8 +71,8 @@ surface_material_override/0 = SubResource("StandardMaterial3D_p1qh1")
 [node name="spawn" parent="." instance=ExtResource("6_4v22i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 13.4004)
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_gpd36")
-
 [node name="spawn2" parent="." instance=ExtResource("6_4v22i")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, -12.9257)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_gpd36")
