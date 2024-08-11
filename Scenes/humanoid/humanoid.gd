@@ -21,8 +21,8 @@ extends CharacterBody3D
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
-@export var SPEED_GEARS = Vector2(3.0, 6.0)
-@export var JUMP_SPEED = 4.5
+@export var SPEED_GEARS = Vector2(3.5, 7.0)
+@export var JUMP_SPEED = 5
 @export var RUNNING = false
 
 
@@ -87,7 +87,7 @@ func _process(delta):
 		RUNNING = false
 		
 	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
-	TOPSPEED_MOD = 0.75 if Main_Trigger else 1.0
+	TOPSPEED_MOD = 0.9 if Main_Trigger else 1.0
 	animation.walkAnimBlendScalar = TOPSPEED
 	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
@@ -134,6 +134,10 @@ func _physics_process(delta):
 			if WALK_VECTOR:
 				velocity.x += WALK_VECTOR.x * velocityStep
 				velocity.z += WALK_VECTOR.z * velocityStep
+				
+			else:
+				velocity.x = lerp(velocity.x, 0.0, velocityStep/3)
+				velocity.z = lerp(velocity.z, 0.0, velocityStep/3)
 				
 			skeleton.processFallOrientation(delta, LOOK_VECTOR, WALK_VECTOR)
 			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
@@ -286,5 +290,5 @@ func unragdoll():
 @rpc("call_local")
 func jump():
 	
-	if is_on_floor() and not Main_Trigger:
+	if is_on_floor():
 		velocity.y = JUMP_SPEED

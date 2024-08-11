@@ -29,21 +29,31 @@ var map
 @export var LOCAL_PLAYER : Node3D
 
 
+const SessionState = {
+	Menu = 0,
+	Lobby = 1,
+	Playing = 2,
+}
+
+@export var Session_State = SessionState.Menu
+
+
 func _process(_delta):
 	
-	if not is_multiplayer_authority(): 
-		return
-		
-	elif not map:
-		pass
+	if not map:
+		map = viewPort.get_node_or_null("map")
 		
 	elif not map.Commissioned:
 		map.Commissioned = true
-		pass
 		
 	elif not LOCAL_PLAYER:
-		map.set_spawn_position(add_player_humanoid(multiplayer.get_unique_id()))
+		spawner.spawned.connect(map.set_spawn_position)
 		LOCAL_PLAYER = spawn_local_player_controller()
+		if is_multiplayer_authority():
+			map.set_spawn_position(add_player_humanoid(multiplayer.get_unique_id()))
+	
+	elif not is_multiplayer_authority(): #only do server/host items from here on out
+		return
 		
 	elif map.State == map.GameState.Setup:
 		pass
@@ -71,7 +81,6 @@ func _on_host_button_pressed():
 	multiplayer.peer_disconnected.connect(remove_player_humanoid)
 
 	map = wigArena_Prefab.instantiate()
-	spawner.spawned.connect(map.set_spawn_position)
 	viewPort.add_child(map)
 	#upnp_setup() #removed and using port forwarding instead
 
@@ -82,7 +91,7 @@ func _on_join_button_pressed():
 	var hostIP = "localhost" if address_entry.text == "" else address_entry.text
 	enet_peer.create_client(hostIP, PORT)
 	multiplayer.multiplayer_peer = enet_peer
-	LOCAL_PLAYER = spawn_local_player_controller()
+	#LOCAL_PLAYER = spawn_local_player_controller()
 
 
 func spawn_local_player_controller():

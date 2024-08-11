@@ -10,12 +10,12 @@ extends Skeleton3D
 
 var bone_modifiers = {
 	"head":1.0,
-	"upperBody":1.0,
+	"upperBody":0.75,
 	"upperArm.r":0.5,
 	"upperArm.l":0.5,
 	"lowerArm.r":0.25,
 	"lowerArm.l":0.25,
-	"lowerBody":1.5,
+	"lowerBody":1.25,
 	"upperLeg.r":0.75,
 	"upperLeg.l":0.75,
 	"lowerLeg.r":0.5,
