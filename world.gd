@@ -80,6 +80,8 @@ func _on_host_button_pressed():
 	multiplayer.peer_connected.connect(add_player_humanoid)
 	multiplayer.peer_disconnected.connect(remove_player_humanoid)
 
+	Session_State = SessionState.Lobby
+
 	map = wigArena_Prefab.instantiate()
 	viewPort.add_child(map)
 	#upnp_setup() #removed and using port forwarding instead
@@ -92,6 +94,7 @@ func _on_join_button_pressed():
 	enet_peer.create_client(hostIP, PORT)
 	multiplayer.multiplayer_peer = enet_peer
 	#LOCAL_PLAYER = spawn_local_player_controller()
+	Session_State = SessionState.Lobby
 
 
 func spawn_local_player_controller():

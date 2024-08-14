@@ -95,7 +95,7 @@ func _process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			IMPACT_THRESHOLD = 8
+			IMPACT_THRESHOLD = 6
 			animation.updateFalling(velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
@@ -210,7 +210,10 @@ func handle_collision(delta):
 		var relativeVelocity = collision.get_collider_velocity() - get_real_velocity()
 		var otherCollider = collision.get_collider()
 		var layer = otherCollider.get_collision_layer()
-		var impact = relativeVelocity.dot(collision.get_normal())
+		
+		var directionalModifier = 1.0 - collision.get_normal().dot(Vector3.UP)/2
+		
+		var impact = relativeVelocity.dot(collision.get_normal()) * directionalModifier
 		
 		match layer:
 			
