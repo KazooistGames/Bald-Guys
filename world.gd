@@ -68,11 +68,15 @@ func _process(_delta):
 			map.set_spawn_position(new_humanoid)
 		map.Commissioned = true
 
-	else:
+	elif Session_State != SessionState.Session:
 		Session_State = SessionState.Session
+		var humanoids = get_tree().get_nodes_in_group("humanoids")
+		
+		for humanoid in humanoids:
+			_handoff.rpc(humanoid.name, str(humanoid.name).to_int())
 
 
-	if not is_multiplayer_authority() or not map: #only do server/host items from here on out
+	if not multiplayer.is_server() or not map: #only do server/host items from here on out
 		return
 		
 	elif map.State == map.GameState.Setup:  
@@ -154,6 +158,11 @@ func untally_player(peer_id):
 	if playerHumanoid:
 		playerHumanoid.queue_free()
 
+
+@rpc("call_local")
+func _handoff(node_name, auth_id):
+	
+	viewPort.get_node(str(node_name)).set_multiplayer_authority(auth_id)
 
 func upnp_setup():
 	
