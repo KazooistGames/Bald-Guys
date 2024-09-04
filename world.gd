@@ -66,6 +66,7 @@ func _process(_delta):
 		for player in Players.keys():
 			var new_humanoid = add_player_humanoid(player)
 			map.set_spawn_position(new_humanoid)
+			
 		map.Commissioned = true
 
 	elif Session_State != SessionState.Session:
