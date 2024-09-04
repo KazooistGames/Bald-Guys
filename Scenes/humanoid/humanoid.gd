@@ -56,11 +56,12 @@ var ragdoll_recovery_timer_seconds = 0
 
 func _enter_tree():
 	
-	set_multiplayer_authority(str(name).to_int())
 	add_to_group("humanoids")
 
 
 func _ready():
+	
+	set_multiplayer_authority(str(name).to_int())
 	
 	if not is_multiplayer_authority(): 
 		return
@@ -124,39 +125,35 @@ func _physics_process(delta):
 		move_and_slide()
 		
 	WALK_VECTOR = WALK_VECTOR.normalized()
+	var translational_velocity = Vector2(velocity.x, velocity.z)
+	var WALK_VECTOR_2 = Vector2(WALK_VECTOR.x, WALK_VECTOR.z)
 	
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
 			velocity.y -= gravity * delta
-			var velocityStep = acceleration()/2.5 * delta
+			var velocityStep = acceleration() * delta
 			
 			if WALK_VECTOR:
-				velocity.x += WALK_VECTOR.x * velocityStep
-				velocity.z += WALK_VECTOR.z * velocityStep
+				translational_velocity.x += WALK_VECTOR.x * velocityStep/2
+				translational_velocity.y += WALK_VECTOR.z * velocityStep/2
 				
-			else:
-				velocity.x = lerp(velocity.x, 0.0, velocityStep/3)
-				velocity.z = lerp(velocity.z, 0.0, velocityStep/3)
-				
+			translational_velocity = translational_velocity.move_toward(Vector2.ZERO, 3 * delta)
 			skeleton.processFallOrientation(delta, LOOK_VECTOR, WALK_VECTOR)
 			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
-			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale), 1.0, 1.5)
-			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale), 0.75, 1.0)
+			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
+			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
 			
 		MoveState.WALKING:
-			
 			var velocityStep = acceleration() * delta
 			var speed_target = TOPSPEED * TOPSPEED_MOD
 			
 			if WALK_VECTOR:
-				velocity.x = lerp(velocity.x, WALK_VECTOR.x * speed_target, velocityStep)
-				velocity.z = lerp(velocity.z, WALK_VECTOR.z * speed_target, velocityStep)
-				skeleton.processWalkOrientation(delta, LOOK_VECTOR, WALK_VECTOR)
+				translational_velocity = translational_velocity.move_toward(WALK_VECTOR_2 * speed_target, velocityStep)
+				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(velocity, WALK_VECTOR, 0.5 ) )
 				
 			else:
-				velocity.x = lerp(velocity.x, 0.0, velocityStep)
-				velocity.z = lerp(velocity.z, 0.0, velocityStep)
+				translational_velocity = translational_velocity.move_toward(Vector2.ZERO, velocityStep)
 				skeleton.processIdleOrientation(delta, LOOK_VECTOR)
 				
 			var scalar = 2
@@ -164,9 +161,12 @@ func _physics_process(delta):
 			collider.position.y = move_toward(collider.position.y, 0.75, delta * scalar)
 			
 		MoveState.RAGDOLL:
-			velocity = Vector3.ZERO
+			translational_velocity = Vector2.ZERO
 			skeleton.processRagdollOrientation(delta)
-			
+		
+	velocity.x = translational_velocity.x
+	velocity.z = translational_velocity.y
+	
 	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
 	rotation.y = fmod(rotation.y, 2*PI)
 
@@ -175,30 +175,31 @@ func is_back_pedaling():
 	
 	var walkVec2 = Vector2(WALK_VECTOR.x, WALK_VECTOR.z).normalized()
 	var lookVec2 = Vector2(LOOK_VECTOR.x, LOOK_VECTOR.z).normalized()
-	return walkVec2.dot(lookVec2) > 0
+	return walkVec2.dot(lookVec2 ) > 0
 
 
 func acceleration():
 	
-	var absolute = 8 if RUNNING else 16
+	var absolute = 20
 	var translationalSpeed = Vector2(velocity.x, velocity.z).length()
-	var relative = pow(1/max(translationalSpeed, 1), 0.5)
-	return absolute * relative
+	var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
+	var return_val = absolute * relative
+	return return_val
 
 
 func getRandomSkinTone():
 	
 	var rng = RandomNumberGenerator.new()
-	var colorBase = rng.randf_range(40.0, 200.0)/255
-	var redShift = rng.randf_range(20,30)/255
-	var blueShift = rng.randf_range(0,redShift)/255
-	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift)
+	var colorBase = rng.randf_range(40.0, 200.0 ) / 255
+	var redShift = rng.randf_range(20,30 ) / 255
+	var blueShift = rng.randf_range(0, redShift ) / 255
+	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift )
 
 
 func head_position():
 	
 	var headPosition = skeleton.head_position()
-	var adjustedPosition = headPosition.rotated(Vector3.UP, skeleton.rotation.y) 
+	var adjustedPosition = headPosition.rotated(Vector3.UP, skeleton.rotation.y ) 
 	return adjustedPosition
 	
 	
@@ -216,7 +217,6 @@ func handle_collision(delta):
 		var impact = relativeVelocity.dot(collision.get_normal()) * directionalModifier
 		
 		match layer:
-			
 			2:
 				#impact = sqrt(pow(relativeVelocity.dot(collision.get_normal()), 2)/2)
 				if otherCollider.check_if_impact_meets_threshold(impact):
@@ -244,18 +244,22 @@ func check_if_impact_meets_threshold(impact):
 		
 
 func ragdoll_is_ready():
+	
 	return ragdoll_cooldown_timer_seconds > ragdoll_cooldown_period_seconds
 	
 	
 func ragdoll_recovered():
+	
 	return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
 	
 	
 func force_push():
+	
 	pass
 	
 	
 func toggle_ragdoll_sync(sync_mode):
+	
 	var propertyPath = "Skeleton3D/Ragdoll/Physical Bone "
 	synchronizer.replication_config.property_set_replication_mode(propertyPath+"lowerBody:linear_velocity", sync_mode)
 	synchronizer.replication_config.property_set_replication_mode(propertyPath+"lowerBody:angular_velocity", sync_mode)
@@ -272,7 +276,7 @@ func ragdoll():
 		animation.active = false
 		collider.disabled = true
 		MOVE_STATE = MoveState.RAGDOLL
-		var propertyPath = "Skeleton3D/Ragdoll/Physical Bone "
+		#var propertyPath = "Skeleton3D/Ragdoll/Physical Bone "
 		toggle_ragdoll_sync(1)
 		
 		

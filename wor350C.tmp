@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://ccecv7ucyb87r"]
+[gd_scene load_steps=7 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
 [ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="2_76mdc"]
-[ext_resource type="Script" path="res://Scenes/UI/lobby_menu.gd" id="4_sy84p"]
 [ext_resource type="PackedScene" uid="uid://dxmbdi6kjhx8i" path="res://Scenes/UI/HUD.tscn" id="9_hcw72"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ddwpy"]
@@ -26,14 +25,6 @@ fog_height_density = 0.5
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_klvnn"]
 dof_blur_far_distance = 5.0
 dof_blur_far_transition = 15.0
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_dnjxn"]
-properties/0/path = NodePath(".:Session_State")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:Players")
-properties/1/spawn = true
-properties/1/replication_mode = 1
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_j31cu")
@@ -119,7 +110,7 @@ layout_mode = 2
 placeholder_text = "Enter Address to join Here"
 alignment = 1
 
-[node name="LobbyMenu" type="Control" parent="CanvasLayer"]
+[node name="Lobby" type="Control" parent="CanvasLayer"]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -127,9 +118,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("4_sy84p")
 
-[node name="margin" type="MarginContainer" parent="CanvasLayer/LobbyMenu"]
+[node name="margin" type="MarginContainer" parent="CanvasLayer/Lobby"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -145,21 +135,18 @@ theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="vbox" type="VBoxContainer" parent="CanvasLayer/LobbyMenu/margin"]
+[node name="vbox" type="VBoxContainer" parent="CanvasLayer/Lobby/margin"]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Label" type="Label" parent="CanvasLayer/LobbyMenu/margin/vbox"]
+[node name="Label" type="Label" parent="CanvasLayer/Lobby/margin/vbox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 75
 text = "Lobby"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ItemList" type="ItemList" parent="CanvasLayer/LobbyMenu/margin/vbox"]
-layout_mode = 2
-
-[node name="StartButton" type="Button" parent="CanvasLayer/LobbyMenu/margin/vbox"]
+[node name="StartButton" type="Button" parent="CanvasLayer/Lobby/margin/vbox"]
 layout_mode = 2
 text = "Start Game
 "
@@ -168,9 +155,6 @@ text = "Start Game
 _spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn", "res://Scenes/games/wigArena.tscn")
 spawn_path = NodePath("../SubViewportContainer/SubViewport")
 
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_dnjxn")
-
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="join_lobby"]
-[connection signal="pressed" from="CanvasLayer/LobbyMenu/margin/vbox/StartButton" to="." method="start_game"]
+[connection signal="pressed" from="CanvasLayer/Lobby/margin/vbox/StartButton" to="." method="start_game"]

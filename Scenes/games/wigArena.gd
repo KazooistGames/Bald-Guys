@@ -18,6 +18,7 @@ const GameState = {
 	Setup = 0,
 	Countdown = 1,
 	Playing = 2,
+	Finished = 3,
 }
 
 
@@ -80,7 +81,19 @@ func set_spawn_position(object):
 	
 	if not available_spawns.is_empty():
 		object.position = available_spawns.pick_random().transform.origin
-
+		
+		
+func get_spawn_position(object):
+	
+	if not object: 
+		return
+	
+	elif not object.is_multiplayer_authority(): 
+		return
+	
+	var available_spawns = get_tree().get_nodes_in_group("spawns")
+	
+	return available_spawns.pick_random().transform.origin
 
 func node_is_player(node):
 	

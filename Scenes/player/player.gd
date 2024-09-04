@@ -9,9 +9,7 @@ var camera
 
 
 func _ready():
-	
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
+	pass
 	
 func _process(_delta):
 	
