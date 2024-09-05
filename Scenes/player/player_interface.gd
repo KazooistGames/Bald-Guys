@@ -1,9 +1,10 @@
 extends Node3D
 
+const camera_prefab = preload("res://Scenes/cameras/FPS_Camera.tscn")
 
-var character
-var camera
+@export var character : Node3D
 
+@export var camera : Node3D
 
 @onready var CAMERA_OFFSET = 0.11
 
@@ -11,10 +12,18 @@ var camera
 func _ready():
 	pass
 	
+	
 func _process(_delta):
 	
-	if character and camera:
-		CAMERA_OFFSET = -1.5 if character.MOVE_STATE == character.MoveState.RAGDOLL else 0.11
+	if not character:
+		camera = null
+		
+	elif not camera:
+		camera = camera_prefab.instantiate()
+		character.add_child(camera)
+		
+	else:
+		CAMERA_OFFSET = -1.5 if character.MOVE_STATE == character.MoveState.RAGDOLL else 0.115
 		var adjustedOffset = character.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * CAMERA_OFFSET
 		var adjustedPosition = character.head_position()
 		camera.position = adjustedPosition + adjustedOffset
@@ -22,22 +31,13 @@ func _process(_delta):
 	
 func _unhandled_input(event):
 	
-	if not character:
-		character = get_node_or_null("../" + str(multiplayer.get_unique_id()))
-	
-	elif not camera:
-		camera = $Camera3D
-		remove_child(camera)
-		character.add_child(camera)
-	
-	else:	
+	if character and camera:	
 		handle_mouse(event)
 		handle_keyboard(event)
 
 
 func handle_mouse(_event):
 	
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 	character.LOOK_VECTOR = look
 	character.Main_Trigger = Input.is_action_pressed("main")

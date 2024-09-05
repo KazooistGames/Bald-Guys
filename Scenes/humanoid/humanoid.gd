@@ -115,7 +115,7 @@ func _process(delta):
 
 func _physics_process(delta):
 	
-	if not is_multiplayer_authority(): 
+	if false if not multiplayer.has_multiplayer_peer() else not is_multiplayer_authority(): 
 		move_and_slide()
 		
 	elif test_move(transform, velocity * delta) && ragdoll_is_ready():

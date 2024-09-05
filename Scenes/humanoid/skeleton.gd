@@ -86,7 +86,7 @@ func processIdleOrientation(delta, look_vector):
 	var difference = get_true_difference(rotation.y, target_angle)
 	#var shortestPath = get_shortest_path(rotation.y, target_angle)
 	
-	if isLookingBack(look_vector):
+	if isLookingBack(look_vector, 0.0):
 		turn_locked_in = true
 		
 	if turn_locked_in:
@@ -96,7 +96,7 @@ func processIdleOrientation(delta, look_vector):
 		#step_size = delta * 12
 		rotation.y = lerp_angle(rotation.y, target_angle, step_size)
 		
-		if(not isLookingBack(look_vector, 0.9)):
+		if(not isLookingBack(look_vector, .95)):
 			turn_locked_in = false
 			
 	elif abs(difference) >= PI/2:
@@ -137,9 +137,9 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 		turn_locked_in = false
 		
 	else: 
-		turn_locked_in = true
+		#turn_locked_in = true
 		turn_velocity = min(turn_velocity + delta*turn_acceleration, turn_top_speed)
-		var step_scale = 4
+		#var step_scale = 4
 		#var step_size = delta*step_scale* turn_velocity
 		rotation.y = lerp_angle(actual, target, timeStep)
 

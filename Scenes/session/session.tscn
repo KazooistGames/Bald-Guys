@@ -1,11 +1,11 @@
 [gd_scene load_steps=16 format=3 uid="uid://by3wuudn8soe"]
 
-[ext_resource type="Script" path="res://Scenes/games/wigArena.gd" id="1_dxq85"]
-[ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/environment/Stage/stage.tscn" id="2_eofxm"]
-[ext_resource type="PackedScene" uid="uid://cxh4be4uwbmtf" path="res://Scenes/environment/Floor/floor.tscn" id="3_odwab"]
-[ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/environment/Wall/wall.tscn" id="4_fwbtu"]
-[ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/environment/Ceiling/ceiling.tscn" id="5_jtuxd"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/environment/Spawn/spawn.tscn" id="6_dsjm2"]
+[ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
+[ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/environment/Stage/stage.tscn" id="2_npewa"]
+[ext_resource type="PackedScene" uid="uid://cxh4be4uwbmtf" path="res://Scenes/environment/Floor/floor.tscn" id="3_qvxsr"]
+[ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/environment/Wall/wall.tscn" id="4_joddo"]
+[ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/environment/Ceiling/ceiling.tscn" id="5_5afua"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/environment/Spawn/spawn.tscn" id="6_cdi01"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d24io"]
 resource_local_to_scene = true
@@ -35,51 +35,54 @@ diffuse_mode = 3
 properties/0/path = NodePath(".:State")
 properties/0/spawn = true
 properties/0/replication_mode = 2
+properties/1/path = NodePath(".:Commissioned")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_4xar4"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_rg11d"]
 
-[node name="map" type="Node3D"]
-script = ExtResource("1_dxq85")
+[node name="session" type="Node3D"]
+script = ExtResource("1_yhshl")
 
-[node name="Stage1" parent="." instance=ExtResource("2_eofxm")]
+[node name="Stage1" parent="." instance=ExtResource("2_npewa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.345, -12.5)
 Size = Vector3(5, 0.15, 8.1)
 
-[node name="Stage2" parent="." instance=ExtResource("2_eofxm")]
+[node name="Stage2" parent="." instance=ExtResource("2_npewa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 12.5)
 
-[node name="floor" parent="." instance=ExtResource("3_odwab")]
+[node name="floor" parent="." instance=ExtResource("3_qvxsr")]
 surface_material_override/0 = SubResource("StandardMaterial3D_d24io")
 
-[node name="wall" parent="." instance=ExtResource("4_fwbtu")]
+[node name="wall" parent="." instance=ExtResource("4_joddo")]
 transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -25, 25, 0)
 surface_material_override/0 = SubResource("StandardMaterial3D_ertt5")
 
-[node name="ceiling" parent="." instance=ExtResource("5_jtuxd")]
+[node name="ceiling" parent="." instance=ExtResource("5_5afua")]
 transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 50, 0)
 surface_material_override/0 = SubResource("StandardMaterial3D_wgpba")
 
-[node name="wall2" parent="." instance=ExtResource("4_fwbtu")]
+[node name="wall2" parent="." instance=ExtResource("4_joddo")]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 25, 25, 0)
 surface_material_override/0 = SubResource("StandardMaterial3D_3drxa")
 
-[node name="wall3" parent="." instance=ExtResource("4_fwbtu")]
+[node name="wall3" parent="." instance=ExtResource("4_joddo")]
 transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0, 25, -25)
 surface_material_override/0 = SubResource("StandardMaterial3D_udkyw")
 
-[node name="wall4" parent="." instance=ExtResource("4_fwbtu")]
+[node name="wall4" parent="." instance=ExtResource("4_joddo")]
 transform = Transform3D(1.91069e-15, 4.37114e-08, -1, 1, -4.37114e-08, 0, -4.37114e-08, -1, -4.37114e-08, 0, 25, 25)
 surface_material_override/0 = SubResource("StandardMaterial3D_p1qh1")
 
-[node name="spawn" parent="." instance=ExtResource("6_dsjm2")]
+[node name="spawn" parent="." instance=ExtResource("6_cdi01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 13.4004)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_gpd36")
 
-[node name="spawn2" parent="." instance=ExtResource("6_dsjm2")]
+[node name="spawn2" parent="." instance=ExtResource("6_cdi01")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, -12.9257)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
@@ -90,3 +93,7 @@ skeleton = NodePath("../..")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("CylinderShape3D_rg11d")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn")
+spawn_path = NodePath("..")

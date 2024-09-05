@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://ccecv7ucyb87r"]
+[gd_scene load_steps=9 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
 [ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="2_76mdc"]
+[ext_resource type="Script" path="res://Scenes/UI/lobby_menu.gd" id="4_sy84p"]
 [ext_resource type="PackedScene" uid="uid://dxmbdi6kjhx8i" path="res://Scenes/UI/HUD.tscn" id="9_hcw72"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ddwpy"]
@@ -18,26 +19,21 @@ shader_parameter/maximum_range = 5.0
 
 [sub_resource type="Environment" id="Environment_yfxrc"]
 background_mode = 1
-glow_enabled = true
-glow_normalized = true
-glow_intensity = 5.0
-glow_bloom = 0.5
 fog_enabled = true
-fog_light_color = Color(0.235294, 0.235294, 0.196078, 1)
-fog_light_energy = 2.0
-fog_sun_scatter = 8.0
-fog_density = 0.05
-fog_height = 2.0
-fog_height_density = 1.0
+fog_light_color = Color(0.231373, 0.231373, 0.231373, 1)
+fog_height_density = 0.5
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_klvnn"]
 dof_blur_far_distance = 5.0
 dof_blur_far_transition = 15.0
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_dnjxn"]
-properties/0/path = NodePath(".:State")
+properties/0/path = NodePath(".:Session_State")
 properties/0/spawn = true
 properties/0/replication_mode = 1
+properties/1/path = NodePath(".:Players")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_j31cu")
@@ -59,11 +55,12 @@ render_target_update_mode = 4
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 34.1522, 0)
 light_color = Color(1, 1, 0.921569, 1)
-light_energy = 0.05
+light_energy = 0.75
 light_angular_distance = 0.5
 shadow_enabled = true
 shadow_bias = 0.01
 shadow_normal_bias = 3.0
+shadow_opacity = 0.5
 shadow_blur = 0.5
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -87,10 +84,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 381.0
-offset_top = 150.0
-offset_right = -380.999
-offset_bottom = -181.0
+offset_left = 443.0
+offset_top = 229.0
+offset_right = -443.0
+offset_bottom = -228.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 15
@@ -122,15 +119,54 @@ layout_mode = 2
 placeholder_text = "Enter Address to join Here"
 alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 10
-
-[node name="QuitButton" type="Button" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/MarginContainer"]
-custom_minimum_size = Vector2(150, 0)
+[node name="HostButton2" type="Button" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Quit"
+
+[node name="LobbyMenu" type="Control" parent="CanvasLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_sy84p")
+
+[node name="margin" type="MarginContainer" parent="CanvasLayer/LobbyMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 443.0
+offset_top = 229.0
+offset_right = -443.0
+offset_bottom = -228.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="vbox" type="VBoxContainer" parent="CanvasLayer/LobbyMenu/margin"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="CanvasLayer/LobbyMenu/margin/vbox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 75
+text = "Lobby"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ItemList" type="ItemList" parent="CanvasLayer/LobbyMenu/margin/vbox"]
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="CanvasLayer/LobbyMenu/margin/vbox"]
+layout_mode = 2
+text = "Start Game
+"
 
 [node name="PauseMenu" type="Control" parent="CanvasLayer"]
 visible = false
@@ -167,7 +203,7 @@ text = "Leave
 "
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/session/session.tscn")
+_spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn", "res://Scenes/games/wigArena.tscn")
 spawn_path = NodePath("../SubViewportContainer/SubViewport")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
@@ -175,5 +211,5 @@ replication_config = SubResource("SceneReplicationConfig_dnjxn")
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="join_lobby"]
-[connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/MarginContainer/QuitButton" to="." method="quit"]
-[connection signal="pressed" from="CanvasLayer/PauseMenu/margin/vbox/LeaveButton" to="." method="leave_game"]
+[connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton2" to="." method="quit"]
+[connection signal="pressed" from="CanvasLayer/LobbyMenu/margin/vbox/StartButton" to="." method="start_game"]
