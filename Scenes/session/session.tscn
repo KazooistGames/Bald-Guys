@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://by3wuudn8soe"]
+[gd_scene load_steps=19 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/environment/Stage/stage.tscn" id="2_npewa"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/environment/Wall/wall.tscn" id="4_joddo"]
 [ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/environment/Ceiling/ceiling.tscn" id="5_5afua"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/environment/Spawn/spawn.tscn" id="6_cdi01"]
+[ext_resource type="Script" path="res://Scenes/session/WorldEnvironment.gd" id="7_aagem"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d24io"]
 resource_local_to_scene = true
@@ -42,6 +43,24 @@ properties/1/replication_mode = 1
 [sub_resource type="CylinderMesh" id="CylinderMesh_4xar4"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_rg11d"]
+
+[sub_resource type="Environment" id="Environment_fcgfc"]
+background_mode = 1
+ambient_light_source = 2
+glow_enabled = true
+glow_normalized = true
+glow_intensity = 5.0
+glow_bloom = 0.5
+fog_enabled = true
+fog_light_color = Color(0.235294, 0.235294, 0.196078, 1)
+fog_light_energy = 3.0
+fog_sun_scatter = 5.0
+fog_density = 0.05
+fog_height = 2.0
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_6gygu"]
+dof_blur_far_distance = 5.0
+dof_blur_far_transition = 15.0
 
 [node name="session" type="Node3D"]
 script = ExtResource("1_yhshl")
@@ -97,3 +116,18 @@ shape = SubResource("CylinderShape3D_rg11d")
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn")
 spawn_path = NodePath("..")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 34.1522, 0)
+light_color = Color(1, 1, 0.921569, 1)
+light_energy = 0.05
+light_angular_distance = 0.5
+shadow_enabled = true
+shadow_bias = 0.01
+shadow_normal_bias = 3.0
+shadow_blur = 0.5
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_fcgfc")
+camera_attributes = SubResource("CameraAttributesPractical_6gygu")
+script = ExtResource("7_aagem")

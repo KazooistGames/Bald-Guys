@@ -152,10 +152,10 @@ func handle_new_session_spawn(new_session):
 func _handoff_object(path, auth_id):
 	
 	path = str(path).replace(str(get_path()), "")
-	var humanoid = get_node(path)
+	var node = get_node(path)
 	
-	if humanoid:
-		humanoid.set_multiplayer_authority(auth_id)
+	if node:
+		node.set_multiplayer_authority(auth_id)
 
 
 func upnp_setup():
