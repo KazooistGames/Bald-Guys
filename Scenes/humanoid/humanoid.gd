@@ -145,7 +145,7 @@ func _physics_process(delta):
 			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
 			
 		MoveState.WALKING:
-			var velocityStep = acceleration() * delta
+			var velocityStep = acceleration() * 2 * delta
 			var speed_target = TOPSPEED * TOPSPEED_MOD
 			
 			if WALK_VECTOR:
@@ -190,7 +190,7 @@ func acceleration():
 func getRandomSkinTone():
 	
 	var rng = RandomNumberGenerator.new()
-	var colorBase = rng.randf_range(40.0, 200.0 ) / 255
+	var colorBase = rng.randf_range(40.0, 220.0 ) / 255
 	var redShift = rng.randf_range(20,30 ) / 255
 	var blueShift = rng.randf_range(0, redShift ) / 255
 	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift )

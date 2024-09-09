@@ -128,10 +128,14 @@ func remove_player_from_game(peer_id):
 	
 	print(str(peer_id) + " left")
 	Player_Lobby_Dict.erase(peer_id)
-	var playerHumanoid = viewPort.get_node_or_null(str(peer_id))
+	
+	if not session:
+		return
+		
+	var playerHumanoid = session.get_node_or_null(str(peer_id))
 	
 	if playerHumanoid:
-		playerHumanoid.queue_free()
+		playerHumanoid.set_multiplayer_authority(1)
 		
 		
 func give_humanoid_to_player(humanoid):

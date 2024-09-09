@@ -1,0 +1,135 @@
+[gd_scene load_steps=20 format=3 uid="uid://by3wuudn8soe"]
+
+[ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
+[ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/environment/Stage/stage.tscn" id="2_npewa"]
+[ext_resource type="PackedScene" uid="uid://cxh4be4uwbmtf" path="res://Scenes/environment/Floor/floor.tscn" id="3_qvxsr"]
+[ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/environment/Wall/wall.tscn" id="4_joddo"]
+[ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/environment/Ceiling/ceiling.tscn" id="5_5afua"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/environment/Spawn/spawn.tscn" id="6_cdi01"]
+[ext_resource type="Script" path="res://Scenes/session/WorldEnvironment.gd" id="7_aagem"]
+[ext_resource type="Script" path="res://Scenes/session/DirectionalLight3D.gd" id="7_g41yj"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d24io"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ertt5"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wgpba"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3drxa"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_udkyw"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p1qh1"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]
+properties/0/path = NodePath(".:State")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:Commissioned")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_4xar4"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_rg11d"]
+
+[sub_resource type="Environment" id="Environment_fcgfc"]
+background_mode = 1
+ambient_light_source = 2
+glow_enabled = true
+glow_normalized = true
+glow_intensity = 5.0
+glow_bloom = 0.5
+fog_enabled = true
+fog_light_color = Color(0.235294, 0.235294, 0.196078, 1)
+fog_light_energy = 3.0
+fog_sun_scatter = 5.0
+fog_density = 0.05
+fog_height = 2.0
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_6gygu"]
+dof_blur_far_distance = 5.0
+dof_blur_far_transition = 15.0
+
+[node name="session" type="Node3D"]
+script = ExtResource("1_yhshl")
+
+[node name="Stage1" parent="." instance=ExtResource("2_npewa")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.345, -12.5)
+Size = Vector3(5, 0.15, 8.1)
+
+[node name="Stage2" parent="." instance=ExtResource("2_npewa")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 12.5)
+
+[node name="floor" parent="." instance=ExtResource("3_qvxsr")]
+surface_material_override/0 = SubResource("StandardMaterial3D_d24io")
+
+[node name="wall" parent="." instance=ExtResource("4_joddo")]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -25, 25, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_ertt5")
+
+[node name="ceiling" parent="." instance=ExtResource("5_5afua")]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 50, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_wgpba")
+
+[node name="wall2" parent="." instance=ExtResource("4_joddo")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 25, 25, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_3drxa")
+
+[node name="wall3" parent="." instance=ExtResource("4_joddo")]
+transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0, 25, -25)
+surface_material_override/0 = SubResource("StandardMaterial3D_udkyw")
+
+[node name="wall4" parent="." instance=ExtResource("4_joddo")]
+transform = Transform3D(1.91069e-15, 4.37114e-08, -1, 1, -4.37114e-08, 0, -4.37114e-08, -1, -4.37114e-08, 0, 25, 25)
+surface_material_override/0 = SubResource("StandardMaterial3D_p1qh1")
+
+[node name="spawn" parent="." instance=ExtResource("6_cdi01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 13.4004)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_gpd36")
+
+[node name="spawn2" parent="." instance=ExtResource("6_cdi01")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, -12.9257)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+mesh = SubResource("CylinderMesh_4xar4")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("CylinderShape3D_rg11d")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn")
+spawn_path = NodePath("..")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 34.1522, 0)
+light_color = Color(1, 1, 0.921569, 1)
+light_energy = 0.5
+light_angular_distance = 0.5
+shadow_enabled = true
+shadow_bias = 0.01
+shadow_normal_bias = 3.0
+shadow_blur = 0.5
+script = ExtResource("7_g41yj")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_fcgfc")
+camera_attributes = SubResource("CameraAttributesPractical_6gygu")
+script = ExtResource("7_aagem")

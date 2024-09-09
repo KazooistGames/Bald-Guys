@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://by3wuudn8soe"]
+[gd_scene load_steps=20 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/environment/Stage/stage.tscn" id="2_npewa"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/environment/Ceiling/ceiling.tscn" id="5_5afua"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/environment/Spawn/spawn.tscn" id="6_cdi01"]
 [ext_resource type="Script" path="res://Scenes/session/WorldEnvironment.gd" id="7_aagem"]
+[ext_resource type="Script" path="res://Scenes/session/DirectionalLight3D.gd" id="7_g41yj"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d24io"]
 resource_local_to_scene = true
@@ -120,12 +121,14 @@ spawn_path = NodePath("..")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 34.1522, 0)
 light_color = Color(1, 1, 0.921569, 1)
-light_energy = 0.05
+light_energy = 0.5
 light_angular_distance = 0.5
 shadow_enabled = true
 shadow_bias = 0.01
 shadow_normal_bias = 3.0
 shadow_blur = 0.5
+script = ExtResource("7_g41yj")
+energy_max = 0.75
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_fcgfc")
