@@ -6,16 +6,17 @@ uniform sampler2D depth_texture : source_color, hint_depth_texture, filter_neare
 uniform sampler2D normal_texture : source_color, hint_normal_roughness_texture, filter_nearest;
 
 uniform float depth_threshold : hint_range(0, 1) = 0.03;
-uniform float reverse_depth_threshold : hint_range(0, 1) = 0.2;
-uniform float normal_threshold : hint_range(0, 1) = 0.3;
+uniform float reverse_depth_threshold : hint_range(0, 1) = 0.35;
+uniform float normal_threshold : hint_range(0, 1) = 0.35;
 
 uniform float darken_amount : hint_range(0, 1, 0.01) = 0.8;
 uniform float lighten_amount : hint_range(0, 10, 0.01) = 1.20;
 
-uniform vec3 normal_edge_bias = vec3(0, 1, 0);
+uniform vec3 normal_edge_bias = vec3(0, -1, 0);
 uniform vec3 light_direction = vec3(0.0, -1.0, 0.0);
 
 uniform float maximum_range : hint_range(1,50) = 15;
+
 float scale_by_range(float range, float depth) {
 	float maximum_value = 2.0;
 	float minimum_value = 0.0;
@@ -75,11 +76,9 @@ void fragment() {
 	}
 	float depth_edge = step(depth_threshold, depth_diff);
 	
-	// The reverse depth sum produces depth lines inside of the object, but they don't look as nice as the normal depth_diff
-	// Instead, we can use this value to mask the normal edge along the outside of the object
 	float reverse_depth_edge = step(reverse_depth_threshold, depth_diff_reversed); 
 	
-	float normal_scale = scale_by_range(maximum_range,depth);
+	float normal_scale = scale_by_range(maximum_range, depth);
 	float indicator = sqrt(normal_sum * normal_scale);
 	float normal_edge = step(normal_threshold, indicator - reverse_depth_edge);
 	

@@ -1,8 +1,8 @@
 extends AnimatableBody3D
 
 
-@export var Size = Vector3(45, 0.5, 17.5)
-var cached_Size = Vector3(45, 0.5, 17.5)
+@export var Size = Vector3(20, 0.5, 20)
+var cached_Size = Vector3(20, 0.5, 20)
 
 
 @export var humanoids_onboard = []
@@ -18,8 +18,9 @@ func _ready():
 	
 	area.body_entered.connect(add_humanoid_to_onboard)
 	area.body_exited.connect(remove_humanoid_from_onboard)
+	process_size_change()
 	
-	
+
 func _process(_delta):
 	
 	if Size != cached_Size:
@@ -50,7 +51,34 @@ func process_size_change():
 		elif child is Area3D:
 			child.get_child(0).shape.size = Vector3(Size.x, Size.y * 2, Size.z)
 			child.position = Vector3.UP * Size.y * 3
+			
+		elif child is StaticBody3D:
+			transform_pillar(child)
 		
+			
+func transform_pillar(child):
+	
+	var x = Size.x / 2.0
+	var z = Size.z / 2.0
+	
+	var x_sign = 1.0
+	var z_sign = 1.0
+	
+	if child.name.ends_with('1'):
+		pass
+		
+	elif child.name.ends_with('2'):
+		x_sign = -1.0
+		
+	elif child.name.ends_with('3'):
+		z_sign = -1.0
+		
+	elif child.name.ends_with('4'):
+		x_sign = -1.0
+		z_sign = -1.0
+		
+	child.transform.origin.x = x * x_sign
+	child.transform.origin.z = z * z_sign
 			
 func transform_rail(child):
 	var signage = -1.0 if child.name.contains('2') else 1.0
@@ -102,5 +130,7 @@ func set_color(color):
 	var material = model.get_surface_override_material(0)
 	material.albedo_color = color
 	model.set_surface_override_material(0, material)
+	
+
 	
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://c2bxkh05oa1qf"]
+[gd_scene load_steps=15 format=3 uid="uid://c2bxkh05oa1qf"]
 
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="1_5c6k7"]
 [ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/environment/wall.material" id="1_qib3r"]
@@ -40,6 +40,10 @@ size = Vector3(45, 5, 17.5)
 properties/0/path = NodePath(".:humanoids_onboard")
 properties/0/spawn = true
 properties/0/replication_mode = 2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_7xvkk"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_qhxnc"]
 
 [node name="Stage" type="AnimatableBody3D"]
 collision_mask = 6
@@ -96,3 +100,43 @@ shape = SubResource("BoxShape3D_l7m8g")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_5dtqu")
+
+[node name="pillar1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 0, 9)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="pillar1"]
+mesh = SubResource("CylinderMesh_7xvkk")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar1"]
+shape = SubResource("CylinderShape3D_qhxnc")
+
+[node name="pillar2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 0, 9)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="pillar2"]
+mesh = SubResource("CylinderMesh_7xvkk")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar2"]
+shape = SubResource("CylinderShape3D_qhxnc")
+
+[node name="pillar3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 0, -9)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="pillar3"]
+mesh = SubResource("CylinderMesh_7xvkk")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar3"]
+shape = SubResource("CylinderShape3D_qhxnc")
+
+[node name="pillar4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.5, 0, -9)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="pillar4"]
+mesh = SubResource("CylinderMesh_7xvkk")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pillar4"]
+shape = SubResource("CylinderShape3D_qhxnc")
