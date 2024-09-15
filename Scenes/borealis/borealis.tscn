@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3 uid="uid://dy3scco4yt1a4"]
+
+[ext_resource type="Script" path="res://Scenes/borealis/WorldEnvironment.gd" id="1_fpf7c"]
+[ext_resource type="Script" path="res://Scenes/borealis/DirectionalLight3D.gd" id="2_xahhs"]
+
+[sub_resource type="Environment" id="Environment_fcgfc"]
+background_mode = 1
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+glow_enabled = true
+glow_bloom = 0.5
+fog_enabled = true
+fog_light_color = Color(1, 1, 1, 1)
+fog_light_energy = 0.5
+fog_sun_scatter = 1.0
+fog_density = 0.025
+fog_height = 2.0
+fog_height_density = 2.0
+volumetric_fog_emission = Color(1, 1, 1, 1)
+volumetric_fog_emission_energy = 2.0
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_6gygu"]
+dof_blur_far_distance = 5.0
+dof_blur_far_transition = 15.0
+
+[node name="Borealis" type="WorldEnvironment"]
+environment = SubResource("Environment_fcgfc")
+camera_attributes = SubResource("CameraAttributesPractical_6gygu")
+script = ExtResource("1_fpf7c")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.000750498, 1, 0, -1, 0.000750498, 0, 34.1522, 0)
+light_color = Color(1, 1, 0.921569, 1)
+light_energy = 0.5
+shadow_enabled = true
+shadow_bias = 0.01
+shadow_blur = 0.5
+script = ExtResource("2_xahhs")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
