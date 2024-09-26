@@ -1,11 +1,11 @@
 [gd_scene load_steps=14 format=3 uid="uid://bmlpo80jx10ny"]
 
 [ext_resource type="Script" path="res://Scenes/session/volleyBall.gd" id="1_2ukak"]
-[ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/environment/Stage/stage.tscn" id="2_6c1jh"]
-[ext_resource type="PackedScene" uid="uid://cxh4be4uwbmtf" path="res://Scenes/environment/Floor/floor.tscn" id="3_lvmo3"]
-[ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/environment/Wall/wall.tscn" id="4_l247c"]
-[ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/environment/Ceiling/ceiling.tscn" id="5_2jq85"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/environment/Spawn/spawn.tscn" id="6_4v22i"]
+[ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_6c1jh"]
+[ext_resource type="PackedScene" uid="uid://cxh4be4uwbmtf" path="res://Scenes/level/Floor/floor.tscn" id="3_lvmo3"]
+[ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/level/Wall/wall.tscn" id="4_l247c"]
+[ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/level/Ceiling/ceiling.tscn" id="5_2jq85"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="6_4v22i"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d24io"]
 resource_local_to_scene = true

@@ -1,10 +1,11 @@
 [gd_scene load_steps=3 format=3 uid="uid://cdpxkq752u0vl"]
 
-[ext_resource type="Script" path="res://Scenes/environment/Spawn/spawn.gd" id="1_jn265"]
+[ext_resource type="Script" path="res://Scenes/level/Spawn/spawn.gd" id="1_j2sqr"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_n32i3"]
 height = 0.5
 
 [node name="spawn" type="MeshInstance3D"]
+visible = false
 mesh = SubResource("CylinderMesh_n32i3")
-script = ExtResource("1_jn265")
+script = ExtResource("1_j2sqr")

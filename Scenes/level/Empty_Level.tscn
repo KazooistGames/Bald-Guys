@@ -1,0 +1,54 @@
+[gd_scene load_steps=10 format=3 uid="uid://c1uj8nhliop8j"]
+
+[ext_resource type="PackedScene" uid="uid://cxh4be4uwbmtf" path="res://Scenes/level/Floor/floor.tscn" id="2_ata1q"]
+[ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/level/Wall/wall.tscn" id="3_siirb"]
+[ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/level/Ceiling/ceiling.tscn" id="4_hexsd"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2rewv"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ud1ck"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_exgif"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pfs5w"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v4g44"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wlefi"]
+resource_local_to_scene = true
+diffuse_mode = 3
+
+[node name="Empty_Level" type="Node3D"]
+
+[node name="floor" parent="." instance=ExtResource("2_ata1q")]
+surface_material_override/0 = SubResource("StandardMaterial3D_2rewv")
+
+[node name="wall" parent="." instance=ExtResource("3_siirb")]
+transform = Transform3D(4.37114e-08, 1, -8.74228e-08, 1, -4.37114e-08, 0, -3.82137e-15, -8.74228e-08, -1, -25, 25, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_ud1ck")
+
+[node name="ceiling" parent="." instance=ExtResource("4_hexsd")]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 50, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_exgif")
+
+[node name="wall2" parent="." instance=ExtResource("3_siirb")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 25, 25, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_pfs5w")
+
+[node name="wall3" parent="." instance=ExtResource("3_siirb")]
+transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0, 25, -25)
+surface_material_override/0 = SubResource("StandardMaterial3D_v4g44")
+
+[node name="wall4" parent="." instance=ExtResource("3_siirb")]
+transform = Transform3D(1.91069e-15, 4.37114e-08, -1, 1, -4.37114e-08, 0, -4.37114e-08, -1, -4.37114e-08, 0, 25, 25)
+surface_material_override/0 = SubResource("StandardMaterial3D_wlefi")

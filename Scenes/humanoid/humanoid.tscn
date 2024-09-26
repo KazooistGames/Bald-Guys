@@ -8,7 +8,7 @@
 [ext_resource type="Script" path="res://Scenes/humanoid/animTree.tres.gd" id="5_6swf7"]
 [ext_resource type="ArrayMesh" uid="uid://dkrvskqnfamyw" path="res://Scenes/humanoid/humanoid.tres" id="5_b5sbe"]
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="6_rg0yq"]
-[ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/force/force.tscn" id="9_vmktp"]
+[ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/humanoid/force/force.tscn" id="9_vmktp"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_l6yus"]
 resource_local_to_scene = true
