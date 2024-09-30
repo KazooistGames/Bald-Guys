@@ -66,23 +66,23 @@ script = ExtResource("1_yhshl")
 
 [node name="Stage1" parent="." instance=ExtResource("2_npewa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2, -12)
-Size = Vector3(21, 0.2, 21)
+Size = Vector3(21, 0.15, 21)
 
 [node name="Stage2" parent="." instance=ExtResource("2_npewa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2, 12)
-Size = Vector3(21, 0.2, 21)
+Size = Vector3(21, 0.15, 21)
 
 [node name="Stage3" parent="." instance=ExtResource("2_npewa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, -12)
-Size = Vector3(21, 0.2, 21)
+Size = Vector3(21, 0.15, 21)
 
 [node name="Stage4" parent="." instance=ExtResource("2_npewa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, 12)
-Size = Vector3(21, 0.2, 21)
+Size = Vector3(21, 0.15, 21)
 
 [node name="Stage5" parent="." instance=ExtResource("2_npewa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
-Size = Vector3(5, 0.2, 5)
+Size = Vector3(10, 0.1, 10)
 
 [node name="floor" parent="." instance=ExtResource("3_qvxsr")]
 surface_material_override/0 = SubResource("StandardMaterial3D_d24io")
