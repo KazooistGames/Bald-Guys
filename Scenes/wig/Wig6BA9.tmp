@@ -26,6 +26,7 @@ collision_layer = 8
 collision_mask = 7
 constant_force = Vector3(0, -9.8, 0)
 script = ExtResource("1_quow7")
+radius = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_k7sog")
@@ -37,4 +38,3 @@ mesh = SubResource("SphereMesh_rd2a8")
 replication_config = SubResource("SceneReplicationConfig_kblqd")
 
 [node name="Interactable" parent="." instance=ExtResource("2_xd3xi")]
-radius = 0.75

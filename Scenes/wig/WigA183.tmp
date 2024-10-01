@@ -37,4 +37,3 @@ mesh = SubResource("SphereMesh_rd2a8")
 replication_config = SubResource("SceneReplicationConfig_kblqd")
 
 [node name="Interactable" parent="." instance=ExtResource("2_xd3xi")]
-radius = 0.75

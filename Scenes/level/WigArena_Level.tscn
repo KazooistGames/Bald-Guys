@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://hdo1moc2epoy"]
+[gd_scene load_steps=11 format=3 uid="uid://hdo1moc2epoy"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_6wsct"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_dxe0h"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="3_h4meo"]
+[ext_resource type="PackedScene" uid="uid://cs5vme3m6f1ux" path="res://Scenes/wig/Wig.tscn" id="4_74way"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2rewv"]
 resource_local_to_scene = true
@@ -101,3 +102,6 @@ skeleton = NodePath("../..")
 [node name="spawn8" parent="spawns" index="7" instance=ExtResource("3_h4meo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 10, 0)
 skeleton = NodePath("../..")
+
+[node name="Wig" parent="." index="12" instance=ExtResource("4_74way")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
