@@ -9,6 +9,10 @@ extends DirectionalLight3D
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	
+	if not is_multiplayer_authority():
+		return
+	
 	wave_phase += delta
 	
 	var raw_wave = sin (wave_phase / wave_period)
