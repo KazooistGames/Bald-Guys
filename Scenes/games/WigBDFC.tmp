@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cupu0kavdlrc4"]
+
+[ext_resource type="Script" path="res://Scenes/games/Wig_FFA.gd" id="1_2sjt2"]
+
+[node name="Wig_FFA" type="Node3D"]
+script = ExtResource("1_2sjt2")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/objects/wig/Wig.tscn")
+spawn_path = NodePath("..")

@@ -1,9 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://hdo1moc2epoy"]
+[gd_scene load_steps=10 format=3 uid="uid://hdo1moc2epoy"]
 
-[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_6wsct"]
-[ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_dxe0h"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="3_h4meo"]
-[ext_resource type="PackedScene" uid="uid://cs5vme3m6f1ux" path="res://Scenes/wig/Wig.tscn" id="4_74way"]
+[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_8mrte"]
+[ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_co0ev"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="3_5slih"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2rewv"]
 resource_local_to_scene = true
@@ -29,7 +28,7 @@ diffuse_mode = 3
 resource_local_to_scene = true
 diffuse_mode = 3
 
-[node name="WigArena_Level" instance=ExtResource("1_6wsct")]
+[node name="Platforms_Level" instance=ExtResource("1_8mrte")]
 
 [node name="floor" parent="." index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_2rewv")
@@ -49,59 +48,56 @@ surface_material_override/0 = SubResource("StandardMaterial3D_v4g44")
 [node name="wall4" parent="." index="5"]
 surface_material_override/0 = SubResource("StandardMaterial3D_wlefi")
 
-[node name="Stage1" parent="." index="6" instance=ExtResource("2_dxe0h")]
+[node name="Stage1" parent="." index="6" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2, -12)
 Size = Vector3(21, 0.2, 21)
 
-[node name="Stage2" parent="." index="7" instance=ExtResource("2_dxe0h")]
+[node name="Stage2" parent="." index="7" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2, 12)
 Size = Vector3(21, 0.2, 21)
 
-[node name="Stage3" parent="." index="8" instance=ExtResource("2_dxe0h")]
+[node name="Stage3" parent="." index="8" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, -12)
 Size = Vector3(21, 0.2, 21)
 
-[node name="Stage4" parent="." index="9" instance=ExtResource("2_dxe0h")]
+[node name="Stage4" parent="." index="9" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, 12)
 Size = Vector3(21, 0.2, 21)
 
-[node name="Stage5" parent="." index="10" instance=ExtResource("2_dxe0h")]
+[node name="Stage5" parent="." index="10" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
 Size = Vector3(10, 0.2, 10)
 
 [node name="spawns" type="Node3D" parent="." index="11"]
 
-[node name="spawn1" parent="spawns" index="0" instance=ExtResource("3_h4meo")]
+[node name="spawn1" parent="spawns" index="0" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 20)
 skeleton = NodePath("../..")
 
-[node name="spawn2" parent="spawns" index="1" instance=ExtResource("3_h4meo")]
+[node name="spawn2" parent="spawns" index="1" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -20)
 skeleton = NodePath("../..")
 
-[node name="spawn3" parent="spawns" index="2" instance=ExtResource("3_h4meo")]
+[node name="spawn3" parent="spawns" index="2" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 10, 18)
 skeleton = NodePath("../..")
 
-[node name="spawn4" parent="spawns" index="3" instance=ExtResource("3_h4meo")]
+[node name="spawn4" parent="spawns" index="3" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 10, -18)
 skeleton = NodePath("../..")
 
-[node name="spawn5" parent="spawns" index="4" instance=ExtResource("3_h4meo")]
+[node name="spawn5" parent="spawns" index="4" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, 18)
 skeleton = NodePath("../..")
 
-[node name="spawn6" parent="spawns" index="5" instance=ExtResource("3_h4meo")]
+[node name="spawn6" parent="spawns" index="5" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, -18)
 skeleton = NodePath("../..")
 
-[node name="spawn7" parent="spawns" index="6" instance=ExtResource("3_h4meo")]
+[node name="spawn7" parent="spawns" index="6" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 10, 0)
 skeleton = NodePath("../..")
 
-[node name="spawn8" parent="spawns" index="7" instance=ExtResource("3_h4meo")]
+[node name="spawn8" parent="spawns" index="7" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 10, 0)
 skeleton = NodePath("../..")
-
-[node name="Wig" parent="." index="12" instance=ExtResource("4_74way")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)

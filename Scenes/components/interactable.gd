@@ -1,12 +1,12 @@
 extends Area3D
 
-signal start(node)
+signal gained_interaction(node)
 
-signal stop(node)
+signal lost_interaction(node)
 
 @export var DEBUG = false
 
-@export var interactions = []
+@export var available_interactions = []
 
 @export var radius = 1.0
 
@@ -20,8 +20,6 @@ var space_state
 func _ready():
 	
 	add_to_group("interactables")
-	#body_entered.connect(check_interaction)
-	body_exited.connect(remove_interaction)
 
 
 func _process(delta):
@@ -33,9 +31,7 @@ func _process(delta):
 func _physics_process(delta):
 	
 	space_state = get_world_3d().direct_space_state
-	
-	interactions = []	
-			
+		
 	var intersection_query = PhysicsShapeQueryParameters3D.new()
 	intersection_query.shape = collider.shape
 	intersection_query.transform = collider.global_transform
@@ -48,8 +44,10 @@ func _physics_process(delta):
 	var target
 	var i = 0
 	
-	if interactions == null:
+	if intersections == null:
 		return
+		
+	var instantaneous_interactions = []	
 		
 	while i < intersections.size():
 		entry = intersections[i]
@@ -57,52 +55,44 @@ func _physics_process(delta):
 		target = (entry + exit) / 2
 		var casted_body = get_body_from_cast(target)
 		
-		if interactions.find(casted_body) >= 0:
+		if instantaneous_interactions.find(casted_body) >= 0:
 			pass
 			
 		elif casted_body:
-			interactions.append(casted_body)
-			if DEBUG:
-				print("I SEE: ", casted_body)
+			instantaneous_interactions.append(casted_body)
 			
 		debug_box.global_position = intersections[intersections.size()-2]
 		debug_sphere.global_position = intersections[intersections.size()-1]
 		i += 2
 		
-	
-	#var bodies = get_overlapping_bodies()
-	#
-	#for body in bodies:
-		#
-		#if body != self.get_parent_node_3d():
-			#check_interaction(body)
-	#
+	for node in instantaneous_interactions:
+		
+		if not node:
+			pass
+		
+		elif available_interactions.find(node) >= 0:
+			pass
+						
+		else:
+			gained_interaction.emit(node)
+			available_interactions.append(node)
+			
+			if DEBUG:
+				print(self, " gained: ", node)
+		
+	for node in available_interactions:
+		
+		if node == null:
+			pass
+			
+		elif instantaneous_interactions.find(node) < 0:
+			
+			available_interactions.remove_at(available_interactions.find(node))
+			lost_interaction.emit(node)
+			
+			if DEBUG:
+				print(self, " lost: ", node)
 
-func check_interaction(node):
-	
-	if not node:
-		return
-		
-	elif interactions.find(node) >= 0:
-		#print("already present: ", node)
-		return
-		
-	elif has_line_of_sight(node):
-		if DEBUG:
-			print("I SEE: ", node)
-		start.emit(node)
-		interactions.append(node)
-		
-
-func remove_interaction(node):
-	
-	var index = interactions.find(node)
-	
-	if index >= 0:
-		interactions.remove_at(index)
-		
-		if DEBUG:
-			print("LOST: ", node)	
 
 func get_body_from_cast(targets_position):
 	
@@ -114,8 +104,10 @@ func get_body_from_cast(targets_position):
 	
 	if result == {}:
 		return null
+		
 	else:
 		return result.collider
+		
 
 func has_line_of_sight(target_node):
 	
@@ -131,6 +123,7 @@ func has_line_of_sight(target_node):
 		
 	elif result.collider == target_node:
 		return true
+		
 	else:
 		print("caught by ", result.collider)
 	

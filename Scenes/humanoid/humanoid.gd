@@ -53,6 +53,8 @@ var ragdoll_cooldown_timer_seconds = 0
 var ragdoll_recovery_period_seconds = 1
 var ragdoll_recovery_timer_seconds = 0
 
+signal ragdolled
+
 
 func _enter_tree():
 	
@@ -271,6 +273,7 @@ func toggle_ragdoll_sync(sync_mode):
 func ragdoll():
 	
 	if(MOVE_STATE != MoveState.RAGDOLL && ragdoll_is_ready()):
+		ragdolled.emit()
 		skeleton.RAGDOLLED = true
 		ragdoll_recovery_timer_seconds = 0
 		animation.active = false

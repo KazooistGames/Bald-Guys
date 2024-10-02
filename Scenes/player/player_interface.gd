@@ -27,12 +27,11 @@ func _process(_delta):
 		var adjustedOffset = character.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * CAMERA_OFFSET
 		var adjustedPosition = character.head_position()
 		camera.position = adjustedPosition + adjustedOffset
-	
+		handle_mouse(null)
 	
 func _unhandled_input(event):
 	
 	if character and camera:	
-		handle_mouse(event)
 		handle_keyboard(event)
 
 
@@ -41,7 +40,7 @@ func handle_mouse(_event):
 	var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 	character.LOOK_VECTOR = look
 	character.Main_Trigger = Input.is_action_pressed("main")
-	camera.HORIZONTAL_SENSITIVITY = 0.002 if character.Main_Trigger else 0.005
+	camera.HORIZONTAL_SENSITIVITY = 0.002 if character.Main_Trigger else 0.004
 	
 	
 func handle_keyboard(_event):
