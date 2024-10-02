@@ -21,7 +21,6 @@ func _process(_delta):
 	mesh.mesh.radius = radius
 	mesh.mesh.height = radius * 2
 	collider.shape.radius = radius
-	interactable.radius = radius * 3
 	
 
 	
