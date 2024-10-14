@@ -46,50 +46,50 @@ func _physics_process(delta):
 	
 	if intersections == null:
 		return
-		
+
 	var instantaneous_interactions = []	
-		
+
 	while i < intersections.size():
 		entry = intersections[i]
 		exit = intersections[i+1]
 		target = (entry + exit) / 2
 		var casted_body = get_body_from_cast(target)
-		
+
 		if instantaneous_interactions.find(casted_body) >= 0:
 			pass
-			
+	
 		elif casted_body:
 			instantaneous_interactions.append(casted_body)
-			
+	
 		debug_box.global_position = intersections[intersections.size()-2]
 		debug_sphere.global_position = intersections[intersections.size()-1]
 		i += 2
-		
+
 	for node in instantaneous_interactions:
-		
+
 		if not node:
 			pass
-		
+
 		elif available_interactions.find(node) >= 0:
 			pass
-						
+			
 		else:
 			gained_interaction.emit(node)
 			available_interactions.append(node)
-			
+
 			if DEBUG:
 				print(self, " gained: ", node)
-		
+				
 	for node in available_interactions:
-		
+
 		if node == null:
 			pass
-			
+
 		elif instantaneous_interactions.find(node) < 0:
-			
+
 			available_interactions.remove_at(available_interactions.find(node))
 			lost_interaction.emit(node)
-			
+
 			if DEBUG:
 				print(self, " lost: ", node)
 
