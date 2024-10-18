@@ -8,6 +8,8 @@ extends RigidBody3D
 
 @onready var interactable = $Interactable
 
+@onready var synchronizer = $MultiplayerSynchronizer
+
 
 func _enter_tree():
 	

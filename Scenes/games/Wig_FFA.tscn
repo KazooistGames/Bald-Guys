@@ -1,6 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://cupu0kavdlrc4"]
+[gd_scene load_steps=3 format=3 uid="uid://cupu0kavdlrc4"]
 
 [ext_resource type="Script" path="res://Scenes/games/Wig_FFA.gd" id="1_2sjt2"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ryau5"]
+properties/0/path = NodePath(".:Bearer_Times")
+properties/0/spawn = true
+properties/0/replication_mode = 1
 
 [node name="Wig_FFA" type="Node3D"]
 script = ExtResource("1_2sjt2")
@@ -10,3 +15,73 @@ script = ExtResource("1_2sjt2")
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/objects/wig/Wig.tscn")
 spawn_path = NodePath("..")
+
+[node name="Scoreboard" type="CanvasLayer" parent="."]
+
+[node name="Table" type="HBoxContainer" parent="Scoreboard"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Names" type="MarginContainer" parent="Scoreboard/Table"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="Rows" type="VBoxContainer" parent="Scoreboard/Table/Names"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="Label" parent="Scoreboard/Table/Names/Rows"]
+layout_mode = 2
+size_flags_horizontal = 5
+theme_override_font_sizes/font_size = 50
+text = "Name"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Values" type="Label" parent="Scoreboard/Table/Names/Rows"]
+layout_mode = 2
+size_flags_horizontal = 5
+theme_override_font_sizes/font_size = 35
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Times" type="MarginContainer" parent="Scoreboard/Table"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="Rows" type="VBoxContainer" parent="Scoreboard/Table/Times"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="Label" parent="Scoreboard/Table/Times/Rows"]
+layout_mode = 2
+size_flags_horizontal = 5
+theme_override_font_sizes/font_size = 50
+text = "Time"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Values" type="Label" parent="Scoreboard/Table/Times/Rows"]
+layout_mode = 2
+size_flags_horizontal = 5
+theme_override_font_sizes/font_size = 35
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_ryau5")
