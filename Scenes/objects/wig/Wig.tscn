@@ -12,14 +12,14 @@ radius = 0.125
 height = 0.25
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tjlpe"]
-render_priority = 0
+render_priority = 1
 shader = ExtResource("2_6yeyh")
 shader_parameter/outline_multiplier = 0.3
 shader_parameter/outline_width = 3.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_omnyi"]
 next_pass = SubResource("ShaderMaterial_tjlpe")
-albedo_color = Color(0, 0, 0, 1)
+albedo_color = Color(0.313726, 0, 0, 1)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kblqd"]
 properties/0/path = NodePath(".:position")
@@ -31,6 +31,9 @@ properties/1/replication_mode = 2
 properties/2/path = NodePath(".:freeze")
 properties/2/spawn = true
 properties/2/replication_mode = 2
+properties/3/path = NodePath(".:HAIR_COLOR")
+properties/3/spawn = true
+properties/3/replication_mode = 2
 
 [node name="Wig" type="RigidBody3D"]
 collision_layer = 8
