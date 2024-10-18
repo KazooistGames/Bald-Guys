@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://cs5vme3m6f1ux"]
+[gd_scene load_steps=9 format=3 uid="uid://cs5vme3m6f1ux"]
 
 [ext_resource type="Script" path="res://Scenes/objects/wig/Wig.gd" id="1_rx6rq"]
+[ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="2_6yeyh"]
 [ext_resource type="PackedScene" uid="uid://bbtuviu7jd3j0" path="res://Scenes/components/interactable.tscn" id="2_qynx0"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_k7sog"]
@@ -10,7 +11,14 @@ radius = 0.125
 radius = 0.125
 height = 0.25
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tjlpe"]
+render_priority = 0
+shader = ExtResource("2_6yeyh")
+shader_parameter/outline_multiplier = 0.3
+shader_parameter/outline_width = 3.0
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_omnyi"]
+next_pass = SubResource("ShaderMaterial_tjlpe")
 albedo_color = Color(0, 0, 0, 1)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kblqd"]
