@@ -19,6 +19,7 @@ shader_parameter/outline_width = 3.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_omnyi"]
 next_pass = SubResource("ShaderMaterial_tjlpe")
+diffuse_mode = 3
 albedo_color = Color(0.313726, 0, 0, 1)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kblqd"]

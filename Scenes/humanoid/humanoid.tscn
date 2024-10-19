@@ -4868,12 +4868,12 @@ transform = Transform3D(0.819151, 0.573576, 0, -0.573576, 0.819151, 5.68434e-14,
 shape = SubResource("CapsuleShape3D_1ny34")
 
 [node name="Physical Bone upperArm_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(1, -2.98023e-07, 3.27826e-07, 2.83122e-07, 1, -7.45058e-07, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
+transform = Transform3D(1, -2.98023e-07, 3.57628e-07, 2.83122e-07, 1, -7.7486e-07, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
 collision_layer = 4
 collision_mask = 5
 joint_type = 5
 joint_offset = Transform3D(0.999999, 0, 0, 0, 0.999999, 0, 0, 0, 0.999998, 0, 0, 0)
-body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916243, 0.453957, 0.317173, -0.832661, 0, 0, 0)
+body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916239, 0.453957, 0.317173, -0.832661, 0, 0, 0)
 mass = 5.0
 bone_name = "upperArm.l"
 joint_constraints/x/linear_limit_enabled = true

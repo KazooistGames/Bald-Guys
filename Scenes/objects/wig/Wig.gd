@@ -49,7 +49,8 @@ func getRandomHairColor():
 	
 	var rng = RandomNumberGenerator.new()
 	var colorBase = rng.randf_range(0.0, 200.0 ) / 255
-	var redShift = rng.randf_range(0.0, colorBase / 3.0) / 255
+	var maxShift = (255.0 - colorBase) / 3.0
+	var redShift = rng.randf_range(0.0, maxShift) / 255
 	var greenShift = rng.randf_range(0.0, redShift ) / 255
 	HAIR_COLOR = Color(colorBase + redShift, colorBase + greenShift, colorBase)
 

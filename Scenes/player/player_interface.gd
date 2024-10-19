@@ -7,10 +7,6 @@ const camera_prefab = preload("res://Scenes/cameras/FPS_Camera.tscn")
 @export var camera : Node3D
 
 @onready var CAMERA_OFFSET = 0.11
-
-
-func _ready():
-	pass
 	
 	
 func _process(_delta):
@@ -27,40 +23,33 @@ func _process(_delta):
 		var adjustedOffset = character.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * CAMERA_OFFSET
 		var adjustedPosition = character.head_position()
 		camera.position = adjustedPosition + adjustedOffset
-		handle_mouse(null)
+		var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
+		character.LOOK_VECTOR = look
+		camera.HORIZONTAL_SENSITIVITY = 0.002 if character.Main_Trigger else 0.004
+		character.Main_Trigger = Input.is_action_pressed("main")
+		
 	
 func _unhandled_input(event):
 	
 	if character and camera:	
-		handle_keyboard(event)
-
-
-func handle_mouse(_event):
-	
-	var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
-	character.LOOK_VECTOR = look
-	character.Main_Trigger = Input.is_action_pressed("main")
-	camera.HORIZONTAL_SENSITIVITY = 0.002 if character.Main_Trigger else 0.004
-	
-	
-func handle_keyboard(_event):
-	
-	var input_dir = Input.get_vector("left", "right", "forward", "backward")
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	direction = direction.rotated(Vector3.UP, camera.rotation.y)
-	character.WALK_VECTOR = direction  
-	
-	if Input.is_action_just_pressed("jump"):
-		character.jump.rpc()
-	
-	if Input.is_action_pressed("run"):
-		character.RUNNING = true
-	
-	elif Input.is_action_just_released("run"):
-		character.RUNNING = false
+		var input_dir = Input.get_vector("left", "right", "forward", "backward")
+		var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		direction = direction.rotated(Vector3.UP, camera.rotation.y)
+		character.WALK_VECTOR = direction
 		
-	if Input.is_action_just_pressed("equip"):
-		character.ragdoll.rpc()
+		if Input.is_action_just_pressed("jump"):
+			character.jump.rpc()
+		
+		if Input.is_action_pressed("run"):
+			character.RUNNING = true
+		
+		elif Input.is_action_just_released("run"):
+			character.RUNNING = false
+			
+		if Input.is_action_just_pressed("equip"):
+			character.ragdoll.rpc()
+		
+		if Input.is_action_just_pressed("drop"):
+			character.unragdoll.rpc()
+
 	
-	if Input.is_action_just_pressed("drop"):
-		character.unragdoll.rpc()

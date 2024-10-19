@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://ccecv7ucyb87r"]
+[gd_scene load_steps=5 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
 [ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="2_76mdc"]
-[ext_resource type="PackedScene" uid="uid://dxmbdi6kjhx8i" path="res://Scenes/UI/HUD.tscn" id="9_hcw72"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ddwpy"]
 render_priority = 0
@@ -37,8 +36,6 @@ stretch = true
 handle_input_locally = false
 size = Vector2i(1152, 648)
 render_target_update_mode = 4
-
-[node name="HUD" parent="." instance=ExtResource("9_hcw72")]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -114,10 +111,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 443.0
-offset_top = 229.0
-offset_right = -443.0
-offset_bottom = -228.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 15
@@ -127,6 +120,8 @@ theme_override_constants/margin_bottom = 15
 
 [node name="vbox" type="VBoxContainer" parent="CanvasLayer/PauseMenu/margin"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
 theme_override_constants/separation = 15
 
 [node name="LeaveButton" type="Button" parent="CanvasLayer/PauseMenu/margin/vbox"]

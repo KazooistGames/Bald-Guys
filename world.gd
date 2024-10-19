@@ -20,7 +20,7 @@ var session
 
 @onready var viewPort = $SubViewportContainer/SubViewport
 
-@onready var hud = $HUD
+#@onready var hud = $HUD
 
 @onready var sessionSpawner = $MultiplayerSpawner
 
@@ -48,6 +48,7 @@ func _ready():
 	multiplayer.server_disconnected.connect(leave_game)
 	
 	sessionSpawner.spawned.connect(handle_new_session_spawn)
+	
 	
 func _unhandled_input(_event):
 	
