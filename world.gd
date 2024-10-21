@@ -175,7 +175,10 @@ func quit():
 
 func leave_session():
 		
-	if multiplayer.is_server():
+	if not multiplayer.has_multiplayer_peer():
+		pass
+		
+	elif multiplayer.is_server():
 		multiplayer.peer_connected.disconnect(add_player_to_session)
 		multiplayer.peer_disconnected.disconnect(remove_player_from_session)
 	else:

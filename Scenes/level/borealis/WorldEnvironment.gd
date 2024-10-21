@@ -22,8 +22,10 @@ const ambient_energy_zsf = Vector3(0.65, 0.3, 1)
 
 func _process(delta):
 	
-	if not is_multiplayer_authority():
+	if not multiplayer.has_multiplayer_peer():
+		pass
 		
+	elif not is_multiplayer_authority():
 		return
 		
 	timer += delta

@@ -58,7 +58,10 @@ func _process(_delta):
 		
 func _physics_process(delta):
 	
-	if is_multiplayer_authority():
+	if not multiplayer.has_multiplayer_peer():
+		return
+		
+	elif is_multiplayer_authority():
 		server_position = position
 		
 	else:
