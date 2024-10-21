@@ -1,3 +1,4 @@
+
 extends RigidBody3D
 
 @export var HAIR_COLOR : Color:
@@ -7,10 +8,10 @@ extends RigidBody3D
 		
 	set(value):
 		HAIR_COLOR = value
-		var model = $MeshInstance3D
-		var material = model.get_surface_override_material(0)
+		if not mesh: return
+		var material = mesh.get_surface_override_material(0)
 		material.albedo_color = value
-		model.set_surface_override_material(0, material)
+		mesh.set_surface_override_material(0, material)
 
 
 @export var radius = 0.25
@@ -23,6 +24,12 @@ extends RigidBody3D
 
 @onready var synchronizer = $MultiplayerSynchronizer
 
+@export var server_position = Vector3.ZERO
+
+#var rng = RandomNumberGenerator.new()
+#
+#@export var seed = 0
+
 
 func _enter_tree():
 	
@@ -30,13 +37,14 @@ func _enter_tree():
 	contact_monitor = true
 	max_contacts_reported = 10
 	
+	
 func _ready():
 	
 	if not is_multiplayer_authority(): 
 		return
 		
 	getRandomHairColor()
-
+	
 
 func _process(_delta):
 	
@@ -44,20 +52,34 @@ func _process(_delta):
 	mesh.mesh.height = radius * 2
 	collider.shape.radius = radius
 	
+	#if Engine.is_editor_hint():
+		#rng.seed = hash(seed)
+		#getRandomHairColor()
+		
+func _physics_process(delta):
+	
+	if is_multiplayer_authority():
+		server_position = position
+		
+	else:
+		position = position.lerp(server_position, .1)
+
 
 func getRandomHairColor():
-	
 	var rng = RandomNumberGenerator.new()
+
+	var colorBase = rng.randf_range(0.0, 200.0 )
 	
-	var colorBase = rng.randf_range(0.0, 200.0 ) / 255
+	var maxShift = (255.0 - colorBase) / 3.0
+	var redShift = rng.randf_range(0.0, maxShift)
 	
-	var maxGreenShift = (255.0 - colorBase) / 4.0
-	var greenShift = rng.randf_range(0.0, maxGreenShift ) / 255
+	var greenShift = rng.randf_range(0.0, redShift )
 	
-	var maxRedShift = min(2*greenShift, maxGreenShift)
-	var redShift = rng.randf_range(greenShift, maxRedShift) / 255
+	var r = (colorBase + redShift)/255.0
+	var g = (colorBase + greenShift)/255.0
+	var b = colorBase/255.0
 	
-	HAIR_COLOR = Color(colorBase + redShift, colorBase + greenShift, colorBase)
+	HAIR_COLOR = Color(r, g, b)
 
 
 	

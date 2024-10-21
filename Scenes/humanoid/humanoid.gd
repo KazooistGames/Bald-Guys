@@ -86,7 +86,11 @@ func _process(delta):
 	elif skeleton.ragdoll_is_at_rest(): 
 		ragdoll_recovery_timer_seconds += delta
 	
-	if Main_Trigger or WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1: #stop running if necessary
+	if Main_Trigger: #stop running if necessary
+		RUNNING = false
+	elif WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
+		RUNNING = false
+	elif velocity == Vector3.ZERO:
 		RUNNING = false
 		
 	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
@@ -273,6 +277,7 @@ func toggle_ragdoll_sync(sync_mode):
 func ragdoll():
 	
 	if(MOVE_STATE != MoveState.RAGDOLL && ragdoll_is_ready()):
+		RUNNING = false
 		ragdolled.emit()
 		skeleton.RAGDOLLED = true
 		ragdoll_recovery_timer_seconds = 0
@@ -295,9 +300,6 @@ func unragdoll():
 		collider.disabled = false
 		MOVE_STATE = MoveState.FALLING
 		toggle_ragdoll_sync(0)	
-
-
-
 
 
 @rpc("call_local")

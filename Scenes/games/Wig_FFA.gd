@@ -126,6 +126,7 @@ func set_wig_bearer(path_to_new_bearer):
 
 @rpc("call_local")
 func rpc_reset():
+	
 	if Bearer:
 		drop_wig()
 		Bearer = null
@@ -135,6 +136,7 @@ func rpc_reset():
 		Wig = null
 		
 	Bearer_Times = {}
+
 
 @rpc("call_local")
 func rpc_initialize():

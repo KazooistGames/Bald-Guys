@@ -7,16 +7,16 @@ var timer = 0.0
 
 const fog_light_energy_zsf = Vector3(0.5, 0.1, 0.5)
 
-const fog_density_zsf = Vector3(0.02, 0.015, 3)
+const fog_density_zsf = Vector3(0.0175, 0.015, 3)
 
-const fog_height_zsf = Vector3(3.0, 1, 10)
+const fog_height_zsf = Vector3(2.8, 1, 10)
 const fog_height_wiggle_zsf = Vector3(0.0, 0.2, 1)
-const fog_height_density_zsf = Vector3(0.45, 0.225, 30)
+const fog_height_density_zsf = Vector3(0.40, 0.2, 30)
 
-const ambient_red_zsf = Vector3(0.4, 0.20, 3)
-const ambient_green_zsf = Vector3(0.4, 0.20, 5)
-const ambient_blue_zsf = Vector3(0.4, 0.20, 7)
-const ambient_energy_zsf = Vector3(0.5, 0.25, 1)
+const ambient_red_zsf = Vector3(0.35, 0.20, 3)
+const ambient_green_zsf = Vector3(0.35, 0.20, 5)
+const ambient_blue_zsf = Vector3(0.35, 0.20, 7)
+const ambient_energy_zsf = Vector3(0.65, 0.3, 1)
 
 @onready var directional_light = $DirectionalLight3D
 
@@ -52,9 +52,8 @@ func set_environment_phase(phase):
 	environment.ambient_light_energy = get_zsf_instant(timer, ambient_energy_zsf)
 	
 	
-
 @export var light_wave_period = 60
-@export var light_energy_max = 1.0
+@export var light_energy_max = 1.2
 @export var light_energy_min = 0.0
 @rpc("call_local")
 func set_light_phase(phase):

@@ -114,8 +114,10 @@ func join_lobby():
 	
 	var enet_peer = ENetMultiplayerPeer.new()
 	main_menu.hide()
+	
 	var hostIP = "127.0.0.1" if address_entry.text == "" else address_entry.text
 	enet_peer.create_client(hostIP, PORT)
+		
 	multiplayer.multiplayer_peer = enet_peer
 		
 	multiplayer.server_disconnected.connect(leave_session)
@@ -172,8 +174,15 @@ func quit():
 
 
 func leave_session():
-	
+		
+	if multiplayer.is_server():
+		multiplayer.peer_connected.disconnect(add_player_to_session)
+		multiplayer.peer_disconnected.disconnect(remove_player_from_session)
+	else:
+		multiplayer.server_disconnected.disconnect(leave_session)
+		
 	multiplayer.multiplayer_peer = null
+	
 	Player_Lobby_Dict.clear()
 	pause_menu.visible = false
 	
@@ -181,6 +190,8 @@ func leave_session():
 		session.queue_free()
 		
 	State = ClientState.Lobby
+	
+
 	
 	
 @rpc("call_local")
