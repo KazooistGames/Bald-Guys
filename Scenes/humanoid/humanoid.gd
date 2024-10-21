@@ -48,7 +48,7 @@ const MoveState = {
 
 
 var IMPACT_THRESHOLD =  6.0
-var ragdoll_cooldown_period_seconds = 1
+var ragdoll_cooldown_period_seconds = 0.5
 var ragdoll_cooldown_timer_seconds = 0
 var ragdoll_recovery_period_seconds = 1
 var ragdoll_recovery_timer_seconds = 0
@@ -294,7 +294,10 @@ func unragdoll():
 		animation.active = true
 		collider.disabled = false
 		MOVE_STATE = MoveState.FALLING
-		toggle_ragdoll_sync(0)
+		toggle_ragdoll_sync(0)	
+
+
+
 
 
 @rpc("call_local")

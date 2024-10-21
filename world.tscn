@@ -139,4 +139,4 @@ replication_config = SubResource("SceneReplicationConfig_dnjxn")
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="join_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/MarginContainer/QuitButton" to="." method="quit"]
-[connection signal="pressed" from="CanvasLayer/PauseMenu/margin/vbox/LeaveButton" to="." method="leave_game"]
+[connection signal="pressed" from="CanvasLayer/PauseMenu/margin/vbox/LeaveButton" to="." method="leave_session"]

@@ -7,73 +7,74 @@ const SessionState = {
 	Level = 1,
 }
 
-@export var State = SessionState.Level
+@export var State = SessionState.Hub
 
-@onready var Hub = $Hub
+const GameMode = {
+	FFA = 0,
+}
 
-@onready var Level = $Level
+@export var Mode = GameMode.FFA
 
 @export var Commissioned = false
 
 @export var Humanoids = []
 
+@onready var FFA = $Wig_FFA
+
+@onready var Hub = $Hub
+
+@onready var Level = $Level
+
 @onready var humanoidSpawner = $MultiplayerSpawner
 
 signal Created_Player_Humanoid
+
 
 func _ready():
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 
 
-func _process(_delta):
-
-	Humanoids = get_tree().get_nodes_in_group("humanoids")
-
-@rpc("authority", "call_local")
-func switch_to_hub():
+func _unhandled_key_input(event):
 	
-	if State == SessionState.Hub:
-		return
+	if event.is_action_pressed("Toggle"):
 		
-	else:
-		State = SessionState.Hub
-		
-		for humanoid in Humanoids:
-			humanoid.position = get_random_spawn()
-		
-		
-@rpc("authority", "call_local")
-func switch_to_level():
-	
-	if State == SessionState.Level:
-		return
-		
-	else:
-		State = SessionState.Level
-		
-		for humanoid in Humanoids:
-			humanoid.position = get_random_spawn()
+		if State != SessionState.Level:
+			rpc_start_level.rpc()	
+			
+		elif State != SessionState.Hub:
+			rpc_start_hub.rpc()
 
 
-@rpc("authority", "call_local")
-func Commission(peer_ids):
+func initialize_game_mode():
 	
-	for peer_id in peer_ids:
-		create_player_humanoid(peer_id)
+	if Mode == GameMode.FFA:
+		FFA.rpc_initialize.rpc()
 		
+		
+func reset_game_mode():
+	
+	if Mode == GameMode.FFA:
+		FFA.rpc_reset.rpc()
+	
+
+func Commission():
+	
+	rpc_start_hub.rpc()
+	create_player_humanoid(1)
 	Commissioned = true
 
 
-func get_random_spawn():
+func spawn_players(parent):
+	
+	for humanoid in Humanoids:
+		humanoid.unragdoll.rpc()
+		respawn_node.rpc(humanoid.get_path(), get_random_spawn(parent))
+		
+
+func get_random_spawn(parent):
 	
 	var all_spawns = get_tree().get_nodes_in_group("spawns")
 	var valid_spawns = []
-	var parent = Hub if State == SessionState.Hub else Level
-	
-	#for child in parent.get_children():
-		#
-		#if child.is_in_group("spawns"):
-			#valid_spawns.append(child)
 	
 	for spawn in all_spawns:
 		
@@ -85,15 +86,26 @@ func get_random_spawn():
 	
 	return valid_spawns.pick_random().global_position
 
+
 func create_player_humanoid(peer_id):
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
-	new_peer_humanoid.position = get_random_spawn()
+	new_peer_humanoid.position = get_random_spawn(Hub)
 	Humanoids.append(new_peer_humanoid)
 	add_child(new_peer_humanoid)
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
+	return new_peer_humanoid
 	#Created_Player_Humanoid.emit(new_peer_humanoid.get_path(), peer_id)
+
+
+func destroy_player_humanoid(peer_id):
+	
+	var playerHumanoid = get_node_or_null(str(peer_id))
+	
+	if playerHumanoid:
+		Humanoids.erase(playerHumanoid)
+		playerHumanoid.queue_free()
 
 
 func signal_to_handoff_player_humanoid(node):
@@ -101,5 +113,25 @@ func signal_to_handoff_player_humanoid(node):
 	Created_Player_Humanoid.emit(node)
 
 
+@rpc("authority", "call_local")
+func rpc_start_hub():
+	
+	State = SessionState.Hub
+	spawn_players(Hub)		
+	reset_game_mode()
+
+		
+@rpc("call_local")
+func rpc_start_level():
+	
+	State = SessionState.Level
+	spawn_players(Level)
+	initialize_game_mode()
 
 
+@rpc("call_local")
+func respawn_node(node_path, spawn_position):
+	
+	var node = get_node(node_path)
+	node.velocity = Vector3.ZERO
+	node.position = spawn_position

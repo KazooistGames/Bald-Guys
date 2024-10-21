@@ -14,17 +14,16 @@ var Bearer : Node3D
 
 @onready var HUD = $HUD
 
+signal Initialized()
+
 var local_player_name
 
+
 func _ready():
+	
 	local_player_name = str(multiplayer.get_unique_id())
-	if is_multiplayer_authority():
-		Wig = wig_prefab.instantiate()
-		add_child(Wig)
-		Wig.global_position = Vector3(0, 10, 0)
-		Wig.interactable.gained_interaction.connect(dawn_wig)
-		
-		
+	
+	
 func _process(delta):
 
 	HUD.TableValues = Bearer_Times
@@ -40,7 +39,7 @@ func _process(delta):
 		HUD.find_child("Progress").visible = false
 	
 	if not Wig:
-		Wig = $Wig
+		Wig = get_node_or_null("Wig")
 		
 	elif not is_multiplayer_authority():
 		pass
@@ -53,8 +52,8 @@ func _process(delta):
 		
 	else:
 		Bearer_Times[Bearer.name] = delta
-		
-		
+			
+	
 func dawn_wig(node):
 	
 	if not Wig:
@@ -93,7 +92,7 @@ func drop_wig():
 	
 @rpc("call_local")
 func toggle_wig_mount(value):
-	
+	if not Wig: return
 	Wig.collider.disabled = value
 	Wig.freeze = value
 	
@@ -102,7 +101,12 @@ func toggle_wig_mount(value):
 func move_wig_remote_controller(path_to_new_parent):
 	
 	wig_remote.get_parent().remove_child(wig_remote)
-	get_node(path_to_new_parent).add_child(wig_remote)
+	var new_parent = get_node(path_to_new_parent)
+	
+	if not new_parent: 
+		return
+		
+	new_parent.add_child(wig_remote)
 	
 	
 @rpc("call_local")
@@ -118,6 +122,33 @@ func set_wig_bearer(path_to_new_bearer):
 		wig_remote.remote_path = Wig.get_path()
 		wig_remote.position = Vector3(0, 0.275, -.075)
 		#Wig.synchronizer.replication_config.property_set_replication_mode("Wig:position", 0)
+				
+
+@rpc("call_local")
+func rpc_reset():
+	if Bearer:
+		drop_wig()
+		Bearer = null
+
+	if Wig:
+		Wig.queue_free()
+		Wig = null
+		
+	Bearer_Times = {}
+
+@rpc("call_local")
+func rpc_initialize():
+
+	rpc_reset()
+		
+	if is_multiplayer_authority():
+		Bearer_Times = {}
+		Wig = wig_prefab.instantiate()
+		add_child(Wig)
+		Wig.global_position = Vector3(0, 20, 0)
+		Wig.interactable.gained_interaction.connect(dawn_wig)
+		
+	Initialized.emit()
 	
 	
 

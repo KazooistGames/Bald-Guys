@@ -29,12 +29,13 @@ var session
 @export var Player_Lobby_Dict = {}
 
 
-const GameState = {
+const ClientState = {
 	Lobby = 0,
 	Session = 1,
 }
 
-@export var State = GameState.Lobby
+@export var State = ClientState.Lobby
+
 
 func _ready():
 	
@@ -43,16 +44,12 @@ func _ready():
 
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
-	multiplayer.peer_connected.connect(add_player_to_game)
-	multiplayer.peer_disconnected.connect(remove_player_from_game)
-	multiplayer.server_disconnected.connect(leave_game)
-	
 	sessionSpawner.spawned.connect(handle_new_session_spawn)
 	
 	
 func _unhandled_input(_event):
 	
-	if State != GameState.Session:
+	if State != ClientState.Session:
 		pass
 		
 	elif Input.is_action_just_pressed("pause"):
@@ -61,10 +58,12 @@ func _unhandled_input(_event):
 
 func _process(_delta):
 	
-	if State != GameState.Session or pause_menu.visible:
+	if State != ClientState.Session or pause_menu.visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	elif State == ClientState.Session:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
-	main_menu.visible = State == GameState.Lobby
+	main_menu.visible = State == ClientState.Lobby
 
 	if not multiplayer.has_multiplayer_peer():
 		return
@@ -74,19 +73,20 @@ func _process(_delta):
 
 	elif not session:
 		session = viewPort.get_node_or_null("session")
-		State = GameState.Lobby
+		State = ClientState.Lobby
 		
 	elif not session.Commissioned:
-		session.Created_Player_Humanoid.connect(give_humanoid_to_player)
-		session.Commission(Player_Lobby_Dict.keys())
+		session.Created_Player_Humanoid.connect(give_humanoid_to_client)
+		session.Commission()
 
-	elif State != GameState.Session:
+	elif State != ClientState.Session:
 		
 		#for humanoid in session.Humanoids:
 			#_handoff_humanoid.rpc(humanoid, str(humanoid.name ).to_int() )
-			
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		State = GameState.Session
+		State = ClientState.Session
+		
+	else:
+		pass
 
 
 func start_host_lobby():
@@ -104,6 +104,9 @@ func start_host_lobby():
 	
 	session = session_Prefab.instantiate()
 	viewPort.add_child(session)
+	
+	multiplayer.peer_connected.connect(add_player_to_session)
+	multiplayer.peer_disconnected.connect(remove_player_from_session)
 	#upnp_setup() #removed and using port forwarding instead
 
 
@@ -114,32 +117,28 @@ func join_lobby():
 	var hostIP = "127.0.0.1" if address_entry.text == "" else address_entry.text
 	enet_peer.create_client(hostIP, PORT)
 	multiplayer.multiplayer_peer = enet_peer
+		
+	multiplayer.server_disconnected.connect(leave_session)
 
 
-func add_player_to_game(peer_id):
+func add_player_to_session(peer_id):
 	
 	print(str(peer_id) + " joined")
 	Player_Lobby_Dict[peer_id] = "client"
 	
-	if State == GameState.Session:
-		session.create_player_humanoid(peer_id)
+	session.create_player_humanoid(peer_id)
 	
 	
-func remove_player_from_game(peer_id):
+func remove_player_from_session(peer_id):
 	
 	print(str(peer_id) + " left")
 	Player_Lobby_Dict.erase(peer_id)
 	
-	if not session:
-		return
-		
-	var playerHumanoid = session.get_node_or_null(str(peer_id))
-	
-	if playerHumanoid:
-		playerHumanoid.set_multiplayer_authority(1)
+	session.destroy_player_humanoid(peer_id)
+
 		
 		
-func give_humanoid_to_player(humanoid):
+func give_humanoid_to_client(humanoid):
 	
 	var peer_id = str(humanoid.name).to_int()
 	humanoid.set_multiplayer_authority(peer_id)
@@ -150,17 +149,7 @@ func give_humanoid_to_player(humanoid):
 
 func handle_new_session_spawn(new_session):
 	
-	new_session.Created_Player_Humanoid.connect(give_humanoid_to_player)
-
-
-@rpc("call_local")
-func _handoff_object(path, auth_id):
-	
-	path = str(path).replace(str(get_path()), "")
-	var node = get_node(path)
-	
-	if node:
-		node.set_multiplayer_authority(auth_id)
+	new_session.Created_Player_Humanoid.connect(give_humanoid_to_client)
 
 
 func upnp_setup():
@@ -182,7 +171,7 @@ func quit():
 	get_tree().quit()
 
 
-func leave_game():
+func leave_session():
 	
 	multiplayer.multiplayer_peer = null
 	Player_Lobby_Dict.clear()
@@ -191,4 +180,14 @@ func leave_game():
 	if session != null:
 		session.queue_free()
 		
-	State = GameState.Lobby
+	State = ClientState.Lobby
+	
+	
+@rpc("call_local")
+func rpc_handoff_object(path, auth_id):
+	
+	path = str(path).replace(str(get_path()), "")
+	var node = get_node(path)
+	
+	if node:
+		node.set_multiplayer_authority(auth_id)

@@ -37,14 +37,11 @@ func _unhandled_input(event):
 		direction = direction.rotated(Vector3.UP, camera.rotation.y)
 		character.WALK_VECTOR = direction
 		
+		if Input.is_action_just_pressed("run"):
+			character.RUNNING = !character.RUNNING
+		
 		if Input.is_action_just_pressed("jump"):
 			character.jump.rpc()
-		
-		if Input.is_action_pressed("run"):
-			character.RUNNING = true
-		
-		elif Input.is_action_just_released("run"):
-			character.RUNNING = false
 			
 		if Input.is_action_just_pressed("equip"):
 			character.ragdoll.rpc()
