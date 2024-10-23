@@ -39,16 +39,16 @@ func _unhandled_key_input(event):
 	if event.is_action_pressed("Toggle"):
 		
 		if State != SessionState.Level:
-			rpc_start_level.rpc()	
+			rpc_move_to_level.rpc()	
 			
 		elif State != SessionState.Hub:
-			rpc_start_hub.rpc()
+			rpc_move_to_hub.rpc()
 
 
-func initialize_game_mode():
+func start_game_mode():
 	
 	if Mode == GameMode.FFA:
-		FFA.rpc_initialize.rpc()
+		FFA.rpc_start.rpc()
 		
 		
 func reset_game_mode():
@@ -59,7 +59,7 @@ func reset_game_mode():
 
 func Commission():
 	
-	rpc_start_hub.rpc()
+	rpc_move_to_hub.rpc()
 	create_player_humanoid(1)
 	Commissioned = true
 
@@ -114,7 +114,7 @@ func signal_to_handoff_player_humanoid(node):
 
 
 @rpc("authority", "call_local")
-func rpc_start_hub():
+func rpc_move_to_hub():
 	
 	State = SessionState.Hub
 	spawn_players(Hub)		
@@ -122,11 +122,11 @@ func rpc_start_hub():
 
 		
 @rpc("call_local")
-func rpc_start_level():
+func rpc_move_to_level():
 	
 	State = SessionState.Level
 	spawn_players(Level)
-	initialize_game_mode()
+	start_game_mode()
 
 
 @rpc("call_local")

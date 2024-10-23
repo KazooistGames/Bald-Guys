@@ -11,24 +11,23 @@ extends CanvasLayer
 @onready var progress_backdrop = $Progress/BackDrop
 
 @onready var PSA = $PSA/Label
-var psaTimeToLive = 0
-
+var psaTTL = 1
 
 @export var TableValues = {}
 
 @export var ProgressPercent = 0
 
-const bar_length = 1000
-const bar_width = 75
+const progress_bar_length = 1000
+const progress_bar_width = 75
 	
 	
 func _ready():
-	progress_backdrop.custom_minimum_size = Vector2(bar_length, bar_width)
+	progress_backdrop.custom_minimum_size = Vector2(progress_bar_length, progress_bar_width)
 	
 func _process(delta):
 	
 	scoreboard.visible = Input.is_action_pressed("tab")
-	progress_fill.custom_minimum_size.x = bar_length * clampf(ProgressPercent, 0.0, 1.0)
+	progress_fill.custom_minimum_size.x = progress_bar_length * clampf(ProgressPercent, 0.0, 1.0)
 
 	names_text.text = ""
 	times_text.text = ""
@@ -39,9 +38,11 @@ func _process(delta):
 	for value in TableValues.values():
 		times_text.text += "\n" + "%3.2f" % value
 	
-	
-	if(psaTimeToLive > 0):
-		psaTimeToLive -= delta
+	if psaTTL > 0:
+		psaTTL -= min(delta, psaTTL)
+		
+	elif psaTTL < 0:
+		pass
 		
 	else:
 		PSA.text = ""
@@ -52,10 +53,9 @@ func get_public_service_announcement():
 	return PSA.text
 	
 		
-@rpc("call_local", "authority")
-func set_public_service_announcement(message = ""):
+@rpc("call_local")
+func set_psa(message = "", ttl = 1):
 	
-	if(PSA.text != ""):
-		PSA.text = message
-		psaTimeToLive = 1
+	PSA.text = message
+	psaTTL = ttl
 	

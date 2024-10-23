@@ -14,10 +14,24 @@ var Bearer : Node3D
 
 @onready var HUD = $HUD
 
-signal Initialized()
-
 var local_player_name
 
+enum GameState {
+	reset,
+	starting,
+	playing,
+	finished
+}
+
+@export var State = GameState.reset
+
+signal Starting()
+signal Playing()
+signal Finished()
+signal Resetting()
+
+var countDown_timer = 0
+var countDown_value = 0
 
 func _ready():
 	
@@ -25,33 +39,59 @@ func _ready():
 	
 	
 func _process(delta):
+			
+	if not Wig:
+		Wig = get_node_or_null("Wig")
 
 	HUD.TableValues = Bearer_Times
-
-	if Bearer_Times.has(local_player_name):	
-		var accumulated_time = Bearer_Times[local_player_name]
-		HUD.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
+	
+	if not is_multiplayer_authority():
+		pass
+		
+	elif State == GameState.reset:
+		pass
+		
+	elif State == GameState.starting:
+		
+		if countDown_value <= 0:
+			rpc_play.rpc()
+			
+		elif countDown_timer > 1:
+			countDown_timer = 0
+			countDown_value -= 1
+			HUD.set_psa.rpc(str(countDown_value))
+			
+		else:
+			countDown_timer += delta
+	
+	elif State == GameState.playing:
+		
+		if not Bearer:
+			pass
+			
+		elif Bearer_Times.has(Bearer.name):
+			Bearer_Times[Bearer.name] += delta
+			
+			if Bearer_Times[Bearer.name] >= Goal_Time:
+				HUD.set_psa.rpc("Winner: " + str(Bearer.name), -1)
+				rpc_finish.rpc()
+		
+		else:
+			Bearer_Times[Bearer.name] = delta
+			
+	elif State == GameState.finished:
+		pass
+		
 		
 	if Bearer:
 		HUD.find_child("Progress").visible = local_player_name == Bearer.name
-		
+			
 	else:
 		HUD.find_child("Progress").visible = false
-	
-	if not Wig:
-		Wig = get_node_or_null("Wig")
 		
-	elif not is_multiplayer_authority():
-		pass
-		
-	elif not Bearer:
-		pass
-		
-	elif Bearer_Times.has(Bearer.name):
-		Bearer_Times[Bearer.name] += delta
-		
-	else:
-		Bearer_Times[Bearer.name] = delta
+	if Bearer_Times.has(local_player_name):	
+		var accumulated_time = Bearer_Times[local_player_name]
+		HUD.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
 			
 	
 func dawn_wig(node):
@@ -127,6 +167,11 @@ func set_wig_bearer(path_to_new_bearer):
 @rpc("call_local")
 func rpc_reset():
 	
+	if not is_multiplayer_authority(): return
+	
+	HUD.find_child("Progress").visible = false
+	HUD.set_psa.rpc("")
+	
 	if Bearer:
 		drop_wig()
 		Bearer = null
@@ -134,23 +179,50 @@ func rpc_reset():
 	if Wig:
 		Wig.queue_free()
 		Wig = null
-		
+	
 	Bearer_Times = {}
-
+	State = GameState.reset
+	Resetting.emit()
+	
 
 @rpc("call_local")
-func rpc_initialize():
+func rpc_start():
+	
+	if not is_multiplayer_authority(): return
 
 	rpc_reset()
+	countDown_value = 10
+	HUD.set_psa.rpc(str(countDown_value))
+	State = GameState.starting
+	Starting.emit()
+	
+	
+@rpc("call_local")
+func rpc_play():
+	
+	if not is_multiplayer_authority(): return
+	
+	Bearer_Times = {}
+	Wig = wig_prefab.instantiate()
+	add_child(Wig)
+	Wig.global_position = Vector3(0, 20, 0)
+	Wig.interactable.gained_interaction.connect(dawn_wig)
+	
+	State = GameState.playing
+	Playing.emit()
+	
+	
+@rpc("call_local")
+func rpc_finish():
+	
+	if not is_multiplayer_authority(): return
+	
+	if Bearer:
+		Bearer.ragdolled.disconnect(drop_wig)
 		
-	if is_multiplayer_authority():
-		Bearer_Times = {}
-		Wig = wig_prefab.instantiate()
-		add_child(Wig)
-		Wig.global_position = Vector3(0, 20, 0)
-		Wig.interactable.gained_interaction.connect(dawn_wig)
-		
-	Initialized.emit()
+	State = GameState.finished
+	Finished.emit()
+
 	
 	
 

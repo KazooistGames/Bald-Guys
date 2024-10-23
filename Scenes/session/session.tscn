@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://hdo1moc2epoy" path="res://Scenes/level/Platforms_Level.tscn" id="2_spc1p"]
 [ext_resource type="PackedScene" uid="uid://c635ib3vdy8sj" path="res://Scenes/level/Hub_Level.tscn" id="3_2so71"]
-[ext_resource type="PackedScene" uid="uid://cupu0kavdlrc4" path="res://Scenes/games/Wig_FFA.tscn" id="4_3gmum"]
+[ext_resource type="PackedScene" uid="uid://cupu0kavdlrc4" path="res://Scenes/games/Wig_FFA/Wig_FFA.tscn" id="4_upl1q"]
 [ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/level/borealis/borealis.tscn" id="7_8kuai"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]
@@ -25,7 +25,7 @@ script = ExtResource("1_yhshl")
 [node name="Hub" parent="." instance=ExtResource("3_2so71")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 50, 50, 0)
 
-[node name="Wig_FFA" parent="." instance=ExtResource("4_3gmum")]
+[node name="Wig_FFA" parent="." instance=ExtResource("4_upl1q")]
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_gpd36")

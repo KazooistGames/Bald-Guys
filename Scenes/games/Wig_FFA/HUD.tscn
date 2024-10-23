@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://dbtsv6kiv41f1"]
 
-[ext_resource type="Script" path="res://Scenes/UI/HUD.gd" id="1_oy7t5"]
+[ext_resource type="Script" path="res://Scenes/games/Wig_FFA/HUD.gd" id="1_v7q02"]
 
 [node name="HUD" type="CanvasLayer"]
-script = ExtResource("1_oy7t5")
+script = ExtResource("1_v7q02")
 
 [node name="Scoreboard" type="HBoxContainer" parent="."]
 anchors_preset = 15
