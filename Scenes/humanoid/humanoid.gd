@@ -16,6 +16,11 @@ extends CharacterBody3D
 	
 @export var Main_Trigger = false
 
+const MoveState = {
+	WALKING = 0,
+	FALLING = 1,
+	RAGDOLL = 2,
+}
 
 @export var MOVE_STATE = MoveState.WALKING
 @export var LOOK_VECTOR = Vector3(0,0,0)
@@ -25,6 +30,7 @@ extends CharacterBody3D
 @export var JUMP_SPEED = 5
 @export var RUNNING = false
 
+@export var AUTHORITY_POSITION = Vector3.ZERO
 
 @onready var skeleton = $Skeleton3D
 @onready var animation = $AnimationTree
@@ -40,14 +46,7 @@ var TOPSPEED_MOD = 1
 const MOUSE_SENSATIVITY = 0.005
 
 
-const MoveState = {
-	WALKING = 0,
-	FALLING = 1,
-	RAGDOLL = 2,
-}
-
-
-var IMPACT_THRESHOLD =  6.0
+var IMPACT_THRESHOLD =  6.5
 var ragdoll_cooldown_period_seconds = 0.5
 var ragdoll_cooldown_timer_seconds = 0
 var ragdoll_recovery_period_seconds = 1
@@ -102,7 +101,7 @@ func _process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			IMPACT_THRESHOLD = 6
+			IMPACT_THRESHOLD = 6.5
 			animation.updateFalling(velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
@@ -175,7 +174,14 @@ func _physics_process(delta):
 	
 	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
 	rotation.y = fmod(rotation.y, 2*PI)
-
+	
+	if is_multiplayer_authority():
+		AUTHORITY_POSITION = position
+	else:
+		if position.distance_to(AUTHORITY_POSITION) > 1:
+			position = AUTHORITY_POSITION
+		else:
+			position = position.lerp(AUTHORITY_POSITION, 0.1)
 
 func is_back_pedaling():
 	
@@ -214,28 +220,48 @@ func handle_collision(delta):
 	var collision = move_and_collide(velocity * delta)
 	
 	if collision:
-		var relativeVelocity = collision.get_collider_velocity() - get_real_velocity()
-		var otherCollider = collision.get_collider()
+		var relativeVelocity = get_real_velocity() - collision.get_collider_velocity()
+		var otherCollider = collision.get_collider() as Node3D
 		var layer = otherCollider.get_collision_layer()
-		
 		var directionalModifier = 1.0 - collision.get_normal().dot(Vector3.UP)/2
-		
-		var impact = relativeVelocity.dot(collision.get_normal()) * directionalModifier
-		
-		match layer:
-			2:
-				#impact = sqrt(pow(relativeVelocity.dot(collision.get_normal()), 2)/2)
+		var normal = collision.get_normal()
+		var impact = -relativeVelocity.dot(normal) * directionalModifier
+				
+		if otherCollider.is_in_group("humanoids"):
+			
 				if otherCollider.check_if_impact_meets_threshold(impact):
 					otherCollider.ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 					otherCollider.ragdoll.rpc()
 					
-			4:
-				pass
+		elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
+			
+			var transverse_velocity = Vector2(velocity.x, velocity.z)
+			print(transverse_velocity.length())
+			
+			var projection_scale = relativeVelocity.normalized().dot(normal)
+			
+			var bounced = relativeVelocity.bounce(normal)
+			
+			var wall_jump = JUMP_SPEED / 2
+			
+			var cutoff = projection_scale >= 0.0 or projection_scale < -0.75
+			
+			var x_result = velocity.x if cutoff else bounced.x
+			
+			var y_result = velocity.y if cutoff else (velocity.y + wall_jump)
+			
+			var z_result = velocity.z if cutoff else bounced.z
+			
+			velocity = Vector3(x_result, y_result, z_result)
+			
+			if not cutoff:
+				print(projection_scale)
 				
+			
 		if  check_if_impact_meets_threshold(impact): 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
-			
+
 		else:
 			move_and_slide()
 
@@ -306,4 +332,4 @@ func unragdoll():
 func jump():
 	
 	if is_on_floor():
-		velocity.y = JUMP_SPEED
+		velocity.y += JUMP_SPEED

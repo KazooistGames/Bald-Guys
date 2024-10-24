@@ -82,7 +82,6 @@ func _process(delta):
 	elif State == GameState.finished:
 		pass
 		
-		
 	if Bearer:
 		HUD.find_child("Progress").visible = local_player_name == Bearer.name
 			
@@ -92,8 +91,8 @@ func _process(delta):
 	if Bearer_Times.has(local_player_name):	
 		var accumulated_time = Bearer_Times[local_player_name]
 		HUD.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
-			
-	
+
+
 func dawn_wig(node):
 	
 	if not Wig:
@@ -111,7 +110,7 @@ func dawn_wig(node):
 		
 		set_wig_bearer.rpc(node.get_path())
 		print("dawned ", node)
-		
+
 		
 func drop_wig():
 	
@@ -135,8 +134,8 @@ func toggle_wig_mount(value):
 	if not Wig: return
 	Wig.collider.disabled = value
 	Wig.freeze = value
-	
-	
+
+
 @rpc("call_local")
 func move_wig_remote_controller(path_to_new_parent):
 	
@@ -147,8 +146,8 @@ func move_wig_remote_controller(path_to_new_parent):
 		return
 		
 	new_parent.add_child(wig_remote)
-	
-	
+
+
 @rpc("call_local")
 func set_wig_bearer(path_to_new_bearer):
 	
@@ -170,7 +169,7 @@ func rpc_reset():
 	if not is_multiplayer_authority(): return
 	
 	HUD.find_child("Progress").visible = false
-	HUD.set_psa.rpc("")
+	#HUD.set_psa.rpc("")
 	
 	if Bearer:
 		drop_wig()

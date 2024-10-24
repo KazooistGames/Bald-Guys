@@ -45,10 +45,15 @@ func _unhandled_key_input(event):
 			rpc_move_to_hub.rpc()
 
 
+func end_game_mode():
+	
+	rpc_move_to_hub.rpc()
+
 func start_game_mode():
 	
 	if Mode == GameMode.FFA:
 		FFA.rpc_start.rpc()
+		FFA.Finished.connect(end_game_mode)
 		
 		
 func reset_game_mode():
@@ -113,7 +118,7 @@ func signal_to_handoff_player_humanoid(node):
 	Created_Player_Humanoid.emit(node)
 
 
-@rpc("authority", "call_local")
+@rpc("call_local")
 func rpc_move_to_hub():
 	
 	State = SessionState.Hub

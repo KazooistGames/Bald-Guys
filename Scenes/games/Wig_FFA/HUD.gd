@@ -59,3 +59,8 @@ func set_psa(message = "", ttl = 1):
 	PSA.text = message
 	psaTTL = ttl
 	
+
+func get_psa():
+
+	return PSA.text
+	

@@ -13,12 +13,12 @@ size = Vector3(25, 1, 1)
 [sub_resource type="BoxShape3D" id="BoxShape3D_hj5wy"]
 size = Vector3(25, 1, 1)
 
-[node name="wall" type="MeshInstance3D"]
+[node name="wall" type="MeshInstance3D" groups=["walls"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 12.5, 0)
 mesh = ExtResource("1_saatn")
 surface_material_override/0 = ExtResource("1_1fkwv")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="."]
+[node name="StaticBody3D" type="StaticBody3D" parent="." groups=["walls"]]
 collision_mask = 5
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
