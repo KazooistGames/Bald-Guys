@@ -1,7 +1,5 @@
 extends SkeletonIK3D
 
-var forwardRotation = Vector3(PI, PI, PI)
-
 @export var swayWidth = 0.15
 @export var swayHeightBase = 0.75
 
@@ -9,19 +7,38 @@ var forwardRotation = Vector3(PI, PI, PI)
 
 var axisOfRotation = Vector3.ZERO
 
+var forwardRotation = Vector3(PI, PI, PI)
+
+var lerp_scalar = 1.0
+
+var targeted_node = null
+
+
 func _ready():
+	targeted_node = get_node(target_node)
 	start()
+	
+	
+func _process(delta):
+	
+	if is_running() and lerp_scalar < 1.0:
+		lerp_scalar += delta
+		pass
+	else:
+		lerp_scalar = 0
+	lerp_scalar = clampf(lerp_scalar, 0.0, 1.0)
+	
 	
 func process_arm_forward(headTransform):
 	var xSign = sign(idleOffset.x)
 	magnet = Vector3(2 * xSign, 0, 0)
-	var targetTransform = get_node(target_node).transform
+	var targetTransform = targeted_node.transform
 	var offset = Vector3(.2 * xSign, .2, 0)
 	var scalar = 1.25
 	targetTransform.origin = headTransform.basis.z * scalar + headTransform.origin + offset
 	targetTransform.origin.z = max(targetTransform.origin.z, 0.2)
 	#targetTransform.basis = headTransform.basis.rotated(Vector3.FORWARD, PI)
-	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.95)
+	targeted_node.transform = targeted_node.transform.interpolate_with(targetTransform, 1.25 * lerp_scalar)
 	
 func process_arm_sway(footTransform):
 	var targetTransform = footTransform
@@ -36,7 +53,7 @@ func process_arm_sway(footTransform):
 	targetTransform.basis = targetTransform.basis.rotated(axisOfRotation, 2.5*footTransform.origin.z)
 	targetTransform.origin *= Vector3(1, 0, -0.5)
 	targetTransform.origin += Vector3(swayWidth, swayHeight, 0)
-	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.2)
+	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, .95 * lerp_scalar)
 
 func process_arm_idle(footTransform):
 	reset_magnet()
@@ -45,7 +62,7 @@ func process_arm_idle(footTransform):
 	targetTransform.origin += idleOffset
 	targetTransform.basis = get_hand_rest().basis.rotated(Vector3(-1,sign(idleOffset.x),0).normalized(), PI/6)
 	targetTransform.basis = targetTransform.basis.rotated(Vector3.RIGHT, -PI * footTransform.origin.y)
-	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.1)
+	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.15 * lerp_scalar)
 
 func process_arm_falling(footTransform):
 	var targetTransform = footTransform
@@ -56,7 +73,7 @@ func process_arm_falling(footTransform):
 	targetTransform.basis = get_hand_rest().basis.rotated(Vector3(-1,0,0).normalized(), PI/3 * (footTransform.origin.y*2))
 	targetTransform.basis = targetTransform.basis.rotated(Vector3.FORWARD, side * PI * footTransform.origin.y)
 	targetTransform.basis = targetTransform.basis.rotated(Vector3.DOWN,side * PI/9)
-	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.25)
+	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.25 * lerp_scalar)
 
 func get_hand_rest():
 	var skel = get_parent_skeleton()

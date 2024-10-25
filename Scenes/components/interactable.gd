@@ -22,13 +22,13 @@ func _ready():
 	add_to_group("interactables")
 
 
-func _process(delta):
+func _process(_delta):
 	debug_box.visible = DEBUG
 	debug_sphere.visible = DEBUG
 	collider.shape.radius = radius
 
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	
 	space_state = get_world_3d().direct_space_state
 		

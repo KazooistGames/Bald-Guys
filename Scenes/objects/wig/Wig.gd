@@ -24,7 +24,7 @@ extends RigidBody3D
 
 @onready var synchronizer = $MultiplayerSynchronizer
 
-@export var server_position = Vector3.ZERO
+@export var AUTHORITY_POSITION = Vector3.ZERO
 
 #var rng = RandomNumberGenerator.new()
 #
@@ -56,16 +56,19 @@ func _process(_delta):
 		#rng.seed = hash(seed)
 		#getRandomHairColor()
 		
-func _physics_process(delta):
+func _physics_process(_delta):
 	
 	if not multiplayer.has_multiplayer_peer():
 		return
 		
 	elif is_multiplayer_authority():
-		server_position = position
+		AUTHORITY_POSITION = position
+		
+	elif position.distance_to(AUTHORITY_POSITION) > 1:
+		position = AUTHORITY_POSITION
 		
 	else:
-		position = position.lerp(server_position, .1)
+		position = position.lerp(AUTHORITY_POSITION, .1)
 
 
 func getRandomHairColor():

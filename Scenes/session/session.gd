@@ -140,3 +140,4 @@ func respawn_node(node_path, spawn_position):
 	var node = get_node(node_path)
 	node.velocity = Vector3.ZERO
 	node.position = spawn_position
+

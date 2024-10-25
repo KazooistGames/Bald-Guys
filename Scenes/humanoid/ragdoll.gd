@@ -36,8 +36,7 @@ const MAX_VELOCITY = 100
 const MAX_DISPLACEMENT = 2
 const MAX_ANGULAR_DISPLACEMENT = PI
 
-@export var correction_trigger = false
-
+var correct_physical_bones_trigger
 
 func _ready():
 	
@@ -54,8 +53,8 @@ func _ready():
 			
 			if indexToRemove >= 0:
 				mockBoneIndices.remove_at(indexToRemove)
-
-
+				
+				
 func animate_physical_bones(delta):
 	
 	for boneIndex in mockBoneIndices:
@@ -63,37 +62,32 @@ func animate_physical_bones(delta):
 		
 	for physical_bone in physicalBones:
 		
-		if(correction_trigger):
-			var animated_transform = get_animated_transform(physical_bone)
-			physical_bone.position = animated_transform.origin
-			physical_bone.rotation = animated_transform.basis.get_euler()
-			
-		else:		
-			var bone_modifier = bone_modifiers.get(physical_bone.bone_name, 1.0)
-			var physical_transform = get_physical_transform(physical_bone)
-			var animated_transform = get_animated_transform(physical_bone)	
-			var linear_displacement = animated_transform.origin - physical_transform.origin
-			var angular_displacement = animated_transform.basis * physical_transform.basis.inverse()
-			var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
-			var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
-			#var tooBent = angular_displacement.get_euler().length() >= MAX_ANGULAR_DISPLACEMENT
-			
-			if tooFast or tooFar:
-				physical_bone.linear_velocity = Vector3.ZERO
-				physical_bone.angular_velocity = Vector3.ZERO
-				instantly_match_animated_bone(physical_bone.get_bone_id())
-			#elif tooBent:
-				#instantly_match_animated_bone(physical_bone.get_bone_id())
-			
-			else:
-				var linear_force = get_hookes_law_force(LINEAR_STIFFNESS * bone_modifier, linear_displacement, LINEAR_DAMPING * bone_modifier, physical_bone.linear_velocity)
-				physical_bone.linear_velocity += linear_force * delta
-				var angular_torque = get_hookes_law_force(ANGULAR_STIFFNESS * bone_modifier, angular_displacement.get_euler(), ANGULAR_DAMPING * bone_modifier, physical_bone.angular_velocity)
-				physical_bone.angular_velocity += angular_torque * delta
+	
+		var bone_modifier = bone_modifiers.get(physical_bone.bone_name, 1.0)
+		var physical_transform = get_physical_transform(physical_bone)
+		var animated_transform = get_animated_transform(physical_bone)	
+		var linear_displacement = animated_transform.origin - physical_transform.origin
+		var angular_displacement = animated_transform.basis * physical_transform.basis.inverse()
+		var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
+		var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
 
-	correction_trigger = false
-	
-	
+		if tooFast or tooFar:
+			correct_physical_bones_trigger = true
+		
+		if(correct_physical_bones_trigger):
+			physical_bone.linear_velocity = Vector3.ZERO
+			physical_bone.angular_velocity = Vector3.ZERO
+			physical_bone.position = physical_bone.position.lerp(animated_transform.origin, 1)
+			physical_bone.rotation = physical_bone.rotation.lerp(animated_transform.basis.get_euler(), 0.5)
+			correct_physical_bones_trigger = false
+			
+		else:
+			var linear_force = get_hookes_law_force(LINEAR_STIFFNESS * bone_modifier, linear_displacement, LINEAR_DAMPING * bone_modifier, physical_bone.linear_velocity)
+			physical_bone.linear_velocity += linear_force * delta
+			var angular_torque = get_hookes_law_force(ANGULAR_STIFFNESS * bone_modifier, angular_displacement.get_euler(), ANGULAR_DAMPING * bone_modifier, physical_bone.angular_velocity)
+			physical_bone.angular_velocity += angular_torque * delta
+
+
 func set_gravity(value):
 	
 	for bone in physicalBones:
@@ -134,18 +128,18 @@ func instantly_match_animated_bone(boneIndex):
 		set_bone_pose_position(boneIndex, Animated_Skeleton.get_bone_pose_position(boneIndex))
 		set_bone_pose_rotation(boneIndex, Animated_Skeleton.get_bone_pose_rotation(boneIndex))
 	
-	else:
-		
-		for physical_bone in physicalBones:
-			
-			if(find_bone(physical_bone.bone_name) == boneIndex):
-				var animated_transform = get_animated_transform(physical_bone)
-				physical_bone.position = animated_transform.origin
-				physical_bone.rotation = animated_transform.basis.get_euler()
+	#else:
+		#
+		#for physical_bone in physicalBones:
+			#
+			#if(find_bone(physical_bone.bone_name) == boneIndex):
+				#var animated_transform = get_animated_transform(physical_bone)
+				#physical_bone.position = animated_transform.origin
+				#physical_bone.rotation = animated_transform.basis.get_euler()
 
 			
 func reset_skeleton():
-	
+	correct_physical_bones_trigger = true
 	for index in range(0, get_bone_count()-1):
 		instantly_match_animated_bone(index)
 		

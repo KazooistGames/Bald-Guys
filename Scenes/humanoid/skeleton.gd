@@ -1,13 +1,6 @@
 extends Skeleton3D
 
-@export var RAGDOLLED: bool = false:
-	get:
-		return RAGDOLLED
-		
-	set(value):
-		RAGDOLLED = value
-		if value == false:
-			ragdollSkeleton.reset_skeleton()
+@export var RAGDOLLED: bool = false
 	
 @onready var leftHand = $leftHandIK
 @onready var rightHand = $rightHandIK
@@ -21,21 +14,31 @@ func _physics_process(delta):
 	rotation.y = fmod(rotation.y, 2 * PI)
 	
 	if RAGDOLLED:
-		leftHand.stop()
-		rightHand.stop()
-		ragdollSkeleton.set_gravity(1.0)
-		ragdollSkeleton.correction_trigger = true
-	
+		pass
+		
 	else:	
-		leftHand.start()
-		rightHand.start()
 		ragdollSkeleton.animate_physical_bones(delta)
-		ragdollSkeleton.set_gravity(0.0)
+		#ragdollSkeleton.correct_physical_bones()
 
+
+func ragdoll_start():
+	leftHand.stop()
+	rightHand.stop()
+	ragdollSkeleton.set_gravity(1.0)
+	RAGDOLLED = true
+	
+	
+func ragdoll_stop():
+	leftHand.start()
+	rightHand.start()
+	ragdollSkeleton.set_gravity(0.0)
+	ragdollSkeleton.reset_skeleton()
+	RAGDOLLED = false
+	
 
 func processRagdollOrientation(_delta):
-	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("head")))
-	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("head")))
+	leftHand.process_arm_falling(ragdollSkeleton.get_bone_global_pose_no_override(find_bone("head")))
+	rightHand.process_arm_falling(ragdollSkeleton.get_bone_global_pose_no_override(find_bone("head")))
 
 
 func processFallOrientation(delta, look_vector, walk_vector):
@@ -66,7 +69,7 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	else:
 		target_angle = atan2(walk_vector.x, walk_vector.z)
 
-	rotation.y = lerp_angle(rotation.y, target_angle, timeStep/3)
+	rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
 
 
 func processIdleOrientation(delta, look_vector):
@@ -270,3 +273,6 @@ func swap_which_hand_has_force(old, new):
 	var new_target_node = get_node(str(new.target_node).trim_prefix('../'))
 	new_target_node.remote_path = old_target_node.remote_path
 	old_target_node.remote_path = ''
+	
+func get_ragdoll_bone_position(bone_name):
+	return ragdollSkeleton.get_bone_global_pose_no_override(ragdollSkeleton.find_bone(bone_name))

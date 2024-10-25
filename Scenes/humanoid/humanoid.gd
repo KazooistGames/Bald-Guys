@@ -177,11 +177,10 @@ func _physics_process(delta):
 	
 	if is_multiplayer_authority():
 		AUTHORITY_POSITION = position
+	elif position.distance_to(AUTHORITY_POSITION) > 1.5:
+		position = AUTHORITY_POSITION
 	else:
-		if position.distance_to(AUTHORITY_POSITION) > 1:
-			position = AUTHORITY_POSITION
-		else:
-			position = position.lerp(AUTHORITY_POSITION, 0.1)
+		position = position.lerp(AUTHORITY_POSITION, 0.05)
 
 func is_back_pedaling():
 	
@@ -222,7 +221,6 @@ func handle_collision(delta):
 	if collision:
 		var relativeVelocity = get_real_velocity() - collision.get_collider_velocity()
 		var otherCollider = collision.get_collider() as Node3D
-		var layer = otherCollider.get_collision_layer()
 		var directionalModifier = 1.0 - collision.get_normal().dot(Vector3.UP)/2
 		var normal = collision.get_normal()
 		var impact = -relativeVelocity.dot(normal) * directionalModifier
@@ -235,29 +233,17 @@ func handle_collision(delta):
 					
 		elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
 			
-			var transverse_velocity = Vector2(velocity.x, velocity.z)
-			print(transverse_velocity.length())
+			var projection_scale = abs(LOOK_VECTOR.normalized().dot(normal))			
 			
-			var projection_scale = relativeVelocity.normalized().dot(normal)
+			var check1 = projection_scale <= 2.0/3.0	
+			var check2 = impact > 3
 			
-			var bounced = relativeVelocity.bounce(normal)
-			
-			var wall_jump = JUMP_SPEED / 2
-			
-			var cutoff = projection_scale >= 0.0 or projection_scale < -0.75
-			
-			var x_result = velocity.x if cutoff else bounced.x
-			
-			var y_result = velocity.y if cutoff else (velocity.y + wall_jump)
-			
-			var z_result = velocity.z if cutoff else bounced.z
-			
-			velocity = Vector3(x_result, y_result, z_result)
-			
-			if not cutoff:
-				print(projection_scale)
-				
-			
+			if check1 and check2:
+				var bounced = relativeVelocity.bounce(normal)
+				var new_velocity = Vector3(bounced.x, velocity.y, bounced.z)
+				new_velocity.y += JUMP_SPEED / 2.0
+				wall_bounce.rpc(new_velocity)
+
 		if  check_if_impact_meets_threshold(impact): 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
@@ -305,7 +291,7 @@ func ragdoll():
 	if(MOVE_STATE != MoveState.RAGDOLL && ragdoll_is_ready()):
 		RUNNING = false
 		ragdolled.emit()
-		skeleton.RAGDOLLED = true
+		skeleton.ragdoll_start()
 		ragdoll_recovery_timer_seconds = 0
 		animation.active = false
 		collider.disabled = true
@@ -319,14 +305,18 @@ func unragdoll():
 	
 	if(MOVE_STATE == MoveState.RAGDOLL):
 		ragdoll_cooldown_timer_seconds = 0
-		var skeletonPosition = skeleton.ragdoll_position()
-		position = skeletonPosition
-		skeleton.RAGDOLLED = false
+		position = skeleton.ragdoll_position()
+		skeleton.ragdoll_stop()
 		animation.active = true
 		collider.disabled = false
 		MOVE_STATE = MoveState.FALLING
 		toggle_ragdoll_sync(0)	
 
+
+@rpc("call_local")
+func wall_bounce(new_velocity):
+	velocity = new_velocity
+	
 
 @rpc("call_local")
 func jump():
