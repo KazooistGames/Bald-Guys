@@ -78,7 +78,7 @@ func animate_physical_bones(delta):
 			physical_bone.linear_velocity = Vector3.ZERO
 			physical_bone.angular_velocity = Vector3.ZERO
 			physical_bone.position = physical_bone.position.lerp(animated_transform.origin, 1)
-			physical_bone.rotation = physical_bone.rotation.lerp(animated_transform.basis.get_euler(), 0.5)
+			physical_bone.rotation = physical_bone.rotation.lerp(animated_transform.basis.get_euler(), 1)
 			correct_physical_bones_trigger = false
 			
 		else:

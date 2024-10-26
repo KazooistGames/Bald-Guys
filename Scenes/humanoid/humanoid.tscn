@@ -197,57 +197,72 @@ diffuse_mode = 3
 albedo_color = Color(0.0784314, 0.392157, 0.392157, 1)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wvkh2"]
+resource_local_to_scene = true
 radius = 0.03
 height = 0.45
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_cpdqq"]
+resource_local_to_scene = true
 radius = 0.15
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_46hrl"]
+resource_local_to_scene = true
 radius = 0.175
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_usxk3"]
+resource_local_to_scene = true
 radius = 0.08
 height = 0.25
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_t7xn5"]
+resource_local_to_scene = true
 radius = 0.03
 height = 0.3
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1ny34"]
+resource_local_to_scene = true
 radius = 0.02
 height = 0.25
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_nkquy"]
+resource_local_to_scene = true
 radius = 0.03
 height = 0.3
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_slkk6"]
+resource_local_to_scene = true
 radius = 0.02
 height = 0.25
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_6dcbr"]
+resource_local_to_scene = true
 radius = 0.03
 height = 0.45
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dqjvq"]
+resource_local_to_scene = true
 radius = 0.05
 height = 0.35
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_uqipt"]
+resource_local_to_scene = true
 radius = 0.05
 height = 0.35
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_lx52y"]
+resource_local_to_scene = true
 size = Vector3(0.05, 0.12, 0.025)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_33x7b"]
+resource_local_to_scene = true
 size = Vector3(0.103564, 0.12, 0.025)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ga6xd"]
+resource_local_to_scene = true
 size = Vector3(0.084549, 0.0714073, 0.0290527)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a18lv"]
+resource_local_to_scene = true
 size = Vector3(0.085, 0.0748047, 0.025)
 
 [sub_resource type="Animation" id="Animation_cnu6c"]
@@ -2272,13 +2287,13 @@ tracks/24/path = NodePath("Skeleton3D:lowerBody")
 tracks/24/interp = 1
 tracks/24/loop_wrap = true
 tracks/24/keys = PackedFloat32Array(0, 1, -0.00855509, 1.00382, -0.167623)
-tracks/25/type = "rotation_3d"
-tracks/25/imported = true
+tracks/25/type = "scale_3d"
+tracks/25/imported = false
 tracks/25/enabled = true
-tracks/25/path = NodePath("Skeleton3D:lowerBody")
+tracks/25/path = NodePath("Skeleton3D:hip.l")
 tracks/25/interp = 1
 tracks/25/loop_wrap = true
-tracks/25/keys = PackedFloat32Array(0, 1, 0.172469, -6.33125e-08, -8.50167e-08, 0.985015)
+tracks/25/keys = PackedFloat32Array(0, 1, 1.00001, 1.05413, 1.03071)
 tracks/26/type = "position_3d"
 tracks/26/imported = false
 tracks/26/enabled = true
@@ -2286,13 +2301,13 @@ tracks/26/path = NodePath("Skeleton3D:hip.l")
 tracks/26/interp = 1
 tracks/26/loop_wrap = true
 tracks/26/keys = PackedFloat32Array(0, 1, 0.0242032, 0.0284676, 0.0158964)
-tracks/27/type = "scale_3d"
-tracks/27/imported = false
+tracks/27/type = "rotation_3d"
+tracks/27/imported = true
 tracks/27/enabled = true
-tracks/27/path = NodePath("Skeleton3D:hip.l")
+tracks/27/path = NodePath("Skeleton3D:lowerBody")
 tracks/27/interp = 1
 tracks/27/loop_wrap = true
-tracks/27/keys = PackedFloat32Array(0, 1, 1.00001, 1.05413, 1.03071)
+tracks/27/keys = PackedFloat32Array(0, 1, 0.172469, -6.33125e-08, -8.50167e-08, 0.985015)
 
 [sub_resource type="Animation" id="Animation_u5u2j"]
 resource_name = "run_loop"
@@ -3677,28 +3692,22 @@ properties/2/spawn = true
 properties/2/replication_mode = 1
 properties/3/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:linear_velocity")
 properties/3/spawn = true
-properties/3/replication_mode = 0
+properties/3/replication_mode = 2
 properties/4/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:angular_velocity")
 properties/4/spawn = true
-properties/4/replication_mode = 0
-properties/5/path = NodePath("Skeleton3D/Ragdoll/Physical Bone upperBody:linear_velocity")
+properties/4/replication_mode = 2
+properties/5/path = NodePath(".:rotation")
 properties/5/spawn = true
-properties/5/replication_mode = 0
-properties/6/path = NodePath("Skeleton3D/Ragdoll/Physical Bone upperBody:angular_velocity")
+properties/5/replication_mode = 1
+properties/6/path = NodePath(".:SKIN_COLOR")
 properties/6/spawn = true
-properties/6/replication_mode = 0
-properties/7/path = NodePath(".:rotation")
+properties/6/replication_mode = 2
+properties/7/path = NodePath(".:Main_Trigger")
 properties/7/spawn = true
 properties/7/replication_mode = 1
-properties/8/path = NodePath(".:SKIN_COLOR")
+properties/8/path = NodePath(".:AUTHORITY_POSITION")
 properties/8/spawn = true
-properties/8/replication_mode = 2
-properties/9/path = NodePath(".:Main_Trigger")
-properties/9/spawn = true
-properties/9/replication_mode = 1
-properties/10/path = NodePath(".:AUTHORITY_POSITION")
-properties/10/spawn = true
-properties/10/replication_mode = 1
+properties/8/replication_mode = 1
 
 [node name="Armature" type="CharacterBody3D"]
 collision_layer = 2
@@ -4868,12 +4877,12 @@ transform = Transform3D(0.819151, 0.573576, 0, -0.573576, 0.819151, 5.68434e-14,
 shape = SubResource("CapsuleShape3D_1ny34")
 
 [node name="Physical Bone upperArm_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(1, -2.98023e-07, 4.17233e-07, 2.83122e-07, 1, -8.64267e-07, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
+transform = Transform3D(1, -2.98023e-07, 4.17233e-07, 2.83122e-07, 1, -8.9407e-07, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
 collision_layer = 4
 collision_mask = 5
 joint_type = 5
 joint_offset = Transform3D(0.999999, 0, 0, 0, 0.999999, 0, 0, 0, 0.999998, 0, 0, 0)
-body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916228, 0.453957, 0.317173, -0.832661, 0, 0, 0)
+body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916226, 0.453957, 0.317173, -0.832661, 0, 0, 0)
 mass = 5.0
 bone_name = "upperArm.l"
 joint_constraints/x/linear_limit_enabled = true
@@ -5505,6 +5514,9 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_l8k7m")
+}
 tree_root = ExtResource("3_1nlf8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Add2/add_amount = 1.0

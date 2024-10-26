@@ -144,7 +144,7 @@ func _physics_process(delta):
 				translational_velocity.y += WALK_VECTOR.z * velocityStep/2
 				
 			translational_velocity = translational_velocity.move_toward(Vector2.ZERO, 3 * delta)
-			skeleton.processFallOrientation(delta, LOOK_VECTOR, WALK_VECTOR)
+			skeleton.processFallOrientation(delta, LOOK_VECTOR, velocity)
 			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
 			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
 			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
@@ -297,7 +297,7 @@ func ragdoll():
 		collider.disabled = true
 		MOVE_STATE = MoveState.RAGDOLL
 		#var propertyPath = "Skeleton3D/Ragdoll/Physical Bone "
-		toggle_ragdoll_sync(1)
+		#toggle_ragdoll_sync(1)
 		
 		
 @rpc("call_local", "any_peer")
@@ -310,7 +310,7 @@ func unragdoll():
 		animation.active = true
 		collider.disabled = false
 		MOVE_STATE = MoveState.FALLING
-		toggle_ragdoll_sync(0)	
+		#toggle_ragdoll_sync(0)	
 
 
 @rpc("call_local")

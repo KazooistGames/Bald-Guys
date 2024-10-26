@@ -96,9 +96,14 @@ func create_player_humanoid(peer_id):
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
-	new_peer_humanoid.position = get_random_spawn(Hub)
+	
 	Humanoids.append(new_peer_humanoid)
+	
 	add_child(new_peer_humanoid)
+	
+	var random_spawn_position = get_random_spawn(Hub)
+	respawn_node.rpc(new_peer_humanoid.get_path(), random_spawn_position)
+	
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
 	return new_peer_humanoid
 	#Created_Player_Humanoid.emit(new_peer_humanoid.get_path(), peer_id)
@@ -138,6 +143,5 @@ func rpc_move_to_level():
 func respawn_node(node_path, spawn_position):
 	
 	var node = get_node(node_path)
-	node.velocity = Vector3.ZERO
 	node.position = spawn_position
 

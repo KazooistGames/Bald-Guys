@@ -22,6 +22,7 @@ func _physics_process(delta):
 
 
 func ragdoll_start():
+	
 	leftHand.stop()
 	rightHand.stop()
 	ragdollSkeleton.set_gravity(1.0)
@@ -29,6 +30,7 @@ func ragdoll_start():
 	
 	
 func ragdoll_stop():
+	
 	leftHand.start()
 	rightHand.start()
 	ragdollSkeleton.set_gravity(0.0)
