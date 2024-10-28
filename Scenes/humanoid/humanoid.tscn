@@ -3708,6 +3708,9 @@ properties/7/replication_mode = 1
 properties/8/path = NodePath(".:AUTHORITY_POSITION")
 properties/8/spawn = true
 properties/8/replication_mode = 1
+properties/9/path = NodePath(".:FLOATING")
+properties/9/spawn = true
+properties/9/replication_mode = 1
 
 [node name="Armature" type="CharacterBody3D"]
 collision_layer = 2

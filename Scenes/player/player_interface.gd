@@ -41,7 +41,10 @@ func _unhandled_input(event):
 			character.RUNNING = !character.RUNNING
 		
 		if Input.is_action_just_pressed("jump"):
+			character.FLOATING = true
 			character.jump.rpc()
+		elif Input.is_action_just_released("jump"):
+			character.FLOATING = false
 			
 		if Input.is_action_just_pressed("equip"):
 			character.ragdoll.rpc()

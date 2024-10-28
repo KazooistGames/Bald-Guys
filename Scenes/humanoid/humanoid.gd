@@ -27,8 +27,9 @@ const MoveState = {
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.5, 7.0)
-@export var JUMP_SPEED = 5
+@export var JUMP_SPEED = 4
 @export var RUNNING = false
+@export var FLOATING = false
 
 @export var AUTHORITY_POSITION = Vector3.ZERO
 
@@ -42,9 +43,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var TOPSPEED = 0
 var TOPSPEED_MOD = 1
 
-
 const MOUSE_SENSATIVITY = 0.005
-
 
 var IMPACT_THRESHOLD =  6.5
 var ragdoll_cooldown_period_seconds = 0.5
@@ -136,15 +135,25 @@ func _physics_process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			velocity.y -= gravity * delta
+			
+			if velocity.y <= 2.5:
+				FLOATING = false
+				
+			if FLOATING:
+				velocity.y -= gravity * delta / 3
+				
+			else:
+				velocity.y -= gravity * delta
+				
 			var velocityStep = acceleration() * delta
 			
 			if WALK_VECTOR:
 				translational_velocity.x += WALK_VECTOR.x * velocityStep/2
 				translational_velocity.y += WALK_VECTOR.z * velocityStep/2
 				
-			translational_velocity = translational_velocity.move_toward(Vector2.ZERO, 3 * delta)
+			translational_velocity = translational_velocity.move_toward(Vector2.ZERO, 2 * delta)
 			skeleton.processFallOrientation(delta, LOOK_VECTOR, velocity)
+			
 			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
 			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
 			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
@@ -316,10 +325,12 @@ func unragdoll():
 @rpc("call_local")
 func wall_bounce(new_velocity):
 	velocity = new_velocity
-	
+	FLOATING = false
 
 @rpc("call_local")
 func jump():
 	
 	if is_on_floor():
 		velocity.y += JUMP_SPEED
+		
+
