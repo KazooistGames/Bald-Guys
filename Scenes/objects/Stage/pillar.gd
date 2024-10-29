@@ -7,7 +7,7 @@ extends Node3D
 @onready var raycast = $RayCast3D
 
 
-var bottom = null
+var bottom = Vector3.ZERO
 var top_height = 0.75
 
 
@@ -17,7 +17,7 @@ func _process(delta):
 		pass
 		
 	elif raycast.get_collision_point() != bottom:
-		bottom = raycast.get_collider()
+		bottom = raycast.get_collision_point()
 		var top = global_position + Vector3.UP * top_height
 		
 		var actual_position = bottom.lerp(top, 0.5)
