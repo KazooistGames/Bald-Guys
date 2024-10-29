@@ -49,20 +49,20 @@ surface_material_override/0 = SubResource("StandardMaterial3D_v4g44")
 surface_material_override/0 = SubResource("StandardMaterial3D_wlefi")
 
 [node name="Stage1" parent="." index="6" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2, -12)
-Size = Vector3(21, 0.2, 21)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2, -18)
+Size = Vector3(10, 0.2, 10)
 
 [node name="Stage2" parent="." index="7" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2, 12)
-Size = Vector3(21, 0.2, 21)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 2, 17)
+Size = Vector3(12, 0.2, 12)
 
 [node name="Stage3" parent="." index="8" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, -12)
-Size = Vector3(21, 0.2, 21)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2, -14)
+Size = Vector3(18, 0.2, 18)
 
 [node name="Stage4" parent="." index="9" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, 12)
-Size = Vector3(21, 0.2, 21)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 2, 15.5)
+Size = Vector3(15, 0.2, 15)
 
 [node name="Stage5" parent="." index="10" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)

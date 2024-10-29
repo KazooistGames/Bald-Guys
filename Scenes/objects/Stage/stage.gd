@@ -1,3 +1,4 @@
+@tool
 extends AnimatableBody3D
 
 
@@ -80,7 +81,9 @@ func transform_pillar(child):
 	child.transform.origin.x = x * x_sign
 	child.transform.origin.z = z * z_sign
 			
+			
 func transform_rail(child):
+	
 	var signage = -1.0 if child.name.contains('2') else 1.0
 	var thickness = Size.y*2
 	var newSize = Size
