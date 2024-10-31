@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://dkvhw01tsv755"]
+
+[ext_resource type="PackedScene" uid="uid://km6if1awx5dt" path="res://Scenes/objects/trip/trip.tscn" id="1_1ygqn"]
+
+[node name="TripField" type="Node3D"]
+
+[node name="Trip" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0.25, 0)
+
+[node name="Trip1" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0.25, 0.75)
+
+[node name="Trip2" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0.25, -0.75)
+
+[node name="Trip3" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0.25, 0.75)
+
+[node name="Trip4" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.75, 0.25, -0.75)
+
+[node name="Trip5" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 1.5, 0.25, 0)
+
+[node name="Trip6" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -1.5, 0.25, 0)
+
+[node name="Trip7" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0.25, 1.5)
+
+[node name="Trip8" parent="." instance=ExtResource("1_1ygqn")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0.25, -1.5)

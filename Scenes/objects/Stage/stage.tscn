@@ -3,7 +3,7 @@
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="1_5c6k7"]
 [ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/level/Wall/wall.material" id="1_qib3r"]
 [ext_resource type="Script" path="res://Scenes/objects/Stage/stage.gd" id="2_d2r1i"]
-[ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/Stage/pillar.tscn" id="4_ppuuk"]
+[ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="4_mgmyd"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
 resource_local_to_scene = true
@@ -99,14 +99,14 @@ shape = SubResource("BoxShape3D_l7m8g")
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_5dtqu")
 
-[node name="pillar1" parent="." instance=ExtResource("4_ppuuk")]
+[node name="pillar1" parent="." instance=ExtResource("4_mgmyd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 10)
 
-[node name="pillar2" parent="." instance=ExtResource("4_ppuuk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -10)
-
-[node name="pillar3" parent="." instance=ExtResource("4_ppuuk")]
+[node name="pillar2" parent="." instance=ExtResource("4_mgmyd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 10)
 
-[node name="pillar4" parent="." instance=ExtResource("4_ppuuk")]
+[node name="pillar3" parent="." instance=ExtResource("4_mgmyd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -10)
+
+[node name="pillar4" parent="." instance=ExtResource("4_mgmyd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -10)

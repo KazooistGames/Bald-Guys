@@ -8,7 +8,7 @@ extends Node3D
 
 
 var bottom = Vector3.ZERO
-var top_height = 0.75
+@export var top_height = 0.75
 
 
 func _process(delta):
@@ -18,14 +18,14 @@ func _process(delta):
 		
 	elif raycast.get_collision_point() != bottom:
 		bottom = raycast.get_collision_point()
-		var top = global_position + Vector3.UP * top_height
-		
-		var actual_position = bottom.lerp(top, 0.5)
-		
+		var top = global_position + Vector3.UP * top_height	
+		var actual_position = bottom.lerp(top, 0.5)		
+		var actual_height = top.y - bottom.y + top_height	
+			
 		mesh.global_position = actual_position
-		collider.global_position = actual_position
-		
-		var actual_height = top.y - bottom.y + top_height
-		
 		mesh.mesh.height = actual_height 
+		
+		collider.global_position = actual_position
 		collider.shape.height = actual_height
+		
+

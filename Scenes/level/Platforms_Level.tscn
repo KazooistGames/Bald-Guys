@@ -1,8 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://hdo1moc2epoy"]
+[gd_scene load_steps=12 format=3 uid="uid://hdo1moc2epoy"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_8mrte"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_co0ev"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="3_5slih"]
+[ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="4_sucxh"]
+[ext_resource type="PackedScene" uid="uid://dkvhw01tsv755" path="res://Scenes/objects/trip/trip_field.tscn" id="5_fjkgg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2rewv"]
 resource_local_to_scene = true
@@ -30,45 +32,25 @@ diffuse_mode = 3
 
 [node name="Platforms_Level" instance=ExtResource("1_8mrte")]
 
-[node name="floor" parent="." index="0"]
+[node name="floor" parent="room" index="0"]
 surface_material_override/0 = SubResource("StandardMaterial3D_2rewv")
 
-[node name="wall" parent="." index="1"]
+[node name="wall" parent="room" index="1"]
 surface_material_override/0 = SubResource("StandardMaterial3D_ud1ck")
 
-[node name="ceiling" parent="." index="2"]
+[node name="ceiling" parent="room" index="2"]
 surface_material_override/0 = SubResource("StandardMaterial3D_exgif")
 
-[node name="wall2" parent="." index="3"]
+[node name="wall2" parent="room" index="3"]
 surface_material_override/0 = SubResource("StandardMaterial3D_pfs5w")
 
-[node name="wall3" parent="." index="4"]
+[node name="wall3" parent="room" index="4"]
 surface_material_override/0 = SubResource("StandardMaterial3D_v4g44")
 
-[node name="wall4" parent="." index="5"]
+[node name="wall4" parent="room" index="5"]
 surface_material_override/0 = SubResource("StandardMaterial3D_wlefi")
 
-[node name="Stage1" parent="." index="6" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2, -18)
-Size = Vector3(10, 0.2, 10)
-
-[node name="Stage2" parent="." index="7" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 2, 17)
-Size = Vector3(12, 0.2, 12)
-
-[node name="Stage3" parent="." index="8" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2, -14)
-Size = Vector3(18, 0.2, 18)
-
-[node name="Stage4" parent="." index="9" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 2, 15.5)
-Size = Vector3(15, 0.2, 15)
-
-[node name="Stage5" parent="." index="10" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
-Size = Vector3(10, 0.2, 10)
-
-[node name="spawns" type="Node3D" parent="." index="11"]
+[node name="spawns" type="Node3D" parent="." index="1"]
 
 [node name="spawn1" parent="spawns" index="0" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 20)
@@ -101,3 +83,62 @@ skeleton = NodePath("../..")
 [node name="spawn8" parent="spawns" index="7" instance=ExtResource("3_5slih")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 10, 0)
 skeleton = NodePath("../..")
+
+[node name="stages" type="Node3D" parent="." index="2"]
+
+[node name="Stage1" parent="stages" index="0" instance=ExtResource("2_co0ev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.25, -18)
+Size = Vector3(10, 0.2, 10)
+
+[node name="Stage2" parent="stages" index="1" instance=ExtResource("2_co0ev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -2, 17)
+Size = Vector3(12, 0.2, 12)
+
+[node name="Stage3" parent="stages" index="2" instance=ExtResource("2_co0ev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.25, -14)
+Size = Vector3(18, 0.2, 18)
+
+[node name="Stage4" parent="stages" index="3" instance=ExtResource("2_co0ev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 3, 15.5)
+Size = Vector3(15, 0.2, 15)
+
+[node name="Stage5" parent="stages" index="4" instance=ExtResource("2_co0ev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+Size = Vector3(10, 0.2, 10)
+
+[node name="Stage6" parent="stages" index="5" instance=ExtResource("2_co0ev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 4.5, -19.25)
+Size = Vector3(7.5, 0.2, 7.5)
+
+[node name="Stage7" parent="stages" index="6" instance=ExtResource("2_co0ev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 6.75, -13)
+Size = Vector3(5, 0.2, 5)
+
+[node name="pillars" type="Node3D" parent="." index="3"]
+
+[node name="pillar1" parent="pillars" index="0" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 4.5, 7.5)
+top_height = 0.0
+
+[node name="pillar 2" parent="pillars" index="1" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 3, 10)
+top_height = 0.0
+
+[node name="pillar3" parent="pillars" index="2" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 1.5, 12.5)
+top_height = 0.0
+
+[node name="podium" parent="pillars" index="3" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+top_height = 0.0
+
+[node name="trips" type="Node3D" parent="." index="4"]
+
+[node name="TripField" parent="trips" index="0" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 0, 6.25)
+
+[node name="TripField1" parent="trips" index="1" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.75, 0, 8.75)
+
+[node name="TripField2" parent="trips" index="2" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.25, 0, 11.25)

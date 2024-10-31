@@ -71,6 +71,11 @@ func _ready():
 
 func _process(delta):
 	
+	if MOVE_STATE == MoveState.FALLING:
+		
+		if is_on_floor():
+			land.rpc()
+		
 	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
 		ragdoll_cooldown_timer_seconds += delta
 		MOVE_STATE = MoveState.WALKING if is_on_floor() else MoveState.FALLING
@@ -100,12 +105,12 @@ func _process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			IMPACT_THRESHOLD = 6.5
+			IMPACT_THRESHOLD = 7.0
 			animation.updateFalling(velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
 		MoveState.WALKING:
-			IMPACT_THRESHOLD = 4.5
+			IMPACT_THRESHOLD = 5.0
 			animation.updateWalking(TOPSPEED, get_real_velocity(), is_back_pedaling())
 			
 			if(WALK_VECTOR):
@@ -136,7 +141,7 @@ func _physics_process(delta):
 		
 		MoveState.FALLING:
 			
-			if velocity.y <= 2.5:
+			if velocity.y <= 2.75:
 				FLOATING = false
 				
 			if FLOATING:
@@ -244,13 +249,13 @@ func handle_collision(delta):
 			
 			var projection_scale = abs(LOOK_VECTOR.normalized().dot(normal))			
 			
-			var check1 = projection_scale <= 2.0/3.0	
-			var check2 = impact > 3
+			var check1 = projection_scale <= 3.0/4.0	
+			var check2 = impact > 3.0
 			
 			if check1 and check2:
 				var bounced = relativeVelocity.bounce(normal)
 				var new_velocity = Vector3(bounced.x, velocity.y, bounced.z)
-				new_velocity.y += JUMP_SPEED / 2.0
+				new_velocity.y += JUMP_SPEED * 2.0 / 3.0
 				wall_bounce.rpc(new_velocity)
 
 		if  check_if_impact_meets_threshold(impact): 
@@ -333,4 +338,9 @@ func jump():
 	if is_on_floor():
 		velocity.y += JUMP_SPEED
 		
-
+@rpc("call_local")
+func land():
+	
+	if is_on_floor():
+		velocity = velocity.move_toward(Vector3.ZERO, 2)
+		

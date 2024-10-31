@@ -5,13 +5,13 @@ var timer = 0.0
 #	"ZSF" = zero / span / frequency
 #	used with fluctuating variables
 
-const fog_light_energy_zsf = Vector3(0.5, 0.1, 0.5)
+const fog_light_energy_zsf = Vector3(0.5, 0.1, 3)
 
-const fog_density_zsf = Vector3(0.0175, 0.015, 3)
+const fog_density_zsf = Vector3(0.0075, 0.0075, 13)
 
-const fog_height_zsf = Vector3(2.8, 1, 10)
-const fog_height_wiggle_zsf = Vector3(0.0, 0.2, 1)
-const fog_height_density_zsf = Vector3(0.40, 0.2, 30)
+const fog_height_zsf = Vector3(1.0, 0.5, 31)
+const fog_height_wiggle_zsf = Vector3(0.0, 0.15, 1)
+const fog_height_density_zsf = Vector3(1.0, 0.5, 23)
 
 const ambient_red_zsf = Vector3(0.35, 0.20, 3)
 const ambient_green_zsf = Vector3(0.35, 0.20, 5)
