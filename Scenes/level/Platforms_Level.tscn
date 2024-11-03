@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_co0ev"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="3_5slih"]
 [ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="4_sucxh"]
-[ext_resource type="PackedScene" uid="uid://dkvhw01tsv755" path="res://Scenes/objects/trip/trip_field.tscn" id="5_fjkgg"]
+[ext_resource type="PackedScene" uid="uid://dkvhw01tsv755" path="res://Scenes/objects/trip/brick_field.tscn" id="5_fjkgg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2rewv"]
 resource_local_to_scene = true
@@ -135,10 +135,10 @@ top_height = 0.0
 [node name="trips" type="Node3D" parent="." index="4"]
 
 [node name="TripField" parent="trips" index="0" instance=ExtResource("5_fjkgg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 0, 6.25)
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 6.25, 0, 6.25)
 
 [node name="TripField1" parent="trips" index="1" instance=ExtResource("5_fjkgg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.75, 0, 8.75)
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 8.75, 0, 8.75)
 
 [node name="TripField2" parent="trips" index="2" instance=ExtResource("5_fjkgg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.25, 0, 11.25)
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 11.25, 0, 11.25)

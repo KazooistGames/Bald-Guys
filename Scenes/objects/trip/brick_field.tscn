@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://dkvhw01tsv755"]
 
-[ext_resource type="PackedScene" uid="uid://km6if1awx5dt" path="res://Scenes/objects/trip/trip.tscn" id="1_1ygqn"]
+[ext_resource type="PackedScene" uid="uid://km6if1awx5dt" path="res://Scenes/objects/trip/brick.tscn" id="1_1ygqn"]
 
-[node name="TripField" type="Node3D"]
+[node name="Bricks" type="Node3D"]
 
 [node name="Trip" parent="." instance=ExtResource("1_1ygqn")]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0.25, 0)

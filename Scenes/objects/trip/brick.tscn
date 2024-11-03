@@ -3,13 +3,14 @@
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="1_e6v8x"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ythp8"]
-size = Vector3(0.5, 0.5, 0.5)
+size = Vector3(0.25, 0.2, 0.5)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5837y"]
-size = Vector3(0.5, 0.5, 0.5)
+size = Vector3(0.25, 0.2, 0.5)
 
-[node name="Trip" type="StaticBody3D"]
-collision_mask = 0
+[node name="Brick" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 15
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_ythp8")

@@ -61,8 +61,6 @@ func _enter_tree():
 
 func _ready():
 	
-	#set_multiplayer_authority(str(name).to_int())
-	
 	if not is_multiplayer_authority(): 
 		return
 		
