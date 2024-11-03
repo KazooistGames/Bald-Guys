@@ -124,7 +124,7 @@ func _process(delta):
 
 func _physics_process(delta):
 	
-	var test_move_collision : KinematicCollision3D = KinematicCollision3D.new()
+	#var test_move_collision : KinematicCollision3D = KinematicCollision3D.new()
 
 	#if not is_multiplayer_authority() : 
 		#move_and_slide()
