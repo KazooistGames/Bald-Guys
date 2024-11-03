@@ -10,9 +10,9 @@
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="6_rg0yq"]
 [ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/humanoid/force/force.tscn" id="9_vmktp"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_26vqe"]
-radius = 0.15
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_qwpag"]
 height = 1.5
+radius = 0.15
 
 [sub_resource type="Skin" id="Skin_vic1c"]
 resource_name = "Skin"
@@ -3715,12 +3715,11 @@ properties/9/replication_mode = 1
 collision_layer = 2
 collision_mask = 3
 wall_min_slide_angle = 0.785398
-safe_margin = 0.005
 script = ExtResource("1_omd7n")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
-shape = SubResource("CapsuleShape3D_26vqe")
+shape = SubResource("CylinderShape3D_qwpag")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="."]
 bones/0/name = "lowerBody"

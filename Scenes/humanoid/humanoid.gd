@@ -91,8 +91,10 @@ func _process(delta):
 	
 	if Main_Trigger: #stop running if necessary
 		RUNNING = false
+		
 	elif WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
 		RUNNING = false
+		
 	elif velocity == Vector3.ZERO:
 		RUNNING = false
 		
@@ -124,13 +126,15 @@ func _process(delta):
 
 func _physics_process(delta):
 	
-	if false if not multiplayer.has_multiplayer_peer() else not is_multiplayer_authority(): 
+	var test_move_collision : KinematicCollision3D = KinematicCollision3D.new()
+
+	if not is_multiplayer_authority() : 
 		move_and_slide()
 		
-	elif test_move(transform, velocity * delta) && ragdoll_is_ready():
-		handle_collision(delta)
+	elif not test_move(transform, velocity * delta, test_move_collision):
+		move_and_slide()
 		
-	else:
+	elif not handle_collision(delta, test_move_collision):
 		move_and_slide()
 		
 	WALK_VECTOR = WALK_VECTOR.normalized()
@@ -228,42 +232,41 @@ func head_position():
 	return adjustedPosition
 	
 	
-func handle_collision(delta):
-	
-	var collision = move_and_collide(velocity * delta)
-	
-	if collision:
-		var relativeVelocity = get_real_velocity() - collision.get_collider_velocity()
-		var otherCollider = collision.get_collider() as Node3D
-		var directionalModifier = 1.0 - collision.get_normal().dot(Vector3.UP)/2
-		var normal = collision.get_normal()
-		var impact = -relativeVelocity.dot(normal) * directionalModifier
+func handle_collision(delta, collision):
+
+	var relativeVelocity = get_real_velocity() - collision.get_collider_velocity()
+	var otherCollider = collision.get_collider() as Node3D
+	var directionalModifier = 1.0 - collision.get_normal().dot(Vector3.UP)/2
+	var normal = collision.get_normal()
+	var impact = -relativeVelocity.dot(normal) * directionalModifier
+			
+	if otherCollider.is_in_group("humanoids"):
+		
+			if otherCollider.check_if_impact_meets_threshold(impact):
+				otherCollider.ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
+				otherCollider.ragdoll.rpc()
 				
-		if otherCollider.is_in_group("humanoids"):
-			
-				if otherCollider.check_if_impact_meets_threshold(impact):
-					otherCollider.ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
-					otherCollider.ragdoll.rpc()
-					
-		elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
-			
-			var projection_scale = abs(LOOK_VECTOR.normalized().dot(normal))			
-			
-			var check1 = projection_scale <= 3.0/4.0	
-			var check2 = impact > 3.0
-			
-			if check1 and check2:
-				var bounced = relativeVelocity.bounce(normal)
-				var new_velocity = Vector3(bounced.x, velocity.y, bounced.z)
-				new_velocity.y += JUMP_SPEED * 2.0 / 3.0
-				wall_bounce.rpc(new_velocity)
+	elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
+		
+		var projection_scale = abs(LOOK_VECTOR.normalized().dot(normal))			
+		
+		var check1 = projection_scale <= 3.0/4.0	
+		var check2 = impact > 3.0
+		
+		if check1 and check2 and not is_on_floor():
+			var bounced = relativeVelocity.bounce(normal)
+			var new_velocity = Vector3(bounced.x, velocity.y, bounced.z)
+			new_velocity.y += JUMP_SPEED * 2.0 / 3.0
+			wall_bounce.rpc(new_velocity)
+			return true
 
-		if  check_if_impact_meets_threshold(impact): 
-			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
-			ragdoll.rpc()
+	if  check_if_impact_meets_threshold(impact): 
+		ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
+		ragdoll.rpc()
+		return true
 
-		else:
-			move_and_slide()
+	else:
+		return false
 
 
 func check_if_impact_meets_threshold(impact):
@@ -332,11 +335,13 @@ func wall_bounce(new_velocity):
 	velocity = new_velocity
 	FLOATING = false
 
+
 @rpc("call_local")
 func jump():
 	
 	if is_on_floor():
 		velocity.y += JUMP_SPEED
+		
 		
 @rpc("call_local")
 func land():
