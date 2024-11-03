@@ -61,6 +61,8 @@ func _enter_tree():
 
 func _ready():
 	
+	contact_monitor = true
+	max_contacts_reported = 5
 	if not is_multiplayer_authority(): 
 		return
 		
@@ -276,6 +278,13 @@ func check_if_impact_meets_threshold(impact):
 		return false
 		
 func is_on_floor():
+	
+	contact_monitor = true
+	var colliding_bodies = get_colliding_bodies()
+
+	var ground_vector = Vector3(0, 1, 0)
+	for body in colliding_bodies:
+		pass
 	return true
 
 func ragdoll_is_ready():
