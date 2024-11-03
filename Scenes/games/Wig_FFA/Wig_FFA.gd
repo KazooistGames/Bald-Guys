@@ -123,7 +123,7 @@ func drop_wig():
 	toggle_wig_mount.rpc(false)
 	
 	Wig.global_position = current_position
-	Wig.linear_velocity = Bearer.velocity * 1.5 + Vector3(0, 3, 0)
+	Wig.linear_velocity = Bearer.linear_velocity * 1.5 + Vector3(0, 3, 0)
 
 	set_wig_bearer.rpc(null)
 	print("Dropped")
