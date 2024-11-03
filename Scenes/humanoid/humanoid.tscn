@@ -3714,8 +3714,7 @@ properties/9/replication_mode = 1
 [node name="Armature" type="CharacterBody3D"]
 collision_layer = 2
 collision_mask = 3
-wall_min_slide_angle = 0.785398
-safe_margin = 0.005
+wall_min_slide_angle = 0.523599
 script = ExtResource("1_omd7n")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

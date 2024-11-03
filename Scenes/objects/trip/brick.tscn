@@ -11,6 +11,7 @@ size = Vector3(0.25, 0.2, 0.5)
 [node name="Brick" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 15
+mass = 5.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_ythp8")
