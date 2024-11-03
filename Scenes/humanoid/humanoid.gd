@@ -1,4 +1,4 @@
-extends CharacterBody3D
+extends RigidBody3D
 
 
 @export var SKIN_COLOR : Color:
@@ -93,7 +93,7 @@ func _process(delta):
 	elif WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
 		RUNNING = false
 		
-	elif velocity == Vector3.ZERO:
+	elif linear_velocity == Vector3.ZERO:
 		RUNNING = false
 		
 	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
@@ -106,12 +106,12 @@ func _process(delta):
 		
 		MoveState.FALLING:
 			IMPACT_THRESHOLD = 7.0
-			animation.updateFalling(velocity)
+			animation.updateFalling(linear_velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
 		MoveState.WALKING:
 			IMPACT_THRESHOLD = 5.0
-			animation.updateWalking(TOPSPEED, get_real_velocity(), is_back_pedaling())
+			animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 			
 			if(WALK_VECTOR):
 				skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)
@@ -126,31 +126,31 @@ func _physics_process(delta):
 	
 	var test_move_collision : KinematicCollision3D = KinematicCollision3D.new()
 
-	if not is_multiplayer_authority() : 
-		move_and_slide()
-		
-	elif not test_move(transform, velocity * delta, test_move_collision):
-		move_and_slide()
-		
-	elif not handle_collision(delta, test_move_collision):
-		move_and_slide()
+	#if not is_multiplayer_authority() : 
+		#move_and_slide()
+		#
+	#elif not test_move(transform, velocity * delta, test_move_collision):
+		#move_and_slide()
+		#
+	#elif not handle_collision(delta, test_move_collision):
+		#move_and_slide()
 		
 	WALK_VECTOR = WALK_VECTOR.normalized()
-	var translational_velocity = Vector2(velocity.x, velocity.z)
+	var translational_velocity = Vector2(linear_velocity.x, linear_velocity.z)
 	var WALK_VECTOR_2 = Vector2(WALK_VECTOR.x, WALK_VECTOR.z)
 	
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
 			
-			if velocity.y <= 2.75:
+			if linear_velocity.y <= 2.75:
 				FLOATING = false
 				
 			if FLOATING:
-				velocity.y -= gravity * delta / 3
+				gravity_scale = 1.0/3.0
 				
 			else:
-				velocity.y -= gravity * delta
+				gravity_scale = 1
 				
 			var velocityStep = acceleration() * delta
 			
@@ -159,7 +159,7 @@ func _physics_process(delta):
 				translational_velocity.y += WALK_VECTOR.z * velocityStep/2
 				
 			translational_velocity = translational_velocity.move_toward(Vector2.ZERO, 2 * delta)
-			skeleton.processFallOrientation(delta, LOOK_VECTOR, velocity)
+			skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)
 			
 			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
 			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
@@ -171,7 +171,7 @@ func _physics_process(delta):
 			
 			if WALK_VECTOR:
 				translational_velocity = translational_velocity.move_toward(WALK_VECTOR_2 * speed_target, velocityStep)
-				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(velocity, WALK_VECTOR, 0.5 ) )
+				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 				
 			else:
 				translational_velocity = translational_velocity.move_toward(Vector2.ZERO, velocityStep)
@@ -185,8 +185,8 @@ func _physics_process(delta):
 			translational_velocity = Vector2.ZERO
 			skeleton.processRagdollOrientation(delta)
 		
-	velocity.x = translational_velocity.x
-	velocity.z = translational_velocity.y
+	linear_velocity.x = translational_velocity.x
+	linear_velocity.z = translational_velocity.y
 	
 	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
 	rotation.y = fmod(rotation.y, 2*PI)
@@ -208,7 +208,7 @@ func is_back_pedaling():
 func acceleration():
 	
 	var absolute = 20
-	var translationalSpeed = Vector2(velocity.x, velocity.z).length()
+	var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
 	var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
 	var return_val = absolute * relative
 	return return_val
@@ -232,7 +232,7 @@ func head_position():
 	
 func handle_collision(delta, collision):
 
-	var relativeVelocity = get_real_velocity() - collision.get_collider_velocity()
+	var relativeVelocity = linear_velocity - collision.get_collider_velocity()
 	var otherCollider = collision.get_collider() as Node3D
 	var directionalModifier = 1.0 - collision.get_normal().dot(Vector3.UP)/2
 	var normal = collision.get_normal()
@@ -253,7 +253,7 @@ func handle_collision(delta, collision):
 		
 		if check1 and check2 and not is_on_floor():
 			var bounced = relativeVelocity.bounce(normal)
-			var new_velocity = Vector3(bounced.x, velocity.y, bounced.z)
+			var new_velocity = Vector3(bounced.x, linear_velocity.y, bounced.z)
 			new_velocity.y += JUMP_SPEED * 2.0 / 3.0
 			wall_bounce.rpc(new_velocity)
 			return true
@@ -275,6 +275,8 @@ func check_if_impact_meets_threshold(impact):
 	else:
 		return false
 		
+func is_on_floor():
+	return true
 
 func ragdoll_is_ready():
 	
@@ -330,7 +332,7 @@ func unragdoll():
 
 @rpc("call_local")
 func wall_bounce(new_velocity):
-	velocity = new_velocity
+	linear_velocity = new_velocity
 	FLOATING = false
 
 
@@ -338,12 +340,12 @@ func wall_bounce(new_velocity):
 func jump():
 	
 	if is_on_floor():
-		velocity.y += JUMP_SPEED
+		linear_velocity.y += JUMP_SPEED
 		
 		
 @rpc("call_local")
 func land():
 	
 	if is_on_floor():
-		velocity = velocity.move_toward(Vector3.ZERO, 2)
+		linear_velocity = linear_velocity.move_toward(Vector3.ZERO, 2)
 		
