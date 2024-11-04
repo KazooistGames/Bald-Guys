@@ -73,7 +73,7 @@ func spawn_players(parent):
 	
 	for humanoid in Humanoids:
 		humanoid.unragdoll.rpc()
-		respawn_node.rpc(humanoid.get_path(), get_random_spawn(parent))
+		humanoid.set_globa
 		
 
 func get_random_spawn(parent):
