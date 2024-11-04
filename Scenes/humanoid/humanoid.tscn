@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=41 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="Script" path="res://Scenes/humanoid/skeleton.gd" id="2_ldi4p"]
@@ -10,7 +10,12 @@
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="6_rg0yq"]
 [ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/humanoid/force/force.tscn" id="9_vmktp"]
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vc0al"]
+resource_local_to_scene = true
+friction = 0.0
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_26vqe"]
+resource_local_to_scene = true
 radius = 0.15
 height = 1.5
 
@@ -3695,19 +3700,19 @@ properties/3/replication_mode = 2
 properties/4/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:angular_velocity")
 properties/4/spawn = true
 properties/4/replication_mode = 2
-properties/5/path = NodePath(".:rotation")
+properties/5/path = NodePath(".:SKIN_COLOR")
 properties/5/spawn = true
-properties/5/replication_mode = 1
-properties/6/path = NodePath(".:SKIN_COLOR")
+properties/5/replication_mode = 2
+properties/6/path = NodePath(".:Main_Trigger")
 properties/6/spawn = true
 properties/6/replication_mode = 2
-properties/7/path = NodePath(".:Main_Trigger")
+properties/7/path = NodePath(".:AUTHORITY_POSITION")
 properties/7/spawn = true
 properties/7/replication_mode = 1
-properties/8/path = NodePath(".:AUTHORITY_POSITION")
+properties/8/path = NodePath(".:FLOATING")
 properties/8/spawn = true
-properties/8/replication_mode = 1
-properties/9/path = NodePath(".:FLOATING")
+properties/8/replication_mode = 2
+properties/9/path = NodePath(".:linear_velocity")
 properties/9/spawn = true
 properties/9/replication_mode = 1
 
@@ -3715,6 +3720,7 @@ properties/9/replication_mode = 1
 collision_layer = 2
 collision_mask = 3
 mass = 100.0
+physics_material_override = SubResource("PhysicsMaterial_vc0al")
 lock_rotation = true
 freeze_mode = 1
 script = ExtResource("1_omd7n")
@@ -4880,12 +4886,12 @@ transform = Transform3D(0.819151, 0.573576, 0, -0.573576, 0.819151, 5.68434e-14,
 shape = SubResource("CapsuleShape3D_1ny34")
 
 [node name="Physical Bone upperArm_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(1, -2.98023e-07, 4.76837e-07, 2.83122e-07, 1, -9.83477e-07, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
+transform = Transform3D(1, -2.98023e-07, 4.76837e-07, 2.83122e-07, 1, -1.01328e-06, -2.98023e-07, -2.38419e-07, 1, 0.20862, 1.54967, -0.0232319)
 collision_layer = 4
 collision_mask = 5
 joint_type = 5
 joint_offset = Transform3D(0.999999, 0, 0, 0, 0.999999, 0, 0, 0, 0.999998, 0, 0, 0)
-body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916215, 0.453957, 0.317173, -0.832661, 0, 0, 0)
+body_offset = Transform3D(0.691947, 0.463268, 0.553707, 0.561366, -0.827517, -0.00916213, 0.453957, 0.317173, -0.832661, 0, 0, 0)
 mass = 5.0
 bone_name = "upperArm.l"
 joint_constraints/x/linear_limit_enabled = true

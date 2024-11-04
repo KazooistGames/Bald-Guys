@@ -109,12 +109,12 @@ func _process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			IMPACT_THRESHOLD = 7.0
+			IMPACT_THRESHOLD = 600.0
 			animation.updateFalling(linear_velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
 		MoveState.WALKING:
-			IMPACT_THRESHOLD = 5.0
+			IMPACT_THRESHOLD = 400.0
 			animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 			
 			if(WALK_VECTOR):
@@ -128,6 +128,15 @@ func _process(delta):
 
 func _integrate_forces(state):
 	
+	if is_multiplayer_authority():
+		AUTHORITY_POSITION = position
+		
+	elif position.distance_to(AUTHORITY_POSITION) > 2.0:
+		state.transform.origin = AUTHORITY_POSITION
+		
+	else:
+		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
+	
 	var contact_count = state.get_contact_count()
 	var floor_normal = Vector3(0, 1, 0)
 	is_on_floor = false
@@ -139,35 +148,28 @@ func _integrate_forces(state):
 		
 		if normal.angle_to(floor_normal) <= PI/4.0:
 			is_on_floor = true
-			
-		var relativeVelocity = state.get_contact_local_velocity_at_position(index) - linear_velocity
-		#var otherCollider = collision.get_collider() as Node3D
-		var directionalModifier = 1.0 - normal.dot(Vector3.UP)/2
-		var impact = -relativeVelocity.dot(normal) * directionalModifier
-				
-		if otherCollider.is_in_group("humanoids"):
-			
-				if otherCollider.check_if_impact_meets_threshold(impact):
-					otherCollider.ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
-					otherCollider.ragdoll.rpc()
-					
-		elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
-			
-			var projection_scale = abs(LOOK_VECTOR.normalized().dot(normal))			
-			
-			var check1 = projection_scale <= 3.0/4.0	
-			var check2 = impact > 3.0
-			
-			if check1 and check2 and not is_on_floor:
-				var bounced = relativeVelocity.bounce(normal)
-				var new_velocity = Vector3(bounced.x, linear_velocity.y, bounced.z)
-				new_velocity.y += JUMP_SPEED * 2.0 / 3.0
-				wall_bounce.rpc(new_velocity)
 
+		var directionalModifier = 1.0 - normal.dot(Vector3.UP)/2
+		var impact = state.get_contact_impulse(index).length() * directionalModifier
+		
 		if impact > IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
+			return
 			
+		elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
+	
+			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 3.0/4.0	
+			var check2 = impact > IMPACT_THRESHOLD/2
+			
+			if check1 and check2 and not is_on_floor:
+				print(impact)
+				state.apply_central_impulse(state.get_contact_impulse(index))
+				#var bounced = relativeVelocity.bounce(normal)
+				#var new_velocity = Vector3(bounced.x, linear_velocity.y, bounced.z)
+				#new_velocity.y += JUMP_SPEED * 1.0 / 2.0
+				#wall_bounce.rpc(new_velocity)
+				return
 
 
 func _physics_process(delta):
@@ -184,7 +186,7 @@ func _physics_process(delta):
 				FLOATING = false
 				
 			if FLOATING:
-				gravity_scale = 1.0/3.0
+				gravity_scale = 1.0/4.0
 				
 			else:
 				gravity_scale = 1
@@ -228,14 +230,7 @@ func _physics_process(delta):
 	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
 	rotation.y = fmod(rotation.y, 2*PI)
 	
-	if is_multiplayer_authority():
-		AUTHORITY_POSITION = position
-		
-	elif position.distance_to(AUTHORITY_POSITION) > 1.5:
-		position = AUTHORITY_POSITION
-		
-	else:
-		position = position.lerp(AUTHORITY_POSITION, 0.05)
+
 	
 	
 func is_back_pedaling():
@@ -294,7 +289,7 @@ func toggle_ragdoll_sync(sync_mode):
 	synchronizer.replication_config.property_set_replication_mode(propertyPath+"upperBody:angular_velocity", sync_mode)
 
 
-@rpc("call_local", "any_peer")
+@rpc("call_local")
 func ragdoll():
 	
 	if(MOVE_STATE != MoveState.RAGDOLL && ragdoll_is_ready()):
@@ -309,7 +304,7 @@ func ragdoll():
 		#toggle_ragdoll_sync(1)
 		
 		
-@rpc("call_local", "any_peer")
+@rpc("call_local")
 func unragdoll():
 	
 	if(MOVE_STATE == MoveState.RAGDOLL):
