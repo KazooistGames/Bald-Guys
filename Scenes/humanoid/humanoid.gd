@@ -56,6 +56,7 @@ var is_on_floor = true
 signal ragdolled
 
 
+
 func _enter_tree():
 	
 	add_to_group("humanoids")
@@ -63,13 +64,13 @@ func _enter_tree():
 
 func _ready():
 	
+	continuous_cd = true
 	contact_monitor = true
 	max_contacts_reported = 5
-	if not is_multiplayer_authority(): 
-		return
+	
+	if is_multiplayer_authority(): 
+		getRandomSkinTone()
 		
-	getRandomSkinTone()
-
 
 func _process(delta):
 	
@@ -79,13 +80,12 @@ func _process(delta):
 			land.rpc()
 		
 	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
-		ragdoll_cooldown_timer_seconds += delta
-		MOVE_STATE = MoveState.WALKING if is_on_floor else MoveState.FALLING
+		pass
 		
 	elif not is_multiplayer_authority():
 		return
 		
-	elif ragdoll_recovered(): 
+	elif get_ragdoll_recovered(): 
 		unragdoll.rpc()
 		
 	elif skeleton.ragdoll_is_at_rest(): 
@@ -109,12 +109,12 @@ func _process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			IMPACT_THRESHOLD = 600.0
+			IMPACT_THRESHOLD = 6.0 * mass
 			animation.updateFalling(linear_velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
 		MoveState.WALKING:
-			IMPACT_THRESHOLD = 400.0
+			IMPACT_THRESHOLD = 4.0 * mass
 			animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 			
 			if(WALK_VECTOR):
@@ -129,14 +129,14 @@ func _process(delta):
 func _integrate_forces(state):
 	
 	if is_multiplayer_authority():
-		AUTHORITY_POSITION = position
+		AUTHORITY_POSITION = state.transform.origin	
 		
 	elif position.distance_to(AUTHORITY_POSITION) > 2.0:
 		state.transform.origin = AUTHORITY_POSITION
 		
 	else:
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
-	
+
 	var contact_count = state.get_contact_count()
 	var floor_normal = Vector3(0, 1, 0)
 	is_on_floor = false
@@ -155,7 +155,6 @@ func _integrate_forces(state):
 		if impact > IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
-			return
 			
 		elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
 	
@@ -163,20 +162,20 @@ func _integrate_forces(state):
 			var check2 = impact > IMPACT_THRESHOLD/2
 			
 			if check1 and check2 and not is_on_floor:
-				print(impact)
 				state.apply_central_impulse(state.get_contact_impulse(index))
-				#var bounced = relativeVelocity.bounce(normal)
-				#var new_velocity = Vector3(bounced.x, linear_velocity.y, bounced.z)
-				#new_velocity.y += JUMP_SPEED * 1.0 / 2.0
-				#wall_bounce.rpc(new_velocity)
-				return
-
+				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
+				FLOATING = false
+				
 
 func _physics_process(delta):
 		
 	WALK_VECTOR = WALK_VECTOR.normalized()
 	var translational_velocity = Vector2(linear_velocity.x, linear_velocity.z)
 	var WALK_VECTOR_2 = Vector2(WALK_VECTOR.x, WALK_VECTOR.z)
+	
+	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
+		ragdoll_cooldown_timer_seconds += delta
+		MOVE_STATE = MoveState.WALKING if is_on_floor else MoveState.FALLING
 	
 	match MOVE_STATE:
 		
@@ -191,7 +190,7 @@ func _physics_process(delta):
 			else:
 				gravity_scale = 1
 				
-			var velocityStep = acceleration() * delta
+			var velocityStep = get_acceleration() * delta
 			
 			if WALK_VECTOR:
 				translational_velocity.x += WALK_VECTOR.x * velocityStep/2
@@ -205,7 +204,7 @@ func _physics_process(delta):
 			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
 			
 		MoveState.WALKING:
-			var velocityStep = acceleration() * 2 * delta
+			var velocityStep = get_acceleration() * 2 * delta
 			var speed_target = TOPSPEED * TOPSPEED_MOD
 			
 			if WALK_VECTOR:
@@ -229,9 +228,7 @@ func _physics_process(delta):
 	
 	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
 	rotation.y = fmod(rotation.y, 2*PI)
-	
 
-	
 	
 func is_back_pedaling():
 	
@@ -240,7 +237,7 @@ func is_back_pedaling():
 	return walkVec2.dot(lookVec2 ) > 0
 
 
-func acceleration():
+func get_acceleration():
 	
 	var absolute = 20
 	var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
@@ -265,19 +262,14 @@ func head_position():
 	return adjustedPosition
 	
 
-func ragdoll_is_ready():
+func get_ragdoll_ready():
 	
 	return ragdoll_cooldown_timer_seconds > ragdoll_cooldown_period_seconds
 	
 	
-func ragdoll_recovered():
+func get_ragdoll_recovered():
 	
 	return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
-	
-	
-func force_push():
-	
-	pass
 	
 	
 func toggle_ragdoll_sync(sync_mode):
@@ -292,7 +284,7 @@ func toggle_ragdoll_sync(sync_mode):
 @rpc("call_local")
 func ragdoll():
 	
-	if(MOVE_STATE != MoveState.RAGDOLL && ragdoll_is_ready()):
+	if(MOVE_STATE != MoveState.RAGDOLL && get_ragdoll_ready()):
 		RUNNING = false
 		ragdolled.emit()
 		skeleton.ragdoll_start()
@@ -300,6 +292,7 @@ func ragdoll():
 		animation.active = false
 		collider.disabled = true
 		MOVE_STATE = MoveState.RAGDOLL
+		freeze = true
 		#var propertyPath = "Skeleton3D/Ragdoll/Physical Bone "
 		#toggle_ragdoll_sync(1)
 		
@@ -314,13 +307,8 @@ func unragdoll():
 		animation.active = true
 		collider.disabled = false
 		MOVE_STATE = MoveState.FALLING
+		freeze = false
 		#toggle_ragdoll_sync(0)	
-
-
-@rpc("call_local")
-func wall_bounce(new_velocity):
-	linear_velocity = new_velocity
-	FLOATING = false
 
 
 @rpc("call_local")
@@ -335,4 +323,5 @@ func land():
 	
 	if is_on_floor:
 		linear_velocity = linear_velocity.move_toward(Vector3.ZERO, 2)
-		
+
+	

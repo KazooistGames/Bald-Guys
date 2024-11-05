@@ -73,8 +73,9 @@ func spawn_players(parent):
 	
 	for humanoid in Humanoids:
 		humanoid.unragdoll.rpc()
-		humanoid.set_globa
-		
+		var spawn_position = get_random_spawn(parent)
+		humanoid.position = spawn_position
+
 
 func get_random_spawn(parent):
 	
