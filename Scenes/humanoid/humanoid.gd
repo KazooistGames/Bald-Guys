@@ -30,7 +30,7 @@ const floor_angle = PI/3.0
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.5, 7.0)
-@export var JUMP_SPEED = 4
+@export var JUMP_SPEED = 4.5
 @export var RUNNING = false
 @export var FLOATING = false
 
@@ -155,7 +155,7 @@ func _integrate_forces(state):
 		elif not is_on_floor_buffer:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 3.0/4.0	
 			var check2 = impact > IMPACT_THRESHOLD/2
-			var check3 = normal.angle_to(floor_normal) > floor_angle
+			var check3 = abs(normal.dot(floor_normal)) <= 0.5
 
 			if check1 and check2 and check3:
 				print (impact)
@@ -188,7 +188,7 @@ func _physics_process(delta):
 				FLOATING = false
 				
 			if FLOATING:
-				gravity_scale = 1.0/5.0
+				gravity_scale = 1.0/3.0
 				
 			else:
 				gravity_scale = 1
@@ -306,6 +306,7 @@ func unragdoll():
 func jump():
 	
 	if is_on_floor:
+		is_on_floor = false
 		linear_velocity.y += JUMP_SPEED
 		
 		

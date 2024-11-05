@@ -3711,14 +3711,14 @@ properties/7/spawn = true
 properties/7/replication_mode = 1
 properties/8/path = NodePath(".:FLOATING")
 properties/8/spawn = true
-properties/8/replication_mode = 2
+properties/8/replication_mode = 1
 properties/9/path = NodePath(".:linear_velocity")
 properties/9/spawn = true
 properties/9/replication_mode = 1
 
 [node name="Armature" type="RigidBody3D"]
 collision_layer = 2
-collision_mask = 3
+collision_mask = 11
 mass = 100.0
 physics_material_override = SubResource("PhysicsMaterial_vc0al")
 lock_rotation = true
