@@ -34,26 +34,38 @@ func _ready():
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 
 
+func _process(delta):
+	Humanoids = get_tree().get_nodes_in_group("humanoids")
+
+
 func _unhandled_key_input(event):
 	
 	if event.is_action_pressed("Toggle"):
 		
-		if State != SessionState.Level:
+		if not is_multiplayer_authority():
+			pass
+			
+		elif State != SessionState.Level:
 			rpc_move_to_level.rpc()	
 			
 		elif State != SessionState.Hub:
 			rpc_move_to_hub.rpc()
 
 
-func end_game_mode():
-	
-	rpc_move_to_hub.rpc()
-
 func start_game_mode():
 	
 	if Mode == GameMode.FFA:
 		FFA.rpc_start.rpc()
-		FFA.Finished.connect(end_game_mode)
+		FFA.Finished.connect(finish_game_mode)
+	
+		
+func finish_game_mode():
+	
+	rpc_move_to_hub.rpc()
+	
+	if Mode == GameMode.FFA:
+		FFA.rpc_reset.rpc()
+		FFA.Finished.disconnect(finish_game_mode)		
 		
 		
 func reset_game_mode():
@@ -73,8 +85,11 @@ func spawn_players(parent):
 	
 	for humanoid in Humanoids:
 		humanoid.unragdoll.rpc()
+		humanoid.linear_velocity = Vector3.ZERO
 		var spawn_position = get_random_spawn(parent)
-		humanoid.position = spawn_position
+		var rid = humanoid.get_rid()
+		var new_transform = Transform3D.IDENTITY.translated(spawn_position)
+		PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, new_transform)
 
 
 func get_random_spawn(parent):
@@ -124,7 +139,7 @@ func signal_to_handoff_player_humanoid(node):
 	Created_Player_Humanoid.emit(node)
 
 
-@rpc("call_local")
+@rpc("call_local", "authority")
 func rpc_move_to_hub():
 	
 	State = SessionState.Hub
@@ -132,7 +147,7 @@ func rpc_move_to_hub():
 	reset_game_mode()
 
 		
-@rpc("call_local")
+@rpc("call_local", "authority")
 func rpc_move_to_level():
 	
 	State = SessionState.Level
@@ -140,7 +155,7 @@ func rpc_move_to_level():
 	start_game_mode()
 
 
-@rpc("call_local")
+@rpc("call_local", "authority")
 func respawn_node(node_path, spawn_position):
 	
 	var node = get_node(node_path)

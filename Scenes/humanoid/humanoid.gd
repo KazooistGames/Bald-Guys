@@ -1,6 +1,16 @@
 extends RigidBody3D
 
 
+
+const MoveState = {
+	WALKING = 0,
+	FALLING = 1,
+	RAGDOLL = 2,
+}
+
+const floor_normal = Vector3(0, 1, 0)
+const floor_angle = PI/3.0
+
 @export var SKIN_COLOR : Color:
 	
 	get:
@@ -15,13 +25,6 @@ extends RigidBody3D
 	
 	
 @export var Main_Trigger = false
-
-const MoveState = {
-	WALKING = 0,
-	FALLING = 1,
-	RAGDOLL = 2,
-}
-
 @export var MOVE_STATE = MoveState.WALKING
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
@@ -43,8 +46,6 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var TOPSPEED = 0
 var TOPSPEED_MOD = 1
 
-const MOUSE_SENSATIVITY = 0.005
-
 var IMPACT_THRESHOLD =  6.5
 var ragdoll_cooldown_period_seconds = 0.5
 var ragdoll_cooldown_timer_seconds = 0
@@ -54,7 +55,6 @@ var ragdoll_recovery_timer_seconds = 0
 var is_on_floor = true
 
 signal ragdolled
-
 
 
 func _enter_tree():
@@ -73,11 +73,6 @@ func _ready():
 		
 
 func _process(delta):
-	
-	if MOVE_STATE == MoveState.FALLING:
-		
-		if is_on_floor:
-			land.rpc()
 		
 	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
 		pass
@@ -114,7 +109,7 @@ func _process(delta):
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
 		MoveState.WALKING:
-			IMPACT_THRESHOLD = 4.0 * mass
+			IMPACT_THRESHOLD = 4.5 * mass
 			animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 			
 			if(WALK_VECTOR):
@@ -138,34 +133,42 @@ func _integrate_forces(state):
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 
 	var contact_count = state.get_contact_count()
-	var floor_normal = Vector3(0, 1, 0)
-	is_on_floor = false
+
+			
+	var is_on_floor_buffer = false
 	
 	for index in range(contact_count):
 
 		var normal = state.get_contact_local_normal(index)
 		var otherCollider : Node3D = state.get_contact_collider_object(index)
-		
-		if normal.angle_to(floor_normal) <= PI/4.0:
-			is_on_floor = true
+
+		if normal.angle_to(floor_normal) <= floor_angle:		
+			is_on_floor_buffer = true
 
 		var directionalModifier = 1.0 - normal.dot(Vector3.UP)/2
 		var impact = state.get_contact_impulse(index).length() * directionalModifier
-		
-		if impact > IMPACT_THRESHOLD: 
+
+		if impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
 			
-		elif not otherCollider.is_in_group("floor") and MOVE_STATE == MoveState.FALLING:
-	
+		elif not is_on_floor_buffer:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 3.0/4.0	
 			var check2 = impact > IMPACT_THRESHOLD/2
-			
-			if check1 and check2 and not is_on_floor:
+			var check3 = normal.angle_to(floor_normal) > floor_angle
+
+			if check1 and check2 and check3:
+				print (impact)
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
 				FLOATING = false
-				
+			
+	if not is_on_floor and is_on_floor_buffer:
+		var retardation = (linear_velocity * Vector3(-1, 0, -1)).normalized()
+		state.apply_central_impulse(retardation * mass * 2)
+		
+	is_on_floor = is_on_floor_buffer
+
 
 func _physics_process(delta):
 		
@@ -185,7 +188,7 @@ func _physics_process(delta):
 				FLOATING = false
 				
 			if FLOATING:
-				gravity_scale = 1.0/4.0
+				gravity_scale = 1.0/5.0
 				
 			else:
 				gravity_scale = 1
@@ -270,21 +273,12 @@ func get_ragdoll_ready():
 func get_ragdoll_recovered():
 	
 	return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
-	
-	
-func toggle_ragdoll_sync(sync_mode):
-	
-	var propertyPath = "Skeleton3D/Ragdoll/Physical Bone "
-	synchronizer.replication_config.property_set_replication_mode(propertyPath+"lowerBody:linear_velocity", sync_mode)
-	synchronizer.replication_config.property_set_replication_mode(propertyPath+"lowerBody:angular_velocity", sync_mode)
-	synchronizer.replication_config.property_set_replication_mode(propertyPath+"upperBody:linear_velocity", sync_mode)
-	synchronizer.replication_config.property_set_replication_mode(propertyPath+"upperBody:angular_velocity", sync_mode)
 
 
 @rpc("call_local")
 func ragdoll():
 	
-	if(MOVE_STATE != MoveState.RAGDOLL && get_ragdoll_ready()):
+	if(MOVE_STATE != MoveState.RAGDOLL):
 		RUNNING = false
 		ragdolled.emit()
 		skeleton.ragdoll_start()
@@ -293,8 +287,6 @@ func ragdoll():
 		collider.disabled = true
 		MOVE_STATE = MoveState.RAGDOLL
 		freeze = true
-		#var propertyPath = "Skeleton3D/Ragdoll/Physical Bone "
-		#toggle_ragdoll_sync(1)
 		
 		
 @rpc("call_local")
@@ -308,7 +300,6 @@ func unragdoll():
 		collider.disabled = false
 		MOVE_STATE = MoveState.FALLING
 		freeze = false
-		#toggle_ragdoll_sync(0)	
 
 
 @rpc("call_local")
