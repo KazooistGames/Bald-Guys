@@ -88,31 +88,31 @@ skeleton = NodePath("../..")
 
 [node name="Stage1" parent="stages" index="0" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.25, -18)
-Size = Vector3(10, 0.3, 10)
+Size = Vector3(10, 0.1, 10)
 
 [node name="Stage2" parent="stages" index="1" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -2, 17)
-Size = Vector3(12, 0.25, 12)
+Size = Vector3(12, 0.1, 12)
 
 [node name="Stage3" parent="stages" index="2" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.25, -14)
-Size = Vector3(18, 0.25, 18)
+Size = Vector3(18, 0.1, 18)
 
 [node name="Stage4" parent="stages" index="3" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 3, 15.5)
-Size = Vector3(15, 0.25, 15)
+Size = Vector3(15, 0.1, 15)
 
 [node name="Stage5" parent="stages" index="4" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
-Size = Vector3(10, 0.25, 10)
+Size = Vector3(10, 0.1, 10)
 
 [node name="Stage6" parent="stages" index="5" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.25, 4.5, -19.25)
-Size = Vector3(7.5, 0.25, 7.5)
+Size = Vector3(7.5, 0.1, 7.5)
 
 [node name="Stage7" parent="stages" index="6" instance=ExtResource("2_co0ev")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 6.75, -13)
-Size = Vector3(5, 0.25, 5)
+Size = Vector3(5, 0.1, 5)
 
 [node name="pillars" type="Node3D" parent="." index="3"]
 

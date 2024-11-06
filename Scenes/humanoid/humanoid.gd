@@ -104,7 +104,7 @@ func _process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			IMPACT_THRESHOLD = 6.0 * mass
+			IMPACT_THRESHOLD = 7.0 * mass
 			animation.updateFalling(linear_velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
@@ -133,8 +133,7 @@ func _integrate_forces(state):
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 
 	var contact_count = state.get_contact_count()
-
-			
+	
 	var is_on_floor_buffer = false
 	
 	for index in range(contact_count):
@@ -145,7 +144,7 @@ func _integrate_forces(state):
 		if normal.angle_to(floor_normal) <= floor_angle:		
 			is_on_floor_buffer = true
 
-		var directionalModifier = 1.0 - normal.dot(Vector3.UP)/2
+		var directionalModifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)
 		var impact = state.get_contact_impulse(index).length() * directionalModifier
 
 		if impact >= IMPACT_THRESHOLD: 
@@ -173,12 +172,14 @@ func _integrate_forces(state):
 func _physics_process(delta):
 		
 	WALK_VECTOR = WALK_VECTOR.normalized()
-	var translational_velocity = Vector2(linear_velocity.x, linear_velocity.z)
-	var WALK_VECTOR_2 = Vector2(WALK_VECTOR.x, WALK_VECTOR.z)
 	
 	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
 		ragdoll_cooldown_timer_seconds += delta
 		MOVE_STATE = MoveState.WALKING if is_on_floor else MoveState.FALLING
+		
+	var speed_target = TOPSPEED * TOPSPEED_MOD
+	var impulse = Vector3.ZERO
+	var translational_velocity = Vector2(linear_velocity.x, linear_velocity.z)
 	
 	match MOVE_STATE:
 		
@@ -192,42 +193,44 @@ func _physics_process(delta):
 				
 			else:
 				gravity_scale = 1
-				
-			var velocityStep = get_acceleration() * delta
-			
+
 			if WALK_VECTOR:
-				translational_velocity.x += WALK_VECTOR.x * velocityStep/2
-				translational_velocity.y += WALK_VECTOR.z * velocityStep/2
+				impulse = Vector3(WALK_VECTOR.x, 0, WALK_VECTOR.z).normalized() * get_acceleration()/2 * mass
 				
-			translational_velocity = translational_velocity.move_toward(Vector2.ZERO, 2 * delta)
-			skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)
-			
+				
+			skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
 			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
 			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
 			
 		MoveState.WALKING:
-			var velocityStep = get_acceleration() * 2 * delta
-			var speed_target = TOPSPEED * TOPSPEED_MOD
 			
-			if WALK_VECTOR:
-				translational_velocity = translational_velocity.move_toward(WALK_VECTOR_2 * speed_target, velocityStep)
+			if WALK_VECTOR == Vector3.ZERO:
+				impulse = -Vector3(linear_velocity.x, 0, linear_velocity.z) * get_acceleration() * mass
+				skeleton.processIdleOrientation(delta, LOOK_VECTOR)
+				
+			elif translational_velocity.length() < speed_target:
+				impulse = Vector3(WALK_VECTOR.x, 0, WALK_VECTOR.z).normalized() * get_acceleration() * 2 * mass
 				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 				
 			else:
-				translational_velocity = translational_velocity.move_toward(Vector2.ZERO, velocityStep)
-				skeleton.processIdleOrientation(delta, LOOK_VECTOR)
-				
+				var removal_factor = WALK_VECTOR.project(Vector3(linear_velocity.x, 0, linear_velocity.z)).normalized()
+				var scalar = get_acceleration() * 2 * mass
+				impulse = (WALK_VECTOR - removal_factor).normalized() * scalar
+				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
+			
 			var scalar = 2
 			collider.shape.height = move_toward(collider.shape.height, 1.5, delta * scalar)
 			collider.position.y = move_toward(collider.position.y, 0.75, delta * scalar)
 			
 		MoveState.RAGDOLL:
-			translational_velocity = Vector2.ZERO
 			skeleton.processRagdollOrientation(delta)
 		
-	linear_velocity.x = translational_velocity.x
-	linear_velocity.z = translational_velocity.y
+	apply_central_force(impulse)
+	
+	if translational_velocity.length() > speed_target:
+		impulse = -Vector3(linear_velocity.x, 0, linear_velocity.z) * get_acceleration() * mass
+		apply_central_force(impulse)
 	
 	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
 	rotation.y = fmod(rotation.y, 2*PI)
@@ -307,13 +310,13 @@ func jump():
 	
 	if is_on_floor:
 		is_on_floor = false
-		linear_velocity.y += JUMP_SPEED
+		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
 		
 		
 @rpc("call_local")
 func land():
 	
 	if is_on_floor:
-		linear_velocity = linear_velocity.move_toward(Vector3.ZERO, 2)
+		apply_central_impulse(-Vector3(linear_velocity.x, 0, linear_velocity.z) * mass * 2)
 
 	
