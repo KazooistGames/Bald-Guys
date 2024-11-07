@@ -82,9 +82,6 @@ func _process(delta):
 		
 	elif get_ragdoll_recovered(): 
 		unragdoll.rpc()
-		
-	elif skeleton.ragdoll_is_at_rest(): 
-		ragdoll_recovery_timer_seconds += delta
 	
 	if Main_Trigger: #stop running if necessary
 		RUNNING = false
@@ -104,7 +101,7 @@ func _process(delta):
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			IMPACT_THRESHOLD = 7.0 * mass
+			IMPACT_THRESHOLD = 6.0 * mass
 			animation.updateFalling(linear_velocity)
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
@@ -123,11 +120,13 @@ func _process(delta):
 
 func _integrate_forces(state):
 	
+	WALK_VECTOR = WALK_VECTOR.normalized()
+	
 	if is_multiplayer_authority():
 		AUTHORITY_POSITION = state.transform.origin	
 		
-	elif position.distance_to(AUTHORITY_POSITION) > 2.0:
-		state.transform.origin = AUTHORITY_POSITION
+	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
+		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.25)
 		
 	else:
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
@@ -150,41 +149,36 @@ func _integrate_forces(state):
 		if impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
-			
+
 		elif not is_on_floor_buffer:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 3.0/4.0	
 			var check2 = impact > IMPACT_THRESHOLD/2
 			var check3 = abs(normal.dot(floor_normal)) <= 0.5
 
 			if check1 and check2 and check3:
-				print (impact)
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
 				FLOATING = false
 			
-	if not is_on_floor and is_on_floor_buffer:
-		var retardation = (linear_velocity * Vector3(-1, 0, -1)).normalized()
-		state.apply_central_impulse(retardation * mass * 2)
+	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
+		
+	if not is_on_floor and is_on_floor_buffer and translational_velocity.length() > 0.5:
+		var retardation_vector = -translational_velocity.normalized()
+		var impulse = retardation_vector * mass * 2
+		state.apply_central_impulse(impulse)
 		
 	is_on_floor = is_on_floor_buffer
-
-
-func _physics_process(delta):
-		
-	WALK_VECTOR = WALK_VECTOR.normalized()
 	
 	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
-		ragdoll_cooldown_timer_seconds += delta
 		MOVE_STATE = MoveState.WALKING if is_on_floor else MoveState.FALLING
 		
 	var speed_target = TOPSPEED * TOPSPEED_MOD
 	var impulse = Vector3.ZERO
-	var translational_velocity = Vector2(linear_velocity.x, linear_velocity.z)
-	
+		
 	match MOVE_STATE:
 		
 		MoveState.FALLING:
-			
+					
 			if linear_velocity.y <= 2.75:
 				FLOATING = false
 				
@@ -195,28 +189,52 @@ func _physics_process(delta):
 				gravity_scale = 1
 
 			if WALK_VECTOR:
-				impulse = Vector3(WALK_VECTOR.x, 0, WALK_VECTOR.z).normalized() * get_acceleration()/2 * mass
+				impulse = WALK_VECTOR * get_acceleration()/2 * mass
+
+		MoveState.WALKING:
+			
+			if not is_on_floor:
+				pass
 				
-				
+			elif WALK_VECTOR == Vector3.ZERO:			
+				impulse = -translational_velocity * get_acceleration() * mass
+
+			elif translational_velocity.length() < speed_target:
+				impulse = WALK_VECTOR * get_acceleration() * 2 * mass
+
+			else:
+				var removal_factor = WALK_VECTOR.project(translational_velocity).normalized()
+				impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
+
+	apply_central_force(impulse)
+	
+	if translational_velocity.length() > speed_target:
+		impulse = -translational_velocity * get_acceleration() * mass
+		apply_central_force(impulse)
+	
+
+func _physics_process(delta):
+	
+	if MOVE_STATE != MoveState.RAGDOLL:
+		ragdoll_cooldown_timer_seconds += delta
+		
+	else:
+		ragdoll_recovery_timer_seconds += delta
+		
+	match MOVE_STATE:
+		
+		MoveState.FALLING:						
 			skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
 			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
 			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
-			
+
 		MoveState.WALKING:
-			
-			if WALK_VECTOR == Vector3.ZERO:
-				impulse = -Vector3(linear_velocity.x, 0, linear_velocity.z) * get_acceleration() * mass
+					
+			if WALK_VECTOR == Vector3.ZERO:		
 				skeleton.processIdleOrientation(delta, LOOK_VECTOR)
-				
-			elif translational_velocity.length() < speed_target:
-				impulse = Vector3(WALK_VECTOR.x, 0, WALK_VECTOR.z).normalized() * get_acceleration() * 2 * mass
-				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
-				
+
 			else:
-				var removal_factor = WALK_VECTOR.project(Vector3(linear_velocity.x, 0, linear_velocity.z)).normalized()
-				var scalar = get_acceleration() * 2 * mass
-				impulse = (WALK_VECTOR - removal_factor).normalized() * scalar
 				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 			
 			var scalar = 2
@@ -225,16 +243,10 @@ func _physics_process(delta):
 			
 		MoveState.RAGDOLL:
 			skeleton.processRagdollOrientation(delta)
-		
-	apply_central_force(impulse)
-	
-	if translational_velocity.length() > speed_target:
-		impulse = -Vector3(linear_velocity.x, 0, linear_velocity.z) * get_acceleration() * mass
-		apply_central_force(impulse)
-	
+
 	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
 	rotation.y = fmod(rotation.y, 2*PI)
-
+	
 	
 func is_back_pedaling():
 	
@@ -309,7 +321,6 @@ func unragdoll():
 func jump():
 	
 	if is_on_floor:
-		is_on_floor = false
 		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
 		
 		
