@@ -23,8 +23,8 @@ const floor_angle = PI/3.0
 		material.albedo_color = value
 		model.set_surface_override_material(0, material)
 	
-	
-@export var Main_Trigger = false
+@export var ON_FLOOR = true
+@export var REACHING = false
 @export var MOVE_STATE = MoveState.WALKING
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
@@ -52,7 +52,7 @@ var ragdoll_cooldown_timer_seconds = 0
 var ragdoll_recovery_period_seconds = 1
 var ragdoll_recovery_timer_seconds = 0
 
-var is_on_floor = true
+
 
 signal ragdolled
 
@@ -83,7 +83,7 @@ func _process(delta):
 	elif get_ragdoll_recovered(): 
 		unragdoll.rpc()
 	
-	if Main_Trigger: #stop running if necessary
+	if REACHING: #stop running if necessary
 		RUNNING = false
 		
 	elif WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
@@ -93,7 +93,7 @@ func _process(delta):
 		RUNNING = false
 		
 	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
-	TOPSPEED_MOD = 0.9 if Main_Trigger else 1.0
+	TOPSPEED_MOD = 0.9 if REACHING else 1.0
 	animation.walkAnimBlendScalar = TOPSPEED
 	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
@@ -133,7 +133,7 @@ func _integrate_forces(state):
 
 	var contact_count = state.get_contact_count()
 	
-	var is_on_floor_buffer = false
+	var ON_FLOOR_buffer = false
 	
 	for index in range(contact_count):
 
@@ -141,7 +141,7 @@ func _integrate_forces(state):
 		var otherCollider : Node3D = state.get_contact_collider_object(index)
 
 		if normal.angle_to(floor_normal) <= floor_angle:		
-			is_on_floor_buffer = true
+			ON_FLOOR_buffer = true
 
 		var directionalModifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)
 		var impact = state.get_contact_impulse(index).length() * directionalModifier
@@ -150,7 +150,7 @@ func _integrate_forces(state):
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
 
-		elif not is_on_floor_buffer:
+		elif not ON_FLOOR_buffer:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 3.0/4.0	
 			var check2 = impact > IMPACT_THRESHOLD/2
 			var check3 = abs(normal.dot(floor_normal)) <= 0.5
@@ -162,15 +162,15 @@ func _integrate_forces(state):
 			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
-	if not is_on_floor and is_on_floor_buffer and translational_velocity.length() > 0.5:
+	if not ON_FLOOR and ON_FLOOR_buffer and translational_velocity.length() > 0.5:
 		var retardation_vector = -translational_velocity.normalized()
 		var impulse = retardation_vector * mass * 2
 		state.apply_central_impulse(impulse)
 		
-	is_on_floor = is_on_floor_buffer
+	ON_FLOOR = ON_FLOOR_buffer
 	
 	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
-		MOVE_STATE = MoveState.WALKING if is_on_floor else MoveState.FALLING
+		MOVE_STATE = MoveState.WALKING if ON_FLOOR else MoveState.FALLING
 		
 	var speed_target = TOPSPEED * TOPSPEED_MOD
 	var impulse = Vector3.ZERO
@@ -193,7 +193,7 @@ func _integrate_forces(state):
 
 		MoveState.WALKING:
 			
-			if not is_on_floor:
+			if not ON_FLOOR:
 				pass
 				
 			elif WALK_VECTOR == Vector3.ZERO:			
@@ -218,7 +218,7 @@ func _physics_process(delta):
 	if MOVE_STATE != MoveState.RAGDOLL:
 		ragdoll_cooldown_timer_seconds += delta
 		
-	else:
+	elif skeleton.ragdoll_is_at_rest():
 		ragdoll_recovery_timer_seconds += delta
 		
 	match MOVE_STATE:
@@ -244,7 +244,7 @@ func _physics_process(delta):
 		MoveState.RAGDOLL:
 			skeleton.processRagdollOrientation(delta)
 
-	skeleton.processReach(LOOK_VECTOR, Main_Trigger)
+	skeleton.processReach(LOOK_VECTOR, REACHING)
 	rotation.y = fmod(rotation.y, 2*PI)
 	
 	
@@ -320,14 +320,15 @@ func unragdoll():
 @rpc("call_local")
 func jump():
 	
-	if is_on_floor:
+	if ON_FLOOR:
 		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
 		
 		
 @rpc("call_local")
 func land():
 	
-	if is_on_floor:
+	if ON_FLOOR:
+		
 		apply_central_impulse(-Vector3(linear_velocity.x, 0, linear_velocity.z) * mass * 2)
 
 	

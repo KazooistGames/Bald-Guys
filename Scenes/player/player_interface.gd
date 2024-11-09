@@ -25,8 +25,8 @@ func _process(_delta):
 		camera.position = adjustedPosition + adjustedOffset
 		var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 		character.LOOK_VECTOR = look
-		camera.HORIZONTAL_SENSITIVITY = 0.002 if character.Main_Trigger else 0.004
-		character.Main_Trigger = Input.is_action_pressed("main")
+		camera.HORIZONTAL_SENSITIVITY = 0.002 if character.REACHING else 0.004
+		character.REACHING = Input.is_action_pressed("main")
 		
 	
 func _unhandled_input(event):

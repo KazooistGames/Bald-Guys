@@ -3703,18 +3703,21 @@ properties/4/replication_mode = 2
 properties/5/path = NodePath(".:SKIN_COLOR")
 properties/5/spawn = true
 properties/5/replication_mode = 2
-properties/6/path = NodePath(".:Main_Trigger")
+properties/6/path = NodePath(".:AUTHORITY_POSITION")
 properties/6/spawn = true
-properties/6/replication_mode = 2
-properties/7/path = NodePath(".:AUTHORITY_POSITION")
+properties/6/replication_mode = 1
+properties/7/path = NodePath(".:FLOATING")
 properties/7/spawn = true
 properties/7/replication_mode = 1
-properties/8/path = NodePath(".:FLOATING")
+properties/8/path = NodePath(".:linear_velocity")
 properties/8/spawn = true
 properties/8/replication_mode = 1
-properties/9/path = NodePath(".:linear_velocity")
+properties/9/path = NodePath(".:REACHING")
 properties/9/spawn = true
 properties/9/replication_mode = 1
+properties/10/path = NodePath(".:ON_FLOOR")
+properties/10/spawn = true
+properties/10/replication_mode = 1
 
 [node name="Armature" type="RigidBody3D"]
 collision_layer = 2
