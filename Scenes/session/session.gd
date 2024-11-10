@@ -34,7 +34,7 @@ func _ready():
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 
 
-func _process(delta):
+func _process(_delta):
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 
 

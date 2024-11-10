@@ -65,7 +65,7 @@ func _ready():
 		getRandomSkinTone()
 		
 
-func _process(delta):
+func _process(_delta):
 			
 	if not RAGDOLLED: #ragdoll cooldown
 		pass
@@ -83,8 +83,7 @@ func _process(delta):
 		RUNNING = false
 		
 	elif WALK_VECTOR == Vector3.ZERO:
-		RUNNING = false
-		
+		RUNNING = false	
 
 	TOPSPEED_MOD = 0.9 if REACHING else 1.0
 	animation.walkAnimBlendScalar = TOPSPEED
@@ -135,7 +134,7 @@ func _integrate_forces(state):
 	for index in range(contact_count):
 
 		var normal = state.get_contact_local_normal(index)
-		var otherCollider : Node3D = state.get_contact_collider_object(index)
+		#var otherCollider : Node3D = state.get_contact_collider_object(index)
 
 		if normal.angle_to(floor_normal) <= floor_angle:		
 			ON_FLOOR_buffer = true
@@ -148,7 +147,7 @@ func _integrate_forces(state):
 			ragdoll.rpc()
 
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
-			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/4.0	
+			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
 			var check2 = impact > IMPACT_THRESHOLD/2
 			var check3 = abs(normal.dot(floor_normal)) <= 0.5
 
@@ -167,7 +166,6 @@ func _integrate_forces(state):
 	var speed_target = TOPSPEED * TOPSPEED_MOD
 	var impulse = Vector3.ZERO
 		
-
 	if RAGDOLLED:
 		pass
 	

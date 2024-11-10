@@ -61,13 +61,13 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
 	
 	var target_angle = atan2(-look_vector.x, -look_vector.z)
-	var timeStep = LERP_VAL * delta
-	
+
 	if walk_vector == Vector3.ZERO:
 		smooth_turn(look_vector, target_angle, 10, delta)
 		
 	else:
 		target_angle = atan2(walk_vector.x, walk_vector.z)
+		var timeStep = LERP_VAL * delta
 		rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
 
 
@@ -84,31 +84,9 @@ func processIdleOrientation(delta, look_vector):
 	
 	leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
-	
-	var timeStep = LERP_VAL * delta
-	var target_angle = atan2(-look_vector.x, -look_vector.z)
-	var difference = get_true_difference(rotation.y, target_angle)
-	#var shortestPath = get_shortest_path(rotation.y, target_angle)
-	
-	if isLookingBack(look_vector, 0.0):
-		turn_locked_in = true
-		
-	if turn_locked_in:
-		turn_velocity = min(turn_velocity + delta * turn_acceleration, turn_top_speed)
-		var step_scale = 5
-		var step_size = delta * step_scale * turn_velocity
-		#step_size = delta * 12
-		rotation.y = lerp_angle(rotation.y, target_angle, step_size)
-		
-		if(not isLookingBack(look_vector, .95)):
-			turn_locked_in = false
-			
-	elif abs(difference) >= PI/2:
-		rotation.y = lerp_angle(rotation.y, target_angle, timeStep)
-		
-	else:
-		turn_velocity = 0
 
+	var target_angle = atan2(-look_vector.x, -look_vector.z)
+	smooth_turn(look_vector, target_angle, 10, delta)
 
 
 func processWalkOrientation(delta, look_vector, walk_vector):
@@ -130,7 +108,6 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	var actual = rotation.y
 	var target = atan2(-walk_vector.x, -walk_vector.z) if is_back_pedaling(look_vector, walk_vector) else atan2(walk_vector.x, walk_vector.z)
 	var lookTarget = atan2(-look_vector.x, -look_vector.z)
-	#var diff = get_true_difference(actual, target)
 	var lookDiff = get_true_difference(actual, lookTarget)
 	
 	if lookDiff > PI/2:
@@ -141,10 +118,7 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 		turn_locked_in = false
 		
 	else: 
-		#turn_locked_in = true
 		turn_velocity = min(turn_velocity + delta*turn_acceleration, turn_top_speed)
-		#var step_scale = 4
-		#var step_size = delta*step_scale* turn_velocity
 		rotation.y = lerp_angle(actual, target, timeStep)
 
 
@@ -171,8 +145,6 @@ func processReach(look_vector, reaching):
 	
 	if !reaching && currentReacher != null:
 		currentReacher = null
-		get_node(str(leftHand.target_node).trim_prefix('../')).remote_path = "../../Force"
-		get_node(str(rightHand.target_node).trim_prefix('../')).remote_path = "../../Force"
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
@@ -182,7 +154,6 @@ func processReach(look_vector, reaching):
 		pass
 	
 	elif lookAngle > deadband && currentReacher != leftHand:
-		swap_which_hand_has_force(rightHand, leftHand)
 		currentReacher = leftHand
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
@@ -190,7 +161,6 @@ func processReach(look_vector, reaching):
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", false)
 	
 	elif lookAngle < -deadband && currentReacher != rightHand:
-		swap_which_hand_has_force(leftHand, rightHand)
 		currentReacher = rightHand
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", false)
@@ -199,7 +169,6 @@ func processReach(look_vector, reaching):
 	
 	elif currentReacher == null:
 		currentReacher = rightHand
-		swap_which_hand_has_force(leftHand, rightHand)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
@@ -266,14 +235,6 @@ func get_shortest_path(actual, target):
 	
 	else:
 		return sign(overlapDifference)
-
-
-func swap_which_hand_has_force(old, new):
-
-	var old_target_node = get_node(str(old.target_node).trim_prefix('../'))
-	var new_target_node = get_node(str(new.target_node).trim_prefix('../'))
-	new_target_node.remote_path = old_target_node.remote_path
-	old_target_node.remote_path = ''
 	
 	
 func get_ragdoll_bone_position(bone_name):
@@ -295,7 +256,6 @@ func smooth_turn(look_vector, target_angle, speed, delta):
 		turn_velocity = min(turn_velocity + delta * turn_acceleration, turn_top_speed)
 		var step_scale = 5
 		var step_size = delta * step_scale * turn_velocity
-		#step_size = delta * 12
 		rotation.y = lerp_angle(rotation.y, target_angle, step_size)
 		
 		if(not isLookingBack(look_vector, .95)):

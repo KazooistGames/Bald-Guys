@@ -11,7 +11,7 @@ var bottom = Vector3.ZERO
 @export var top_height = 0.75
 
 
-func _process(delta):
+func _process(_delta):
 
 	if not raycast.is_colliding():
 		pass

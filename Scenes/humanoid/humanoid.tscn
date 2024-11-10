@@ -4144,13 +4144,11 @@ swayWidth = -0.22
 swayHeightBase = 0.8
 idleOffset = Vector3(-0.2, 0.9, 0.1)
 
-[node name="leftHandTarget" type="RemoteTransform3D" parent="Skeleton3D"]
+[node name="leftHandTarget" type="Node3D" parent="Skeleton3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.311868, 1.18889, 0.245717)
-remote_path = NodePath("../../Force")
 
-[node name="rightHandTarget" type="RemoteTransform3D" parent="Skeleton3D"]
+[node name="rightHandTarget" type="Node3D" parent="Skeleton3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.489, 0.962, -0.07)
-remote_path = NodePath("../../Force")
 
 [node name="Ragdoll" type="Skeleton3D" parent="Skeleton3D"]
 bones/0/name = "lowerBody"
@@ -4732,6 +4730,10 @@ joint_constraints/z/angular_equilibrium_point = 0.0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Skeleton3D/Ragdoll/Physical Bone head"]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.0781233, 0.0393642)
 shape = SubResource("CapsuleShape3D_usxk3")
+
+[node name="Force" parent="Skeleton3D/Ragdoll/Physical Bone head" node_paths=PackedStringArray("Wielder") instance=ExtResource("9_vmktp")]
+transform = Transform3D(1, -9.62229e-19, -4.54748e-13, -1.6263e-18, 1, 5.06639e-07, 4.98733e-18, -5.06639e-07, 1, 0, 0, 1)
+Wielder = NodePath("../../../..")
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
 transform = Transform3D(0.99995, -4.90993e-05, -1.2964e-05, 8.71122e-05, 0.999978, 9.86457e-06, 2.05636e-05, -9.86457e-06, 0.999983, -0.208618, 1.54967, -0.0231976)
@@ -5549,6 +5551,3 @@ script = ExtResource("5_6swf7")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_0d5cw")
-
-[node name="Force" parent="." instance=ExtResource("9_vmktp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.311868, 1.18889, 0.245717)

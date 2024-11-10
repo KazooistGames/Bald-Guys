@@ -2,52 +2,61 @@ extends Area3D
 
 @onready var collider = $CollisionShape3D
 
-@export var pivotOffset = Vector3.ZERO
-@export var aim = Vector3.ZERO	
+@export var Holding = false
 
+@export var Wielder : Node3D = null
 
-var wielder
+var contained_bodies = []
 
 
 func _ready():
-	wielder = get_parent()
-
-
-func _physics_process(delta):
 	
-	aim = wielder.LOOK_VECTOR
+	
+	if not Wielder:
+		queue_free()
 		
-	var collidingNodes = get_overlapping_bodies()	
+	elif not Wielder.is_in_group("humanoids"):
+		queue_free()
+	
+	else:
+		body_entered.connect(add_body)
+		body_exited.connect(remove_body)
+
+
+func _physics_process(_delta):
 		
-	if wielder.REACHING:
+	if Wielder.REACHING:
+		Holding = true
 		
-		for node in collidingNodes:
+		for node in contained_bodies:
 			hold(node)
 			
+	elif Holding:
+		Holding = false
+				
+		for node in contained_bodies:
+			throw(node)
+		
 		
 func hold(node):
 	
-	if node == wielder:
-			return
-			
-	elif node is RigidBody3D:
+	if can_be_forced(node):
 
-		var disposition = (global_position + pivotOffset) - node.global_position	
+		var disposition = global_position - node.global_position	
 
 		var direction = disposition.normalized()
-		var magnitude = 250 * node.mass * pow(disposition.length(), 2.0)
+		var magnitude = 150 * node.mass * pow(disposition.length(), 3.0)
 
 		node.apply_central_force(direction * magnitude)
 
 
 func throw(node):
 
-	if node == wielder:
-			return
-			
-	elif node is RigidBody3D:
-		var disposition = node.global_position - (global_position + pivotOffset)		
-		var direction = aim.lerp(disposition, 0.2)
+	if can_be_forced(node):
+
+		var disposition = global_position - get_parent().global_position
+		var scatter = node.global_position - get_parent().global_position
+		var direction = disposition.lerp(scatter, 0.25)
 		var magnitude = 1000 * node.mass
 		
 		node.apply_central_force(magnitude * direction)
@@ -55,12 +64,43 @@ func throw(node):
 
 func push(node):
 	
-		if node == wielder:
-			return
+	if can_be_forced(node):
+
+		var direction = node.global_position - Wielder.global_position
+		
+		var magnitude = 1000 * node.mass
+		
+		node.apply_central_force(magnitude * direction)
 			
-		elif node is RigidBody3D:
-			var direction = node.global_position - (wielder.global_position + pivotOffset)
 			
-			var magnitude = 1000 * node.mass
+func add_body(node):
+	
+	if can_be_forced(node):
+		contained_bodies.append(node)
+	
+	
+func remove_body(node):
+	
+	if can_be_forced(node):
+		contained_bodies.erase(node)
+		
+		
+func can_be_forced(node):
+	
+	if node == null:
+		return false
+		
+	elif not node is RigidBody3D:
+		return false
+		
+	elif node == Wielder:
+		return false
+	
+	elif node.is_in_group("humanoids"):
+		return false
+		
+	else:
+		return true
 			
-			node.apply_central_force(magnitude * direction)
+
+			
