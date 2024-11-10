@@ -47,6 +47,7 @@ func processFallOrientation(delta, look_vector, walk_vector):
 
 	walk_vector.y = 0
 	walk_vector = walk_vector.normalized()
+	
 	ragdollSkeleton.LINEAR_STIFFNESS = 400.0
 	ragdollSkeleton.ANGULAR_STIFFNESS = 400.0
 	ragdollSkeleton.LINEAR_DAMPING = 20
@@ -55,23 +56,19 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.bone_modifiers["foot.l"] = 0.25
 	ragdollSkeleton.bone_modifiers["toes.r"] = 1.0
 	ragdollSkeleton.bone_modifiers["toes.l"] = 1.0
-	var timeStep = LERP_VAL * delta
+	
 	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
-	var target_angle = rotation.y
-
-	if(walk_vector == Vector3.ZERO):
-		
-		if(isLookingBack(look_vector, 0.5)):
-			target_angle = atan2(-look_vector.x, -look_vector.z)
-			
-	elif (is_back_pedaling(look_vector, walk_vector)):
-		target_angle = atan2(-walk_vector.x, -walk_vector.z)
+	
+	var target_angle = atan2(-look_vector.x, -look_vector.z)
+	var timeStep = LERP_VAL * delta
+	
+	if walk_vector == Vector3.ZERO:
+		smooth_turn(look_vector, target_angle, 10, delta)
 		
 	else:
 		target_angle = atan2(walk_vector.x, walk_vector.z)
-
-	rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
+		rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
 
 
 func processIdleOrientation(delta, look_vector):
@@ -84,9 +81,11 @@ func processIdleOrientation(delta, look_vector):
 	ragdollSkeleton.bone_modifiers["foot.l"] = 1.5
 	ragdollSkeleton.bone_modifiers["toes.r"] = 0.125
 	ragdollSkeleton.bone_modifiers["toes.l"] = 0.125
-	var timeStep = LERP_VAL * delta
+	
 	leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
+	
+	var timeStep = LERP_VAL * delta
 	var target_angle = atan2(-look_vector.x, -look_vector.z)
 	var difference = get_true_difference(rotation.y, target_angle)
 	#var shortestPath = get_shortest_path(rotation.y, target_angle)
@@ -111,10 +110,7 @@ func processIdleOrientation(delta, look_vector):
 		turn_velocity = 0
 
 
-var turn_velocity = 0
-var turn_acceleration = 5
-var turn_locked_in = false
-var turn_top_speed = 3
+
 func processWalkOrientation(delta, look_vector, walk_vector):
 	
 	ragdollSkeleton.LINEAR_STIFFNESS = 800.0
@@ -125,9 +121,12 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.bone_modifiers["foot.l"] = 1.0
 	ragdollSkeleton.bone_modifiers["toes.r"] = 0.125
 	ragdollSkeleton.bone_modifiers["toes.l"] = 0.125
-	var timeStep = LERP_VAL * delta
+	
+
 	leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
 	rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")))
+	
+	var timeStep = LERP_VAL * delta
 	var actual = rotation.y
 	var target = atan2(-walk_vector.x, -walk_vector.z) if is_back_pedaling(look_vector, walk_vector) else atan2(walk_vector.x, walk_vector.z)
 	var lookTarget = atan2(-look_vector.x, -look_vector.z)
@@ -276,5 +275,37 @@ func swap_which_hand_has_force(old, new):
 	new_target_node.remote_path = old_target_node.remote_path
 	old_target_node.remote_path = ''
 	
+	
 func get_ragdoll_bone_position(bone_name):
 	return ragdollSkeleton.get_bone_global_pose_no_override(ragdollSkeleton.find_bone(bone_name))
+
+
+var turn_velocity = 0
+var turn_acceleration = 5
+var turn_locked_in = false
+var turn_top_speed = 3
+func smooth_turn(look_vector, target_angle, speed, delta):
+	
+	if isLookingBack(look_vector, 0.0):
+		turn_locked_in = true
+		
+	var difference = get_true_difference(rotation.y, target_angle)
+	
+	if turn_locked_in:
+		turn_velocity = min(turn_velocity + delta * turn_acceleration, turn_top_speed)
+		var step_scale = 5
+		var step_size = delta * step_scale * turn_velocity
+		#step_size = delta * 12
+		rotation.y = lerp_angle(rotation.y, target_angle, step_size)
+		
+		if(not isLookingBack(look_vector, .95)):
+			turn_locked_in = false
+			
+	elif abs(difference) >= PI/2:
+		rotation.y = lerp_angle(rotation.y, target_angle, delta * speed)
+		
+	else:
+		turn_velocity = 0
+		
+		
+		

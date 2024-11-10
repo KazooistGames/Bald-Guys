@@ -1,13 +1,5 @@
 extends RigidBody3D
 
-
-
-const MoveState = {
-	WALKING = 0,
-	FALLING = 1,
-	RAGDOLL = 2,
-}
-
 const floor_normal = Vector3(0, 1, 0)
 const floor_angle = PI/3.0
 
@@ -23,9 +15,10 @@ const floor_angle = PI/3.0
 		material.albedo_color = value
 		model.set_surface_override_material(0, material)
 	
+@export var RAGDOLLED = false
 @export var ON_FLOOR = true
 @export var REACHING = false
-@export var MOVE_STATE = MoveState.WALKING
+
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
@@ -73,8 +66,8 @@ func _ready():
 		
 
 func _process(delta):
-		
-	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
+			
+	if not RAGDOLLED: #ragdoll cooldown
 		pass
 		
 	elif not is_multiplayer_authority():
@@ -89,34 +82,38 @@ func _process(delta):
 	elif WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
 		RUNNING = false
 		
-	elif linear_velocity == Vector3.ZERO:
+	elif WALK_VECTOR == Vector3.ZERO:
 		RUNNING = false
 		
-	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
+
 	TOPSPEED_MOD = 0.9 if REACHING else 1.0
 	animation.walkAnimBlendScalar = TOPSPEED
 	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
 	
-	match MOVE_STATE:
+	if RAGDOLLED:
+		pass
 		
-		MoveState.FALLING:
-			IMPACT_THRESHOLD = 6.0 * mass
-			animation.updateFalling(linear_velocity)
-			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
+	elif ON_FLOOR:
+		TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
+		IMPACT_THRESHOLD = 4.5 * mass
+		animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
+		
+		if(WALK_VECTOR):
+			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)
 			
-		MoveState.WALKING:
-			IMPACT_THRESHOLD = 4.5 * mass
-			animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
+		else:
+			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
 			
-			if(WALK_VECTOR):
-				skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)
-				
-			else:
-				skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
-				
+	else:
+		TOPSPEED = SPEED_GEARS.y
+		IMPACT_THRESHOLD = 6.0 * mass
+		animation.updateFalling(linear_velocity)
+		skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
+			
 	FACING_VECTOR = Vector3(sin(skeleton.rotation.y), skeleton.rotation.x, cos(skeleton.rotation.y))
-
+	skeleton.processReach(LOOK_VECTOR, REACHING)
+	
 
 func _integrate_forces(state):
 	
@@ -146,12 +143,12 @@ func _integrate_forces(state):
 		var directionalModifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)
 		var impact = state.get_contact_impulse(index).length() * directionalModifier
 
-		if impact >= IMPACT_THRESHOLD: 
+		if is_multiplayer_authority() and impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
 
-		elif not ON_FLOOR_buffer:
-			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 3.0/4.0	
+		elif not ON_FLOOR_buffer and not ON_FLOOR:
+			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/4.0	
 			var check2 = impact > IMPACT_THRESHOLD/2
 			var check3 = abs(normal.dot(floor_normal)) <= 0.5
 
@@ -162,50 +159,44 @@ func _integrate_forces(state):
 			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
-	if not ON_FLOOR and ON_FLOOR_buffer and translational_velocity.length() > 0.5:
-		var retardation_vector = -translational_velocity.normalized()
-		var impulse = retardation_vector * mass * 2
-		state.apply_central_impulse(impulse)
+	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer and translational_velocity.length() > 0.5:
+		land.rpc()
 		
 	ON_FLOOR = ON_FLOOR_buffer
-	
-	if MOVE_STATE != MoveState.RAGDOLL: #ragdoll cooldown
-		MOVE_STATE = MoveState.WALKING if ON_FLOOR else MoveState.FALLING
 		
 	var speed_target = TOPSPEED * TOPSPEED_MOD
 	var impulse = Vector3.ZERO
 		
-	match MOVE_STATE:
+
+	if RAGDOLLED:
+		pass
+	
+	elif ON_FLOOR:
 		
-		MoveState.FALLING:
-					
-			if linear_velocity.y <= 2.75:
-				FLOATING = false
-				
-			if FLOATING:
-				gravity_scale = 1.0/3.0
-				
-			else:
-				gravity_scale = 1
+		if WALK_VECTOR == Vector3.ZERO:			
+			impulse = -translational_velocity * get_acceleration() * mass
 
-			if WALK_VECTOR:
-				impulse = WALK_VECTOR * get_acceleration()/2 * mass
+		elif translational_velocity.length() < speed_target:
+			impulse = WALK_VECTOR * get_acceleration() * 2 * mass
 
-		MoveState.WALKING:
+		else:
+			var removal_factor = WALK_VECTOR.project(translational_velocity).normalized()
+			impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
+
+	else:
+				
+		if linear_velocity.y <= 2.75:
+			FLOATING = false
 			
-			if not ON_FLOOR:
-				pass
-				
-			elif WALK_VECTOR == Vector3.ZERO:			
-				impulse = -translational_velocity * get_acceleration() * mass
+		if FLOATING:
+			gravity_scale = 1.0/3.0
+			
+		else:
+			gravity_scale = 1
 
-			elif translational_velocity.length() < speed_target:
-				impulse = WALK_VECTOR * get_acceleration() * 2 * mass
-
-			else:
-				var removal_factor = WALK_VECTOR.project(translational_velocity).normalized()
-				impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
-
+		if WALK_VECTOR:
+			impulse = WALK_VECTOR * get_acceleration()/2 * mass
+			
 	apply_central_force(impulse)
 	
 	if translational_velocity.length() > speed_target:
@@ -215,36 +206,33 @@ func _integrate_forces(state):
 
 func _physics_process(delta):
 	
-	if MOVE_STATE != MoveState.RAGDOLL:
+	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta
 		
 	elif skeleton.ragdoll_is_at_rest():
 		ragdoll_recovery_timer_seconds += delta
+				
+	if RAGDOLLED:
+		skeleton.processRagdollOrientation(delta)
 		
-	match MOVE_STATE:
+	elif ON_FLOOR:
 		
-		MoveState.FALLING:						
-			skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
-			var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
-			collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
-			collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
+		if WALK_VECTOR == Vector3.ZERO:		
+			skeleton.processIdleOrientation(delta, LOOK_VECTOR)
 
-		MoveState.WALKING:
-					
-			if WALK_VECTOR == Vector3.ZERO:		
-				skeleton.processIdleOrientation(delta, LOOK_VECTOR)
+		else:
+			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
+		
+		var scalar = 2
+		collider.shape.height = move_toward(collider.shape.height, 1.5, delta * scalar)
+		collider.position.y = move_toward(collider.position.y, 0.75, delta * scalar)
+		
+	else:
+		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
+		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
+		collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
+		collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
 
-			else:
-				skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
-			
-			var scalar = 2
-			collider.shape.height = move_toward(collider.shape.height, 1.5, delta * scalar)
-			collider.position.y = move_toward(collider.position.y, 0.75, delta * scalar)
-			
-		MoveState.RAGDOLL:
-			skeleton.processRagdollOrientation(delta)
-
-	skeleton.processReach(LOOK_VECTOR, REACHING)
 	rotation.y = fmod(rotation.y, 2*PI)
 	
 	
@@ -293,27 +281,27 @@ func get_ragdoll_recovered():
 @rpc("call_local")
 func ragdoll():
 	
-	if(MOVE_STATE != MoveState.RAGDOLL):
+	if not RAGDOLLED:
 		RUNNING = false
 		ragdolled.emit()
 		skeleton.ragdoll_start()
 		ragdoll_recovery_timer_seconds = 0
 		animation.active = false
 		collider.disabled = true
-		MOVE_STATE = MoveState.RAGDOLL
+		RAGDOLLED = true
 		freeze = true
 		
 		
 @rpc("call_local")
 func unragdoll():
 	
-	if(MOVE_STATE == MoveState.RAGDOLL):
+	if RAGDOLLED:
 		ragdoll_cooldown_timer_seconds = 0
 		position = skeleton.ragdoll_position()
 		skeleton.ragdoll_stop()
 		animation.active = true
 		collider.disabled = false
-		MOVE_STATE = MoveState.FALLING
+		RAGDOLLED = false
 		freeze = false
 
 
@@ -328,7 +316,9 @@ func jump():
 func land():
 	
 	if ON_FLOOR:
-		
-		apply_central_impulse(-Vector3(linear_velocity.x, 0, linear_velocity.z) * mass * 2)
+		var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
+		var retardation_vector = -translational_velocity.normalized()
+		var impulse = retardation_vector * mass * 2
+		apply_central_impulse(impulse)
 
 	

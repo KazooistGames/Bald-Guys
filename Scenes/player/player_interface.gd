@@ -19,7 +19,7 @@ func _process(_delta):
 		character.add_child(camera)
 		
 	else:
-		CAMERA_OFFSET = -1.5 if character.MOVE_STATE == character.MoveState.RAGDOLL else 0.115
+		CAMERA_OFFSET = -1.5 if character.RAGDOLLED else 0.115
 		var adjustedOffset = character.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * CAMERA_OFFSET
 		var adjustedPosition = character.head_position()
 		camera.position = adjustedPosition + adjustedOffset

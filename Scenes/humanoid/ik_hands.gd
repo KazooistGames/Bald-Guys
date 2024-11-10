@@ -23,9 +23,10 @@ func _process(delta):
 	
 	if is_running() and lerp_scalar < 1.0:
 		lerp_scalar += delta
-		pass
+		
 	else:
 		lerp_scalar = 0
+		
 	lerp_scalar = clampf(lerp_scalar, 0.0, 1.0)
 	
 	
@@ -38,7 +39,8 @@ func process_arm_forward(headTransform):
 	targetTransform.origin = headTransform.basis.z * scalar + headTransform.origin + offset
 	targetTransform.origin.z = max(targetTransform.origin.z, 0.2)
 	#targetTransform.basis = headTransform.basis.rotated(Vector3.FORWARD, PI)
-	targeted_node.transform = targeted_node.transform.interpolate_with(targetTransform, 1.25 * lerp_scalar)
+	targeted_node.transform = targeted_node.transform.interpolate_with(targetTransform, 1.0 * lerp_scalar)
+	
 	
 func process_arm_sway(footTransform):
 	var targetTransform = footTransform

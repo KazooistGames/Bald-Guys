@@ -35,7 +35,7 @@ func hold(node):
 		var disposition = (global_position + pivotOffset) - node.global_position	
 
 		var direction = disposition.normalized()
-		var magnitude = 250 * node.mass * pow(disposition.length(), 3.0)
+		var magnitude = 250 * node.mass * pow(disposition.length(), 2.0)
 
 		node.apply_central_force(direction * magnitude)
 
