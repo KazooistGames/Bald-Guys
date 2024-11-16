@@ -247,7 +247,7 @@ var turn_locked_in = false
 var turn_top_speed = 3
 func smooth_turn(look_vector, target_angle, speed, delta):
 	
-	if isLookingBack(look_vector, 0.0):
+	if isLookingBack(look_vector, 0.25):
 		turn_locked_in = true
 		
 	var difference = get_true_difference(rotation.y, target_angle)
@@ -258,7 +258,7 @@ func smooth_turn(look_vector, target_angle, speed, delta):
 		var step_size = delta * step_scale * turn_velocity
 		rotation.y = lerp_angle(rotation.y, target_angle, step_size)
 		
-		if(not isLookingBack(look_vector, .95)):
+		if not isLookingBack(look_vector, .95):
 			turn_locked_in = false
 			
 	elif abs(difference) >= PI/2:

@@ -28,8 +28,8 @@ func _physics_process(_delta):
 		Holding = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		collider.shape.radius = 0.75
-		collider.shape.height = 1.25
+		collider.shape.radius = 0.5
+		collider.shape.height = 1.5
 		for node in contained_bodies:
 			hold(node)
 			
@@ -59,13 +59,14 @@ func throw(node):
 
 	if can_be_forced(node):
 
-		var disposition = global_position - get_parent().global_position
+		#var aim = global_position - get_parent().global_position
+		var aim = Wielder.LOOK_VECTOR.normalized() * Vector3(-1, 1, -1)
 		var scatter = node.global_position - get_parent().global_position
-		var direction = disposition.lerp(scatter, 0.05)
+		var direction = aim.lerp(scatter, 0.2)
 		var magnitude = 2000.0 * node.mass
 		node.apply_central_force(magnitude * direction)
 		
-		var lift = Vector3.UP * magnitude / 5.0
+		var lift = Vector3.UP * magnitude / 10.0
 		node.apply_central_force(lift)
 			
 

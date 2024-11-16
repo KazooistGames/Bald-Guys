@@ -142,7 +142,10 @@ func _integrate_forces(state):
 		var directionalModifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)
 		var impact = state.get_contact_impulse(index).length() * directionalModifier
 
-		if is_multiplayer_authority() and impact >= IMPACT_THRESHOLD: 
+		if not is_multiplayer_authority():
+			pass
+			
+		elif is_multiplayer_authority() and impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
 			ragdoll.rpc()
 

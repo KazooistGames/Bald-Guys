@@ -6,11 +6,17 @@ const force_prefab = preload("res://Scenes/humanoid/force/force.tscn")
 @export var character : Node3D
 
 @export var camera : Node3D
+
+@export var force : Node3D
 	
 	
 func _process(_delta):
 	
 	if not character:
+		
+		if camera:
+			camera.queue_free()
+		
 		camera = null
 		
 	elif not camera:
