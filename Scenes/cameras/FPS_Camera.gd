@@ -7,18 +7,24 @@ const MAX_ANGLE = PI/2.3
 @onready var reticle = $reticle
 @onready var raycast = $RayCast3D
 
+
 func _ready():
+	
 	set_current(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
+	
 func _process(_delta):
+	
 	reticle.expand_mode = 1
 	reticle.size = Vector2.ONE * 4
 	reticle.position = get_center_of_screen() - reticle.size/2
 	
-func _unhandled_input(event):
+func _input(event):
+	
 	set_current(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
 	if event is InputEventMouseMotion:
 		rotate_y(-event.relative.x * HORIZONTAL_SENSITIVITY )
 		rotate_object_local(Vector3(1,0,0), -event.relative.y * VERTICAL_SENSATIVITY)
@@ -26,7 +32,9 @@ func _unhandled_input(event):
 		rotation.y = fmod(rotation.y, 2 * PI)
 		rotation.z = 0
 
+
 func get_center_of_screen():
+	
 	var lookPoint = raycast.get_collision_point()
 	var screenCenter = unproject_position(lookPoint)
 	screenCenter.x = snapped(screenCenter.x, 1)

@@ -8,7 +8,6 @@ extends Area3D
 
 var contained_bodies = []
 
-
 func _ready():
 	
 	
@@ -27,13 +26,19 @@ func _physics_process(_delta):
 		
 	if Wielder.REACHING:
 		Holding = true
-		
+		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+		collider.shape.radius = 0.75
+		collider.shape.height = 1.25
 		for node in contained_bodies:
 			hold(node)
 			
 	elif Holding:
 		Holding = false
-				
+		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		collider.shape.radius = 0.0
+		collider.shape.height = 0.0
 		for node in contained_bodies:
 			throw(node)
 		
@@ -45,7 +50,7 @@ func hold(node):
 		var disposition = global_position - node.global_position	
 
 		var direction = disposition.normalized()
-		var magnitude = 150 * node.mass * pow(disposition.length(), 3.0)
+		var magnitude = 250 * node.mass * pow(disposition.length(), 2.0)
 
 		node.apply_central_force(direction * magnitude)
 
@@ -56,10 +61,12 @@ func throw(node):
 
 		var disposition = global_position - get_parent().global_position
 		var scatter = node.global_position - get_parent().global_position
-		var direction = disposition.lerp(scatter, 0.25)
-		var magnitude = 1000 * node.mass
-		
+		var direction = disposition.lerp(scatter, 0.05)
+		var magnitude = 2000.0 * node.mass
 		node.apply_central_force(magnitude * direction)
+		
+		var lift = Vector3.UP * magnitude / 5.0
+		node.apply_central_force(lift)
 			
 
 func push(node):

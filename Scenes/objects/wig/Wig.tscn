@@ -1,8 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://cs5vme3m6f1ux"]
+[gd_scene load_steps=10 format=3 uid="uid://cs5vme3m6f1ux"]
 
 [ext_resource type="Script" path="res://Scenes/objects/wig/Wig.gd" id="1_rx6rq"]
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="2_6yeyh"]
 [ext_resource type="PackedScene" uid="uid://bbtuviu7jd3j0" path="res://Scenes/components/interactable.tscn" id="2_qynx0"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8sl1w"]
+bounce = 0.1
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_k7sog"]
 radius = 0.25
@@ -38,7 +41,8 @@ properties/3/replication_mode = 1
 
 [node name="Wig" type="RigidBody3D"]
 collision_layer = 8
-collision_mask = 7
+collision_mask = 15
+physics_material_override = SubResource("PhysicsMaterial_8sl1w")
 max_contacts_reported = 10
 contact_monitor = true
 linear_damp = 1.0

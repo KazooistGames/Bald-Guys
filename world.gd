@@ -89,6 +89,15 @@ func _process(_delta):
 		pass
 
 
+func _notification(what):
+	
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		pause_menu.visible = true
+		
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		pause_menu.visible = false
+
+
 func start_host_lobby():
 	
 	var enet_peer = ENetMultiplayerPeer.new()

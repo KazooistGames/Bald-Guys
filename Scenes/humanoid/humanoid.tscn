@@ -4571,6 +4571,7 @@ collision_mask = 5
 joint_offset = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.52973e-10, 2.94683e-24, 0)
 body_offset = Transform3D(1, 2.89831e-09, 0, 5.32907e-15, 1, 0, 0, 0, 1, 5.52973e-10, 0, 0)
 mass = 20.0
+bounce = 0.2
 bone_name = "lowerBody"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Skeleton3D/Ragdoll/Physical Bone lowerBody"]
@@ -4585,6 +4586,7 @@ joint_type = 5
 joint_offset = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.09317e-11, -1.27227e-26, 0)
 body_offset = Transform3D(1, 4.44089e-16, 0, -2.498e-16, 1, 0, 0, 0, 1, 5.09317e-11, 0, 0)
 mass = 20.0
+bounce = 0.2
 bone_name = "upperBody"
 joint_constraints/x/linear_limit_enabled = true
 joint_constraints/x/linear_limit_upper = 0.0
@@ -4662,6 +4664,7 @@ joint_type = 5
 joint_offset = Transform3D(0.999997, 0, 0, 0, 0.999995, 0, 0, 0, 0.999995, 6.4756e-10, 1.28832e-22, -1.52759e-21)
 body_offset = Transform3D(1, 1.75391e-13, -1.8837e-12, 5.5792e-13, 0.94859, 0.316508, 2.30069e-12, -0.316508, 0.94859, -6.4756e-10, 0, 0)
 mass = 5.0
+bounce = 0.2
 bone_name = "head"
 joint_constraints/x/linear_limit_enabled = true
 joint_constraints/x/linear_limit_upper = 0.0
