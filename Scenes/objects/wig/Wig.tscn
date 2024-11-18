@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Scenes/objects/wig/Wig.gd" id="1_rx6rq"]
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="2_6yeyh"]
-[ext_resource type="PackedScene" uid="uid://bbtuviu7jd3j0" path="res://Scenes/components/interactable.tscn" id="2_qynx0"]
+[ext_resource type="PackedScene" uid="uid://bbtuviu7jd3j0" path="res://Scenes/components/interactable/interactable.tscn" id="2_qynx0"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8sl1w"]
 bounce = 0.1

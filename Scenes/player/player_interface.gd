@@ -14,9 +14,6 @@ func _process(_delta):
 	
 	if not character:
 		
-		if camera:
-			camera.queue_free()
-		
 		camera = null
 		
 	elif not camera:

@@ -34,7 +34,6 @@ const floor_angle = PI/3.0
 @onready var collider = $CollisionShape3D
 @onready var synchronizer = $MultiplayerSynchronizer
 
-
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var TOPSPEED = 0
 var TOPSPEED_MOD = 1
@@ -44,8 +43,6 @@ var ragdoll_cooldown_period_seconds = 0.5
 var ragdoll_cooldown_timer_seconds = 0
 var ragdoll_recovery_period_seconds = 1
 var ragdoll_recovery_timer_seconds = 0
-
-
 
 signal ragdolled
 
@@ -146,8 +143,9 @@ func _integrate_forces(state):
 			pass
 			
 		elif is_multiplayer_authority() and impact >= IMPACT_THRESHOLD: 
-			ragdoll_recovery_period_seconds = impact / IMPACT_THRESHOLD
+			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
+			print(impact)
 
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
@@ -225,14 +223,14 @@ func _physics_process(delta):
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 		
 		var scalar = 2
-		collider.shape.height = move_toward(collider.shape.height, 1.5, delta * scalar)
-		collider.position.y = move_toward(collider.position.y, 0.75, delta * scalar)
+		collider.shape.height = move_toward(collider.shape.height, 1.85, delta * scalar)
+		collider.position.y = move_toward(collider.position.y, 0.925, delta * scalar)
 		
 	else:
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
-		collider.shape.height = clamp(lerp(1.5, 1.0, jumpDeltaScale ), 1.0, 1.5)
-		collider.position.y = clamp(lerp(0.75, 1.0, jumpDeltaScale ), 0.75, 1.0)
+		collider.shape.height = clamp(lerp(1.85, 1.0, jumpDeltaScale ), 1.0, 1.85)
+		collider.position.y = clamp(lerp(0.925, 1.175, jumpDeltaScale ), 0.925, 1.175)
 
 	rotation.y = fmod(rotation.y, 2*PI)
 	
@@ -283,6 +281,7 @@ func get_ragdoll_recovered():
 func ragdoll():
 	
 	if not RAGDOLLED:
+		$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 		RUNNING = false
 		ragdolled.emit()
 		skeleton.ragdoll_start()

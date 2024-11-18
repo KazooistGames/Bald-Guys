@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://km6if1awx5dt"]
+[gd_scene load_steps=7 format=3 uid="uid://km6if1awx5dt"]
 
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="1_e6v8x"]
+[ext_resource type="Script" path="res://Scenes/objects/brick/brick.gd" id="1_pm3sq"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xydkg"]
 bounce = 0.15
@@ -11,11 +12,20 @@ size = Vector3(0.25, 0.2, 0.5)
 [sub_resource type="BoxShape3D" id="BoxShape3D_5837y"]
 size = Vector3(0.25, 0.2, 0.5)
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_cl3je"]
+properties/0/path = NodePath(".:AUTHORITY_POSITION")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
 [node name="Brick" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 15
 mass = 10.0
 physics_material_override = SubResource("PhysicsMaterial_xydkg")
+script = ExtResource("1_pm3sq")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_ythp8")
@@ -23,3 +33,6 @@ surface_material_override/0 = ExtResource("1_e6v8x")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_5837y")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_cl3je")
