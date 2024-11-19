@@ -4,7 +4,6 @@
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_yifoa"]
 resource_local_to_scene = true
-height = 1.5
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_b2kif"]
 height = 1.25
@@ -18,7 +17,7 @@ gravity_point_center = Vector3(0, 0, 0)
 gravity_direction = Vector3(0, 0, 0)
 gravity = 0.0
 linear_damp_space_override = 3
-linear_damp = 6.0
+linear_damp = 5.0
 angular_damp_space_override = 3
 angular_damp = 3.0
 script = ExtResource("1_8ejgp")
@@ -26,7 +25,6 @@ script = ExtResource("1_8ejgp")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 shape = SubResource("CylinderShape3D_yifoa")
-disabled = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)

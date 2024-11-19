@@ -129,23 +129,23 @@ func _integrate_forces(state):
 	var ON_FLOOR_buffer = false
 	
 	for index in range(contact_count):
-
+	
 		var normal = state.get_contact_local_normal(index)
-		#var otherCollider : Node3D = state.get_contact_collider_object(index)
-
+		var relative_velocity = (state.get_contact_collider_velocity_at_position(index) - state.get_contact_local_velocity_at_position(index))
 		if normal.angle_to(floor_normal) <= floor_angle:		
 			ON_FLOOR_buffer = true
 
 		var directionalModifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)
 		var impact = state.get_contact_impulse(index).length() * directionalModifier
+		if state.get_contact_collider_object(index) is RigidBody3D:
+			impact *= sqrt(relative_velocity.length())
 
 		if not is_multiplayer_authority():
 			pass
 			
-		elif is_multiplayer_authority() and impact >= IMPACT_THRESHOLD: 
+		elif impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
-			print(impact)
 
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
@@ -156,7 +156,8 @@ func _integrate_forces(state):
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
 				FLOATING = false
-			
+		if(impact > 100):
+			print(impact, " ",  " ", multiplayer.get_unique_id())
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
 	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer and translational_velocity.length() > 0.5:

@@ -10,8 +10,11 @@ func _ready():
 		
 		
 func process_hit(node):
-			
-	if not node:
+		
+	if not is_multiplayer_authority():
+		pass	
+		
+	elif not node:
 		pass
 		
 	elif not node.is_in_group("humanoids"):
@@ -23,11 +26,10 @@ func process_hit(node):
 	
 @rpc("call_local")
 func hit_humanoid(node_path):
-
+	return
 	var node = get_node(node_path)
-	
 	var direction = node.global_position - global_position
-	var magnitude = linear_velocity.length() * mass
+	var magnitude = pow(linear_velocity.length(), 1.5) * mass
 	var impulse = magnitude * direction
-	print(impulse)
+	#print(impulse.length(), " ", multiplayer.get_unique_id())
 	node.apply_central_impulse(impulse)
