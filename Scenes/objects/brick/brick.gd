@@ -7,18 +7,6 @@ func _ready():
 	contact_monitor = true
 	max_contacts_reported = 5
 	body_entered.connect(process_hit)
-	
-		
-func _integrate_forces(state):
-
-	if is_multiplayer_authority():
-		AUTHORITY_POSITION = state.transform.origin	
-		
-	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.25)
-		
-	else:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 		
 		
 func process_hit(node):
@@ -40,5 +28,6 @@ func hit_humanoid(node_path):
 	
 	var direction = node.global_position - global_position
 	var magnitude = linear_velocity.length() * mass
-
-	node.apply_central_impulse(magnitude * direction)
+	var impulse = magnitude * direction
+	print(impulse)
+	node.apply_central_impulse(impulse)

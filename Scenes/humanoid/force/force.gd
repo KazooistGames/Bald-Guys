@@ -34,6 +34,7 @@ func _physics_process(_delta):
 		collider.shape.radius = 0.5
 		collider.shape.height = 1.5
 		collider.disabled = false
+		
 		for node in contained_bodies:			
 			hold.rpc(node.get_path())
 			
@@ -44,6 +45,7 @@ func _physics_process(_delta):
 		collider.shape.radius = 0.0
 		collider.shape.height = 0.0
 		collider.disabled = true
+		
 		for node in contained_bodies:
 			throw.rpc(node.get_path())
 		
@@ -54,7 +56,6 @@ func hold(node_path):
 	var node = get_node(node_path)
 	
 	if can_be_held(node):
-		print("held")
 		var disposition = global_position - node.global_position	
 		var direction = disposition.normalized()
 		var magnitude = hold_force * pow(disposition.length(), 2.0)
@@ -72,7 +73,6 @@ func throw(node_path):
 		var direction = aim.lerp(scatter, 0.2)
 		var magnitude = throw_force
 		node.apply_central_force(magnitude * direction)
-		
 		var lift = Vector3.UP * magnitude / 10.0
 		node.apply_central_force(lift)
 		

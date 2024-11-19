@@ -55,20 +55,6 @@ func _process(_delta):
 	#if Engine.is_editor_hint():
 		#rng.seed = hash(seed)
 		#getRandomHairColor()
-		
-func _physics_process(_delta):
-	
-	if not multiplayer.has_multiplayer_peer():
-		return
-		
-	elif is_multiplayer_authority():
-		AUTHORITY_POSITION = position
-		
-	elif position.distance_to(AUTHORITY_POSITION) > 1:
-		position = AUTHORITY_POSITION
-		
-	else:
-		position = position.lerp(AUTHORITY_POSITION, .1)
 
 
 func getRandomHairColor():
