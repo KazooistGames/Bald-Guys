@@ -4,8 +4,7 @@
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_yifoa"]
 resource_local_to_scene = true
-height = 1.25
-radius = 0.75
+height = 1.5
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_b2kif"]
 height = 1.25
@@ -27,6 +26,7 @@ script = ExtResource("1_8ejgp")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 shape = SubResource("CylinderShape3D_yifoa")
+disabled = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)

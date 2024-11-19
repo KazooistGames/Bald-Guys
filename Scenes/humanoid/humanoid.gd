@@ -197,6 +197,7 @@ func _integrate_forces(state):
 			impulse = WALK_VECTOR * get_acceleration()/2 * mass
 			
 	apply_central_force(impulse)
+	print(impulse)
 	
 	if translational_velocity.length() > speed_target:
 		impulse = -translational_velocity * get_acceleration() * mass

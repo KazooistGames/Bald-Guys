@@ -1,0 +1,28 @@
+[gd_scene load_steps=6 format=3 uid="uid://bco5lktfdwxre"]
+
+[ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="2_8epmy"]
+[ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="2_n6e4d"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xydkg"]
+bounce = 0.15
+
+[sub_resource type="BoxMesh" id="BoxMesh_ythp8"]
+size = Vector3(2, 2, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5837y"]
+size = Vector3(2, 2, 2)
+
+[node name="Block" type="RigidBody3D"]
+collision_layer = 8
+collision_mask = 15
+mass = 500.0
+physics_material_override = SubResource("PhysicsMaterial_xydkg")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_ythp8")
+surface_material_override/0 = ExtResource("2_n6e4d")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_5837y")
+
+[node name="PhysicsSync" parent="." instance=ExtResource("2_8epmy")]
