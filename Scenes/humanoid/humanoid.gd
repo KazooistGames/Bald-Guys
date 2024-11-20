@@ -112,10 +112,11 @@ func _process(_delta):
 	
 
 func _integrate_forces(state):
-	
-	WALK_VECTOR = WALK_VECTOR.normalized()
-	
-	if is_multiplayer_authority():
+
+	if not multiplayer.has_multiplayer_peer():
+		pass
+		
+	elif is_multiplayer_authority():
 		AUTHORITY_POSITION = state.transform.origin	
 		
 	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
@@ -131,14 +132,24 @@ func _integrate_forces(state):
 	for index in range(contact_count):
 	
 		var normal = state.get_contact_local_normal(index)
-		var relative_velocity = (state.get_contact_collider_velocity_at_position(index) - state.get_contact_local_velocity_at_position(index))
+
 		if normal.angle_to(floor_normal) <= floor_angle:		
 			ON_FLOOR_buffer = true
 
 		var directionalModifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)
 		var impact = state.get_contact_impulse(index).length() * directionalModifier
-		if state.get_contact_collider_object(index) is RigidBody3D:
-			impact *= sqrt(relative_velocity.length())
+		
+		if state.get_contact_collider_object(index) is RigidBody3D:		
+			var their_velocity = state.get_contact_collider_velocity_at_position(index)
+			var my_velocity = state.get_contact_local_velocity_at_position(index)
+			var relative_velocity = their_velocity - my_velocity
+			
+			if my_velocity.length() >= relative_velocity.length():
+				var reverse_impulse = ((my_velocity.length() - relative_velocity.length()) * mass)
+				impact += reverse_impulse
+			else:			
+				var kinetic_impulse = sqrt(relative_velocity.length())
+				impact *= kinetic_impulse
 
 		if not is_multiplayer_authority():
 			pass
@@ -156,15 +167,19 @@ func _integrate_forces(state):
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
 				FLOATING = false
+				
 		if(impact > 100):
 			print(impact, " ",  " ", multiplayer.get_unique_id())
+			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
 	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer and translational_velocity.length() > 0.5:
 		land.rpc()
 		
 	ON_FLOOR = ON_FLOOR_buffer
-		
+
+	WALK_VECTOR = WALK_VECTOR.normalized()
+	
 	var speed_target = TOPSPEED * TOPSPEED_MOD
 	var impulse = Vector3.ZERO
 		

@@ -28,6 +28,9 @@ func _physics_process(delta):
 	elif not parent is RigidBody3D:
 		queue_free() 
 		
+	elif not multiplayer.has_multiplayer_peer():
+		pass
+		
 	elif is_multiplayer_authority():
 		AUTHORITY_ORIGIN = parent.transform.origin
 		AUTHORITY_BASIS = parent.transform.basis

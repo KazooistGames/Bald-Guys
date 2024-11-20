@@ -71,10 +71,10 @@ func throw(node_path):
 	if can_be_held(node):
 		var aim = Wielder.LOOK_VECTOR.normalized() * Vector3(-1, 1, -1)
 		var scatter = node.global_position - get_parent().global_position
-		var direction = aim.lerp(scatter, 0.2)
+		var direction = aim.lerp(scatter, 0.1)
 		var magnitude = throw_force
 		node.apply_central_force(magnitude * direction)
-		var lift = Vector3.UP * magnitude / 10.0
+		var lift = Vector3.UP * magnitude / 20.0
 		node.apply_central_force(lift)
 		
 			
