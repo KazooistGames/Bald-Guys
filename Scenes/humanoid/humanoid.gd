@@ -167,9 +167,7 @@ func _integrate_forces(state):
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
 				FLOATING = false
-				
-		if(impact > 100):
-			print(impact, " ",  " ", multiplayer.get_unique_id())
+
 			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
