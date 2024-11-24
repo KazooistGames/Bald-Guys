@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://km6if1awx5dt"]
+[gd_scene load_steps=6 format=3 uid="uid://km6if1awx5dt"]
 
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="1_e6v8x"]
-[ext_resource type="Script" path="res://Scenes/objects/brick/brick.gd" id="1_pm3sq"]
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="3_k633c"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xydkg"]
@@ -15,10 +14,10 @@ size = Vector3(0.25, 0.2, 0.5)
 
 [node name="Brick" type="RigidBody3D"]
 collision_layer = 8
-collision_mask = 13
+collision_mask = 11
 mass = 10.0
 physics_material_override = SubResource("PhysicsMaterial_xydkg")
-script = ExtResource("1_pm3sq")
+continuous_cd = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_ythp8")

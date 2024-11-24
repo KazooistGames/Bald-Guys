@@ -97,7 +97,7 @@ func add_body(node):
 	
 func remove_body(node):
 	
-	if can_be_pushed(node):
+	if contained_bodies.has(node):
 		contained_bodies.erase(node)
 		
 		
@@ -110,6 +110,9 @@ func can_be_pushed(node):
 		return false
 		
 	elif node == Wielder:
+		return false
+		
+	elif node.linear_velocity.length() >= 20:
 		return false
 		
 	else:

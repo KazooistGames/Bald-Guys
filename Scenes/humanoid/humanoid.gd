@@ -92,7 +92,7 @@ func _process(_delta):
 		
 	elif ON_FLOOR:
 		TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
-		IMPACT_THRESHOLD = 4.5 * mass
+		IMPACT_THRESHOLD = 5.0 * mass
 		animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 		
 		if(WALK_VECTOR):
@@ -102,7 +102,6 @@ func _process(_delta):
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
 			
 	else:
-		TOPSPEED = SPEED_GEARS.y
 		IMPACT_THRESHOLD = 6.0 * mass
 		animation.updateFalling(linear_velocity)
 		skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
@@ -136,8 +135,8 @@ func _integrate_forces(state):
 		if normal.angle_to(floor_normal) <= floor_angle:		
 			ON_FLOOR_buffer = true
 
-		var directionalModifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)
-		var impact = state.get_contact_impulse(index).length() * directionalModifier
+
+		var impact = state.get_contact_impulse(index).length()
 		
 		if state.get_contact_collider_object(index) is RigidBody3D:		
 			var their_velocity = state.get_contact_collider_velocity_at_position(index)
@@ -145,12 +144,22 @@ func _integrate_forces(state):
 			var relative_velocity = their_velocity - my_velocity
 			
 			if my_velocity.length() >= relative_velocity.length():
-				var reverse_impulse = ((my_velocity.length() - relative_velocity.length()) * mass)
-				impact += reverse_impulse
+				var relative_mass = state.get_contact_collider_object(index).mass - mass
+				var reverse_impulse = sqrt(relative_mass) * relative_velocity.length()
+				
+				#if relative_mass > 0:
+					#impact += reverse_impulse
+					
 			else:			
 				var kinetic_impulse = sqrt(relative_velocity.length())
 				impact *= kinetic_impulse
-
+		
+		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)	
+		impact *= directional_modifier
+		
+		if impact > 300:
+			print("Impact to ", name, ": ", impact, " ", directional_modifier)
+			
 		if not is_multiplayer_authority():
 			pass
 			
@@ -161,7 +170,7 @@ func _integrate_forces(state):
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
 			var check2 = impact > IMPACT_THRESHOLD/2
-			var check3 = abs(normal.dot(floor_normal)) <= 0.5
+			var check3 = abs(normal.dot(floor_normal)) <= 0.4
 
 			if check1 and check2 and check3:
 				state.apply_central_impulse(state.get_contact_impulse(index))
@@ -208,7 +217,7 @@ func _integrate_forces(state):
 			gravity_scale = 1
 
 		if WALK_VECTOR:
-			impulse = WALK_VECTOR * get_acceleration()/2 * mass
+			impulse = WALK_VECTOR * get_acceleration() * mass
 			
 	apply_central_force(impulse)
 	
@@ -262,6 +271,10 @@ func get_acceleration():
 	var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
 	var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
 	var return_val = absolute * relative
+	
+	if not ON_FLOOR:
+		return_val /= 2.0
+		
 	return return_val
 
 
@@ -332,7 +345,7 @@ func land():
 	if ON_FLOOR:
 		var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		var retardation_vector = -translational_velocity.normalized()
-		var impulse = retardation_vector * mass * 2
+		var impulse = retardation_vector * mass * 2.5
 		apply_central_impulse(impulse)
 
 	

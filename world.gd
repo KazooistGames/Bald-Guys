@@ -91,7 +91,10 @@ func _process(_delta):
 
 func _notification(what):
 	
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+	if State != ClientState.Session:
+		pass
+	
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		pause_menu.visible = true
 		
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
