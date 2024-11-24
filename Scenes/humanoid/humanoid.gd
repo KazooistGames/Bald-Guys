@@ -143,22 +143,12 @@ func _integrate_forces(state):
 			var my_velocity = state.get_contact_local_velocity_at_position(index)
 			var relative_velocity = their_velocity - my_velocity
 			
-			if my_velocity.length() >= relative_velocity.length():
-				var relative_mass = state.get_contact_collider_object(index).mass - mass
-				var reverse_impulse = sqrt(relative_mass) * relative_velocity.length()
-				
-				#if relative_mass > 0:
-					#impact += reverse_impulse
-					
-			else:			
+			if my_velocity.length() < relative_velocity.length():	
 				var kinetic_impulse = sqrt(relative_velocity.length())
 				impact *= kinetic_impulse
 		
 		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)	
 		impact *= directional_modifier
-		
-		if impact > 300:
-			print("Impact to ", name, ": ", impact, " ", directional_modifier)
 			
 		if not is_multiplayer_authority():
 			pass

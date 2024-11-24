@@ -193,6 +193,7 @@ func leave_session():
 	elif multiplayer.is_server():
 		multiplayer.peer_connected.disconnect(add_player_to_session)
 		multiplayer.peer_disconnected.disconnect(remove_player_from_session)
+	
 	else:
 		multiplayer.server_disconnected.disconnect(leave_session)
 		
@@ -205,11 +206,9 @@ func leave_session():
 		session.queue_free()
 		
 	State = ClientState.Lobby
+		
 	
-
-	
-	
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func rpc_handoff_object(path, auth_id):
 	
 	path = str(path).replace(str(get_path()), "")

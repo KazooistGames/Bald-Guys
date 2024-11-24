@@ -4,30 +4,28 @@ const Humanoid_Prefab = preload("res://Scenes/humanoid/humanoid.tscn")
 
 const SessionState = {
 	Hub = 0,
-	Level = 1,
+	Round = 1,
 }
 
 @export var State = SessionState.Hub
-
-const GameMode = {
-	FFA = 0,
-}
-
-@export var Mode = GameMode.FFA
 
 @export var Commissioned = false
 
 @export var Humanoids = []
 
-@onready var FFA = $Wig_FFA
+@export var Level : Node3D = null
+
+@export var Game : Node3D = null
 
 @onready var Hub = $Hub
-
-@onready var Level = $Level
 
 @onready var humanoidSpawner = $MultiplayerSpawner
 
 signal Created_Player_Humanoid
+
+signal Started_Round
+
+signal Ended_Round
 
 
 func _ready():
@@ -45,40 +43,21 @@ func _unhandled_key_input(event):
 		if not is_multiplayer_authority():
 			pass
 			
-		elif State != SessionState.Level:
-			rpc_move_to_level.rpc()	
-			
 		elif State != SessionState.Hub:
 			rpc_move_to_hub.rpc()
-
-
-func start_game_mode():
-	
-	if Mode == GameMode.FFA:
-		FFA.rpc_start.rpc()
-		FFA.Finished.connect(finish_game_mode)
-	
-		
-func finish_game_mode():
-	
-	rpc_move_to_hub.rpc()
-	
-	if Mode == GameMode.FFA:
-		FFA.rpc_reset.rpc()
-		FFA.Finished.disconnect(finish_game_mode)		
-		
-		
-func reset_game_mode():
-	
-	if Mode == GameMode.FFA:
-		FFA.rpc_reset.rpc()
-	
+			
+		elif State != SessionState.Round:
+			rpc_move_to_level.rpc()	
+			
 
 func Commission():
-	
 	rpc_move_to_hub.rpc()
 	create_player_humanoid(1)
 	Commissioned = true
+
+
+func Finished_Level():
+	rpc_move_to_hub.rpc()
 
 
 func spawn_players(parent):
@@ -122,7 +101,6 @@ func create_player_humanoid(peer_id):
 	
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
 	return new_peer_humanoid
-	#Created_Player_Humanoid.emit(new_peer_humanoid.get_path(), peer_id)
 
 
 func destroy_player_humanoid(peer_id):
@@ -139,25 +117,42 @@ func signal_to_handoff_player_humanoid(node):
 	Created_Player_Humanoid.emit(node)
 
 
-@rpc("call_local", "authority")
+@rpc("call_local", "authority", "reliable")
 func rpc_move_to_hub():
 	
 	State = SessionState.Hub
 	spawn_players(Hub)		
-	reset_game_mode()
+	Ended_Round.emit()
 
 		
-@rpc("call_local", "authority")
+@rpc("call_local", "authority", "reliable")
 func rpc_move_to_level():
 	
-	State = SessionState.Level
+	State = SessionState.Round
 	spawn_players(Level)
-	start_game_mode()
+	Started_Round.emit()
 
 
-@rpc("call_local", "authority")
+@rpc("call_local", "authority", "reliable")
 func respawn_node(node_path, spawn_position):
 	
 	var node = get_node(node_path)
 	node.position = spawn_position
-
+	
+	
+	
+func setup_round():
+	
+	var unique_round_id = randi_range(0, 0)
+	var level_prefab
+	var game_prefab
+	
+	match unique_round_id:
+		0:
+			level_prefab = preload("res://Scenes/level/Platforms_Level.tscn")
+			game_prefab = preload("res://Scenes/games/Wig_FFA/Wig_FFA.tscn")
+	
+	if level_prefab != null	and game_prefab != null:
+		Level = level_prefab.instantiate()
+		Game = game_prefab.instantiate()
+	
