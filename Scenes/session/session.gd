@@ -187,6 +187,7 @@ func load_level(path):
 		
 	Level = prefab.instantiate()
 	add_child(Level, true)
+	print("Level commissioned: ", Level)
 	
 
 func load_game(path):
@@ -201,6 +202,7 @@ func load_game(path):
 		
 	Game = prefab.instantiate()
 	add_child(Game, true)
+	print("Game commissioned: ", Game)
 		
 		
 		
