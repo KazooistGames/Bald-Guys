@@ -19,7 +19,11 @@ const SessionState = {
 
 @onready var Hub = $Hub
 
-@onready var humanoidSpawner = $MultiplayerSpawner
+@onready var humanoidSpawner = $HumanoidSpawner
+
+@onready var levelSpawner = $LevelSpawner
+
+@onready var gameSpawner = $GameSpawner
 
 signal Created_Player_Humanoid
 
@@ -30,7 +34,8 @@ signal Ended_Round
 
 func _ready():
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
-
+	gameSpawner.spawned.connect(handle_new_game)
+	levelSpawner.spawned.connect(handle_new_level)
 
 func _process(_delta):
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
@@ -48,15 +53,16 @@ func _unhandled_key_input(event):
 			
 		elif State != SessionState.Round:
 			rpc_move_to_level.rpc()	
-			
 
-func Commission():
-	rpc_move_to_hub.rpc()
-	create_player_humanoid(1)
-	Commissioned = true
+func handle_new_level(new_level):
+	Level = new_level
+	
+func handle_new_game(new_game):
+	Game = new_game
 
 
 func Finished_Level():
+	
 	rpc_move_to_hub.rpc()
 
 
@@ -139,20 +145,41 @@ func respawn_node(node_path, spawn_position):
 	var node = get_node(node_path)
 	node.position = spawn_position
 	
-	
-	
-func setup_round():
+
+func Commission_Round():
 	
 	var unique_round_id = randi_range(0, 0)
-	var level_prefab
-	var game_prefab
+	var level_prefab_path = ""
+	var game_prefab_path = ""
 	
 	match unique_round_id:
 		0:
-			level_prefab = preload("res://Scenes/level/Platforms_Level.tscn")
-			game_prefab = preload("res://Scenes/games/Wig_FFA/Wig_FFA.tscn")
+			level_prefab_path = "res://Scenes/level/Platforms_Level.tscn"
+			game_prefab_path = "res://Scenes/games/Wig_FFA/Wig_FFA.tscn"
 	
-	if level_prefab != null	and game_prefab != null:
-		Level = level_prefab.instantiate()
-		Game = game_prefab.instantiate()
+	if level_prefab_path != ""	and game_prefab_path != "":
+		load_level(level_prefab_path)
+		load_game(game_prefab_path)
 	
+
+func load_level(path):
+	
+	var prefab = load(path)
+	
+	if prefab != null:
+		Level = prefab.instantiate()
+		add_child(Level)
+	
+
+func load_game(path):
+	
+	var prefab = load(path)
+	
+	if prefab != null:
+		Game = prefab.instantiate()
+		add_child(Game)
+		
+		
+		
+		
+		
