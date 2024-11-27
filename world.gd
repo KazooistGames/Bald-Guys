@@ -76,7 +76,7 @@ func _process(_delta):
 		State = ClientState.Lobby
 		
 	elif not session.Commissioned:
-		session.Commission_Round()
+		session.Commission_Next_Round()
 		session.Created_Player_Humanoid.connect(give_humanoid_to_client)
 		session.rpc_move_to_hub.rpc()
 		session.create_player_humanoid(1)

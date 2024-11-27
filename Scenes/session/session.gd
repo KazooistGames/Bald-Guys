@@ -33,38 +33,51 @@ signal Ended_Round
 
 
 func _ready():
+	
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 	gameSpawner.spawned.connect(handle_new_game)
 	levelSpawner.spawned.connect(handle_new_level)
 
+
 func _process(_delta):
+	
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 
 
 func _unhandled_key_input(event):
 	
-	if event.is_action_pressed("Toggle"):
-		
-		if not is_multiplayer_authority():
-			pass
+	if not is_multiplayer_authority():
+		pass
 			
-		elif State != SessionState.Hub:
+	elif event.is_action_pressed("Toggle"):
+			
+		if State != SessionState.Hub:
 			rpc_move_to_hub.rpc()
 			
 		elif State != SessionState.Round:
 			rpc_move_to_level.rpc()	
 
+
 func handle_new_level(new_level):
+	
+	#if Level != null:
+		#Level.queue_free()
+		
 	Level = new_level
 	
+	
 func handle_new_game(new_game):
+	
+	#if Game != null:
+		#Game.queue_free()
+	
 	Game = new_game
 
 
-func Finished_Level():
+func Finished_Round():
 	
 	rpc_move_to_hub.rpc()
-
+	Commission_Next_Round()
 
 func spawn_players(parent):
 	
@@ -146,7 +159,7 @@ func respawn_node(node_path, spawn_position):
 	node.position = spawn_position
 	
 
-func Commission_Round():
+func Commission_Next_Round():
 	
 	var unique_round_id = randi_range(0, 0)
 	var level_prefab_path = ""
@@ -166,18 +179,28 @@ func load_level(path):
 	
 	var prefab = load(path)
 	
-	if prefab != null:
-		Level = prefab.instantiate()
-		add_child(Level)
+	if prefab == null:
+		return
+		
+	if Level != null:
+		Level.queue_free()
+		
+	Level = prefab.instantiate()
+	add_child(Level, true)
 	
 
 func load_game(path):
 	
 	var prefab = load(path)
 	
-	if prefab != null:
-		Game = prefab.instantiate()
-		add_child(Game)
+	if prefab == null:
+		return
+		
+	if Game != null:
+		Game.queue_free()
+		
+	Game = prefab.instantiate()
+	add_child(Game, true)
 		
 		
 		

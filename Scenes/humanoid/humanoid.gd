@@ -119,7 +119,7 @@ func _integrate_forces(state):
 		AUTHORITY_POSITION = state.transform.origin	
 		
 	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.25)
+		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.5)
 		
 	else:
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
@@ -235,13 +235,15 @@ func _physics_process(delta):
 		else:
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 		
-		var scalar = 2
+		var scalar = 2.5
+		collider.shape.radius = move_toward(collider.shape.radius, 0.20, delta * scalar)
 		collider.shape.height = move_toward(collider.shape.height, 1.85, delta * scalar)
 		collider.position.y = move_toward(collider.position.y, 0.925, delta * scalar)
 		
 	else:
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
+		collider.shape.radius = clamp(lerp(0.20, 0.3, jumpDeltaScale ), 0.20, 0.3)
 		collider.shape.height = clamp(lerp(1.85, 1.0, jumpDeltaScale ), 1.0, 1.85)
 		collider.position.y = clamp(lerp(0.925, 1.175, jumpDeltaScale ), 0.925, 1.175)
 
@@ -335,7 +337,8 @@ func land():
 	if ON_FLOOR:
 		var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		var retardation_vector = -translational_velocity.normalized()
-		var impulse = retardation_vector * mass * 2.5
+		var retardation_magnitude = min(2.5, translational_velocity.length())
+		var impulse = retardation_vector * retardation_magnitude * mass
 		apply_central_impulse(impulse)
 
 	

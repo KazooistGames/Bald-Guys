@@ -6,7 +6,7 @@ var Wig : Node3D
 
 var Bearer : Node3D
 
-@export var Goal_Time = 60
+@export var Goal_Time = 6
 
 @export var Bearer_Times = {}
 
@@ -75,7 +75,7 @@ func _process(delta):
 			if Bearer_Times[Bearer.name] >= Goal_Time:
 				HUD.set_psa.rpc("Winner: " + str(Bearer.name), -1)
 				rpc_finish.rpc()
-		
+				session.Finished_Round()
 		else:
 			Bearer_Times[Bearer.name] = delta
 			
@@ -222,7 +222,6 @@ func rpc_finish():
 		Bearer.ragdolled.disconnect(drop_wig)
 		
 	State = GameState.finished
-	session.rpc_move_to_hub.rpc()
 
 	
 	
