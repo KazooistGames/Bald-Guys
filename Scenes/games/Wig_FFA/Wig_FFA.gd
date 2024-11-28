@@ -44,6 +44,7 @@ func _process(delta):
 		Wig = get_node_or_null("Wig")
 
 	HUD.TableValues = Bearer_Times
+	HUD.visible = session.State == session.SessionState.Round 
 	
 	if not is_multiplayer_authority():
 		pass
@@ -59,7 +60,7 @@ func _process(delta):
 		elif countDown_timer > 1:
 			countDown_timer = 0
 			countDown_value -= 1
-			HUD.set_psa.rpc(str(countDown_value))
+			session.HUD.set_psa.rpc(str(countDown_value))
 			
 		else:
 			countDown_timer += delta
@@ -73,9 +74,8 @@ func _process(delta):
 			Bearer_Times[Bearer.name] += delta
 			
 			if Bearer_Times[Bearer.name] >= Goal_Time:
-				HUD.set_psa.rpc("Winner: " + str(Bearer.name), -1)
 				rpc_finish.rpc()
-				session.Finished_Round()
+				session.Finished_Round(str(Bearer.name))
 		else:
 			Bearer_Times[Bearer.name] = delta
 			
@@ -176,7 +176,7 @@ func rpc_start():
 
 	rpc_reset()
 	countDown_value = 10
-	HUD.set_psa.rpc(str(countDown_value))
+	session.HUD.set_psa.rpc(str(countDown_value))
 	State = GameState.starting
 	
 

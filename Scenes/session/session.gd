@@ -17,6 +17,8 @@ const SessionState = {
 
 @export var Game : Node3D = null
 
+@onready var HUD = $HUD
+
 @onready var Hub = $Hub
 
 @onready var humanoidSpawner = $HumanoidSpawner
@@ -37,6 +39,12 @@ func _ready():
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 	gameSpawner.spawned.connect(handle_new_game)
 	levelSpawner.spawned.connect(handle_new_level)
+	
+	if is_multiplayer_authority():
+		Commission_Next_Round()
+		rpc_move_to_hub.rpc()
+		create_player_humanoid(1)
+		Commissioned = true
 
 
 func _process(_delta):
@@ -60,24 +68,26 @@ func _unhandled_key_input(event):
 
 func handle_new_level(new_level):
 	
-	#if Level != null:
-		#Level.queue_free()
+	if Level != null:
+		Level.queue_free()
 		
 	Level = new_level
 	
 	
 func handle_new_game(new_game):
 	
-	#if Game != null:
-		#Game.queue_free()
+	if Game != null:
+		Game.queue_free()
 	
 	Game = new_game
 
 
-func Finished_Round():
+func Finished_Round(winner):
 	
+	HUD.set_psa.rpc("Winner: " + winner, -1)
 	rpc_move_to_hub.rpc()
 	Commission_Next_Round()
+
 
 func spawn_players(parent):
 	
@@ -110,7 +120,6 @@ func create_player_humanoid(peer_id):
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
-	
 	Humanoids.append(new_peer_humanoid)
 	
 	add_child(new_peer_humanoid)
@@ -119,6 +128,7 @@ func create_player_humanoid(peer_id):
 	respawn_node.rpc(new_peer_humanoid.get_path(), random_spawn_position)
 	
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
+	new_peer_humanoid.set_multiplayer_authority(peer_id)
 	return new_peer_humanoid
 
 
@@ -203,8 +213,6 @@ func load_game(path):
 	Game = prefab.instantiate()
 	add_child(Game, true)
 	print("Game commissioned: ", Game)
-		
-		
-		
-		
-		
+			
+
+	

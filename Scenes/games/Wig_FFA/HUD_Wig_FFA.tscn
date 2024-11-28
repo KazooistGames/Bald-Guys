@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dbtsv6kiv41f1"]
 
-[ext_resource type="Script" path="res://Scenes/games/Wig_FFA/HUD.gd" id="1_v7q02"]
+[ext_resource type="Script" path="res://Scenes/games/Wig_FFA/HUD_Wig_FFA.gd" id="1_v7q02"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_v7q02")
@@ -108,24 +108,3 @@ theme_override_colors/font_color = Color(0.686275, 0.686275, 0, 1)
 theme_override_font_sizes/font_size = 24
 text = "Installing Wig..."
 horizontal_alignment = 1
-
-[node name="PSA" type="MarginContainer" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-mouse_filter = 2
-theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
-
-[node name="Label" type="Label" parent="PSA"]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 75
-horizontal_alignment = 1
-vertical_alignment = 1

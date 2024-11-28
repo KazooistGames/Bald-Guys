@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://by3wuudn8soe"]
+[gd_scene load_steps=6 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://c635ib3vdy8sj" path="res://Scenes/level/Hub_Level.tscn" id="3_2so71"]
+[ext_resource type="PackedScene" uid="uid://bi27y02b7i065" path="res://Scenes/session/HUD.tscn" id="4_ik81w"]
 [ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/level/borealis/borealis.tscn" id="7_8kuai"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]
@@ -34,3 +35,5 @@ spawn_path = NodePath("..")
 [node name="GameSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/games/Wig_FFA/Wig_FFA.tscn")
 spawn_path = NodePath("..")
+
+[node name="HUD" parent="." instance=ExtResource("4_ik81w")]

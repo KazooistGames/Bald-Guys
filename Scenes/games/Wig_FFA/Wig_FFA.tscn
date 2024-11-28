@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cupu0kavdlrc4"]
 
 [ext_resource type="Script" path="res://Scenes/games/Wig_FFA/Wig_FFA.gd" id="1_2sjt2"]
-[ext_resource type="PackedScene" uid="uid://dbtsv6kiv41f1" path="res://Scenes/games/Wig_FFA/HUD.tscn" id="2_jbyu4"]
+[ext_resource type="PackedScene" uid="uid://dbtsv6kiv41f1" path="res://Scenes/games/Wig_FFA/HUD_Wig_FFA.tscn" id="2_jbyu4"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ryau5"]
 properties/0/path = NodePath(".:Bearer_Times")

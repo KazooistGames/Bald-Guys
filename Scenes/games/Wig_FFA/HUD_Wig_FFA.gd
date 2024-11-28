@@ -10,9 +10,6 @@ extends CanvasLayer
 
 @onready var progress_backdrop = $Progress/BackDrop
 
-@onready var PSA = $PSA/Label
-var psaTTL = 1
-
 @export var TableValues = {}
 
 @export var ProgressPercent = 0
@@ -22,7 +19,9 @@ const progress_bar_width = 75
 	
 	
 func _ready():
+	
 	progress_backdrop.custom_minimum_size = Vector2(progress_bar_length, progress_bar_width)
+	
 	
 func _process(delta):
 	
@@ -37,30 +36,5 @@ func _process(delta):
 	
 	for value in TableValues.values():
 		times_text.text += "\n" + "%3.2f" % value
-	
-	if psaTTL > 0:
-		psaTTL -= min(delta, psaTTL)
 		
-	elif psaTTL < 0:
-		pass
-		
-	else:
-		PSA.text = ""
-		
-	
-func get_public_service_announcement():
-	
-	return PSA.text
-	
-		
-@rpc("call_local")
-func set_psa(message = "", ttl = 1):
-	
-	PSA.text = message
-	psaTTL = ttl
-	
-
-func get_psa():
-
-	return PSA.text
 	
