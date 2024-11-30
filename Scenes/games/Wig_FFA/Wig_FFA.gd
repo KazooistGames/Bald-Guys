@@ -6,7 +6,7 @@ var Wig : Node3D
 
 var Bearer : Node3D
 
-@export var Goal_Time = 6
+@export var Goal_Time = 60
 
 @export var Bearer_Times = {}
 
