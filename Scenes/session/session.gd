@@ -129,6 +129,7 @@ func create_player_humanoid(peer_id):
 	
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
 	new_peer_humanoid.set_multiplayer_authority(peer_id)
+	
 	return new_peer_humanoid
 
 

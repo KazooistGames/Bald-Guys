@@ -141,7 +141,6 @@ func remove_player_from_session(peer_id):
 	session.destroy_player_humanoid(peer_id)
 
 		
-		
 func give_humanoid_to_client(humanoid):
 	
 	var peer_id = str(humanoid.name).to_int()
@@ -154,7 +153,6 @@ func give_humanoid_to_client(humanoid):
 func handle_new_session_spawn(new_session):
 	
 	new_session.Created_Player_Humanoid.connect(give_humanoid_to_client)
-
 
 
 func leave_session():
