@@ -20,6 +20,9 @@ const ambient_energy_zsf = Vector3(0.65, 0.3, 1)
 
 @onready var directional_light = $DirectionalLight3D
 
+const light_tilt_zsf = Vector3(-90, 10, 47)
+const light_angle_zsf = Vector3(180, 180, 37)
+
 func _process(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
@@ -49,9 +52,12 @@ func set_environment_phase(phase):
 	var ambient_blue = get_zsf_instant(phase, ambient_blue_zsf)	
 
 	environment.ambient_light_color = Color(ambient_red, ambient_green, ambient_blue)
-	#environment.volumetric_fog_emission_energy = get_zsf_instant(timer, fog_density_zsf)
-	
+	#environment.volumetric_fog_emission_energy = get_zsf_instant(timer, fog_density_zsf)	
 	environment.ambient_light_energy = get_zsf_instant(timer, ambient_energy_zsf)
+	
+	var x = get_zsf_instant(phase, light_tilt_zsf)
+	var y = get_zsf_instant(phase, light_angle_zsf)
+	directional_light.rotation_degrees = Vector3(x, y, 0)
 	
 	
 @export var light_wave_period = 60
@@ -70,4 +76,5 @@ func set_light_phase(phase):
 
 	directional_light.light_energy = clamped_wave
 	
+
 	#print(raw_wave, "   ", rectified_wave,"   ", scaled_wave, "   ", clamped_wave)
