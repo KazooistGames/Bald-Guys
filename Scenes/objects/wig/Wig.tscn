@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://cs5vme3m6f1ux"]
+[gd_scene load_steps=12 format=3 uid="uid://cs5vme3m6f1ux"]
 
 [ext_resource type="Script" path="res://Scenes/objects/wig/Wig.gd" id="1_rx6rq"]
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="2_6yeyh"]
+[ext_resource type="Texture2D" uid="uid://wnmv7ic5wt76" path="res://Textures/afro.png" id="2_bv5em"]
 [ext_resource type="PackedScene" uid="uid://bbtuviu7jd3j0" path="res://Scenes/components/interactable/interactable.tscn" id="3_mbq86"]
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="4_m1qom"]
 
@@ -23,8 +24,19 @@ shader_parameter/outline_width = 3.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_omnyi"]
 next_pass = SubResource("ShaderMaterial_tjlpe")
-diffuse_mode = 3
+diffuse_mode = 1
 albedo_color = Color(0.601887, 0.558877, 0.532093, 1)
+emission_enabled = true
+emission = Color(0.866667, 0, 0, 1)
+emission_energy_multiplier = 3.0
+normal_texture = ExtResource("2_bv5em")
+rim_tint = 0.0
+rim_texture = ExtResource("2_bv5em")
+heightmap_enabled = true
+heightmap_scale = 5.826
+heightmap_texture = ExtResource("2_bv5em")
+detail_mask = ExtResource("2_bv5em")
+grow_amount = 0.07
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_kblqd"]
 properties/0/path = NodePath(".:radius")

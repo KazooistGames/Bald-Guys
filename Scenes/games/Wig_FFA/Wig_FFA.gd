@@ -162,12 +162,13 @@ func set_wig_bearer(path_to_new_bearer):
 	if path_to_new_bearer == null:
 		Bearer = null
 		wig_remote.remote_path = ""
+		Wig.toggle_strobing(true)
 		
 	else:	
 		Bearer = get_node(path_to_new_bearer)
 		wig_remote.remote_path = Wig.get_path()
 		wig_remote.position = Vector3(0, 0.275, -.075)		
-
+		Wig.toggle_strobing(false)
 
 @rpc("call_local", "reliable")
 func rpc_start():
@@ -209,7 +210,7 @@ func rpc_play():
 	add_child(Wig)
 	Wig.global_position = Vector3(0, 20, 0)
 	Wig.interactable.gained_interaction.connect(dawn_wig)
-	
+	Wig.toggle_strobing(true)
 	State = GameState.playing
 	
 	

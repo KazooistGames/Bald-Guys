@@ -9,13 +9,13 @@ const fog_light_energy_zsf = Vector3(0.5, 0.1, 3)
 
 const fog_density_zsf = Vector3(0.0075, 0.0075, 13)
 
-const fog_height_zsf = Vector3(1.0, 0.5, 31)
-const fog_height_wiggle_zsf = Vector3(0.0, 0.15, 1)
+const fog_height_zsf = Vector3(0.75, 0.25, 31)
+const fog_height_wiggle_zsf = Vector3(0.0, 0.10, 0.5)
 const fog_height_density_zsf = Vector3(1.0, 0.5, 23)
 
-const ambient_red_zsf = Vector3(0.35, 0.20, 3)
-const ambient_green_zsf = Vector3(0.35, 0.20, 5)
-const ambient_blue_zsf = Vector3(0.35, 0.20, 7)
+const ambient_red_zsf = Vector3(0.35, 0.20, 7)
+const ambient_green_zsf = Vector3(0.35, 0.20, 11)
+const ambient_blue_zsf = Vector3(0.35, 0.20, 13)
 const ambient_energy_zsf = Vector3(0.65, 0.3, 1)
 
 @onready var directional_light = $DirectionalLight3D
