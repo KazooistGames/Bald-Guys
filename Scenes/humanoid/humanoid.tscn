@@ -4539,6 +4539,7 @@ bones/54/scale = Vector3(1, 1, 1)
 script = ExtResource("4_1erm7")
 
 [node name="Cube" type="MeshInstance3D" parent="Skeleton3D/Ragdoll"]
+layers = 3
 mesh = ExtResource("5_b5sbe")
 skin = SubResource("Skin_vic1c")
 surface_material_override/0 = SubResource("StandardMaterial3D_17cil")

@@ -244,7 +244,7 @@ func _physics_process(delta):
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
 		collider.shape.radius = clamp(lerp(0.20, 0.3, jumpDeltaScale ), 0.20, 0.3)
-		collider.shape.height = clamp(lerp(1.85, 1.0, jumpDeltaScale ), 1.0, 1.85)
+		collider.shape.height = clamp(lerp(1.85, 1.10, jumpDeltaScale ), 1.1, 1.85)
 		collider.position.y = clamp(lerp(0.925, 1.175, jumpDeltaScale ), 0.925, 1.175)
 
 	rotation.y = fmod(rotation.y, 2*PI)
@@ -259,7 +259,7 @@ func is_back_pedaling():
 
 func get_acceleration():
 	
-	var absolute = 20
+	var absolute = 25
 	var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
 	var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
 	var return_val = absolute * relative
@@ -337,7 +337,7 @@ func land():
 	if ON_FLOOR:
 		var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		var retardation_vector = -translational_velocity.normalized()
-		var retardation_magnitude = min(2.5, translational_velocity.length())
+		var retardation_magnitude = min(3.0, translational_velocity.length())
 		var impulse = retardation_vector * retardation_magnitude * mass
 		apply_central_impulse(impulse)
 

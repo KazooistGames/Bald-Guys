@@ -54,11 +54,11 @@ func _process(delta):
 	var material = mesh.get_surface_override_material(0)
 	
 	if strobing_enabled:
-		material.emission_energy_multiplier = 4 + 4 * abs(sin(strobing_phase))
+		material.emission_energy_multiplier = 2 + 2 * abs(sin(strobing_phase))
 		strobing_phase += delta
 	
 	else:
-		material.emission_energy_multiplier = 8
+		material.emission_energy_multiplier = 4
 
 
 func getRandomHairColor():
