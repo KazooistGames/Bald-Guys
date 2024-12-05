@@ -135,7 +135,6 @@ func _integrate_forces(state):
 		if normal.angle_to(floor_normal) <= floor_angle:		
 			ON_FLOOR_buffer = true
 
-
 		var impact = state.get_contact_impulse(index).length()
 		
 		if state.get_contact_collider_object(index) is RigidBody3D:		
@@ -166,11 +165,11 @@ func _integrate_forces(state):
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
 				FLOATING = false
-
+				$AudioStreamPlayer3D.play()
 			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
-	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer and translational_velocity.length() > 0.5:
+	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer:
 		land.rpc()
 		
 	ON_FLOOR = ON_FLOOR_buffer
@@ -300,6 +299,7 @@ func get_ragdoll_recovered():
 func ragdoll():
 	
 	if not RAGDOLLED:
+		$AudioStreamPlayer3D.play()
 		$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 		RUNNING = false
 		ragdolled.emit()
@@ -329,16 +329,15 @@ func jump():
 	
 	if ON_FLOOR:
 		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
-		
+
 		
 @rpc("call_local")
 func land():
 	
-	if ON_FLOOR:
-		var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
-		var retardation_vector = -translational_velocity.normalized()
-		var retardation_magnitude = min(3.0, translational_velocity.length())
-		var impulse = retardation_vector * retardation_magnitude * mass
-		apply_central_impulse(impulse)
+	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
+	var retardation_vector = -translational_velocity.normalized()
+	var retardation_magnitude = min(3.0, translational_velocity.length())
+	var impulse = retardation_vector * retardation_magnitude * mass
+	apply_central_impulse(impulse)
 
 	

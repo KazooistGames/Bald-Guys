@@ -32,6 +32,10 @@ var bone_modifiers = {
 @onready var physicalBones = []
 @onready var mockBoneIndices = []
 
+@onready var slappy_foot_left = $"Physical Bone foot_l/SlappyFoot"
+@onready var slappy_foot_right = $"Physical Bone foot_r/SlappyFoot"
+
+
 const MAX_VELOCITY = 100
 const MAX_DISPLACEMENT = 2
 const MAX_ANGULAR_DISPLACEMENT = PI
@@ -86,7 +90,9 @@ func animate_physical_bones(delta):
 			physical_bone.linear_velocity += linear_force * delta
 			var angular_torque = get_hookes_law_force(ANGULAR_STIFFNESS * bone_modifier, angular_displacement.get_euler(), ANGULAR_DAMPING * bone_modifier, physical_bone.angular_velocity)
 			physical_bone.angular_velocity += angular_torque * delta
-
+	
+	slappy_foot_left.process_slap(delta)
+	slappy_foot_right.process_slap(delta)
 
 func set_gravity(value):
 	

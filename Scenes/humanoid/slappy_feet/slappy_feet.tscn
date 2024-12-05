@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://cv4wc5my34rxm"]
+
+[ext_resource type="AudioStream" uid="uid://bwlo06x8jfil" path="res://audio/punch.mp3" id="1_ll0fi"]
+[ext_resource type="Script" path="res://Scenes/humanoid/slappy_feet/slappy_feet.gd" id="2_riafc"]
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_nnqi8"]
+playback_mode = 1
+random_pitch = 1.3
+random_volume_offset_db = 3.0
+streams_count = 1
+stream_0/stream = ExtResource("1_ll0fi")
+stream_0/weight = 1.0
+
+[node name="SlappyFeet" type="AudioStreamPlayer3D"]
+stream = SubResource("AudioStreamRandomizer_nnqi8")
+volume_db = -30.0
+bus = &"meat"
+script = ExtResource("2_riafc")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+target_position = Vector3(0, -0.2, 0)
+collision_mask = 9
