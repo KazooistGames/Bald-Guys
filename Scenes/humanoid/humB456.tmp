@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=43 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="Script" path="res://Scenes/humanoid/skeleton.gd" id="2_ldi4p"]
@@ -9,6 +9,7 @@
 [ext_resource type="ArrayMesh" uid="uid://dkrvskqnfamyw" path="res://Scenes/humanoid/humanoid.tres" id="5_b5sbe"]
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="6_rg0yq"]
 [ext_resource type="PackedScene" uid="uid://cv4wc5my34rxm" path="res://Scenes/humanoid/slappy_feet/slappy_feet.tscn" id="8_g1pbr"]
+[ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/humanoid/force/force.tscn" id="9_vmktp"]
 [ext_resource type="AudioStream" uid="uid://bwlo06x8jfil" path="res://audio/punch.mp3" id="11_neikv"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vc0al"]
@@ -4791,6 +4792,10 @@ joint_constraints/z/angular_equilibrium_point = 0.0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Skeleton3D/Ragdoll/Physical Bone head"]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.0781233, 0.0393642)
 shape = SubResource("CapsuleShape3D_usxk3")
+
+[node name="Force" parent="Skeleton3D/Ragdoll/Physical Bone head" node_paths=PackedStringArray("Wielder") instance=ExtResource("9_vmktp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+Wielder = NodePath("../../../..")
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
 transform = Transform3D(0.99995, -4.90993e-05, -1.2964e-05, 8.71122e-05, 0.999978, 9.86457e-06, 2.05636e-05, -9.86457e-06, 0.999983, -0.208618, 1.54967, -0.0231976)

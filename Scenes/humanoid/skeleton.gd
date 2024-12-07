@@ -63,11 +63,11 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	var target_angle = atan2(-look_vector.x, -look_vector.z)
 
 	if walk_vector == Vector3.ZERO:
-		print("Zero")
+		#print("Zero")
 		smooth_turn(look_vector, target_angle, 10, delta)
 		
 	else:
-		print(walk_vector)
+		#print(walk_vector)
 		target_angle = atan2(walk_vector.x, walk_vector.z)
 		var timeStep = LERP_VAL * delta
 		rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)

@@ -1,34 +1,37 @@
 extends Area3D
 
+enum Action {
+	inert = 0,
+	hold = 1,	
+}
+
+@export var action = Action.inert
+
 @onready var collider = $CollisionShape3D
 
 @export var Holding = false
 
 @export var Wielder : Node3D = null
 
+@export var Aim = Vector3.ZERO
+
+
 var contained_bodies = []
 
-const hold_force = 2500.0	
+const hold_force = 5000.0	
 const throw_force = 25000.0
 
-const offset = Vector3(0, 0, 1.25)
+var offset =  Vector3.ZERO
 
 func _ready():
-	
-	if not Wielder:
-		queue_free()
-		
-	elif not Wielder.is_in_group("humanoids"):
-		queue_free()
-	
-	else:
-		body_entered.connect(add_body)
-		body_exited.connect(remove_body)
+
+	body_entered.connect(add_body)
+	body_exited.connect(remove_body)
 
 
 func _physics_process(_delta):
-		
-	if Wielder.REACHING:
+	print(global_rotation)
+	if action == Action.hold:
 		monitoring = true
 		Holding = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
@@ -38,7 +41,7 @@ func _physics_process(_delta):
 		position = offset
 		
 		for node in contained_bodies:			
-			hold(node.get_path())
+			rpc_hold(node.get_path())
 			
 	elif Holding:
 		Holding = false
@@ -49,12 +52,12 @@ func _physics_process(_delta):
 		position = -offset
 		
 		for node in contained_bodies:
-			throw(node.get_path())
+			rpc_throw(node.get_path())
 		monitoring = false
 		
 		
 @rpc("call_local")		
-func hold(node_path):
+func rpc_hold(node_path):
 	
 	var node = get_node(node_path)
 	
@@ -66,14 +69,13 @@ func hold(node_path):
 
 
 @rpc("call_local")
-func throw(node_path):
+func rpc_throw(node_path):
 	
 	var node = get_node(node_path)
 	
 	if can_be_held(node):
-		var aim = Wielder.LOOK_VECTOR.normalized() * Vector3(-1, 1, -1)
 		var scatter = node.global_position - get_parent().global_position
-		var direction = aim.lerp(scatter, 0.1)
+		var direction = Aim.lerp(scatter, 0.1)
 		var magnitude = throw_force
 		node.apply_central_force(magnitude * direction)
 		var lift = Vector3.UP * magnitude / 20.0
@@ -81,7 +83,7 @@ func throw(node_path):
 		
 			
 @rpc("call_local")
-func push(node_path):
+func rpc_push(node_path):
 	
 	var node = get_node(node_path)
 	

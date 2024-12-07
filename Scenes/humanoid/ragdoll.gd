@@ -90,7 +90,13 @@ func animate_physical_bones(delta):
 			physical_bone.linear_velocity += linear_force * delta
 			var angular_torque = get_hookes_law_force(ANGULAR_STIFFNESS * bone_modifier, angular_displacement.get_euler(), ANGULAR_DAMPING * bone_modifier, physical_bone.angular_velocity)
 			physical_bone.angular_velocity += angular_torque * delta
-	
+	process_slappy_feet(delta)
+
+
+func process_slappy_feet(delta):
+	var speed = $"Physical Bone lowerBody".linear_velocity.length()
+	slappy_foot_left.mod_db = speed 
+	slappy_foot_right.mod_db = speed
 	slappy_foot_left.process_slap(delta)
 	slappy_foot_right.process_slap(delta)
 

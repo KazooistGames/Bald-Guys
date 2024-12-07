@@ -4,8 +4,6 @@
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="2_n6e4d"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xydkg"]
-friction = 0.25
-rough = true
 bounce = 0.15
 
 [sub_resource type="BoxMesh" id="BoxMesh_ythp8"]

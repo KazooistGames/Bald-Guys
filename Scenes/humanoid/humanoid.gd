@@ -149,7 +149,7 @@ func _integrate_forces(state):
 				var kinetic_impulse = sqrt(relative_velocity.length())
 				impact *= kinetic_impulse
 		
-		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 2)	
+		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.5)	
 		impact *= directional_modifier
 			
 		if not is_multiplayer_authority():
