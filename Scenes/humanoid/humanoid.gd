@@ -47,6 +47,9 @@ var ragdoll_recovery_timer_seconds = 0
 signal ragdolled
 
 
+@onready var soundFX = $AudioStreamPlayer3D
+
+
 func _enter_tree():
 	
 	add_to_group("humanoids")
@@ -165,7 +168,8 @@ func _integrate_forces(state):
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
 				FLOATING = false
-				$AudioStreamPlayer3D.play()
+				soundFX.bus = "beef"
+				soundFX.play()
 			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
@@ -299,7 +303,8 @@ func get_ragdoll_recovered():
 func ragdoll():
 	
 	if not RAGDOLLED:
-		$AudioStreamPlayer3D.play()
+		soundFX.bus = "stank"
+		soundFX.play()
 		$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 		RUNNING = false
 		ragdolled.emit()

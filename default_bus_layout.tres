@@ -7,13 +7,9 @@ resource_name = "HighPassFilter"
 resource_name = "LowPassFilter"
 cutoff_hz = 1000.0
 
-[sub_resource type="AudioEffectDelay" id="AudioEffectDelay_ca8es"]
-resource_name = "Delay"
-tap1_delay_ms = 150.0
-tap1_level_db = -15.0
-tap1_pan = -0.4
-tap2_active = false
-tap2_delay_ms = 400.0
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_5bdlx"]
+resource_name = "Reverb"
+wet = 0.25
 
 [resource]
 bus/1/name = &"meat"
@@ -32,5 +28,11 @@ bus/2/volume_db = 0.0
 bus/2/send = &"Master"
 bus/2/effect/0/effect = SubResource("AudioEffectLowPassFilter_bev3p")
 bus/2/effect/0/enabled = true
-bus/2/effect/1/effect = SubResource("AudioEffectDelay_ca8es")
-bus/2/effect/1/enabled = false
+bus/3/name = &"stank"
+bus/3/solo = false
+bus/3/mute = false
+bus/3/bypass_fx = false
+bus/3/volume_db = 0.0
+bus/3/send = &"Master"
+bus/3/effect/0/effect = SubResource("AudioEffectReverb_5bdlx")
+bus/3/effect/0/enabled = true

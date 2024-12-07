@@ -20,6 +20,8 @@ var session
 
 @onready var sessionSpawner = $MultiplayerSpawner
 
+@onready var music = $Music
+
 @export var LOCAL_PLAYER_INTERFACE : Node3D
 
 @export var Player_Lobby_Dict = {}
@@ -34,6 +36,8 @@ const ClientState = {
 
 
 func _ready():
+	
+	music.play()
 	
 	LOCAL_PLAYER_INTERFACE = Player_Interface_Prefab.instantiate()
 	viewPort.add_child(LOCAL_PLAYER_INTERFACE)
@@ -61,6 +65,7 @@ func _process(_delta):
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
 	main_menu.visible = State == ClientState.Lobby
+	music.stream_paused = not main_menu.visible
 
 	if not multiplayer.has_multiplayer_peer():
 		return
@@ -123,7 +128,7 @@ func join_lobby():
 	multiplayer.multiplayer_peer = enet_peer
 		
 	multiplayer.server_disconnected.connect(leave_session)
-
+	
 
 func add_player_to_session(peer_id):
 	

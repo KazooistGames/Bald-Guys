@@ -11,6 +11,7 @@ var contained_bodies = []
 const hold_force = 2500.0	
 const throw_force = 25000.0
 
+const offset = Vector3(0, 0, 1.25)
 
 func _ready():
 	
@@ -27,14 +28,14 @@ func _ready():
 
 func _physics_process(_delta):
 		
-	
 	if Wielder.REACHING:
+		monitoring = true
 		Holding = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		collider.shape.radius = 0.5
 		collider.shape.height = 1.0
-		position = Vector3(0, 0, 1.25)
+		position = offset
 		
 		for node in contained_bodies:			
 			hold(node.get_path())
@@ -45,10 +46,11 @@ func _physics_process(_delta):
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		collider.shape.radius = 0.0
 		collider.shape.height = 0.0
-		position = Vector3(0, 0, 0)
+		position = -offset
 		
 		for node in contained_bodies:
 			throw(node.get_path())
+		monitoring = false
 		
 		
 @rpc("call_local")		
