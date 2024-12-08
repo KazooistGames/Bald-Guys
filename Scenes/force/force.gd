@@ -30,7 +30,7 @@ func _ready():
 
 
 func _physics_process(_delta):
-	print(global_rotation)
+	
 	if action == Action.hold:
 		monitoring = true
 		Holding = true

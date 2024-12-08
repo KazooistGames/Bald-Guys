@@ -13,7 +13,8 @@ stream_0/weight = 1.0
 
 [node name="SlappyFeet" type="AudioStreamPlayer3D"]
 stream = SubResource("AudioStreamRandomizer_nnqi8")
-volume_db = -24.0
+volume_db = -27.0
+pitch_scale = 0.8
 bus = &"meat"
 script = ExtResource("2_riafc")
 

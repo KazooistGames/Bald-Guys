@@ -6,7 +6,7 @@ extends AudioStreamPlayer3D
 var triggered = false
 
 var mod_db = 0.0
-const base_db = -24.0
+const base_db = -30.0
 
 func process_slap(delta):
 	

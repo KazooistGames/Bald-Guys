@@ -1,7 +1,7 @@
 extends Node3D
 
 const camera_prefab = preload("res://Scenes/cameras/FPS_Camera.tscn")
-const force_prefab = preload("res://Scenes/humanoid/force/force.tscn")
+const force_prefab = preload("res://Scenes/force/force.tscn")
 
 @export var character : Node3D
 
