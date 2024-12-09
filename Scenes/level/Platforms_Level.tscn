@@ -120,14 +120,17 @@ Size = Vector3(5, 0.1, 5)
 [node name="pillar1" parent="pillars" index="0" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 4.5, 7.5)
 top_height = 0.0
+radius = 1.0
 
 [node name="pillar 2" parent="pillars" index="1" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 3, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4.5, 10)
 top_height = 0.0
+radius = 1.0
 
 [node name="pillar3" parent="pillars" index="2" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 1.5, 12.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 4.5, 12.5)
 top_height = 0.0
+radius = 1.0
 
 [node name="podium" parent="pillars" index="3" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
@@ -136,13 +139,22 @@ top_height = 0.0
 [node name="Bricks" type="Node3D" parent="." index="4"]
 
 [node name="BrickField" parent="Bricks" index="0" instance=ExtResource("5_fjkgg")]
-transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 6.25, 0, 6.25)
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 8.5, 0, 4)
 
 [node name="BrickField1" parent="Bricks" index="1" instance=ExtResource("5_fjkgg")]
-transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 8.75, 0, 8.75)
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 11, 0, 6.5)
 
 [node name="BrickField2" parent="Bricks" index="2" instance=ExtResource("5_fjkgg")]
-transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 11.25, 0, 11.25)
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 13.5, 0, 9)
+
+[node name="BrickField3" parent="Bricks" index="3" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 4, 0, 8.5)
+
+[node name="BrickField4" parent="Bricks" index="4" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 6.5, 0, 11)
+
+[node name="BrickField5" parent="Bricks" index="5" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 9, 0, 13.5)
 
 [node name="Blocks" type="Node3D" parent="." index="5"]
 
