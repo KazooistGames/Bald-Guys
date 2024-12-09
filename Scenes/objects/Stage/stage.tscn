@@ -101,12 +101,16 @@ replication_config = SubResource("SceneReplicationConfig_5dtqu")
 
 [node name="pillar1" parent="." instance=ExtResource("4_mgmyd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 10)
+radius = 0.5
 
 [node name="pillar2" parent="." instance=ExtResource("4_mgmyd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 10)
+radius = 0.5
 
 [node name="pillar3" parent="." instance=ExtResource("4_mgmyd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -10)
+radius = 0.5
 
 [node name="pillar4" parent="." instance=ExtResource("4_mgmyd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -10)
+radius = 0.5

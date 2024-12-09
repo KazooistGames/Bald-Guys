@@ -105,6 +105,8 @@ func _process(_delta):
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
 			
 	else:
+		#var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
+		#TOPSPEED = max(SPEED_GEARS.x, translational_velocity.length())
 		IMPACT_THRESHOLD = 6.0 * mass
 		animation.updateFalling(linear_velocity)
 		skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
@@ -246,7 +248,7 @@ func _physics_process(delta):
 	else:
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
-		collider.shape.radius = clamp(lerp(0.20, 0.3, jumpDeltaScale ), 0.20, 0.3)
+		#collider.shape.radius = clamp(lerp(0.20, 0.3, jumpDeltaScale ), 0.20, 0.3)
 		collider.shape.height = clamp(lerp(1.85, 1.10, jumpDeltaScale ), 1.1, 1.85)
 		collider.position.y = clamp(lerp(0.925, 1.175, jumpDeltaScale ), 0.925, 1.175)
 
@@ -266,10 +268,11 @@ func get_acceleration():
 	var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
 	var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
 	var return_val = absolute * relative
+	print(return_val)
 	
 	if not ON_FLOOR:
-		return_val /= 2.0
-		
+		return_val = absolute/3.0
+	print(return_val)
 	return return_val
 
 

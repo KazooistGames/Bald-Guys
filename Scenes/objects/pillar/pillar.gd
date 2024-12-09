@@ -9,6 +9,7 @@ extends Node3D
 
 var bottom = Vector3.ZERO
 @export var top_height = 0.75
+
 @export var radius = 0.5
 
 
