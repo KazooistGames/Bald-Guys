@@ -23,8 +23,9 @@ const floor_angle = PI/3.0
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.5, 7.0)
-@export var JUMP_SPEED = 6
+@export var JUMP_SPEED = 5
 @export var RUNNING = false
+@export var DOUBLE_JUMP_CHARGES = 1
 #@export var FLOATING = false
 
 @export var AUTHORITY_POSITION = Vector3.ZERO
@@ -168,7 +169,7 @@ func _integrate_forces(state):
 			if check1 and check2 and check3:
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
-				#FLOATING = false
+				reset_double_jump.rpc()
 				soundFX.bus = "beef"
 				soundFX.play()
 			
@@ -200,15 +201,6 @@ func _integrate_forces(state):
 			impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
 
 	else:
-				
-		#if linear_velocity.y <= 2.75:
-			#FLOATING = false
-			#
-		#if FLOATING:
-			#gravity_scale = 1.0/3.0
-			#
-		#else:
-			#gravity_scale = 1
 
 		if WALK_VECTOR:
 			impulse = WALK_VECTOR * get_acceleration() * mass
@@ -267,11 +259,9 @@ func get_acceleration():
 	var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
 	var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
 	var return_val = absolute * relative
-	print(return_val)
 	
 	if not ON_FLOOR:
 		return_val = absolute/3.0
-	print(return_val)
 	return return_val
 
 
@@ -299,7 +289,7 @@ func get_ragdoll_ready():
 func get_ragdoll_recovered():
 	
 	return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
-
+	
 
 @rpc("call_local")
 func ragdoll():
@@ -336,11 +326,34 @@ func jump():
 	
 	if ON_FLOOR:
 		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
+		
+	elif DOUBLE_JUMP_CHARGES > 0:
+		double_jump.rpc()
 
+
+@rpc("call_local")
+func double_jump():
+	
+	if ON_FLOOR:
+		pass
+		
+	elif DOUBLE_JUMP_CHARGES > 0:
+		DOUBLE_JUMP_CHARGES -= 1
+		var total_change = 3 - min(0.0, linear_velocity.y)
+		print(total_change)
+		apply_central_impulse(Vector3.UP * mass * total_change)
+		
+
+@rpc("call_local")
+func reset_double_jump():
+	
+	DOUBLE_JUMP_CHARGES = 1
+		
 		
 @rpc("call_local")
 func land():
 	
+	reset_double_jump()
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 	var retardation_vector = -translational_velocity.normalized()
 	var retardation_magnitude = min(3.0, translational_velocity.length())
