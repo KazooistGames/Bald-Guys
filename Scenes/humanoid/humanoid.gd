@@ -150,6 +150,7 @@ func _integrate_forces(state):
 			if my_velocity.length() < relative_velocity.length():	
 				var kinetic_impulse = sqrt(relative_velocity.length())
 				impact *= kinetic_impulse
+				#print(multiplayer.get_unique_id(), "	", impact)
 		
 		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.5)	
 		impact *= directional_modifier
@@ -167,11 +168,12 @@ func _integrate_forces(state):
 			var check3 = abs(normal.dot(floor_normal)) <= 0.4
 
 			if check1 and check2 and check3:
-				state.apply_central_impulse(state.get_contact_impulse(index))
-				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
-				reset_double_jump.rpc()
-				soundFX.bus = "beef"
-				soundFX.play()
+				#state.apply_central_impulse(state.get_contact_impulse(index))
+				#state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2.0 * mass)
+				#reset_double_jump.rpc()
+				#soundFX.bus = "beef"
+				#soundFX.play()
+				wall_jump.rpc(state.get_contact_impulse(index))
 			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
@@ -239,7 +241,6 @@ func _physics_process(delta):
 	else:
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
-		#collider.shape.radius = clamp(lerp(0.20, 0.3, jumpDeltaScale ), 0.20, 0.3)
 		collider.shape.height = clamp(lerp(1.85, 1.10, jumpDeltaScale ), 1.1, 1.85)
 		collider.position.y = clamp(lerp(0.925, 1.175, jumpDeltaScale ), 0.925, 1.175)
 
@@ -262,6 +263,7 @@ func get_acceleration():
 	
 	if not ON_FLOOR:
 		return_val = absolute/3.0
+		
 	return return_val
 
 
@@ -328,8 +330,18 @@ func jump():
 		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
 		
 	elif DOUBLE_JUMP_CHARGES > 0:
-		double_jump.rpc()
+		double_jump()
+		
 
+@rpc("call_local")
+func wall_jump(impulse):
+	
+	apply_central_impulse(impulse)
+	apply_central_impulse(Vector3.UP * JUMP_SPEED/2.0 * mass)
+	reset_double_jump()
+	soundFX.bus = "beef"
+	soundFX.play()
+	
 
 @rpc("call_local")
 func double_jump():

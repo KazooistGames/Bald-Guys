@@ -167,7 +167,8 @@ func rpc_move_to_level():
 func respawn_node(node_path, spawn_position):
 	
 	var node = get_node(node_path)
-	node.position = spawn_position
+	if node != null:
+		node.position = spawn_position
 	
 
 func Commission_Next_Round():
