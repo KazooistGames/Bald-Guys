@@ -23,9 +23,9 @@ const floor_angle = PI/3.0
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.5, 7.0)
-@export var JUMP_SPEED = 4.5
+@export var JUMP_SPEED = 6
 @export var RUNNING = false
-@export var FLOATING = false
+#@export var FLOATING = false
 
 @export var AUTHORITY_POSITION = Vector3.ZERO
 
@@ -45,7 +45,6 @@ var ragdoll_recovery_period_seconds = 1
 var ragdoll_recovery_timer_seconds = 0
 
 signal ragdolled
-
 
 @onready var soundFX = $AudioStreamPlayer3D
 
@@ -169,7 +168,7 @@ func _integrate_forces(state):
 			if check1 and check2 and check3:
 				state.apply_central_impulse(state.get_contact_impulse(index))
 				state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2 * mass)
-				FLOATING = false
+				#FLOATING = false
 				soundFX.bus = "beef"
 				soundFX.play()
 			
@@ -202,14 +201,14 @@ func _integrate_forces(state):
 
 	else:
 				
-		if linear_velocity.y <= 2.75:
-			FLOATING = false
-			
-		if FLOATING:
-			gravity_scale = 1.0/3.0
-			
-		else:
-			gravity_scale = 1
+		#if linear_velocity.y <= 2.75:
+			#FLOATING = false
+			#
+		#if FLOATING:
+			#gravity_scale = 1.0/3.0
+			#
+		#else:
+			#gravity_scale = 1
 
 		if WALK_VECTOR:
 			impulse = WALK_VECTOR * get_acceleration() * mass

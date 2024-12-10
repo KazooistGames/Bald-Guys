@@ -49,11 +49,11 @@ func _process(_delta):
 		character.RUNNING = Input.is_action_pressed("run")
 			
 		if Input.is_action_just_pressed("jump"):
-			character.FLOATING = true
+ 			#character.FLOATING = true
 			character.jump.rpc()
 			
-		elif Input.is_action_just_released("jump"):
-			character.FLOATING = false
+		#elif Input.is_action_just_released("jump"):
+			#character.FLOATING = false
 			
 		if Input.is_action_just_pressed("equip"):
 			character.ragdoll.rpc()
