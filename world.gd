@@ -1,6 +1,8 @@
 extends Node3D
 
-const Player_Interface_Prefab = preload("res://Scenes/player/player_interface.tscn")
+const player_interface_prefab = preload("res://Scenes/player/player_interface.tscn")
+
+const force_prefab = preload("res://Scenes/force/force.tscn")
 
 const session_Prefab = preload("res://Scenes/session/session.tscn")
 
@@ -39,7 +41,7 @@ func _ready():
 	
 	music.play()
 	
-	LOCAL_PLAYER_INTERFACE = Player_Interface_Prefab.instantiate()
+	LOCAL_PLAYER_INTERFACE = player_interface_prefab.instantiate()
 	viewPort.add_child(LOCAL_PLAYER_INTERFACE)
 
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -151,9 +153,13 @@ func give_humanoid_to_client(humanoid):
 	var peer_id = str(humanoid.name).to_int()
 	humanoid.set_multiplayer_authority(peer_id)
 	
+	var force = force_prefab.instantiate()
+	force.set_multiplayer_authority(peer_id)
+	humanoid.add_child(force)
+	
 	if multiplayer.get_unique_id() == peer_id:
 		LOCAL_PLAYER_INTERFACE.character = humanoid
-
+		LOCAL_PLAYER_INTERFACE.force = force
 
 func handle_new_session_spawn(new_session):
 	

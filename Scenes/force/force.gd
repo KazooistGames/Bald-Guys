@@ -21,7 +21,6 @@ var contained_bodies = []
 const hold_force = 5000.0	
 const throw_force = 25000.0
 
-var offset =  Vector3.ZERO
 
 func _ready():
 
@@ -32,14 +31,14 @@ func _ready():
 func _physics_process(_delta):
 	
 	if action == Action.hold:
+		print(global_position)
 		monitoring = true
 		Holding = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		collider.shape.radius = 0.5
 		collider.shape.height = 1.0
-		position = offset
-		
+	
 		for node in contained_bodies:			
 			rpc_hold(node.get_path())
 			
@@ -49,10 +48,10 @@ func _physics_process(_delta):
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		collider.shape.radius = 0.0
 		collider.shape.height = 0.0
-		position = -offset
-		
+
 		for node in contained_bodies:
 			rpc_throw(node.get_path())
+			
 		monitoring = false
 		
 		
@@ -74,8 +73,8 @@ func rpc_throw(node_path):
 	var node = get_node(node_path)
 	
 	if can_be_held(node):
-		var scatter = node.global_position - get_parent().global_position
-		var direction = Aim.lerp(scatter, 0.1)
+
+		var direction = get_scattered_aim(node)
 		var magnitude = throw_force
 		node.apply_central_force(magnitude * direction)
 		var lift = Vector3.UP * magnitude / 20.0
@@ -92,6 +91,17 @@ func rpc_push(node_path):
 		var magnitude = throw_force / 2.0	
 		node.apply_central_force(magnitude * direction)
 			
+			
+func get_scattered_aim(node):
+	
+	var count = contained_bodies.size()
+	var lerp_val = (count - 1) * 0.1
+	lerp_val = clampf(lerp_val, 0.0, 0.6)
+	
+	var disposition = node.global_position - get_parent().global_position
+	disposition.y /= 10
+	
+	return Aim.lerp(disposition.normalized(), lerp_val)
 	
 func add_body(node):
 	

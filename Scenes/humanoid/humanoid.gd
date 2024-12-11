@@ -75,11 +75,8 @@ func _process(_delta):
 		
 	elif get_ragdoll_recovered(): 
 		unragdoll.rpc()
-	
-	if REACHING: #stop running if necessary
-		RUNNING = false
 		
-	elif WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
+	if WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
 		RUNNING = false
 		
 	elif WALK_VECTOR == Vector3.ZERO:
