@@ -31,7 +31,6 @@ func _ready():
 func _physics_process(_delta):
 	
 	if action == Action.hold:
-		print(global_position)
 		monitoring = true
 		Holding = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
