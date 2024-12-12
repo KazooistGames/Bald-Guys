@@ -1,0 +1,34 @@
+[gd_scene load_steps=7 format=3 uid="uid://bbtuviu7jd3j0"]
+
+[ext_resource type="Script" path="res://Scenes/components/interactable/interactable.gd" id="1_3i1eq"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_s66xe"]
+radius = 1.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_tsj0h"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lel2v"]
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cek3t"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g52rv"]
+albedo_color = Color(1, 0, 0, 1)
+
+[node name="Interactable" type="Area3D"]
+collision_layer = 0
+collision_mask = 11
+script = ExtResource("1_3i1eq")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_s66xe")
+
+[node name="DebugSphere" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+mesh = SubResource("SphereMesh_tsj0h")
+surface_material_override/0 = SubResource("StandardMaterial3D_lel2v")
+
+[node name="DebugBox" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+mesh = SubResource("BoxMesh_cek3t")
+surface_material_override/0 = SubResource("StandardMaterial3D_g52rv")

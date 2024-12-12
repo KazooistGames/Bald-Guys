@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://6df6up57x4jw"]
+
+[ext_resource type="Script" path="res://Scenes/components/physics_sync/physics_sync.gd" id="1_yt0mc"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_q45re"]
+properties/0/path = NodePath("PhysicsSync:AUTHORITY_ORIGIN")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath("PhysicsSync:AUTHORITY_BASIS")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath("PhysicsSync:Authority_Angular_Velocity")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+
+[node name="PhysicsSync" type="MultiplayerSynchronizer"]
+replication_config = SubResource("SceneReplicationConfig_q45re")
+script = ExtResource("1_yt0mc")

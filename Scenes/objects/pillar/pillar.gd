@@ -10,8 +10,10 @@ extends Node3D
 var bottom = Vector3.ZERO
 @export var top_height = 0.75
 
+@export var radius = 0.5
 
-func _process(delta):
+
+func _process(_delta):
 
 	if not raycast.is_colliding():
 		pass
@@ -24,8 +26,11 @@ func _process(delta):
 			
 		mesh.global_position = actual_position
 		mesh.mesh.height = actual_height 
+		mesh.mesh.top_radius = radius
+		mesh.mesh.bottom_radius = radius
 		
 		collider.global_position = actual_position
 		collider.shape.height = actual_height
+		collider.shape.radius = radius
 		
 

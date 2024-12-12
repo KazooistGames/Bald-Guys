@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://bg13x1s1aib1u"]
+
+[ext_resource type="Script" path="res://Scenes/humanoid/force/force.gd" id="1_8ejgp"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_yifoa"]
+height = 1.25
+
+[node name="Force" type="Area3D"]
+collision_layer = 16
+collision_mask = 14
+script = ExtResource("1_8ejgp")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("CylinderShape3D_yifoa")

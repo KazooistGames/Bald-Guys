@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://do2svkh5yqq6a"
+path="res://.godot/imported/Beas Mote2.wav-1640ff23299d01dc2c6a9dc00634425d.sample"
+
+[deps]
+
+source_file="res://audio/Beas Mote2.wav"
+dest_files=["res://.godot/imported/Beas Mote2.wav-1640ff23299d01dc2c6a9dc00634425d.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=2
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

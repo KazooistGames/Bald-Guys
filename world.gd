@@ -1,6 +1,8 @@
 extends Node3D
 
-const Player_Interface_Prefab = preload("res://Scenes/player/player_interface.tscn")
+const player_interface_prefab = preload("res://Scenes/player/player_interface.tscn")
+
+const force_prefab = preload("res://Scenes/force/force.tscn")
 
 const session_Prefab = preload("res://Scenes/session/session.tscn")
 
@@ -12,17 +14,15 @@ var session
 
 @onready var main_menu = $CanvasLayer/MainMenu
 
-#@onready var lobby_menu = $CanvasLayer/LobbyMenu
-
 @onready var pause_menu = $CanvasLayer/PauseMenu
 
 @onready var address_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/AddressEntry
 
 @onready var viewPort = $SubViewportContainer/SubViewport
 
-#@onready var hud = $HUD
-
 @onready var sessionSpawner = $MultiplayerSpawner
+
+@onready var music = $Music
 
 @export var LOCAL_PLAYER_INTERFACE : Node3D
 
@@ -39,7 +39,9 @@ const ClientState = {
 
 func _ready():
 	
-	LOCAL_PLAYER_INTERFACE = Player_Interface_Prefab.instantiate()
+	music.play()
+	
+	LOCAL_PLAYER_INTERFACE = player_interface_prefab.instantiate()
 	viewPort.add_child(LOCAL_PLAYER_INTERFACE)
 
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -56,37 +58,49 @@ func _unhandled_input(_event):
 		pause_menu.visible = not pause_menu.visible
 
 
-func _process(_delta):
+func _process(delta):
 	
-	if State != ClientState.Session or pause_menu.visible:
+	
+	if State == ClientState.Lobby:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		music.volume_db = move_toward(music.volume_db, -24, delta * 3)
+		
+	elif pause_menu.visible:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
+		
 	elif State == ClientState.Session:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		music.volume_db = move_toward(music.volume_db, -48, delta * 6)
 	
 	main_menu.visible = State == ClientState.Lobby
 
 	if not multiplayer.has_multiplayer_peer():
 		return
 		
-	if not is_multiplayer_authority():
+	elif not is_multiplayer_authority():
 		return
 
 	elif not session:
 		session = viewPort.get_node_or_null("session")
 		State = ClientState.Lobby
-		
-	elif not session.Commissioned:
-		session.Created_Player_Humanoid.connect(give_humanoid_to_client)
-		session.Commission()
 
 	elif State != ClientState.Session:
-		
-		#for humanoid in session.Humanoids:
-			#_handoff_humanoid.rpc(humanoid, str(humanoid.name ).to_int() )
 		State = ClientState.Session
 		
 	else:
+		music.stream_paused = session.State != session.SessionState.Hub and not pause_menu.visible
+
+
+func _notification(what):
+	
+	if State != ClientState.Session:
 		pass
+	
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		pause_menu.visible = true
+		
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		pause_menu.visible = false
 
 
 func start_host_lobby():
@@ -103,11 +117,11 @@ func start_host_lobby():
 	multiplayer.multiplayer_peer = enet_peer
 	
 	session = session_Prefab.instantiate()
+	session.Created_Player_Humanoid.connect(give_humanoid_to_client)
 	viewPort.add_child(session)
 	
 	multiplayer.peer_connected.connect(add_player_to_session)
 	multiplayer.peer_disconnected.connect(remove_player_from_session)
-	#upnp_setup() #removed and using port forwarding instead
 
 
 func join_lobby():
@@ -121,7 +135,7 @@ func join_lobby():
 	multiplayer.multiplayer_peer = enet_peer
 		
 	multiplayer.server_disconnected.connect(leave_session)
-
+	
 
 func add_player_to_session(peer_id):
 	
@@ -139,38 +153,22 @@ func remove_player_from_session(peer_id):
 	session.destroy_player_humanoid(peer_id)
 
 		
-		
 func give_humanoid_to_client(humanoid):
 	
 	var peer_id = str(humanoid.name).to_int()
 	humanoid.set_multiplayer_authority(peer_id)
 	
+	var force = force_prefab.instantiate()
+	force.set_multiplayer_authority(peer_id)
+	humanoid.add_child(force)
+	
 	if multiplayer.get_unique_id() == peer_id:
 		LOCAL_PLAYER_INTERFACE.character = humanoid
-
+		LOCAL_PLAYER_INTERFACE.force = force
 
 func handle_new_session_spawn(new_session):
 	
 	new_session.Created_Player_Humanoid.connect(give_humanoid_to_client)
-
-
-func upnp_setup():
-	
-	var upnp = UPNP.new()
-	var discover_result = upnp.discover()
-	assert(discover_result == UPNP.UPNP_RESULT_SUCCESS, \
-	"UPNP Discover Failed! Error %s" % discover_result)
-	assert(upnp.get_gateway() and upnp.get_gateway().is_valid_gateway(), \
-	"UPNP Invalid Gateway!")
-	var map_result = upnp.add_port_mapping(PORT)
-	assert(map_result == UPNP.UPNP_RESULT_SUCCESS, \
-	"UPNP Port Mapping Failed! Error %s" % map_result)
-	print("Success! Join Address: %s" % upnp.query_external_address())
-	
-
-func quit():
-	
-	get_tree().quit()
 
 
 func leave_session():
@@ -181,6 +179,7 @@ func leave_session():
 	elif multiplayer.is_server():
 		multiplayer.peer_connected.disconnect(add_player_to_session)
 		multiplayer.peer_disconnected.disconnect(remove_player_from_session)
+	
 	else:
 		multiplayer.server_disconnected.disconnect(leave_session)
 		
@@ -193,11 +192,14 @@ func leave_session():
 		session.queue_free()
 		
 	State = ClientState.Lobby
+		
+		
+func quit():
 	
-
+	get_tree().quit()
 	
-	
-@rpc("call_local")
+		
+@rpc("call_local", "reliable")
 func rpc_handoff_object(path, auth_id):
 	
 	path = str(path).replace(str(get_path()), "")

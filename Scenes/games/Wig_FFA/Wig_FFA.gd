@@ -25,17 +25,17 @@ enum GameState {
 
 @export var State = GameState.reset
 
-signal Starting()
-signal Playing()
-signal Finished()
-signal Resetting()
+@onready var session = get_parent()
 
 var countDown_timer = 0
 var countDown_value = 0
 
+
 func _ready():
 	
 	local_player_name = str(multiplayer.get_unique_id())
+	session.Started_Round.connect(start)
+	session.Ended_Round.connect(reset)
 	
 	
 func _process(delta):
@@ -44,6 +44,7 @@ func _process(delta):
 		Wig = get_node_or_null("Wig")
 
 	HUD.TableValues = Bearer_Times
+	HUD.visible = session.State == session.SessionState.Round 
 	
 	if not is_multiplayer_authority():
 		pass
@@ -59,7 +60,7 @@ func _process(delta):
 		elif countDown_timer > 1:
 			countDown_timer = 0
 			countDown_value -= 1
-			HUD.set_psa.rpc(str(countDown_value))
+			session.HUD.set_psa.rpc(str(countDown_value))
 			
 		else:
 			countDown_timer += delta
@@ -73,9 +74,8 @@ func _process(delta):
 			Bearer_Times[Bearer.name] += delta
 			
 			if Bearer_Times[Bearer.name] >= Goal_Time:
-				HUD.set_psa.rpc("Winner: " + str(Bearer.name), -1)
 				rpc_finish.rpc()
-		
+				session.Finished_Round(str(Bearer.name))
 		else:
 			Bearer_Times[Bearer.name] = delta
 			
@@ -91,6 +91,14 @@ func _process(delta):
 	if Bearer_Times.has(local_player_name):	
 		var accumulated_time = Bearer_Times[local_player_name]
 		HUD.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
+
+
+func start():
+	rpc_start.rpc()
+	
+	
+func reset():
+	rpc_reset.rpc()	
 
 
 func dawn_wig(node):
@@ -109,7 +117,7 @@ func dawn_wig(node):
 		toggle_wig_mount.rpc(true)
 		
 		set_wig_bearer.rpc(node.get_path())
-		print("dawned ", node)
+		#print("dawned ", node)
 
 		
 func drop_wig():
@@ -123,20 +131,20 @@ func drop_wig():
 	toggle_wig_mount.rpc(false)
 	
 	Wig.global_position = current_position
-	Wig.linear_velocity = Bearer.velocity * 1.5 + Vector3(0, 3, 0)
+	Wig.linear_velocity = Bearer.linear_velocity * 1.5 + Vector3(0, 3, 0)
 
 	set_wig_bearer.rpc(null)
-	print("Dropped")
+	#print("Dropped")
 	
 	
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func toggle_wig_mount(value):
 	if not Wig: return
 	Wig.collider.disabled = value
 	Wig.freeze = value
 
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func move_wig_remote_controller(path_to_new_parent):
 	
 	wig_remote.get_parent().remove_child(wig_remote)
@@ -148,28 +156,37 @@ func move_wig_remote_controller(path_to_new_parent):
 	new_parent.add_child(wig_remote)
 
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func set_wig_bearer(path_to_new_bearer):
 	
 	if path_to_new_bearer == null:
 		Bearer = null
 		wig_remote.remote_path = ""
-		#Wig.synchronizer.replication_config.property_set_replication_mode("Wig:position", 1)
+		Wig.toggle_strobing(true)
 		
 	else:	
 		Bearer = get_node(path_to_new_bearer)
 		wig_remote.remote_path = Wig.get_path()
-		wig_remote.position = Vector3(0, 0.275, -.075)
-		#Wig.synchronizer.replication_config.property_set_replication_mode("Wig:position", 0)
-				
+		wig_remote.position = Vector3(0, 0.275, -.075)		
+		Wig.toggle_strobing(false)
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
+func rpc_start():
+	
+	if not is_multiplayer_authority(): return
+
+	rpc_reset()
+	countDown_value = 10
+	session.HUD.set_psa.rpc(str(countDown_value))
+	State = GameState.starting
+	
+
+@rpc("call_local", "reliable")
 func rpc_reset():
 	
 	if not is_multiplayer_authority(): return
 	
 	HUD.find_child("Progress").visible = false
-	#HUD.set_psa.rpc("")
 	
 	if Bearer:
 		drop_wig()
@@ -181,22 +198,9 @@ func rpc_reset():
 	
 	Bearer_Times = {}
 	State = GameState.reset
-	Resetting.emit()
-	
-
-@rpc("call_local")
-func rpc_start():
-	
-	if not is_multiplayer_authority(): return
-
-	rpc_reset()
-	countDown_value = 10
-	HUD.set_psa.rpc(str(countDown_value))
-	State = GameState.starting
-	Starting.emit()
 	
 	
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func rpc_play():
 	
 	if not is_multiplayer_authority(): return
@@ -206,12 +210,11 @@ func rpc_play():
 	add_child(Wig)
 	Wig.global_position = Vector3(0, 20, 0)
 	Wig.interactable.gained_interaction.connect(dawn_wig)
-	
+	Wig.toggle_strobing(true)
 	State = GameState.playing
-	Playing.emit()
 	
 	
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func rpc_finish():
 	
 	if not is_multiplayer_authority(): return
@@ -220,7 +223,6 @@ func rpc_finish():
 		Bearer.ragdolled.disconnect(drop_wig)
 		
 	State = GameState.finished
-	Finished.emit()
 
 	
 	

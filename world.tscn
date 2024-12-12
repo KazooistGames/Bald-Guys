@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://ccecv7ucyb87r"]
+[gd_scene load_steps=6 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
 [ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="2_76mdc"]
+[ext_resource type="AudioStream" uid="uid://do2svkh5yqq6a" path="res://audio/Beas Mote2.wav" id="3_w7uwt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ddwpy"]
 render_priority = 0
@@ -34,6 +35,7 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
+audio_listener_enable_3d = true
 size = Vector2i(1152, 648)
 render_target_update_mode = 4
 
@@ -135,6 +137,12 @@ spawn_path = NodePath("../SubViewportContainer/SubViewport")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_dnjxn")
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_w7uwt")
+volume_db = -18.0
+autoplay = true
+bus = &"muzic"
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="join_lobby"]

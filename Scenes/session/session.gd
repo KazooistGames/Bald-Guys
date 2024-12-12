@@ -4,77 +4,101 @@ const Humanoid_Prefab = preload("res://Scenes/humanoid/humanoid.tscn")
 
 const SessionState = {
 	Hub = 0,
-	Level = 1,
+	Round = 1,
 }
 
 @export var State = SessionState.Hub
-
-const GameMode = {
-	FFA = 0,
-}
-
-@export var Mode = GameMode.FFA
 
 @export var Commissioned = false
 
 @export var Humanoids = []
 
-@onready var FFA = $Wig_FFA
+@export var Level : Node3D = null
+
+@export var Game : Node3D = null
+
+@onready var HUD = $HUD
 
 @onready var Hub = $Hub
 
-@onready var Level = $Level
+@onready var humanoidSpawner = $HumanoidSpawner
 
-@onready var humanoidSpawner = $MultiplayerSpawner
+@onready var levelSpawner = $LevelSpawner
+
+@onready var gameSpawner = $GameSpawner
 
 signal Created_Player_Humanoid
 
+signal Started_Round
+
+signal Ended_Round
+
 
 func _ready():
+	
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
+	gameSpawner.spawned.connect(handle_new_game)
+	levelSpawner.spawned.connect(handle_new_level)
+	
+	if is_multiplayer_authority():
+		Commission_Next_Round()
+		rpc_move_to_hub.rpc()
+		create_player_humanoid(1)
+		Commissioned = true
+
+
+func _process(_delta):
+	
+	Humanoids = get_tree().get_nodes_in_group("humanoids")
 
 
 func _unhandled_key_input(event):
 	
-	if event.is_action_pressed("Toggle"):
-		
-		if State != SessionState.Level:
-			rpc_move_to_level.rpc()	
+	if not is_multiplayer_authority():
+		pass
 			
-		elif State != SessionState.Hub:
+	elif event.is_action_pressed("Toggle"):
+			
+		if State != SessionState.Hub:
 			rpc_move_to_hub.rpc()
+			
+		elif State != SessionState.Round:
+			rpc_move_to_level.rpc()	
 
 
-func end_game_mode():
+func handle_new_level(new_level):
 	
-	rpc_move_to_hub.rpc()
-
-func start_game_mode():
-	
-	if Mode == GameMode.FFA:
-		FFA.rpc_start.rpc()
-		FFA.Finished.connect(end_game_mode)
+	if Level != null:
+		Level.queue_free()
 		
-		
-func reset_game_mode():
+	Level = new_level
 	
-	if Mode == GameMode.FFA:
-		FFA.rpc_reset.rpc()
 	
+func handle_new_game(new_game):
+	
+	if Game != null:
+		Game.queue_free()
+	
+	Game = new_game
 
-func Commission():
+
+func Finished_Round(winner):
 	
+	HUD.set_psa.rpc("Winner: " + winner, -1)
 	rpc_move_to_hub.rpc()
-	create_player_humanoid(1)
-	Commissioned = true
+	Commission_Next_Round()
 
 
 func spawn_players(parent):
 	
 	for humanoid in Humanoids:
 		humanoid.unragdoll.rpc()
-		respawn_node.rpc(humanoid.get_path(), get_random_spawn(parent))
-		
+		humanoid.linear_velocity = Vector3.ZERO
+		var spawn_position = get_random_spawn(parent)
+		var rid = humanoid.get_rid()
+		var new_transform = Transform3D.IDENTITY.translated(spawn_position)
+		PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, new_transform)
+
 
 func get_random_spawn(parent):
 	
@@ -96,7 +120,6 @@ func create_player_humanoid(peer_id):
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
-	
 	Humanoids.append(new_peer_humanoid)
 	
 	add_child(new_peer_humanoid)
@@ -105,8 +128,9 @@ func create_player_humanoid(peer_id):
 	respawn_node.rpc(new_peer_humanoid.get_path(), random_spawn_position)
 	
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
+	new_peer_humanoid.set_multiplayer_authority(peer_id)
+	
 	return new_peer_humanoid
-	#Created_Player_Humanoid.emit(new_peer_humanoid.get_path(), peer_id)
 
 
 func destroy_player_humanoid(peer_id):
@@ -123,25 +147,74 @@ func signal_to_handoff_player_humanoid(node):
 	Created_Player_Humanoid.emit(node)
 
 
-@rpc("call_local")
+@rpc("call_local", "authority", "reliable")
 func rpc_move_to_hub():
 	
 	State = SessionState.Hub
 	spawn_players(Hub)		
-	reset_game_mode()
+	Ended_Round.emit()
 
 		
-@rpc("call_local")
+@rpc("call_local", "authority", "reliable")
 func rpc_move_to_level():
 	
-	State = SessionState.Level
+	State = SessionState.Round
 	spawn_players(Level)
-	start_game_mode()
+	Started_Round.emit()
 
 
-@rpc("call_local")
+@rpc("call_local", "authority", "reliable")
 func respawn_node(node_path, spawn_position):
 	
 	var node = get_node(node_path)
-	node.position = spawn_position
+	if node != null:
+		node.position = spawn_position
+	
 
+func Commission_Next_Round():
+	
+	var unique_round_id = randi_range(0, 0)
+	var level_prefab_path = ""
+	var game_prefab_path = ""
+	
+	match unique_round_id:
+		0:
+			level_prefab_path = "res://Scenes/level/Platforms_Level.tscn"
+			game_prefab_path = "res://Scenes/games/Wig_FFA/Wig_FFA.tscn"
+	
+	if level_prefab_path != ""	and game_prefab_path != "":
+		load_level(level_prefab_path)
+		load_game(game_prefab_path)
+	
+
+func load_level(path):
+	
+	var prefab = load(path)
+	
+	if prefab == null:
+		return
+		
+	if Level != null:
+		Level.queue_free()
+		
+	Level = prefab.instantiate()
+	add_child(Level, true)
+	print("Level commissioned: ", Level)
+	
+
+func load_game(path):
+	
+	var prefab = load(path)
+	
+	if prefab == null:
+		return
+		
+	if Game != null:
+		Game.queue_free()
+		
+	Game = prefab.instantiate()
+	add_child(Game, true)
+	print("Game commissioned: ", Game)
+			
+
+	

@@ -11,6 +11,7 @@ extends RigidBody3D
 		if not mesh: return
 		var material = mesh.get_surface_override_material(0)
 		material.albedo_color = value
+		material.emission = value
 		mesh.set_surface_override_material(0, material)
 
 
@@ -26,9 +27,8 @@ extends RigidBody3D
 
 @export var AUTHORITY_POSITION = Vector3.ZERO
 
-#var rng = RandomNumberGenerator.new()
-#
-#@export var seed = 0
+var strobing_enabled = false
+var strobing_phase = 0
 
 
 func _enter_tree():
@@ -46,29 +46,19 @@ func _ready():
 	getRandomHairColor()
 	
 
-func _process(_delta):
+func _process(delta):
 	
 	mesh.mesh.radius = radius
 	mesh.mesh.height = radius * 2
 	collider.shape.radius = radius
+	var material = mesh.get_surface_override_material(0)
 	
-	#if Engine.is_editor_hint():
-		#rng.seed = hash(seed)
-		#getRandomHairColor()
-		
-func _physics_process(_delta):
+	if strobing_enabled:
+		material.emission_energy_multiplier = 2 + 2 * abs(sin(strobing_phase))
+		strobing_phase += delta
 	
-	if not multiplayer.has_multiplayer_peer():
-		return
-		
-	elif is_multiplayer_authority():
-		AUTHORITY_POSITION = position
-		
-	elif position.distance_to(AUTHORITY_POSITION) > 1:
-		position = AUTHORITY_POSITION
-		
 	else:
-		position = position.lerp(AUTHORITY_POSITION, .1)
+		material.emission_energy_multiplier = 4
 
 
 func getRandomHairColor():
@@ -88,5 +78,8 @@ func getRandomHairColor():
 	HAIR_COLOR = Color(r, g, b)
 
 
+func toggle_strobing(enable):
+	strobing_enabled = enable
+		
 	
 	
