@@ -1,4 +1,4 @@
-[gd_resource type="AudioBusLayout" load_steps=4 format=3 uid="uid://bxiqlu7c70tkp"]
+[gd_resource type="AudioBusLayout" load_steps=5 format=3 uid="uid://bxiqlu7c70tkp"]
 
 [sub_resource type="AudioEffectHighPassFilter" id="AudioEffectHighPassFilter_u5rve"]
 resource_name = "HighPassFilter"
@@ -10,6 +10,9 @@ cutoff_hz = 1000.0
 [sub_resource type="AudioEffectReverb" id="AudioEffectReverb_5bdlx"]
 resource_name = "Reverb"
 wet = 0.25
+
+[sub_resource type="AudioEffectPanner" id="AudioEffectPanner_k0aei"]
+resource_name = "Panner"
 
 [resource]
 bus/1/name = &"meat"
@@ -36,3 +39,11 @@ bus/3/volume_db = 0.0
 bus/3/send = &"Master"
 bus/3/effect/0/effect = SubResource("AudioEffectReverb_5bdlx")
 bus/3/effect/0/enabled = true
+bus/4/name = &"muzic"
+bus/4/solo = false
+bus/4/mute = false
+bus/4/bypass_fx = false
+bus/4/volume_db = 0.0
+bus/4/send = &"Master"
+bus/4/effect/0/effect = SubResource("AudioEffectPanner_k0aei")
+bus/4/effect/0/enabled = false
