@@ -142,6 +142,7 @@ replication_config = SubResource("SceneReplicationConfig_dnjxn")
 stream = ExtResource("3_w7uwt")
 volume_db = -18.0
 autoplay = true
+bus = &"muzic"
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="join_lobby"]
