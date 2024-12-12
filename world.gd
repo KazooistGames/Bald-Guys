@@ -58,16 +58,21 @@ func _unhandled_input(_event):
 		pause_menu.visible = not pause_menu.visible
 
 
-func _process(_delta):
+func _process(delta):
 	
-	if State != ClientState.Session or pause_menu.visible:
+	
+	if State == ClientState.Lobby:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		music.volume_db = move_toward(music.volume_db, -24, delta * 3)
+		
+	elif pause_menu.visible:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
 		
 	elif State == ClientState.Session:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		music.volume_db = move_toward(music.volume_db, -48, delta * 6)
 	
 	main_menu.visible = State == ClientState.Lobby
-	music.stream_paused = not main_menu.visible
 
 	if not multiplayer.has_multiplayer_peer():
 		return
@@ -83,7 +88,7 @@ func _process(_delta):
 		State = ClientState.Session
 		
 	else:
-		pass
+		music.stream_paused = session.State != session.SessionState.Hub and not pause_menu.visible
 
 
 func _notification(what):
