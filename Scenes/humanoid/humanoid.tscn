@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=44 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="Script" path="res://Scenes/humanoid/skeleton.gd" id="2_ldi4p"]
@@ -9,6 +9,7 @@
 [ext_resource type="ArrayMesh" uid="uid://dkrvskqnfamyw" path="res://Scenes/humanoid/humanoid.tres" id="5_b5sbe"]
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="6_rg0yq"]
 [ext_resource type="PackedScene" uid="uid://cv4wc5my34rxm" path="res://Scenes/humanoid/slappy_feet/slappy_feet.tscn" id="8_g1pbr"]
+[ext_resource type="AudioStream" uid="uid://c3y031bmnuw74" path="res://audio/deepSwing.mp3" id="11_030sq"]
 [ext_resource type="AudioStream" uid="uid://bwlo06x8jfil" path="res://audio/punch.mp3" id="11_neikv"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vc0al"]
@@ -3717,6 +3718,12 @@ properties/9/path = NodePath(".:ON_FLOOR")
 properties/9/spawn = true
 properties/9/replication_mode = 1
 
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_vpbvi"]
+random_pitch = 1.1
+streams_count = 1
+stream_0/stream = ExtResource("11_030sq")
+stream_0/weight = 1.0
+
 [node name="Armature" type="RigidBody3D"]
 collision_layer = 2
 collision_mask = 11
@@ -5656,9 +5663,6 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_l8k7m")
-}
 tree_root = ExtResource("3_1nlf8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Add2/add_amount = 1.0
@@ -5680,8 +5684,13 @@ script = ExtResource("5_6swf7")
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_0d5cw")
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+[node name="ImpactAudio" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("11_neikv")
-volume_db = -6.0
+volume_db = -18.0
 pitch_scale = 0.75
+bus = &"beef"
+
+[node name="JumpAudio" type="AudioStreamPlayer3D" parent="."]
+stream = SubResource("AudioStreamRandomizer_vpbvi")
+volume_db = -18.0
 bus = &"beef"

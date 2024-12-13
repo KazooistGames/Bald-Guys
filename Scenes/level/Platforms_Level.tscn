@@ -157,6 +157,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 15)
 top_height = 0.0
 radius = 2.0
 
+[node name="pillar8" parent="pillars" index="8" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 9, 15)
+top_height = 0.0
+radius = 1.0
+
+[node name="pillar9" parent="pillars" index="9" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 10, 17.5)
+top_height = 0.0
+radius = 1.0
+
 [node name="Bricks" type="Node3D" parent="." index="4"]
 
 [node name="BrickField" parent="Bricks" index="0" instance=ExtResource("5_fjkgg")]

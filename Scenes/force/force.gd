@@ -15,12 +15,17 @@ enum Action {
 
 @export var Aim = Vector3.ZERO
 
+@export var Max_kg = 500
+
+var contained_mass = 0
 
 var contained_bodies = []
 
 const hold_force = 5000.0	
 const throw_force = 25000.0
 
+var target_radius = 0.0
+var target_height = 0.0
 
 func _ready():
 
@@ -28,15 +33,18 @@ func _ready():
 	body_exited.connect(remove_body)
 
 
-func _physics_process(_delta):
+func _physics_process(delta):
+	
+	collider.shape.radius = move_toward(collider.shape.radius, target_radius, 2.0 * delta)
+	collider.shape.height = move_toward(collider.shape.height, target_height, 5.0 * delta)
 	
 	if action == Action.hold:
 		monitoring = true
 		Holding = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		collider.shape.radius = 0.5
-		collider.shape.height = 1.0
+		target_radius = 0.5
+		target_height = 1.0
 	
 		for node in contained_bodies:			
 			rpc_hold(node.get_path())
@@ -45,8 +53,8 @@ func _physics_process(_delta):
 		Holding = false
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-		collider.shape.radius = 0.0
-		collider.shape.height = 0.0
+		target_radius = 0.0
+		target_height = 0.0
 
 		for node in contained_bodies:
 			rpc_throw(node.get_path())
@@ -102,16 +110,26 @@ func get_scattered_aim(node):
 	
 	return Aim.lerp(disposition.normalized(), lerp_val)
 	
+	
 func add_body(node):
 	
-	if can_be_pushed(node):
+	if not can_be_pushed(node):
+		pass
+		
+	elif node.mass + contained_mass > Max_kg:
+		pass
+	
+	else:
 		contained_bodies.append(node)
+		contained_mass += node.mass
+		
 	
 	
 func remove_body(node):
 	
 	if contained_bodies.has(node):
 		contained_bodies.erase(node)
+		contained_mass -= node.mass
 		
 		
 func can_be_pushed(node):
