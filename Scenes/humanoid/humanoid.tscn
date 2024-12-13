@@ -3731,6 +3731,7 @@ mass = 100.0
 physics_material_override = SubResource("PhysicsMaterial_vc0al")
 lock_rotation = true
 freeze_mode = 1
+continuous_cd = true
 script = ExtResource("1_omd7n")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
