@@ -140,7 +140,7 @@ replication_config = SubResource("SceneReplicationConfig_dnjxn")
 
 [node name="Music" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_w7uwt")
-volume_db = -18.0
+volume_db = -32.0
 autoplay = true
 bus = &"muzic"
 

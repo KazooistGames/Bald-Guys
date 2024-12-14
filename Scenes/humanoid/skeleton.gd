@@ -66,6 +66,11 @@ func processFallOrientation(delta, look_vector, walk_vector):
 		#print("Zero")
 		smooth_turn(look_vector, target_angle, 10, delta)
 		
+	elif is_back_pedaling(look_vector, walk_vector):
+		target_angle = atan2(-walk_vector.x, -walk_vector.z)
+		var timeStep = LERP_VAL * delta
+		rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
+		
 	else:
 		#print(walk_vector)
 		target_angle = atan2(walk_vector.x, walk_vector.z)
@@ -108,7 +113,14 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	
 	var timeStep = LERP_VAL * delta
 	var actual = rotation.y
-	var target = atan2(-walk_vector.x, -walk_vector.z) if is_back_pedaling(look_vector, walk_vector) else atan2(walk_vector.x, walk_vector.z)
+	var target
+	
+	if is_back_pedaling(look_vector, walk_vector):
+		target = atan2(-walk_vector.x, -walk_vector.z)
+		
+	else:
+		target = atan2(walk_vector.x, walk_vector.z)
+		
 	var lookTarget = atan2(-look_vector.x, -look_vector.z)
 	var lookDiff = get_true_difference(actual, lookTarget)
 	

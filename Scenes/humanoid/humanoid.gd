@@ -50,6 +50,9 @@ signal ragdolled
 @onready var impactFX = $ImpactAudio
 @onready var jumpFX = $JumpAudio
 
+var coyote_timer = 0.0
+var coyote_duration = 0.1
+
 func _enter_tree():
 	
 	add_to_group("humanoids")
@@ -102,7 +105,7 @@ func _process(_delta):
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
 			
 	else:
-		IMPACT_THRESHOLD = 6.25 * mass
+		IMPACT_THRESHOLD = 6.0 * mass
 		animation.updateFalling(linear_velocity)
 		skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
@@ -158,14 +161,14 @@ func _integrate_forces(state):
 			ragdoll.rpc()
 
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
-			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
-			var check2 = impact > IMPACT_THRESHOLD/3.0
-			var check3 = abs(normal.dot(floor_normal)) <= 1.0/2.0
-			var check4 = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 3.0/4.0
+			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
+			var forceful = impact > IMPACT_THRESHOLD/3.0
+			var upright = abs(normal.dot(floor_normal)) <= 1.0/2.0
+			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 3.0/4.0
 			
-			if check1 and check2 and check3 and check4:
+			if glancing and forceful and upright and looking_forward:
 				wall_jump.rpc(state.get_contact_impulse(index))
-				print(abs(normal.dot(floor_normal)))
+				
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
 	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer:
@@ -193,7 +196,6 @@ func _integrate_forces(state):
 			impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
 
 	else:
-
 		if WALK_VECTOR:
 			impulse = WALK_VECTOR * get_acceleration() * mass
 			
@@ -206,6 +208,9 @@ func _integrate_forces(state):
 
 func _physics_process(delta):
 	
+	if not ON_FLOOR:
+		coyote_timer += delta
+	
 	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta
 		
@@ -215,7 +220,7 @@ func _physics_process(delta):
 	if RAGDOLLED:
 		skeleton.processRagdollOrientation(delta)
 		
-	elif ON_FLOOR:
+	elif ON_FLOOR or (coyote_timer < coyote_duration):
 		
 		if WALK_VECTOR == Vector3.ZERO:		
 			skeleton.processIdleOrientation(delta, LOOK_VECTOR)
@@ -289,6 +294,7 @@ func ragdoll():
 	if not RAGDOLLED:
 		impactFX.bus = "stank"
 		impactFX.volume_db = -12
+		impactFX.pitch_scale = 1.0
 		impactFX.play()
 		$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 		RUNNING = false
@@ -317,7 +323,7 @@ func unragdoll():
 @rpc("call_local")
 func jump():
 	
-	if ON_FLOOR:
+	if ON_FLOOR or (coyote_timer < coyote_duration):
 		reset_double_jump()
 		jumpFX.play()
 		jumpFX.pitch_scale = 0.75
@@ -335,6 +341,7 @@ func wall_jump(impulse):
 	reset_double_jump()
 	impactFX.bus = "beef"
 	impactFX.volume_db = -18
+	impactFX.pitch_scale = 1.0
 	impactFX.play()
 	
 
@@ -361,7 +368,11 @@ func reset_double_jump():
 		
 @rpc("call_local")
 func land():
-	
+	coyote_timer = 0
+	impactFX.bus = "beef"
+	impactFX.volume_db = -24
+	impactFX.pitch_scale = 0.5
+	impactFX.play()
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 	var retardation_vector = -translational_velocity.normalized()
 	var retardation_magnitude = max(1.0, translational_velocity.length()/2)

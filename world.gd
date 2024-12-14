@@ -62,20 +62,16 @@ func _process(delta):
 	
 	if State == ClientState.Lobby:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		music.volume_db = move_toward(music.volume_db, -24, delta * 3)
+		music.volume_db = move_toward(music.volume_db, -21, delta * 3)
 		
 	elif pause_menu.visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		music.volume_db = move_toward(music.volume_db, -39, delta * 3)
+		music.volume_db = move_toward(music.volume_db, -32, delta * 6)
 		
 	elif State == ClientState.Session:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		music.volume_db = move_toward(music.volume_db, -39, delta * 6)
+		music.volume_db = move_toward(music.volume_db, -32, delta * 6)
 		
-		
-	elif State == ClientState.Session:
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		music.volume_db = move_toward(music.volume_db, -48, delta * 6)
 	
 	main_menu.visible = State == ClientState.Lobby
 
@@ -104,8 +100,8 @@ func _notification(what):
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		pause_menu.visible = true
 		
-	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		pause_menu.visible = false
+	#elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		#pause_menu.visible = false
 
 
 func start_host_lobby():

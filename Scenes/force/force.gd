@@ -43,7 +43,7 @@ func _physics_process(delta):
 		Holding = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		target_radius = 0.5
+		target_radius = 0.75
 		target_height = 1.0
 	
 		for node in contained_bodies:			
