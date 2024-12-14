@@ -47,8 +47,8 @@ var ragdoll_recovery_timer_seconds = 0
 
 signal ragdolled
 
-@onready var soundFX = $AudioStreamPlayer3D
-
+@onready var impactFX = $ImpactAudio
+@onready var jumpFX = $JumpAudio
 
 func _enter_tree():
 	
@@ -92,7 +92,7 @@ func _process(_delta):
 		
 	elif ON_FLOOR:
 		TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
-		IMPACT_THRESHOLD = 5.0 * mass
+		IMPACT_THRESHOLD = 5.5 * mass
 		animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 		
 		if(WALK_VECTOR):
@@ -102,9 +102,7 @@ func _process(_delta):
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
 			
 	else:
-		#var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
-		#TOPSPEED = max(SPEED_GEARS.x, translational_velocity.length())
-		IMPACT_THRESHOLD = 6.0 * mass
+		IMPACT_THRESHOLD = 6.25 * mass
 		animation.updateFalling(linear_velocity)
 		skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
@@ -149,7 +147,7 @@ func _integrate_forces(state):
 				impact *= kinetic_impulse
 				#print(multiplayer.get_unique_id(), "	", impact)
 		
-		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.5)	
+		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
 		impact *= directional_modifier
 			
 		if not is_multiplayer_authority():
@@ -160,25 +158,20 @@ func _integrate_forces(state):
 			ragdoll.rpc()
 
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
-			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
-			var check2 = impact > IMPACT_THRESHOLD/2
-			var check3 = abs(normal.dot(floor_normal)) <= 0.4
-
-			if check1 and check2 and check3:
-				#state.apply_central_impulse(state.get_contact_impulse(index))
-				#state.apply_central_impulse(Vector3.UP * JUMP_SPEED/2.0 * mass)
-				#reset_double_jump.rpc()
-				#soundFX.bus = "beef"
-				#soundFX.play()
-				wall_jump.rpc(state.get_contact_impulse(index))
+			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
+			var check2 = impact > IMPACT_THRESHOLD/3.0
+			var check3 = abs(normal.dot(floor_normal)) <= 1.0/2.0
+			var check4 = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 3.0/4.0
 			
+			if check1 and check2 and check3 and check4:
+				wall_jump.rpc(state.get_contact_impulse(index))
+				print(abs(normal.dot(floor_normal)))
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
 	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer:
 		land.rpc()
 		
 	ON_FLOOR = ON_FLOOR_buffer
-
 	WALK_VECTOR = WALK_VECTOR.normalized()
 	
 	var speed_target = TOPSPEED * TOPSPEED_MOD
@@ -230,7 +223,7 @@ func _physics_process(delta):
 		else:
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 		
-		var scalar = 2.5
+		var scalar = 5.0
 		collider.shape.radius = move_toward(collider.shape.radius, 0.20, delta * scalar)
 		collider.shape.height = move_toward(collider.shape.height, 1.85, delta * scalar)
 		collider.position.y = move_toward(collider.position.y, 0.925, delta * scalar)
@@ -294,8 +287,9 @@ func get_ragdoll_recovered():
 func ragdoll():
 	
 	if not RAGDOLLED:
-		soundFX.bus = "stank"
-		soundFX.play()
+		impactFX.bus = "stank"
+		impactFX.volume_db = -12
+		impactFX.play()
 		$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 		RUNNING = false
 		ragdolled.emit()
@@ -324,6 +318,9 @@ func unragdoll():
 func jump():
 	
 	if ON_FLOOR:
+		reset_double_jump()
+		jumpFX.play()
+		jumpFX.pitch_scale = 0.75
 		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
 		
 	elif DOUBLE_JUMP_CHARGES > 0:
@@ -336,8 +333,9 @@ func wall_jump(impulse):
 	apply_central_impulse(impulse)
 	apply_central_impulse(Vector3.UP * JUMP_SPEED/2.0 * mass)
 	reset_double_jump()
-	soundFX.bus = "beef"
-	soundFX.play()
+	impactFX.bus = "beef"
+	impactFX.volume_db = -18
+	impactFX.play()
 	
 
 @rpc("call_local")
@@ -347,6 +345,8 @@ func double_jump():
 		pass
 		
 	elif DOUBLE_JUMP_CHARGES > 0:
+		jumpFX.pitch_scale = 1.25
+		jumpFX.play()	
 		DOUBLE_JUMP_CHARGES -= 1
 		var total_change = 3 - min(0.0, linear_velocity.y)
 		print(total_change)
@@ -362,10 +362,9 @@ func reset_double_jump():
 @rpc("call_local")
 func land():
 	
-	reset_double_jump()
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 	var retardation_vector = -translational_velocity.normalized()
-	var retardation_magnitude = min(3.0, translational_velocity.length())
+	var retardation_magnitude = max(1.0, translational_velocity.length()/2)
 	var impulse = retardation_vector * retardation_magnitude * mass
 	apply_central_impulse(impulse)
 

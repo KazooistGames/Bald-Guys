@@ -60,24 +60,22 @@ func _unhandled_input(_event):
 
 func _process(delta):
 	
-	
 	if State == ClientState.Lobby:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		music.volume_db = move_toward(music.volume_db, -24, delta * 3)
-<<<<<<< HEAD
+		
+	elif pause_menu.visible:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		music.volume_db = move_toward(music.volume_db, -39, delta * 3)
 		
 	elif State == ClientState.Session:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		music.volume_db = move_toward(music.volume_db, -39, delta * 6)
-=======
 		
-	elif pause_menu.visible:
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
 		
 	elif State == ClientState.Session:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		music.volume_db = move_toward(music.volume_db, -48, delta * 6)
->>>>>>> tmp
 	
 	main_menu.visible = State == ClientState.Lobby
 

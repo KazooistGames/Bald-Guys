@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://hdo1moc2epoy"]
+[gd_scene load_steps=14 format=3 uid="uid://hdo1moc2epoy"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_8mrte"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_co0ev"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="4_sucxh"]
 [ext_resource type="PackedScene" uid="uid://dkvhw01tsv755" path="res://Scenes/objects/brick/brick_field.tscn" id="5_fjkgg"]
 [ext_resource type="PackedScene" uid="uid://tatel5rmq1h" path="res://Scenes/objects/block/block_tower.tscn" id="6_evcv0"]
+[ext_resource type="PackedScene" uid="uid://dqp8ekibcvawv" path="res://Scenes/objects/Stage/shelf.tscn" id="8_yygct"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2rewv"]
 resource_local_to_scene = true
@@ -88,7 +89,7 @@ skeleton = NodePath("../..")
 [node name="stages" type="Node3D" parent="." index="2"]
 
 [node name="Stage1" parent="stages" index="0" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.25, -18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.5, -18)
 Size = Vector3(10, 0.1, 10)
 
 [node name="Stage2" parent="stages" index="1" instance=ExtResource("2_co0ev")]
@@ -96,44 +97,44 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -2, 17)
 Size = Vector3(12, 0.1, 12)
 
 [node name="Stage3" parent="stages" index="2" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.25, -14)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.5, -14)
 Size = Vector3(18, 0.1, 18)
 
 [node name="Stage4" parent="stages" index="3" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 3, 15.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 5, 15.5)
 Size = Vector3(15, 0.1, 15)
 
 [node name="Stage5" parent="stages" index="4" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 Size = Vector3(10, 0.1, 10)
 
 [node name="Stage6" parent="stages" index="5" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 4.5, -17.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.5, 5, -17.5)
 Size = Vector3(7.5, 0.1, 7.5)
 
 [node name="Stage7" parent="stages" index="6" instance=ExtResource("2_co0ev")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.25, 6.75, -11.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.25, 7.5, -11.25)
 Size = Vector3(5, 0.1, 5)
 
 [node name="pillars" type="Node3D" parent="." index="3"]
 
 [node name="pillar1" parent="pillars" index="0" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 6, 7.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 6.25, 7.5)
 top_height = 0.0
 radius = 1.0
 
 [node name="pillar 2" parent="pillars" index="1" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 7, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 7.5, 10.5)
 top_height = 0.0
-radius = 1.0
+radius = 1.25
 
 [node name="pillar3" parent="pillars" index="2" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 8, 12.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 8.75, 14)
 top_height = 0.0
-radius = 1.0
+radius = 1.5
 
 [node name="podium" parent="pillars" index="3" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, 0)
 top_height = 0.0
 radius = 0.5
 
@@ -157,6 +158,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 15)
 top_height = 0.0
 radius = 2.0
 
+[node name="pillar8" parent="pillars" index="8" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, 18)
+top_height = 0.0
+radius = 1.75
+
+[node name="pillar9" parent="pillars" index="9" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 11.25, 22.5)
+top_height = 0.0
+radius = 2.0
+
 [node name="Bricks" type="Node3D" parent="." index="4"]
 
 [node name="BrickField" parent="Bricks" index="0" instance=ExtResource("5_fjkgg")]
@@ -177,10 +188,32 @@ transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848
 [node name="BrickField5" parent="Bricks" index="5" instance=ExtResource("5_fjkgg")]
 transform = Transform3D(0.999848, 0, 0.0174524, 0, 1, 0, -0.0174524, 0, 0.999848, 9, 0, 13.5)
 
+[node name="BrickField6" parent="Bricks" index="6" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -16, 3, -16)
+
+[node name="BrickField7" parent="Bricks" index="7" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -16, 3, -19)
+
+[node name="BrickField8" parent="Bricks" index="8" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -19, 3, -16)
+
+[node name="BrickField9" parent="Bricks" index="9" instance=ExtResource("5_fjkgg")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -19, 3, -19)
+
 [node name="Blocks" type="Node3D" parent="." index="5"]
 
 [node name="Block_Tower" parent="Blocks" index="0" instance=ExtResource("6_evcv0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.5, -18)
 
 [node name="Block_Tower2" parent="Blocks" index="1" instance=ExtResource("6_evcv0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 5, 15.5)
+
+[node name="shelves" type="Node3D" parent="." index="6"]
+
+[node name="Shelf" parent="shelves" index="0" instance=ExtResource("8_yygct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 15, 0)
+Size = Vector3(5, 0.25, 30)
+
+[node name="Shelf2" parent="shelves" index="1" instance=ExtResource("8_yygct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 25)
+Size = Vector3(30, 0.25, 5)

@@ -19,11 +19,6 @@ func _process(_delta):
 	elif not camera:
 		camera = camera_prefab.instantiate()
 		character.add_child(camera)
-		#force = force_prefab.instantiate()
-		#character.add_child(force)
-		#force.position = Vector3.ZERO
-		#force.rotation = Vector3.ZERO
-
 		
 	else:
 		var cam_depth = -1.5 if character.RAGDOLLED else 0.115

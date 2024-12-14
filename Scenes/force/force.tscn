@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://bg13x1s1aib1u"]
+[gd_scene load_steps=5 format=3 uid="uid://bg13x1s1aib1u"]
 
 [ext_resource type="Script" path="res://Scenes/force/force.gd" id="1_8ejgp"]
 
@@ -7,6 +7,20 @@ resource_local_to_scene = true
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_b2kif"]
 height = 1.25
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_idmps"]
+properties/0/path = NodePath(".:Aim")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:action")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:position")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:rotation")
+properties/3/spawn = true
+properties/3/replication_mode = 1
 
 [node name="Force" type="Area3D"]
 collision_layer = 16
@@ -31,3 +45,6 @@ shape = SubResource("CylinderShape3D_yifoa")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 visible = false
 mesh = SubResource("CylinderMesh_b2kif")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_idmps")

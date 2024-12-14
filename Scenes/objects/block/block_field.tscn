@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://18samsvurxnl"]
+
+[ext_resource type="PackedScene" uid="uid://bco5lktfdwxre" path="res://Scenes/objects/block/block.tscn" id="1_4wi3n"]
+
+[node name="Block_Field" type="Node3D"]
+
+[node name="Block" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.75)
+
+[node name="Block2" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Block3" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2.75)
+
+[node name="Block4" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.75, 1, -2.75)
+
+[node name="Block5" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.75, 1, 0)
+
+[node name="Block6" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.75, 1, 2.75)
+
+[node name="Block7" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.75, 1, -2.75)
+
+[node name="Block8" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.75, 1, 0)
+
+[node name="Block9" parent="." instance=ExtResource("1_4wi3n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.75, 1, 2.75)

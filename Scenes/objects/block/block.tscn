@@ -7,10 +7,10 @@
 bounce = 0.15
 
 [sub_resource type="BoxMesh" id="BoxMesh_ythp8"]
-size = Vector3(2, 2, 2)
+size = Vector3(1.5, 1.5, 1.5)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5837y"]
-size = Vector3(2, 2, 2)
+size = Vector3(1.5, 1.5, 1.5)
 
 [node name="Block" type="RigidBody3D"]
 collision_layer = 8
