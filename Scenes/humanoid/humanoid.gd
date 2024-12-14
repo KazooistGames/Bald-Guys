@@ -147,7 +147,7 @@ func _integrate_forces(state):
 				impact *= kinetic_impulse
 				#print(multiplayer.get_unique_id(), "	", impact)
 		
-		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.5)	
+		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
 		impact *= directional_modifier
 			
 		if not is_multiplayer_authority():
@@ -160,11 +160,12 @@ func _integrate_forces(state):
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
 			var check1 = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
 			var check2 = impact > IMPACT_THRESHOLD/3.0
-			var check3 = abs(normal.dot(floor_normal)) <= 1.0/3.0
-
-			if check1 and check2 and check3:
-				wall_jump.rpc(state.get_contact_impulse(index))
+			var check3 = abs(normal.dot(floor_normal)) <= 1.0/2.0
+			var check4 = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 3.0/4.0
 			
+			if check1 and check2 and check3 and check4:
+				wall_jump.rpc(state.get_contact_impulse(index))
+				print(abs(normal.dot(floor_normal)))
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
 	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer:
@@ -222,7 +223,7 @@ func _physics_process(delta):
 		else:
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 		
-		var scalar = 2.5
+		var scalar = 5.0
 		collider.shape.radius = move_toward(collider.shape.radius, 0.20, delta * scalar)
 		collider.shape.height = move_toward(collider.shape.height, 1.85, delta * scalar)
 		collider.position.y = move_toward(collider.position.y, 0.925, delta * scalar)
