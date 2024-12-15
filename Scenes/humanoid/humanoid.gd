@@ -356,7 +356,6 @@ func double_jump():
 		jumpFX.play()	
 		DOUBLE_JUMP_CHARGES -= 1
 		var total_change = 3 - min(0.0, linear_velocity.y)
-		print(total_change)
 		apply_central_impulse(Vector3.UP * mass * total_change)
 		
 
