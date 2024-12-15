@@ -1,7 +1,7 @@
 extends RigidBody3D
 
 const floor_normal = Vector3(0, 1, 0)
-const floor_angle = PI/3.0
+const floor_angle = PI/4.0
 
 @export var SKIN_COLOR : Color:
 	
@@ -90,12 +90,13 @@ func _process(_delta):
 	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
 	
+	IMPACT_THRESHOLD = 6.0 * mass
+	
 	if RAGDOLLED:
 		pass
 		
 	elif ON_FLOOR:
 		TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
-		IMPACT_THRESHOLD = 5.5 * mass
 		animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 		
 		if(WALK_VECTOR):
@@ -105,7 +106,6 @@ func _process(_delta):
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
 			
 	else:
-		IMPACT_THRESHOLD = 6.0 * mass
 		animation.updateFalling(linear_velocity)
 		skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
@@ -148,11 +148,10 @@ func _integrate_forces(state):
 			if my_velocity.length() < relative_velocity.length():	
 				var kinetic_impulse = sqrt(relative_velocity.length())
 				impact *= kinetic_impulse
-				#print(multiplayer.get_unique_id(), "	", impact)
 		
 		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
 		impact *= directional_modifier
-			
+		
 		if not is_multiplayer_authority():
 			pass
 			
@@ -161,6 +160,7 @@ func _integrate_forces(state):
 			ragdoll.rpc()
 
 		elif not ON_FLOOR_buffer and not ON_FLOOR:
+			
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
 			var forceful = impact > IMPACT_THRESHOLD/3.0
 			var upright = abs(normal.dot(floor_normal)) <= 1.0/2.0
@@ -251,15 +251,14 @@ func is_back_pedaling():
 
 func get_acceleration():
 	
-	var absolute = 25
-	var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
-	var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
-	var return_val = absolute * relative
-	
 	if not ON_FLOOR:
-		return_val = absolute/3.0
+		return 8.0
+	else:
 		
-	return return_val
+		var absolute = 25.0
+		var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
+		var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
+		return absolute * relative
 
 
 func getRandomSkinTone():
@@ -369,7 +368,7 @@ func reset_double_jump():
 func land():
 	coyote_timer = 0
 	impactFX.bus = "beef"
-	impactFX.volume_db = -24
+	impactFX.volume_db = -27
 	impactFX.pitch_scale = 0.5
 	impactFX.play()
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)

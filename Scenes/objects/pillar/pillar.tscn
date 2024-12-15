@@ -10,7 +10,7 @@ resource_local_to_scene = true
 
 [node name="pillar" type="StaticBody3D"]
 script = ExtResource("1_bs8dr")
-radius = null
+top_height = 0.75
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
@@ -22,6 +22,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 shape = SubResource("CylinderShape3D_qhxnc")
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
-target_position = Vector3(0, -50, 0)
+target_position = Vector3(0, -100, 0)
 hit_back_faces = false
 debug_shape_thickness = 5
