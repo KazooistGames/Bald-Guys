@@ -102,6 +102,11 @@ vec4 random_vec4(float minimum, float maximum, int seed){
 }
 
 
+varying float seed_offset;
+void vertex() {
+	seed_offset = max(NODE_POSITION_WORLD.r, NODE_POSITION_WORLD.g) * NODE_POSITION_WORLD.b;
+}
+
 void fragment() {
 	
 	vec3 sample_color = texture(screen_texture, SCREEN_UV).rgb;
@@ -110,8 +115,6 @@ void fragment() {
 	//vec4 y_rails = vec4(0.45, 0.35, 0.55, 0.45);
 	//vec4 speeds = vec4(0.75, -1.5, 2.0, -2.0);
 	//vec4 offsets = vec4(0.0, 0.5, 0.0, 0.5);
-	
-	float seed_offset = fract(NODE_POSITION_WORLD.r * NODE_POSITION_WORLD.b) * NODE_POSITION_WORLD.g;
 	float reseed_interval = 4.0 * phase_scalar;
 	float seed_phase = TIME + seed_offset;
 	int seed = int(seed_phase / reseed_interval);
@@ -120,13 +123,15 @@ void fragment() {
 	vec4 y_rails = random_vec4(0.2, 0.8, seed);
 	vec4 speeds = vec4(1.0, 2.0, -1.0, -2.0);
 
+	float fade = pow(abs(sin(seed_phase)), 3.0);
+
 	if (energized(UV, x_rails, y_rails, speeds)){
-		sample_color.r = 0.0;		
+		sample_color.r = fade;		
 		EMISSION = sample_color;
 	}
 	else if(energized(UV, x_rails, y_rails, speeds/2.0))
 	{
-		sample_color.r = 0.0;	
+		sample_color.r = fade;	
 		EMISSION = sample_color;
 	}
 	ALBEDO = sample_color;

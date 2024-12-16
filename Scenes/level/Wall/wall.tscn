@@ -1,8 +1,19 @@
-[gd_scene load_steps=7 format=3 uid="uid://1v5p2mj7bl3y"]
+[gd_scene load_steps=9 format=3 uid="uid://1v5p2mj7bl3y"]
 
-[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/level/Wall/wall.material" id="1_1fkwv"]
 [ext_resource type="PlaneMesh" uid="uid://bkcwl7e51sjbe" path="res://Scenes/level/Wall/wall.tres" id="1_saatn"]
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="2_hlw34"]
+[ext_resource type="Shader" path="res://shaders/circuits.gdshader" id="2_laii5"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_e8q1n"]
+render_priority = 0
+shader = ExtResource("2_laii5")
+shader_parameter/track_thickness = 0.001
+shader_parameter/tail_length = 0.025
+shader_parameter/phase_scalar = 2.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4d0sb"]
+next_pass = SubResource("ShaderMaterial_e8q1n")
+diffuse_mode = 3
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
 size = Vector3(50, 1, 50)
@@ -15,7 +26,7 @@ size = Vector3(25, 3, 3)
 
 [node name="wall" type="MeshInstance3D" groups=["walls"]]
 mesh = ExtResource("1_saatn")
-surface_material_override/0 = ExtResource("1_1fkwv")
+surface_material_override/0 = SubResource("StandardMaterial3D_4d0sb")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." groups=["walls"]]
 collision_mask = 5
