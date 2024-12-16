@@ -2,81 +2,72 @@ shader_type spatial;
 
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 
-uniform vec4 x_rails = vec4(0.2, 0.4, 0.6, 0.8);
-uniform vec4 y_rails = vec4(0.45, 0.35, 0.55, 0.45);
-uniform vec4 speeds = vec4(0.5, -1.0, 2.0, -2.0);
-uniform vec4 offsets = vec4(0.0, 0.5, 0.0, 0.5);
-
-uniform float track_thickness = 0.005;
+uniform float track_thickness = 0.001;
 uniform float tail_length = 0.05;
 
-uniform float phase_period = 1.0;
+uniform float phase_scalar = 1.0;
 
-
-int comet_phase(int index){
-	float speed = abs(speeds[index]);
-	float period = (phase_period / speed);
-	float offset = offsets[index] * phase_period;
-	int cycle = int( (TIME + offset) / period);
-	return cycle % 2;
-}
-
-int comet_cycle(int index){
-	float speed = abs(speeds[index]);
-	float period = (phase_period / speed);
-	float offset = offsets[index] * phase_period;
+int comet_cycle(float offset, float period){
 	return int( (TIME + offset) / period);
 }
 
-
-float phase_progress(int index){
-	float speed = abs(speeds[index]);
-	float period = (phase_period / speed);
-	float offset = offsets[index] * phase_period;
-	return sign(speeds[index]) * mod(TIME + offset, period) / period;
+int comet_phase(float offset, float period){
+	int cycle = comet_cycle(offset, period);
+	return cycle % 2;
 }
 
 
-float tail_position(int index, int phase){
+float phase_progress(float offset, float period){
+	return mod(TIME + offset, period) / period;
+}
+
+
+float tail_position(vec2 rails, int phase, float progress, float speed){
 	
 	float offset, span;
 	
 	if(phase > 0){
 		
-		if(speeds[index] < 0.0){
-			span = 1.0 - x_rails[index];
+		if(speed < 0.0){
+			span = rails.x - 1.0;
 		}else{
-			span = x_rails[index];
+			span = rails.x;
 		}
-		return x_rails[index] - phase_progress(index) * span;
+		return rails.x -progress * span;
 	} else{
 
-		if(speeds[index] < 0.0){
+		if(speed < 0.0){
 			offset = 1.0;
-			span = 1.0 - y_rails[index];
+			span = rails.y - 1.0;
 		}else{
 			offset = 0.0;
-			span = y_rails[index];
+			span = rails.y;
 		}
-		return offset + phase_progress(index) * span;
+		return offset + progress * span;
 	}
 }
 
 
-float track_position(int index, int phase){
+float track_position(vec2 rails, int phase){
 	
 	if(phase > 0){
-		return y_rails[index];
+		return rails.y;
 	}else{
-		return x_rails[index];
+		return rails.x;
 	}
 }
 
 
-bool energized(vec2 uv){
+bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, vec4 offsets){
 
 	for(int index = 0; index < 4; index++){	
-		int phase = comet_phase(index);
+		vec2 rails = vec2(x_rails[index], y_rails[index]);
+		float speed = speeds[index];
+		float offset = offsets[index];
+		float period = phase_scalar / speed;
+		int phase = comet_phase(offset, period);
+		float progress = phase_progress(offset, period);
+		
 		float UV_track = uv.x;
 		float UV_trail = uv.y;
 		
@@ -84,8 +75,8 @@ bool energized(vec2 uv){
 			UV_track = uv.y;
 			UV_trail = uv.x;
 		}
-		bool on_track = abs(UV_track - track_position(index, phase)) <= track_thickness;
-		bool on_tail = abs(UV_trail - tail_position(index, phase)) <= tail_length/2.0;
+		bool on_track = abs(UV_track - track_position(rails, phase)) <= track_thickness;
+		bool on_tail = abs(UV_trail - tail_position(rails, phase, progress, speed)) <= tail_length/2.0;
 	
 		if (on_track && on_tail){
 			return true;
@@ -98,8 +89,13 @@ bool energized(vec2 uv){
 void fragment() {
 	
 	vec3 sample_color = texture(screen_texture, SCREEN_UV).rgb;
+	
+	vec4 x_rails = vec4(0.2, 0.4, 0.6, 0.8);
+	vec4 y_rails = vec4(0.45, 0.35, 0.55, 0.45);
+	vec4 speeds = vec4(0.75, -1.5, 2.0, -2.0);
+	vec4 offsets = vec4(0.0, 0.5, 0.0, 0.5);
 
-	if (energized(UV)){
+	if (energized(UV, x_rails, y_rails, speeds, offsets)){
 		sample_color.r = 0.0;		
 	}
 	ALBEDO = sample_color;
