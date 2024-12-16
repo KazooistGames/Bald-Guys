@@ -5,7 +5,7 @@ uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nea
 uniform float track_thickness = 0.001;
 uniform float tail_length = 0.025;
 
-uniform float phase_scalar = 1.0;
+uniform float phase_scalar = 2.0;
 
 
 int comet_cycle(float period){
@@ -111,9 +111,10 @@ void fragment() {
 	//vec4 speeds = vec4(0.75, -1.5, 2.0, -2.0);
 	//vec4 offsets = vec4(0.0, 0.5, 0.0, 0.5);
 	
-	float seed_offset = fract(NODE_POSITION_WORLD.r * NODE_POSITION_WORLD.b) + NODE_POSITION_WORLD.g;
-	
-	int seed = int((TIME + seed_offset) / 4.0);
+	float seed_offset = fract(NODE_POSITION_WORLD.r * NODE_POSITION_WORLD.b) * NODE_POSITION_WORLD.g;
+	float reseed_interval = 4.0 * phase_scalar;
+	float seed_phase = TIME + seed_offset;
+	int seed = int(seed_phase / reseed_interval);
 	
 	vec4 x_rails = random_vec4(0.2, 0.8, seed);
 	vec4 y_rails = random_vec4(0.2, 0.8, seed);
