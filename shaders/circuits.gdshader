@@ -3,22 +3,24 @@ shader_type spatial;
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 
 uniform float track_thickness = 0.001;
-uniform float tail_length = 0.05;
+uniform float tail_length = 0.025;
 
 uniform float phase_scalar = 1.0;
 
-int comet_cycle(float offset, float period){
-	return int( (TIME + offset) / period);
+
+int comet_cycle(float period){
+	return int( (TIME) / period);
 }
 
-int comet_phase(float offset, float period){
-	int cycle = comet_cycle(offset, period);
+
+int comet_phase(float period){
+	int cycle = comet_cycle(period);
 	return cycle % 2;
 }
 
 
-float phase_progress(float offset, float period){
-	return mod(TIME + offset, period) / period;
+float phase_progress(float period){
+	return mod(TIME, period) / period;
 }
 
 
@@ -58,15 +60,14 @@ float track_position(vec2 rails, int phase){
 }
 
 
-bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, vec4 offsets){
+bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds){
 
 	for(int index = 0; index < 4; index++){	
 		vec2 rails = vec2(x_rails[index], y_rails[index]);
 		float speed = speeds[index];
-		float offset = offsets[index];
-		float period = phase_scalar / speed;
-		int phase = comet_phase(offset, period);
-		float progress = phase_progress(offset, period);
+		float period = phase_scalar / abs(speed);
+		int phase = comet_phase(period);
+		float progress = phase_progress(period);
 		
 		float UV_track = uv.x;
 		float UV_trail = uv.y;
@@ -85,20 +86,51 @@ bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, vec4 offsets){
 	return false;
 }
 
+	
+
+vec4 random_vec4(float minimum, float maximum, int seed){
+	float span = (maximum - minimum) / 2.0;
+	float zero = minimum + span;
+	float float_seed = float(seed);
+	
+	vec4 return_val;
+	return_val.x = zero + sin(float_seed * 43758.0982309) * span;
+	return_val.y = zero + sin(float_seed * 72191.32920) * span;
+	return_val.z = zero + sin(float_seed * 342.09871) * span;
+	return_val.w = zero + sin(float_seed * 8790.4322) * span;
+	return return_val;
+}
+
 
 void fragment() {
 	
 	vec3 sample_color = texture(screen_texture, SCREEN_UV).rgb;
 	
-	vec4 x_rails = vec4(0.2, 0.4, 0.6, 0.8);
-	vec4 y_rails = vec4(0.45, 0.35, 0.55, 0.45);
-	vec4 speeds = vec4(0.75, -1.5, 2.0, -2.0);
-	vec4 offsets = vec4(0.0, 0.5, 0.0, 0.5);
+	//vec4 x_rails = vec4(0.2, 0.4, 0.6, 0.8);
+	//vec4 y_rails = vec4(0.45, 0.35, 0.55, 0.45);
+	//vec4 speeds = vec4(0.75, -1.5, 2.0, -2.0);
+	//vec4 offsets = vec4(0.0, 0.5, 0.0, 0.5);
+	
+	float seed_offset = fract(NODE_POSITION_WORLD.r * NODE_POSITION_WORLD.b) + NODE_POSITION_WORLD.g;
+	
+	int seed = int((TIME + seed_offset) / 4.0);
+	
+	vec4 x_rails = random_vec4(0.2, 0.8, seed);
+	vec4 y_rails = random_vec4(0.2, 0.8, seed);
+	vec4 speeds = vec4(1.0, 2.0, -1.0, -2.0);
 
-	if (energized(UV, x_rails, y_rails, speeds, offsets)){
+	if (energized(UV, x_rails, y_rails, speeds)){
 		sample_color.r = 0.0;		
+		EMISSION = sample_color;
+	}
+	else if(energized(UV, x_rails, y_rails, speeds/2.0))
+	{
+		sample_color.r = 0.0;	
+		EMISSION = sample_color;
 	}
 	ALBEDO = sample_color;
 }
+
+
 
 
