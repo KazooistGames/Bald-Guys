@@ -1,8 +1,6 @@
 shader_type spatial;
 render_mode cull_front, unshaded;
 
-uniform sampler2D OBJECT_TEXTURE : hint_screen_texture, filter_linear_mipmap;
-
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 uniform sampler2D depth_texture : source_color, hint_depth_texture, filter_nearest;
 
@@ -35,7 +33,7 @@ void fragment() {
 	vec2 nearest_uv = SCREEN_UV;
 	
 	vec2 uvs[4];
-	uvs[0] = vec2(SCREEN_UV.x, min(1.0 - 0.001, SCREEN_UV.y + texel_size.y * outline_width));
+	uvs[0] = vec2(SCREEN_UV.x, min(1.0, SCREEN_UV.y + texel_size.y * outline_width));
 	uvs[1] = vec2(SCREEN_UV.x, max(0.0, SCREEN_UV.y - texel_size.y * outline_width));
 	uvs[2] = vec2(min(1.0 - 0.001, SCREEN_UV.x + texel_size.x * outline_width), SCREEN_UV.y);
 	uvs[3] = vec2(max(0.0, SCREEN_UV.x - texel_size.x * outline_width), SCREEN_UV.y);
