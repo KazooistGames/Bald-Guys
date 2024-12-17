@@ -19,7 +19,7 @@ friction = 0.0
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_26vqe"]
 resource_local_to_scene = true
 radius = 0.2
-height = 1.85
+height = 1.4
 
 [sub_resource type="Skin" id="Skin_vic1c"]
 resource_name = "Skin"
@@ -3735,7 +3735,7 @@ continuous_cd = true
 script = ExtResource("1_omd7n")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
 shape = SubResource("CapsuleShape3D_26vqe")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="."]

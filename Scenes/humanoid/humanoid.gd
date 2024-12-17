@@ -236,10 +236,8 @@ func _physics_process(delta):
 	else:
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
-		#collider.shape.height = clamp(lerp(1.85, 1.10, jumpDeltaScale ), 1.1, 1.85)
-		#collider.position.y = clamp(lerp(0.925, 1.175, jumpDeltaScale ), 0.925, 1.175)
-		collider.shape.height = 1.1
-		collider.position.y = 0.925
+		collider.shape.height = 1.4
+		collider.position.y = 1.15
 
 	rotation.y = fmod(rotation.y, 2*PI)
 	
@@ -255,6 +253,7 @@ func get_acceleration():
 	
 	if not ON_FLOOR:
 		return 8.0
+		
 	else:
 		
 		var absolute = 25.0

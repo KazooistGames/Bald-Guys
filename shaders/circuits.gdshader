@@ -3,26 +3,22 @@ shader_type spatial;
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 
 uniform float track_thickness = 0.001;
-uniform float tail_length = 0.025;
+uniform float tail_length = 0.1;
 
-uniform float phase_scalar = 2.0;
+uniform float phase_scalar = 1.0;
 
-
-int comet_cycle(float period){
-	return int( (TIME) / period);
+int comet_cycle(float period, float offset){
+	return int( (TIME + offset) / period);
 }
 
-
-int comet_phase(float period){
-	int cycle = comet_cycle(period);
+int comet_phase(float period, float offset){
+	int cycle = comet_cycle(period, offset);
 	return cycle % 2;
 }
 
-
-float phase_progress(float period){
-	return mod(TIME, period) / period;
+float phase_progress(float period, float offset){
+	return mod(TIME + offset, period) / period;
 }
-
 
 float tail_position(vec2 rails, int phase, float progress, float speed){
 	
@@ -49,7 +45,6 @@ float tail_position(vec2 rails, int phase, float progress, float speed){
 	}
 }
 
-
 float track_position(vec2 rails, int phase){
 	
 	if(phase > 0){
@@ -59,34 +54,62 @@ float track_position(vec2 rails, int phase){
 	}
 }
 
+bool tail_in_bounds(float uv_position, float start, float end, float speed, int phase){
+	
+	bool past_start = true;
+	bool before_end = true;
+	
+	if(speed < 0.0){
+		past_start = uv_position >= start;
+		if(phase == 0){
+			past_start = uv_position >= start;
+			before_end = uv_position >= end;
+		}
+	}else{
+		if(phase == 0){
+			past_start = uv_position >= start;
+			before_end = uv_position <= end;
+		}else{
+			past_start = uv_position <= start;
+		}
+	}	
+	return past_start && before_end;
+}
 
-bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds){
+bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, float offset){
 
 	for(int index = 0; index < 4; index++){	
 		vec2 rails = vec2(x_rails[index], y_rails[index]);
 		float speed = speeds[index];
 		float period = phase_scalar / abs(speed);
-		int phase = comet_phase(period);
-		float progress = phase_progress(period);
+		int phase = comet_phase(period, offset);
+		float progress = phase_progress(period, offset);
 		
 		float UV_track = uv.x;
-		float UV_trail = uv.y;
-		
+		float UV_tail = uv.y;
+		float tail_start = 0.0;	
+		float tail_end = uv.x;	
 		if(phase > 0){
 			UV_track = uv.y;
-			UV_trail = uv.x;
+			UV_tail = uv.x;
+			tail_start = uv.y;
+			float tail_end = 1.0;
 		}
-		bool on_track = abs(UV_track - track_position(rails, phase)) <= track_thickness;
-		bool on_tail = abs(UV_trail - tail_position(rails, phase, progress, speed)) <= tail_length/2.0;
+		
+		float track_pos = track_position(rails, phase);
+		float tail_pos = tail_position(rails, phase, progress, speed);
+		bool on_track = abs(UV_track - track_pos) <= track_thickness;
+		float parabola = max(1.0-pow(2.0*progress-1.0, 2), 0.1);
+		bool on_tail = abs(UV_tail - tail_pos) <= tail_length * parabola / 2.0;
+		
+		bool in_bounds = tail_in_bounds(UV_tail, tail_start, tail_end, speed, phase);
 	
-		if (on_track && on_tail){
+		if (on_track && on_tail && in_bounds){
 			return true;
 		}
 	}
 	return false;
 }
-
-	
 
 vec4 random_vec4(float minimum, float maximum, int seed){
 	float span = (maximum - minimum) / 2.0;
@@ -101,22 +124,17 @@ vec4 random_vec4(float minimum, float maximum, int seed){
 	return return_val;
 }
 
-
-varying float seed_offset;
+varying float time_offset;
 void vertex() {
-	seed_offset = max(NODE_POSITION_WORLD.r, NODE_POSITION_WORLD.g) * NODE_POSITION_WORLD.b;
+	time_offset = max(NODE_POSITION_WORLD.r, NODE_POSITION_WORLD.g) * NODE_POSITION_WORLD.b;
 }
 
 void fragment() {
 	
 	vec3 sample_color = texture(screen_texture, SCREEN_UV).rgb;
 	
-	//vec4 x_rails = vec4(0.2, 0.4, 0.6, 0.8);
-	//vec4 y_rails = vec4(0.45, 0.35, 0.55, 0.45);
-	//vec4 speeds = vec4(0.75, -1.5, 2.0, -2.0);
-	//vec4 offsets = vec4(0.0, 0.5, 0.0, 0.5);
 	float reseed_interval = 4.0 * phase_scalar;
-	float seed_phase = TIME + seed_offset;
+	float seed_phase = TIME + time_offset;
 	int seed = int(seed_phase / reseed_interval);
 	
 	vec4 x_rails = random_vec4(0.2, 0.8, seed);
@@ -125,11 +143,16 @@ void fragment() {
 
 	float fade = pow(abs(sin(seed_phase)), 3.0);
 
-	if (energized(UV, x_rails, y_rails, speeds)){
+	if (energized(UV, x_rails, y_rails, speeds, time_offset)){
 		sample_color.r = fade;		
 		EMISSION = sample_color;
 	}
-	else if(energized(UV, x_rails, y_rails, speeds/2.0))
+	else if(energized(UV, x_rails, y_rails, speeds/2.0, time_offset))
+	{
+		sample_color.r = fade;	
+		EMISSION = sample_color;
+	}
+	else if(energized(UV, x_rails, y_rails, speeds*2.0, time_offset))
 	{
 		sample_color.r = fade;	
 		EMISSION = sample_color;

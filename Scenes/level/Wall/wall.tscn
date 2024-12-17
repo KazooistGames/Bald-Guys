@@ -8,7 +8,7 @@
 render_priority = 0
 shader = ExtResource("2_laii5")
 shader_parameter/track_thickness = 0.001
-shader_parameter/tail_length = 0.025
+shader_parameter/tail_length = 0.1
 shader_parameter/phase_scalar = 2.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4d0sb"]
