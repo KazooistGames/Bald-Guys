@@ -179,7 +179,7 @@ top_height = 0.0
 radius = 0.25
 
 [node name="beam2" parent="beams" index="1" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 0.00607366, 0.999982, 0, -0.999982, 0.00607366, 2.125, 3.5, 15.5)
+transform = Transform3D(1, 0, 0, 0, 0.00607366, 0.999982, 0, -0.999982, 0.00607366, 2.125, 3.625, 15.5)
 top_height = 0.0
 radius = 0.25
 
@@ -189,7 +189,7 @@ top_height = 0.0
 radius = 0.25
 
 [node name="beam4" parent="beams" index="3" instance=ExtResource("4_sucxh")]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 15.5, 3.5, 2.125)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 15.5, 3.625, 2.125)
 top_height = 0.0
 radius = 0.25
 
@@ -199,7 +199,7 @@ top_height = 0.0
 radius = 0.25
 
 [node name="beam6" parent="beams" index="5" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -2.125, 3.5, 15.5)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -2.125, 3.625, 15.5)
 top_height = 0.0
 radius = 0.25
 
@@ -209,6 +209,6 @@ top_height = 0.0
 radius = 0.25
 
 [node name="beam8" parent="beams" index="7" instance=ExtResource("4_sucxh")]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 15.5, 3.5, -2.125)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 15.5, 3.625, -2.125)
 top_height = 0.0
 radius = 0.25
