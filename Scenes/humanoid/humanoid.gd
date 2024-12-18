@@ -367,6 +367,7 @@ func reset_double_jump():
 		
 @rpc("call_local")
 func land():
+	ON_FLOOR = true
 	coyote_timer = 0
 	impactFX.bus = "beef"
 	impactFX.volume_db = -27

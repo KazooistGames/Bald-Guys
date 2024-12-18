@@ -2,16 +2,13 @@ extends Area3D
 
 enum Action {
 	inert = 0,
-	hold = 1,	
+	holding = 1,
+	charging = 2,	
 }
 
 @export var action = Action.inert
 
 @onready var collider = $CollisionShape3D
-
-@export var Holding = false
-
-@export var Wielder : Node3D = null
 
 @export var Aim = Vector3.ZERO
 
@@ -22,7 +19,7 @@ var contained_mass = 0
 var contained_bodies = []
 
 const hold_force = 5000.0	
-const throw_force = 25000.0
+const throw_force = 30000.0
 
 var target_radius = 0.0
 var target_height = 0.0
@@ -32,35 +29,62 @@ func _ready():
 
 	body_entered.connect(add_body)
 	body_exited.connect(remove_body)
-
+	
 
 func _physics_process(delta):
 	
 	collider.shape.radius = move_toward(collider.shape.radius, target_radius, 2.0 * delta)
 	collider.shape.height = move_toward(collider.shape.height, target_height, 5.0 * delta)
-	
-	if action == Action.hold:
+		
+	if action == Action.holding:
 		monitoring = true
-		Holding = true
-		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		target_radius = 0.75
 		target_height = 1.0
-	
+		collision_mask = 12
+		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+		gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		for node in contained_bodies:			
 			rpc_hold(node.get_path())
 			
-	elif Holding:
-		Holding = false
+	elif action == Action.charging:
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		monitoring = true
+		target_radius = 0.75
+		target_height = 1.0
+		collision_mask = 14
+
+			
+	elif action == Action.inert:	
+		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
+		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		monitoring = false
 		target_radius = 0.0
 		target_height = 0.0
-
+		
+		for node in contained_bodies:
+			remove_body(node)
+			
+			
+@rpc("call_local")
+func rpc_trigger():
+	
+	if action == Action.holding:
+		
 		for node in contained_bodies:
 			rpc_throw(node.get_path())
 			
-		monitoring = false
+	elif action == Action.charging:
+	
+		for node in contained_bodies:
+			rpc_push(node.get_path())		
+
+	target_radius = 0.0
+	target_height = 0.0		
+	action = Action.inert	
 		
 		
 @rpc("call_local")		
@@ -93,11 +117,15 @@ func rpc_throw(node_path):
 func rpc_push(node_path):
 	
 	var node = get_node(node_path)
-	
+
 	if can_be_pushed(node):
-		var direction = node.global_position - Wielder.global_position	
-		var magnitude = throw_force / 2.0	
+		var disposition = node.global_position - get_parent().global_position
+		disposition.y /= 10 	
+		var direction = Aim.lerp(disposition.normalized(), 1.0)
+		var magnitude = throw_force
 		node.apply_central_force(magnitude * direction)
+		var lift = Vector3.UP * magnitude / 10.0
+		node.apply_central_force(lift)
 			
 			
 func get_scattered_aim(node):
@@ -134,17 +162,11 @@ func remove_body(node):
 		
 		
 func can_be_pushed(node):
-	
+
 	if node == null:
 		return false
 		
 	elif not node is RigidBody3D:
-		return false
-		
-	elif node == Wielder:
-		return false
-		
-	elif node.linear_velocity.length() >= 20:
 		return false
 		
 	else:
@@ -154,6 +176,9 @@ func can_be_pushed(node):
 func can_be_held(node):
 	
 	if not can_be_pushed(node):
+		return false
+			
+	elif node.linear_velocity.length() >= 20:
 		return false
 		
 	elif node.is_in_group("humanoids"):

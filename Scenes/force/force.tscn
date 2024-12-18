@@ -24,7 +24,7 @@ properties/3/replication_mode = 1
 
 [node name="Force" type="Area3D"]
 collision_layer = 16
-collision_mask = 12
+collision_mask = 14
 monitoring = false
 gravity_space_override = 3
 gravity_point = true

@@ -1,4 +1,4 @@
-[gd_resource type="AudioBusLayout" load_steps=5 format=3 uid="uid://bxiqlu7c70tkp"]
+[gd_resource type="AudioBusLayout" load_steps=6 format=3 uid="uid://bxiqlu7c70tkp"]
 
 [sub_resource type="AudioEffectHighPassFilter" id="AudioEffectHighPassFilter_u5rve"]
 resource_name = "HighPassFilter"
@@ -13,6 +13,10 @@ wet = 0.25
 
 [sub_resource type="AudioEffectCompressor" id="AudioEffectCompressor_4rqj5"]
 resource_name = "Compressor"
+
+[sub_resource type="AudioEffectChorus" id="AudioEffectChorus_edlpp"]
+resource_name = "Chorus"
+wet = 0.25
 
 [resource]
 bus/0/volume_db = 0.00282288
@@ -48,3 +52,5 @@ bus/4/volume_db = 0.0
 bus/4/send = &"Master"
 bus/4/effect/0/effect = SubResource("AudioEffectCompressor_4rqj5")
 bus/4/effect/0/enabled = true
+bus/4/effect/1/effect = SubResource("AudioEffectChorus_edlpp")
+bus/4/effect/1/enabled = true

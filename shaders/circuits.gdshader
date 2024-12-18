@@ -93,7 +93,7 @@ bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, float offset){
 			UV_track = uv.y;
 			UV_tail = uv.x;
 			tail_start = uv.y;
-			float tail_end = 1.0;
+			tail_end = 1.0;
 		}
 		
 		float track_pos = track_position(rails, phase);
@@ -111,16 +111,14 @@ bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, float offset){
 	return false;
 }
 
-vec4 random_vec4(float minimum, float maximum, int seed){
-	float span = (maximum - minimum) / 2.0;
-	float zero = minimum + span;
+vec4 random_vec4(float zero, float span, int seed){
 	float float_seed = float(seed);
 	
 	vec4 return_val;
-	return_val.x = zero + sin(float_seed * 43758.0982309) * span;
+	return_val.x = zero + sin(float_seed * 43758.82309) * span;
 	return_val.y = zero + sin(float_seed * 72191.32920) * span;
 	return_val.z = zero + sin(float_seed * 342.09871) * span;
-	return_val.w = zero + sin(float_seed * 8790.4322) * span;
+	return_val.w = zero + sin(float_seed * 8790.43229) * span;
 	return return_val;
 }
 
@@ -133,15 +131,15 @@ void fragment() {
 	
 	vec3 sample_color = texture(screen_texture, SCREEN_UV).rgb;
 	
-	float reseed_interval = 4.0 * phase_scalar;
+	float reseed_interval = 8.0 * phase_scalar;
 	float seed_phase = TIME + time_offset;
 	int seed = int(seed_phase / reseed_interval);
 	
-	vec4 x_rails = random_vec4(0.2, 0.8, seed);
-	vec4 y_rails = random_vec4(0.2, 0.8, seed);
-	vec4 speeds = vec4(1.0, 2.0, -1.0, -2.0);
+	vec4 x_rails = random_vec4(0.5, 0.3, seed);
+	vec4 y_rails = random_vec4(0.5, 0.3, seed);
+	vec4 speeds = vec4(1.0, 1.5, -1.0, -1.5);
 
-	float fade = pow(abs(sin(seed_phase)), 3.0);
+	float fade = abs(sin(seed_phase));
 
 	if (energized(UV, x_rails, y_rails, speeds, time_offset)){
 		sample_color.r = fade;		
