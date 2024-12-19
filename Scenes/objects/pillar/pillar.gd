@@ -5,7 +5,7 @@ extends Node3D
 @onready var collider = $CollisionShape3D
 @onready var raycast = $RayCast3D
 
-
+@export var bottom_drop = 0.0
 @export var top_height = 0.0
 @export var radius = 0.5
 
@@ -43,12 +43,13 @@ func get_top_position(bottom_position):
 func get_mesh_position(bottom_position):
 	
 	var top_position = get_top_position(bottom_position)
-	return bottom_position.lerp(top_position, 0.5)	
+	var extra_drop = (bottom_position - top_position).normalized() * bottom_drop
+	return (bottom_position + extra_drop).lerp(top_position, 0.5)	
 	
 	
 func get_mesh_height(bottom_position):
 	
 	var top_position = get_top_position(bottom_position)
-	return top_position.distance_to(bottom_position)
+	return top_position.distance_to(bottom_position) + bottom_drop
 	
-	
+
