@@ -71,13 +71,7 @@ func abilities():
 		if force.action == force.Action.holding:
 			force.rpc_trigger.rpc()
 		else:
-			force.action = force.Action.charging
-	
-	if Input.is_action_just_released("primary"):
-		
-		if force.action == force.Action.charging:
-			force.rpc_trigger.rpc()	
-	
+			force.action = force.Action.charging	
 		
 	if Input.is_action_just_pressed("equip"):
 		character.ragdoll.rpc()

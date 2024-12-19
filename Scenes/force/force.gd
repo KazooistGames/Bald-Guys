@@ -19,10 +19,14 @@ var contained_mass = 0
 var contained_bodies = []
 
 const hold_force = 5000.0	
-const throw_force = 30000.0
+const throw_force = 1000.0
+const push_force = 100.0
 
 var target_radius = 0.0
 var target_height = 0.0
+
+var charge_period = 0.5
+var charge_timer = 0.0
 
 
 func _ready():
@@ -33,7 +37,7 @@ func _ready():
 
 func _physics_process(delta):
 	
-	collider.shape.radius = move_toward(collider.shape.radius, target_radius, 2.0 * delta)
+	collider.shape.radius = move_toward(collider.shape.radius, target_radius, 3.0 * delta)
 	collider.shape.height = move_toward(collider.shape.height, target_height, 5.0 * delta)
 		
 	if action == Action.holding:
@@ -53,9 +57,11 @@ func _physics_process(delta):
 		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		monitoring = true
 		target_radius = 0.75
-		target_height = 1.0
+		target_height = 1.25
 		collision_mask = 14
-
+		charge_timer += delta
+		if charge_timer >= charge_period:
+			rpc_trigger.rpc()
 			
 	elif action == Action.inert:	
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
@@ -64,6 +70,7 @@ func _physics_process(delta):
 		monitoring = false
 		target_radius = 0.0
 		target_height = 0.0
+		charge_timer = 0
 		
 		for node in contained_bodies:
 			remove_body(node)
@@ -80,8 +87,9 @@ func rpc_trigger():
 	elif action == Action.charging:
 	
 		for node in contained_bodies:
-			rpc_push(node.get_path())		
-
+			rpc_push(node.get_path())	
+				
+	charge_timer = 0
 	target_radius = 0.0
 	target_height = 0.0		
 	action = Action.inert	
@@ -108,8 +116,8 @@ func rpc_throw(node_path):
 
 		var direction = get_scattered_aim(node)
 		var magnitude = throw_force
-		node.apply_central_force(magnitude * direction)
-		var lift = Vector3.UP * magnitude / 20.0
+		node.apply_central_impulse(magnitude * direction)
+		var lift = Vector3.UP * magnitude / 10.0
 		node.apply_central_force(lift)
 		
 			
@@ -118,15 +126,24 @@ func rpc_push(node_path):
 	
 	var node = get_node(node_path)
 
-	if can_be_pushed(node):
+	if !can_be_pushed(node):
+		pass
+		
+	elif node.is_in_group("humanoids"):
+		var disposition = (node.global_position - get_parent().global_position).normalized()
+		var direction = disposition.lerp(Vector3.UP, 0.25)
+		var magnitude = push_force / 3.0
+		node.ragdoll.rpc(direction * magnitude)
+		
+	else:
 		var disposition = node.global_position - get_parent().global_position
 		disposition.y /= 10 	
 		var direction = Aim.lerp(disposition.normalized(), 1.0)
-		var magnitude = throw_force
-		node.apply_central_force(magnitude * direction)
+		var magnitude = push_force * sqrt(node.mass)
+		node.apply_central_impulse(magnitude * direction)
 		var lift = Vector3.UP * magnitude / 10.0
 		node.apply_central_force(lift)
-			
+				
 			
 func get_scattered_aim(node):
 	
@@ -151,7 +168,6 @@ func add_body(node):
 	else:
 		contained_bodies.append(node)
 		contained_mass += node.mass
-		
 	
 	
 func remove_body(node):

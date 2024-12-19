@@ -151,7 +151,7 @@ func _integrate_forces(state):
 		
 		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
 		impact *= directional_modifier
-		
+			
 		if not is_multiplayer_authority():
 			pass
 			
@@ -204,6 +204,9 @@ func _integrate_forces(state):
 	if translational_velocity.length() > speed_target:
 		impulse = -translational_velocity * get_acceleration() * mass
 		apply_central_force(impulse)
+	
+
+	
 	
 
 func _physics_process(delta):
@@ -289,14 +292,20 @@ func get_ragdoll_recovered():
 	
 
 @rpc("call_local")
-func ragdoll():
+func ragdoll(velocity_override = Vector3.ZERO):
 	
 	if not RAGDOLLED:
 		impactFX.bus = "stank"
 		impactFX.volume_db = -12
 		impactFX.pitch_scale = 1.0
 		impactFX.play()
-		$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
+		
+		if velocity_override != Vector3.ZERO:
+			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = velocity_override
+			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = velocity_override
+		else:
+			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
+			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = linear_velocity
 		RUNNING = false
 		ragdolled.emit()
 		skeleton.ragdoll_start()
