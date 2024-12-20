@@ -13,9 +13,14 @@ extends RigidBody3D
 		material.albedo_color = value
 		material.emission = value
 		mesh.set_surface_override_material(0, material)
-
+		
+@export var AUTHORITY_POSITION = Vector3.ZERO
 
 @export var radius = 0.25
+
+@onready var Dawn = $Dawn
+
+@onready var Drop = $Drop
 
 @onready var mesh = $MeshInstance3D
 
@@ -24,8 +29,6 @@ extends RigidBody3D
 @onready var interactable = $Interactable
 
 @onready var synchronizer = $MultiplayerSynchronizer
-
-@export var AUTHORITY_POSITION = Vector3.ZERO
 
 var strobing_enabled = false
 var strobing_phase = 0

@@ -8,11 +8,13 @@ enum Action {
 
 @export var action = Action.inert
 
-@onready var collider = $CollisionShape3D
-
 @export var Aim = Vector3.ZERO
 
 @export var Max_kg = 500
+
+@onready var collider = $CollisionShape3D
+
+@onready var hum = $hum
 
 var contained_mass = 0
 
@@ -33,7 +35,7 @@ func _ready():
 
 	body_entered.connect(add_body)
 	body_exited.connect(remove_body)
-	
+	hum.play()
 
 func _physics_process(delta):
 	
@@ -41,6 +43,7 @@ func _physics_process(delta):
 	collider.shape.height = move_toward(collider.shape.height, target_height, 5.0 * delta)
 		
 	if action == Action.holding:
+		hum.stream_paused = false
 		monitoring = true
 		target_radius = 0.75
 		target_height = 1.0
@@ -52,6 +55,7 @@ func _physics_process(delta):
 			rpc_hold(node.get_path())
 			
 	elif action == Action.charging:
+		hum.stream_paused = false
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
@@ -64,6 +68,7 @@ func _physics_process(delta):
 			rpc_trigger.rpc()
 			
 	elif action == Action.inert:	
+		hum.stream_paused = true
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
 		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED

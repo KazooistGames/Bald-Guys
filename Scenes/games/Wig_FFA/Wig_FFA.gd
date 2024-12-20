@@ -163,12 +163,14 @@ func set_wig_bearer(path_to_new_bearer):
 		Bearer = null
 		wig_remote.remote_path = ""
 		Wig.toggle_strobing(true)
+		Wig.Drop.play()
 		
 	else:	
 		Bearer = get_node(path_to_new_bearer)
 		wig_remote.remote_path = Wig.get_path()
 		wig_remote.position = Vector3(0, 0.275, -.075)		
 		Wig.toggle_strobing(false)
+		Wig.Dawn.play()
 
 @rpc("call_local", "reliable")
 func rpc_start():

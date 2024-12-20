@@ -62,16 +62,13 @@ func _process(delta):
 	
 	if State == ClientState.Lobby:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		music.volume_db = move_toward(music.volume_db, -21, delta * 3)
+		music.volume_db = move_toward(music.volume_db, -24, delta * 6)
 		
 	elif pause_menu.visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		music.volume_db = move_toward(music.volume_db, -32, delta * 6)
 		
 	elif State == ClientState.Session:
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		music.volume_db = move_toward(music.volume_db, -32, delta * 6)
-		
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)		
 	
 	main_menu.visible = State == ClientState.Lobby
 
@@ -88,8 +85,12 @@ func _process(delta):
 	elif State != ClientState.Session:
 		State = ClientState.Session
 		
+	elif music.volume_db <= -96:
+		music.stop()
+		
 	else:
-		music.stream_paused = session.State != session.SessionState.Hub and not pause_menu.visible
+		music.volume_db = move_toward(music.volume_db, -96, delta * 6)
+
 
 
 func _notification(what):
@@ -167,6 +168,7 @@ func give_humanoid_to_client(humanoid):
 		LOCAL_PLAYER_INTERFACE.character = humanoid
 		LOCAL_PLAYER_INTERFACE.force = force
 
+
 func handle_new_session_spawn(new_session):
 	
 	new_session.Created_Player_Humanoid.connect(give_humanoid_to_client)
@@ -193,7 +195,8 @@ func leave_session():
 		session.queue_free()
 		
 	State = ClientState.Lobby
-		
+	music.play()
+	
 		
 func quit():
 	

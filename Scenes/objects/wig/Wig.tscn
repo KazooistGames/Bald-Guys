@@ -1,13 +1,15 @@
-[gd_scene load_steps=12 format=3 uid="uid://cs5vme3m6f1ux"]
+[gd_scene load_steps=14 format=3 uid="uid://cs5vme3m6f1ux"]
 
 [ext_resource type="Script" path="res://Scenes/objects/wig/Wig.gd" id="1_rx6rq"]
 [ext_resource type="Shader" path="res://shaders/object_outline.gdshader" id="2_6yeyh"]
 [ext_resource type="Texture2D" uid="uid://wnmv7ic5wt76" path="res://Textures/afro.png" id="2_bv5em"]
 [ext_resource type="PackedScene" uid="uid://bbtuviu7jd3j0" path="res://Scenes/components/interactable/interactable.tscn" id="3_mbq86"]
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="4_m1qom"]
+[ext_resource type="AudioStream" uid="uid://caispurkdm8u8" path="res://audio/dawn.wav" id="6_awnx7"]
+[ext_resource type="AudioStream" uid="uid://cd5err1tmmn8a" path="res://audio/drop.wav" id="7_12mry"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8sl1w"]
-bounce = 0.25
+bounce = 0.75
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_k7sog"]
 radius = 0.25
@@ -53,7 +55,7 @@ physics_material_override = SubResource("PhysicsMaterial_8sl1w")
 gravity_scale = 0.75
 max_contacts_reported = 10
 contact_monitor = true
-linear_damp = 1.0
+linear_damp = 0.5
 constant_force = Vector3(0, -9.8, 0)
 script = ExtResource("1_rx6rq")
 
@@ -72,3 +74,11 @@ radius = 0.75
 replication_config = SubResource("SceneReplicationConfig_kblqd")
 
 [node name="PhysicsSync" parent="." instance=ExtResource("4_m1qom")]
+
+[node name="Dawn" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("6_awnx7")
+volume_db = -6.0
+
+[node name="Drop" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("7_12mry")
+volume_db = -6.0

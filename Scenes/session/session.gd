@@ -50,6 +50,7 @@ func _ready():
 func _process(_delta):
 	
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
+	
 
 
 func _unhandled_key_input(event):

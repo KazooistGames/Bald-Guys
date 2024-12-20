@@ -43,7 +43,10 @@ func movement():
 	character.WALK_VECTOR = direction
 	character.RUNNING = Input.is_action_pressed("run")
 	
-	if Input.is_action_just_pressed("jump"):
+	if character.RAGDOLLED:
+		return
+		
+	elif Input.is_action_just_pressed("jump"):
 		character.jump.rpc()
 	
 		
@@ -60,6 +63,16 @@ func aiming():
 	
 func abilities():
 	
+	if Input.is_action_just_pressed("equip"):
+		character.ragdoll.rpc()
+	
+	if Input.is_action_just_pressed("drop"):
+		character.unragdoll.rpc()
+	
+	if character.RAGDOLLED:
+		force.action = force.Action.inert
+		return
+	
 	if Input.is_action_just_pressed("secondary"):
 		force.action = force.Action.holding
 		
@@ -73,8 +86,4 @@ func abilities():
 		else:
 			force.action = force.Action.charging	
 		
-	if Input.is_action_just_pressed("equip"):
-		character.ragdoll.rpc()
-	
-	if Input.is_action_just_pressed("drop"):
-		character.unragdoll.rpc()
+
