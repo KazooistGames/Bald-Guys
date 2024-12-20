@@ -5664,9 +5664,6 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_l8k7m")
-}
 tree_root = ExtResource("3_1nlf8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Add2/add_amount = 1.0
@@ -5700,3 +5697,9 @@ stream = SubResource("AudioStreamRandomizer_vpbvi")
 volume_db = -18.0
 max_polyphony = 3
 bus = &"beef"
+
+[node name="FloorCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+target_position = Vector3(0, -1.1, 0)
+collision_mask = 9
+hit_back_faces = false

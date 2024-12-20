@@ -26,9 +26,9 @@ func _process(_delta):
 		var mesh_height = get_mesh_height(bottom_position)
 			
 		mesh.global_position = mesh_position + global_position
-		mesh.mesh.size.y = mesh_height 
 		mesh.mesh.size.x = radius
-		mesh.mesh.size.z = radius
+		mesh.mesh.size.y = radius
+		mesh.mesh.size.z = mesh_height 
 		
 		collider.global_position = mesh_position + global_position
 		collider.shape.size.y = mesh_height

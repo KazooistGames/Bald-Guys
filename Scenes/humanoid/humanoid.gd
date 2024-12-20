@@ -34,6 +34,7 @@ const floor_angle = PI/4.0
 @onready var animation = $AnimationTree
 @onready var collider = $CollisionShape3D
 @onready var synchronizer = $MultiplayerSynchronizer
+@onready var floorcast = $FloorCast3D
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var TOPSPEED = 0
@@ -52,6 +53,7 @@ signal ragdolled
 
 var coyote_timer = 0.0
 var coyote_duration = 0.1
+
 
 func _enter_tree():
 	
@@ -114,7 +116,10 @@ func _process(_delta):
 	
 
 func _integrate_forces(state):
-
+	
+	if floorcast.is_colliding():
+		state.transform.origin.y = floorcast.get_collision_point().y
+		
 	if not multiplayer.has_multiplayer_peer():
 		pass
 		
@@ -122,21 +127,16 @@ func _integrate_forces(state):
 		AUTHORITY_POSITION = state.transform.origin	
 		
 	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.5)
+		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.75)
 		
 	else:
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
-
-	var contact_count = state.get_contact_count()
 	
-	var ON_FLOOR_buffer = false
+	var contact_count = state.get_contact_count()
 	
 	for index in range(contact_count):
 	
 		var normal = state.get_contact_local_normal(index)
-
-		if normal.angle_to(floor_normal) <= floor_angle:		
-			ON_FLOOR_buffer = true
 
 		var impact = state.get_contact_impulse(index).length()
 		
@@ -159,7 +159,7 @@ func _integrate_forces(state):
 			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
 
-		elif not ON_FLOOR_buffer and not ON_FLOOR:
+		elif not ON_FLOOR:
 			
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
 			var forceful = impact > IMPACT_THRESHOLD/3.0
@@ -171,10 +171,6 @@ func _integrate_forces(state):
 				
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
-	if is_multiplayer_authority() and not ON_FLOOR and ON_FLOOR_buffer:
-		land.rpc()
-		
-	ON_FLOOR = ON_FLOOR_buffer
 	WALK_VECTOR = WALK_VECTOR.normalized()
 	
 	var speed_target = TOPSPEED * TOPSPEED_MOD
@@ -206,13 +202,23 @@ func _integrate_forces(state):
 		apply_central_force(impulse)
 	
 
+func is_on_floor():
 	
+	return floorcast.is_colliding()
 	
 
 func _physics_process(delta):
 	
-	if not ON_FLOOR:
+	ON_FLOOR = coyote_timer <= coyote_duration
+	
+	if not is_on_floor():
 		coyote_timer += delta
+		
+	elif not ON_FLOOR:
+		land.rpc()
+		
+	else:
+		coyote_timer = 0
 	
 	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta
@@ -223,7 +229,7 @@ func _physics_process(delta):
 	if RAGDOLLED:
 		skeleton.processRagdollOrientation(delta)
 		
-	elif ON_FLOOR or (coyote_timer < coyote_duration):
+	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:		
 			skeleton.processIdleOrientation(delta, LOOK_VECTOR)
@@ -306,6 +312,7 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		else:
 			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = linear_velocity
+			
 		RUNNING = false
 		ragdolled.emit()
 		skeleton.ragdoll_start()
@@ -332,7 +339,10 @@ func unragdoll():
 @rpc("call_local")
 func jump():
 	
-	if ON_FLOOR or (coyote_timer < coyote_duration):
+	if ON_FLOOR:
+		ON_FLOOR = false
+		coyote_timer = coyote_duration
+		floorcast.target_position = Vector3.DOWN * 0.6
 		reset_double_jump()
 		jumpFX.play()
 		jumpFX.pitch_scale = 0.75
@@ -364,8 +374,8 @@ func double_jump():
 		jumpFX.pitch_scale = 1.25
 		jumpFX.play()	
 		DOUBLE_JUMP_CHARGES -= 1
-		var total_change = 3 - min(0.0, linear_velocity.y)
-		apply_central_impulse(Vector3.UP * mass * total_change)
+		#var total_change = 3 - min(0.0, linear_velocity.y)
+		set_axis_velocity(Vector3.UP * JUMP_SPEED)
 		
 
 @rpc("call_local")
@@ -376,6 +386,7 @@ func reset_double_jump():
 		
 @rpc("call_local")
 func land():
+	floorcast.target_position = Vector3.DOWN * 1.1
 	ON_FLOOR = true
 	coyote_timer = 0
 	impactFX.bus = "beef"

@@ -66,10 +66,15 @@ func _process(delta):
 		
 	elif pause_menu.visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		music.volume_db = move_toward(music.volume_db, -72, delta * 6)
 		
 	elif State == ClientState.Session:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)		
-	
+		music.volume_db = move_toward(music.volume_db, -72, delta * 6)
+				
+	if music.volume_db <= -72:
+		music.stop()
+		
 	main_menu.visible = State == ClientState.Lobby
 
 	if not multiplayer.has_multiplayer_peer():
@@ -84,13 +89,6 @@ func _process(delta):
 
 	elif State != ClientState.Session:
 		State = ClientState.Session
-		
-	elif music.volume_db <= -96:
-		music.stop()
-		
-	else:
-		music.volume_db = move_toward(music.volume_db, -96, delta * 6)
-
 
 
 func _notification(what):
@@ -135,7 +133,7 @@ func join_lobby():
 	enet_peer.create_client(hostIP, PORT)
 		
 	multiplayer.multiplayer_peer = enet_peer
-		
+	
 	multiplayer.server_disconnected.connect(leave_session)
 	
 

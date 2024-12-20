@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://hdo1moc2epoy"]
+[gd_scene load_steps=9 format=3 uid="uid://hdo1moc2epoy"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_8mrte"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_co0ev"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="4_sucxh"]
 [ext_resource type="PackedScene" uid="uid://dkvhw01tsv755" path="res://Scenes/objects/brick/brick_field.tscn" id="5_fjkgg"]
 [ext_resource type="PackedScene" uid="uid://tatel5rmq1h" path="res://Scenes/objects/block/block_tower.tscn" id="6_evcv0"]
+[ext_resource type="PackedScene" uid="uid://dnyf0qu40f6qt" path="res://Scenes/objects/ramp/ramp.tscn" id="8_22tnl"]
 [ext_resource type="PackedScene" uid="uid://dqp8ekibcvawv" path="res://Scenes/objects/Stage/shelf.tscn" id="8_yygct"]
 
 [node name="Platforms_Level" instance=ExtResource("1_8mrte")]
@@ -158,7 +159,7 @@ transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 
 [node name="Blocks" type="Node3D" parent="." index="5"]
 
 [node name="Block_Tower" parent="Blocks" index="0" instance=ExtResource("6_evcv0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 2.5, -18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 18, -18)
 
 [node name="Block_Tower2" parent="Blocks" index="1" instance=ExtResource("6_evcv0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.5, 5, 15.5)
@@ -172,6 +173,10 @@ Size = Vector3(5, 0.25, 30)
 [node name="Shelf2" parent="shelves" index="1" instance=ExtResource("8_yygct")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 25)
 Size = Vector3(30, 0.25, 5)
+
+[node name="Shelf3" parent="shelves" index="2" instance=ExtResource("8_yygct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.75, 18, -17.75)
+Size = Vector3(15, 0.25, 15)
 
 [node name="beams" type="Node3D" parent="." index="7"]
 
@@ -232,3 +237,29 @@ transform = Transform3D(-0.707107, 0.664463, -0.241845, 0, 0.34202, 0.939693, 0.
 bottom_drop = 1.0
 top_height = 0.0
 radius = 1.5
+
+[node name="ramps" type="Node3D" parent="." index="8"]
+
+[node name="Ramp" parent="ramps" index="0" instance=ExtResource("8_22tnl")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -24, 0, -14.5)
+height = 10.0
+length = 17.0
+thickness = 2.0
+
+[node name="Ramp2" parent="ramps" index="1" instance=ExtResource("8_22tnl")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -11.5, 0, -24)
+height = 10.0
+length = 23.0
+thickness = 2.0
+
+[node name="Ramp3" parent="ramps" index="2" instance=ExtResource("8_22tnl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.5, 0, -24)
+height = 10.0
+length = 23.0
+thickness = 2.0
+
+[node name="Ramp4" parent="ramps" index="3" instance=ExtResource("8_22tnl")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 24, 0, -14.5)
+height = 10.0
+length = 17.0
+thickness = 2.0

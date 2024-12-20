@@ -8,8 +8,8 @@ var notes = [1.0, 1.1, 1.0, 0.84]
 var note_index = 0
 
 var bpm = 3
-var boop_timer = 0.0
-var boop_period = 10
+var boop_timer = -40.0
+var boop_period = 20
 
 
 func _ready():
