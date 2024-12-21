@@ -36,7 +36,6 @@ const floor_angle = PI/4.0
 @onready var synchronizer = $MultiplayerSynchronizer
 @onready var floorcast = $FloorCast3D
 
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var TOPSPEED = 0
 var TOPSPEED_MOD = 1
 
@@ -53,6 +52,7 @@ signal ragdolled
 
 var coyote_timer = 0.0
 var coyote_duration = 0.1
+var reverse_coyote_timer = 0.0
 
 
 func _enter_tree():
@@ -117,18 +117,17 @@ func _process(_delta):
 
 func _integrate_forces(state):
 	
-	if floorcast.is_colliding():
+	if not floorcast.is_colliding():
+		pass
+	else:
 		state.transform.origin.y = floorcast.get_collision_point().y
 		
 	if not multiplayer.has_multiplayer_peer():
-		pass
-		
+		pass		
 	elif is_multiplayer_authority():
-		AUTHORITY_POSITION = state.transform.origin	
-		
+		AUTHORITY_POSITION = state.transform.origin			
 	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.75)
-		
+		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 1.0)		
 	else:
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 	
@@ -137,7 +136,6 @@ func _integrate_forces(state):
 	for index in range(contact_count):
 	
 		var normal = state.get_contact_local_normal(index)
-
 		var impact = state.get_contact_impulse(index).length()
 		
 		if state.get_contact_collider_object(index) is RigidBody3D:		
@@ -153,14 +151,12 @@ func _integrate_forces(state):
 		impact *= directional_modifier
 			
 		if not is_multiplayer_authority():
-			pass
-			
+			pass		
 		elif impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
 
-		elif not ON_FLOOR:
-			
+		elif not ON_FLOOR:	
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
 			var forceful = impact > IMPACT_THRESHOLD/3.0
 			var upright = abs(normal.dot(floor_normal)) <= 1.0/2.0
@@ -178,20 +174,18 @@ func _integrate_forces(state):
 		
 	if RAGDOLLED:
 		pass
-	
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:			
 			impulse = -translational_velocity * get_acceleration() * mass
-
 		elif translational_velocity.length() < speed_target:
 			impulse = WALK_VECTOR * get_acceleration() * 2 * mass
-
 		else:
 			var removal_factor = WALK_VECTOR.project(translational_velocity).normalized()
 			impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
 
 	else:
+		
 		if WALK_VECTOR:
 			impulse = WALK_VECTOR * get_acceleration() * mass
 			
@@ -200,31 +194,32 @@ func _integrate_forces(state):
 	if translational_velocity.length() > speed_target:
 		impulse = -translational_velocity * get_acceleration() * mass
 		apply_central_force(impulse)
-	
-
-func is_on_floor():
-	
-	return floorcast.is_colliding()
-	
+			
 
 func _physics_process(delta):
 	
-	ON_FLOOR = coyote_timer <= coyote_duration
+	if floorcast.enabled:
+		reverse_coyote_timer = 0.0
+	else:
+		reverse_coyote_timer += delta
+	if reverse_coyote_timer >= coyote_duration:
+		floorcast.enabled = true
 	
+	
+	ON_FLOOR = coyote_timer <= coyote_duration
 	if not is_on_floor():
-		coyote_timer += delta
-		
+		coyote_timer += delta	
 	elif not ON_FLOOR:
-		land.rpc()
-		
+		land.rpc()	
 	else:
 		coyote_timer = 0
 	
+	
 	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta
-		
 	elif skeleton.ragdoll_is_at_rest():
 		ragdoll_recovery_timer_seconds += delta
+			
 				
 	if RAGDOLLED:
 		skeleton.processRagdollOrientation(delta)
@@ -232,24 +227,39 @@ func _physics_process(delta):
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:		
+			gravity_scale = 0.0
+				
+			if floorcast.enabled:
+				linear_velocity.y = 0.0
+				
 			skeleton.processIdleOrientation(delta, LOOK_VECTOR)
-
 		else:
+			gravity_scale = 1.0
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 		
 		var scalar = 5.0
 		collider.shape.radius = move_toward(collider.shape.radius, 0.20, delta * scalar)
 		collider.shape.height = move_toward(collider.shape.height, 1.85, delta * scalar)
 		collider.position.y = move_toward(collider.position.y, 0.925, delta * scalar)
-		
+		floorcast.target_position.y = -1.1
 	else:
+		gravity_scale = 1.0
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
-		var jumpDeltaScale = animation.get("parameters/Jump/blend_position")
-		collider.shape.height = 1.4
-		collider.position.y = 1.15
-
+		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
+		collider.shape.height = lerp(1.85, 1.4, jumpDeltaScale)
+		collider.position.y = lerp(0.925, 1.15, jumpDeltaScale)
+		floorcast.target_position.y = lerp(-1.1, -0.6, jumpDeltaScale)
+		
 	rotation.y = fmod(rotation.y, 2*PI)
 	
+	
+func is_on_floor():
+	
+	if floorcast.enabled:
+		return floorcast.is_colliding()
+	else:
+		return false 
+		
 	
 func is_back_pedaling():
 	
@@ -261,10 +271,8 @@ func is_back_pedaling():
 func get_acceleration():
 	
 	if not ON_FLOOR:
-		return 8.0
-		
-	else:
-		
+		return 8.0	
+	else:	
 		var absolute = 25.0
 		var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
 		var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
@@ -342,12 +350,13 @@ func jump():
 	if ON_FLOOR:
 		ON_FLOOR = false
 		coyote_timer = coyote_duration
-		floorcast.target_position = Vector3.DOWN * 0.6
-		reset_double_jump()
+		reverse_coyote_timer = 0.0
+		floorcast.enabled = false
 		jumpFX.play()
 		jumpFX.pitch_scale = 0.75
-		apply_central_impulse(Vector3.UP * mass * JUMP_SPEED)
-		
+		var offset = max(0.0, linear_velocity.y)
+		set_axis_velocity(Vector3.UP * (JUMP_SPEED + offset))
+				
 	elif DOUBLE_JUMP_CHARGES > 0:
 		double_jump()
 		
@@ -368,8 +377,7 @@ func wall_jump(impulse):
 func double_jump():
 	
 	if ON_FLOOR:
-		pass
-		
+		pass	
 	elif DOUBLE_JUMP_CHARGES > 0:
 		jumpFX.pitch_scale = 1.25
 		jumpFX.play()	
@@ -386,8 +394,7 @@ func reset_double_jump():
 		
 @rpc("call_local")
 func land():
-	floorcast.target_position = Vector3.DOWN * 1.1
-	ON_FLOOR = true
+	reset_double_jump()
 	coyote_timer = 0
 	impactFX.bus = "beef"
 	impactFX.volume_db = -27
