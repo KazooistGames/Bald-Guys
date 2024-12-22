@@ -8,11 +8,17 @@ enum Action {
 
 @export var action = Action.inert
 
+@export var base_position = Vector3.ZERO
+
 @export var Aim = Vector3.ZERO
 
 @export var Max_kg = 500
 
+@export var wielder : Node3D = null
+
 @onready var collider = $CollisionShape3D
+
+@onready var mesh = $MeshInstance3D
 
 @onready var hum = $hum
 
@@ -24,11 +30,11 @@ const hold_force = 5000.0
 const throw_force = 750.0
 const push_force = 200.0
 
-var target_radius = 0.0
-var target_height = 0.0
-
-var charge_period = 0.5
+var charge_period = 1.0
 var charge_timer = 0.0
+var early_discharge = false
+
+var position_projection = 1.25
 
 
 func _ready():
@@ -39,33 +45,48 @@ func _ready():
 
 
 func _physics_process(delta):
-	
-	collider.shape.radius = move_toward(collider.shape.radius, target_radius, 3.0 * delta)
-	collider.shape.height = move_toward(collider.shape.height, target_height, 5.0 * delta)
-		
+
 	if action == Action.holding:
-		hum.stream_paused = false
 		monitoring = true
-		target_radius = 0.75
-		target_height = 1.0
 		collision_mask = 12
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 		gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		for node in contained_bodies:			
-			rpc_hold(node.get_path())
+		
+		hum.stream_paused = false
+		hum.volume_db = -27.0
+		hum.pitch_scale = 1.0
+		collider.shape.radius = move_toward(collider.shape.radius, 0.5, 3.0 * delta)
+		collider.shape.height = move_toward(collider.shape.height, 1.5, 5.0 * delta)
+		
+		if is_multiplayer_authority():
+			
+			for node in contained_bodies:			
+				rpc_hold.rpc(node.get_path())
+			
 			
 	elif action == Action.charging:
-		hum.stream_paused = false
 		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		monitoring = true
-		target_radius = 0.75
-		target_height = 1.25
 		collision_mask = 14
+		
+		var progress = charge_timer/charge_period
+		
+		collider.shape.radius = lerp(1.0, 0.75, progress)
+		collider.shape.height = lerp(0.75, 3.0, progress)
 		charge_timer += delta
-		if charge_timer >= charge_period:
+		
+		hum.stream_paused = false
+		hum.volume_db = lerp(-27.0, -18.0, progress)
+		hum.pitch_scale = lerp(0.75, 1.5, progress)
+
+		if not is_multiplayer_authority():
+			pass
+		elif progress >= 1.0:
+			rpc_trigger.rpc()
+		elif early_discharge and progress >= 0.25:
 			rpc_trigger.rpc()
 			
 	elif action == Action.inert:	
@@ -74,13 +95,18 @@ func _physics_process(delta):
 		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
 		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		monitoring = false
-		target_radius = 0.0
-		target_height = 0.0
 		charge_timer = 0
+		collider.shape.radius = 0.0
+		collider.shape.height = 0.0
 		
 		for node in contained_bodies:
 			remove_body(node)
 			
+	mesh.mesh.top_radius = collider.shape.radius
+	mesh.mesh.bottom_radius = collider.shape.radius
+	mesh.mesh.height = collider.shape.height
+	position = base_position + Aim.normalized() * collider.shape.height/2.0
+		
 			
 @rpc("call_local")
 func rpc_trigger():
@@ -92,12 +118,15 @@ func rpc_trigger():
 			
 	elif action == Action.charging:
 	
+		if charge_timer < charge_period and not early_discharge:
+			early_discharge = true
+			return
+			
 		for node in contained_bodies:
 			rpc_push(node.get_path())	
 				
-	charge_timer = 0
-	target_radius = 0.0
-	target_height = 0.0		
+	charge_timer = 0	
+	early_discharge = false
 	action = Action.inert	
 		
 		
@@ -136,6 +165,10 @@ func rpc_push(node_path):
 		pass
 		
 	elif node.is_in_group("humanoids"):
+		
+		if multiplayer.get_unique_id() != node.get_multiplayer_authority():
+			return
+			
 		var disposition = (node.global_position - get_parent().global_position).normalized()
 		var direction = disposition.lerp(Vector3.UP, 0.25)
 		var magnitude = push_force / 8.0
@@ -186,6 +219,9 @@ func remove_body(node):
 func can_be_pushed(node):
 
 	if node == null:
+		return false
+		
+	elif node == wielder:
 		return false
 		
 	elif not node is RigidBody3D:

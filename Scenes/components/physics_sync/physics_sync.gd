@@ -39,8 +39,9 @@ func _physics_process(_delta):
 	else:
 		parent.transform.basis = AUTHORITY_BASIS
 		Authority_Angular_Velocity = Authority_Angular_Velocity
+		
 		if parent.position.distance_to(AUTHORITY_ORIGIN) > 1.0:
-			parent.transform.origin = parent.transform.origin.lerp(AUTHORITY_ORIGIN, 0.5)
+			parent.transform.origin = parent.transform.origin.lerp(AUTHORITY_ORIGIN, 0.75)
 			
 		else:
 			parent.transform.origin = parent.transform.origin.lerp(AUTHORITY_ORIGIN, 0.25)

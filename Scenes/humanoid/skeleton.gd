@@ -1,9 +1,12 @@
 extends Skeleton3D
 
 @export var RAGDOLLED: bool = false
+@export var Reaching = 0
 	
 @onready var leftHand = $leftHandIK
 @onready var rightHand = $rightHandIK
+@onready var currentReacher = null
+
 @onready var ragdollSkeleton = $Ragdoll
 
 const LERP_VAL = 10.0
@@ -57,9 +60,17 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.bone_modifiers["toes.r"] = 1.0
 	ragdollSkeleton.bone_modifiers["toes.l"] = 1.0
 	
-	leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
-	rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
+	if Reaching == 2:
+		pass
+	elif Reaching == 0:
+		leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
+		rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
 	
+	elif leftHand != currentReacher:
+		leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
+	elif rightHand != currentReacher:
+		rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
+
 	var target_angle = atan2(-look_vector.x, -look_vector.z)
 
 	if walk_vector == Vector3.ZERO:
@@ -89,8 +100,16 @@ func processIdleOrientation(delta, look_vector):
 	ragdollSkeleton.bone_modifiers["toes.r"] = 0.125
 	ragdollSkeleton.bone_modifiers["toes.l"] = 0.125
 	
-	leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
-	rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
+	if Reaching == 2:
+		pass
+	elif Reaching == 0:
+		leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
+		rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
+		
+	elif leftHand != currentReacher:
+		leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
+	elif rightHand != currentReacher:
+		rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 
 	var target_angle = atan2(-look_vector.x, -look_vector.z)
 	smooth_turn(look_vector, target_angle, 10, delta)
@@ -107,10 +126,17 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	ragdollSkeleton.bone_modifiers["toes.r"] = 0.125
 	ragdollSkeleton.bone_modifiers["toes.l"] = 0.125
 	
-
-	leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
-	rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")))
-	
+	if Reaching == 2:
+		pass
+	elif Reaching == 0:
+		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
+		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")))
+		
+	elif leftHand != currentReacher:
+		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
+	elif rightHand != currentReacher:
+		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
+		
 	var timeStep = LERP_VAL * delta
 	var actual = rotation.y
 	var target
@@ -148,8 +174,7 @@ func processSkeletonRotation(look_vector, ratio, scalar):
 	set_bone_pose_rotation(find_bone("head"), Quaternion.from_euler(head_rotation + Vector3.BACK * -lookAngle/4))
 	
 
-@onready var currentReacher = null
-func processReach(look_vector, reaching):
+func processReach(look_vector):
 	
 	if currentReacher:
 		currentReacher.process_arm_forward(get_bone_global_pose_no_override(find_bone("head")))
@@ -157,15 +182,23 @@ func processReach(look_vector, reaching):
 	var lookAngle = get_relative_look_angle(look_vector)
 	var deadband = PI/5
 	
-	if !reaching && currentReacher != null:
+	if Reaching == 0 && currentReacher != null:
 		currentReacher = null
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", true)
 	
-	elif !reaching:
+	elif Reaching == 0:
 		pass
+	
+	elif Reaching == 2:
+		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", false)
+		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", false)
+		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", false)
+		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", false)
+		leftHand.process_arm_forward(get_bone_global_pose_no_override(find_bone("head")))
+		rightHand.process_arm_forward(get_bone_global_pose_no_override(find_bone("head")))
 	
 	elif lookAngle > deadband && currentReacher != leftHand:
 		currentReacher = leftHand

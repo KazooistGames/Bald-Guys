@@ -22,10 +22,14 @@ func _process(delta):
 	
 	if boop_burst_count >= boop_burst_size:
 		boop_timer -= boop_period
-		boop_period = 60.0/bpm
 		boop_burst_count = 0
 		boop_burst_timer = 0.0
 		boop_burst_size = randi_range(1, 4)
+		
+		if randf() > 0.8:
+			bpm = randi_range(1, 4) * 3
+			
+		boop_period = 60.0/bpm
 	
 	elif boop_burst_timer >= boop_burst_period:
 		boop.play()

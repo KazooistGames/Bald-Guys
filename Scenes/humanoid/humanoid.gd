@@ -17,7 +17,7 @@ const floor_angle = PI/4.0
 	
 @export var RAGDOLLED = false
 @export var ON_FLOOR = true
-@export var REACHING = false
+@export var REACHING = 0
 
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
@@ -88,7 +88,7 @@ func _process(_delta):
 	elif WALK_VECTOR == Vector3.ZERO:
 		RUNNING = false	
 
-	TOPSPEED_MOD = 0.9 if REACHING else 1.0
+	#TOPSPEED_MOD = 0.9 if REACHING else 1.0
 	animation.walkAnimBlendScalar = TOPSPEED
 	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
@@ -113,8 +113,8 @@ func _process(_delta):
 		skeleton.processSkeletonRotation(LOOK_VECTOR, 0.3, 1.0)
 			
 	FACING_VECTOR = Vector3(sin(skeleton.rotation.y), skeleton.rotation.x, cos(skeleton.rotation.y))
-	skeleton.processReach(LOOK_VECTOR, REACHING)
-	
+	skeleton.processReach(LOOK_VECTOR)
+	skeleton.Reaching = REACHING
 
 func _integrate_forces(state):
 	
@@ -133,8 +133,9 @@ func _integrate_forces(state):
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 	
 	var contact_count = state.get_contact_count()
+	var index = 0
 	
-	for index in range(contact_count):
+	while index < contact_count and is_multiplayer_authority():
 	
 		var normal = state.get_contact_local_normal(index)
 		var impact = state.get_contact_impulse(index).length()
@@ -151,20 +152,16 @@ func _integrate_forces(state):
 		var shape = state.get_contact_local_shape(index)
 		
 		if shape == 0:
-			#if abs(normal.angle_to(Vector3.UP)) <= 45.0*PI/180.0:
-				#impact /= 2.5
 			var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
 			impact *= directional_modifier
 			
 		elif shape == 2:
 			impact *= 1.5
-			
-		if not is_multiplayer_authority():
-			pass		
-		elif impact >= IMPACT_THRESHOLD: 
+				
+		if impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
-			print(state.get_contact_local_shape(index))
+			#print(state.get_contact_local_shape(index))
 			
 		elif not ON_FLOOR:	
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
@@ -174,7 +171,8 @@ func _integrate_forces(state):
 			
 			if glancing and forceful and upright and looking_forward:
 				wall_jump.rpc(state.get_contact_impulse(index))
-				
+		index += 1
+			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 		
 	WALK_VECTOR = WALK_VECTOR.normalized()
@@ -216,10 +214,14 @@ func _physics_process(delta):
 		floorcast.enabled = true
 	
 	ON_FLOOR = coyote_timer <= coyote_duration
+	
 	if not is_on_floor():
 		coyote_timer += delta	
 	elif not ON_FLOOR:
-		land.rpc()	
+		
+		if is_multiplayer_authority():
+			land.rpc()	
+			
 	else:
 		coyote_timer = 0
 	
@@ -268,6 +270,7 @@ func _physics_process(delta):
 	collider3.transform.origin = skeleton.bone_transform("chin").origin
 	collider3.transform.basis = skeleton.bone_transform("head").basis
 	collider3.transform = collider3.transform.rotated(Vector3.UP, skeleton.rotation.y)
+	
 	
 func is_on_floor():
 	

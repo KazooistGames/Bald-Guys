@@ -160,6 +160,7 @@ func give_humanoid_to_client(humanoid):
 	
 	var force = force_prefab.instantiate()
 	force.set_multiplayer_authority(peer_id)
+	force.wielder = humanoid
 	humanoid.add_child(force)
 	
 	if multiplayer.get_unique_id() == peer_id:

@@ -40,7 +40,6 @@ func process_arm_forward(headTransform):
 	var scalar = 1.25
 	targetTransform.origin = headTransform.basis.z * scalar + headTransform.origin + offset
 	targetTransform.origin.z = max(targetTransform.origin.z, 0.2)
-	#targetTransform.basis = headTransform.basis.rotated(Vector3.FORWARD, PI)
 	targeted_node.transform = targeted_node.transform.interpolate_with(targetTransform, 1.0 * lerp_scalar)
 	
 	
@@ -58,7 +57,7 @@ func process_arm_sway(footTransform):
 	targetTransform.basis = targetTransform.basis.rotated(axisOfRotation, 2.5*footTransform.origin.z)
 	targetTransform.origin *= Vector3(1, 0, -0.5)
 	targetTransform.origin += Vector3(swayWidth, swayHeight, 0)
-	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, .95 * lerp_scalar)
+	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.75 * lerp_scalar)
 
 
 func process_arm_idle(footTransform):

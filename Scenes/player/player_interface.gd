@@ -23,16 +23,13 @@ func _process(_delta):
 		movement()
 		aiming()
 		abilities()		
-		character.REACHING = force.action != force.Action.inert
+		character.REACHING = force.action #enumerations are lined up via integer values
 		camera.HORIZONTAL_SENSITIVITY = 0.002 if character.REACHING else 0.004
-		force.position = camera.position 
-		force.rotation = camera.rotation 	
-		
-		if force.action != force.Action.inert:
-			force.position = force.position.lerp(Vector3.ZERO, 0.25)
-			force.position += force.Aim * 1.25	
-		else:
-			force.position -= force.Aim * 1.25			
+
+		force.Aim = (character.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
+		var offset_to_zero = 1.0 - abs(character.LOOK_VECTOR.normalized().dot(Vector3.UP))
+		force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
+		force.rotation = camera.rotation 		
 
 	
 func movement():
@@ -58,7 +55,6 @@ func aiming():
 	camera.position = adjustedPosition + adjustedOffset	
 	var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 	character.LOOK_VECTOR = look
-	force.Aim = (look * Vector3(-1, 1, -1)).normalized()
 	
 	
 func abilities():
@@ -85,5 +81,10 @@ func abilities():
 			force.rpc_trigger.rpc()
 		else:
 			force.action = force.Action.charging	
+			
+	elif Input.is_action_just_released("primary"):
+		
+		if force.action == force.Action.charging:
+			force.rpc_trigger.rpc()
 		
 

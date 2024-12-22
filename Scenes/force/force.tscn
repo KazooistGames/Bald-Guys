@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://bg13x1s1aib1u"]
+[gd_scene load_steps=7 format=3 uid="uid://bg13x1s1aib1u"]
 
 [ext_resource type="Script" path="res://Scenes/force/force.gd" id="1_8ejgp"]
 [ext_resource type="AudioStream" uid="uid://dhgcmldg3e6k7" path="res://audio/energy-hum-29083.mp3" id="2_41484"]
@@ -7,7 +7,12 @@
 resource_local_to_scene = true
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_b2kif"]
+resource_local_to_scene = true
 height = 1.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ita6i"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.431373)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_idmps"]
 properties/0/path = NodePath(".:Aim")
@@ -22,6 +27,9 @@ properties/2/replication_mode = 1
 properties/3/path = NodePath(".:rotation")
 properties/3/spawn = true
 properties/3/replication_mode = 1
+properties/4/path = NodePath(".:base_position")
+properties/4/spawn = true
+properties/4/replication_mode = 1
 
 [node name="Force" type="Area3D"]
 collision_layer = 16
@@ -44,8 +52,8 @@ shape = SubResource("CylinderShape3D_yifoa")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-visible = false
 mesh = SubResource("CylinderMesh_b2kif")
+surface_material_override/0 = SubResource("StandardMaterial3D_ita6i")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_idmps")
