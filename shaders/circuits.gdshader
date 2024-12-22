@@ -135,8 +135,8 @@ void fragment() {
 	float seed_phase = TIME + time_offset;
 	int seed = int(seed_phase / reseed_interval);
 	
-	vec4 x_rails = random_vec4(0.5, 0.3, seed);
-	vec4 y_rails = random_vec4(0.5, 0.3, seed);
+	vec4 x_rails = random_vec4(0.5, 0.35, seed);
+	vec4 y_rails = random_vec4(0.5, 0.35, seed);
 	vec4 speeds = vec4(1.0, 1.5, -1.0, -1.5);
 
 	float fade = abs(sin(seed_phase));

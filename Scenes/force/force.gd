@@ -21,8 +21,8 @@ var contained_mass = 0
 var contained_bodies = []
 
 const hold_force = 5000.0	
-const throw_force = 1000.0
-const push_force = 100.0
+const throw_force = 750.0
+const push_force = 200.0
 
 var target_radius = 0.0
 var target_height = 0.0
@@ -138,7 +138,7 @@ func rpc_push(node_path):
 	elif node.is_in_group("humanoids"):
 		var disposition = (node.global_position - get_parent().global_position).normalized()
 		var direction = disposition.lerp(Vector3.UP, 0.25)
-		var magnitude = push_force / 3.0
+		var magnitude = push_force / 8.0
 		node.ragdoll.rpc(direction * magnitude)
 		
 	else:

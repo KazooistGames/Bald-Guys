@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=46 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="Script" path="res://Scenes/humanoid/skeleton.gd" id="2_ldi4p"]
@@ -18,8 +18,17 @@ friction = 0.0
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_26vqe"]
 resource_local_to_scene = true
+radius = 0.15
+height = 1.2
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ynv38"]
+resource_local_to_scene = true
 radius = 0.2
-height = 1.4
+height = 0.5
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_e1a1j"]
+radius = 0.1
+height = 0.4
 
 [sub_resource type="Skin" id="Skin_vic1c"]
 resource_name = "Skin"
@@ -3735,8 +3744,16 @@ continuous_cd = true
 script = ExtResource("1_omd7n")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("CapsuleShape3D_26vqe")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 1.4, 0)
+shape = SubResource("CapsuleShape3D_ynv38")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+shape = SubResource("CapsuleShape3D_e1a1j")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="."]
 bones/0/name = "lowerBody"

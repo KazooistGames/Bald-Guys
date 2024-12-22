@@ -23,16 +23,17 @@ const floor_angle = PI/4.0
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.5, 7.0)
-@export var JUMP_SPEED = 5
+@export var JUMP_SPEED = 5.0
 @export var RUNNING = false
 @export var DOUBLE_JUMP_CHARGES = 1
-#@export var FLOATING = false
 
 @export var AUTHORITY_POSITION = Vector3.ZERO
 
 @onready var skeleton = $Skeleton3D
 @onready var animation = $AnimationTree
 @onready var collider = $CollisionShape3D
+@onready var collider2 = $CollisionShape3D2
+@onready var collider3 = $CollisionShape3D3
 @onready var synchronizer = $MultiplayerSynchronizer
 @onready var floorcast = $FloorCast3D
 
@@ -147,17 +148,26 @@ func _integrate_forces(state):
 				var kinetic_impulse = sqrt(relative_velocity.length())
 				impact *= kinetic_impulse
 		
-		var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
-		impact *= directional_modifier
+		var shape = state.get_contact_local_shape(index)
+		
+		if shape == 0:
+			#if abs(normal.angle_to(Vector3.UP)) <= 45.0*PI/180.0:
+				#impact /= 2.5
+			var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
+			impact *= directional_modifier
+			
+		elif shape == 2:
+			impact *= 1.5
 			
 		if not is_multiplayer_authority():
 			pass		
 		elif impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
-
+			print(state.get_contact_local_shape(index))
+			
 		elif not ON_FLOOR:	
-			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
+			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
 			var forceful = impact > IMPACT_THRESHOLD/3.0
 			var upright = abs(normal.dot(floor_normal)) <= 1.0/2.0
 			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 3.0/4.0
@@ -205,7 +215,6 @@ func _physics_process(delta):
 	if reverse_coyote_timer >= coyote_duration:
 		floorcast.enabled = true
 	
-	
 	ON_FLOOR = coyote_timer <= coyote_duration
 	if not is_on_floor():
 		coyote_timer += delta	
@@ -214,16 +223,13 @@ func _physics_process(delta):
 	else:
 		coyote_timer = 0
 	
-	
 	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta
 	elif skeleton.ragdoll_is_at_rest():
 		ragdoll_recovery_timer_seconds += delta
-			
-				
+					
 	if RAGDOLLED:
-		skeleton.processRagdollOrientation(delta)
-		
+		skeleton.processRagdollOrientation(delta)	
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:		
@@ -233,25 +239,35 @@ func _physics_process(delta):
 				linear_velocity.y = 0.0
 				
 			skeleton.processIdleOrientation(delta, LOOK_VECTOR)
+			
 		else:
 			gravity_scale = 1.0
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 		
-		var scalar = 5.0
-		collider.shape.radius = move_toward(collider.shape.radius, 0.20, delta * scalar)
-		collider.shape.height = move_toward(collider.shape.height, 1.85, delta * scalar)
-		collider.position.y = move_toward(collider.position.y, 0.925, delta * scalar)
-		floorcast.target_position.y = -1.1
+		var scalar = 5.0 * delta
+		#collider.shape.radius = move_toward(collider.shape.radius, .20, scalar)
+		collider.shape.height = move_toward(collider.shape.height, 1.3, scalar)
+		collider.position.y = move_toward(collider.position.y, .65, scalar)
+		floorcast.target_position.y = move_toward(floorcast.target_position.y, -1.1, scalar)
+		
 	else:
 		gravity_scale = 1.0
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
-		collider.shape.height = lerp(1.85, 1.4, jumpDeltaScale)
-		collider.position.y = lerp(0.925, 1.15, jumpDeltaScale)
-		floorcast.target_position.y = lerp(-1.1, -0.6, jumpDeltaScale)
+		#collider.shape.radius = lerp(.2, .25, jumpDeltaScale)
+		collider.shape.height = lerp(1.3, .8, jumpDeltaScale)
+		collider.position.y = lerp(.65, .8, jumpDeltaScale)
+		floorcast.target_position.y = lerp(-1.1, -.65, jumpDeltaScale)
 		
 	rotation.y = fmod(rotation.y, 2*PI)
-	
+	collider2.transform = skeleton.bone_transform("neck")
+	var upperBody = skeleton.bone_transform("upperBody")
+	collider2.transform.basis = collider2.transform.basis.slerp(upperBody.basis, 0.7)
+	collider2.transform.origin = collider2.transform.origin.slerp(upperBody.origin, 0.5)
+	collider2.transform = collider2.transform.rotated(Vector3.UP, skeleton.rotation.y)
+	collider3.transform.origin = skeleton.bone_transform("chin").origin
+	collider3.transform.basis = skeleton.bone_transform("head").basis
+	collider3.transform = collider3.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
 func is_on_floor():
 	
@@ -288,9 +304,10 @@ func getRandomSkinTone():
 	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift )
 
 
+
 func head_position():
 	
-	var headPosition = skeleton.head_position()
+	var headPosition = skeleton.bone_position("chin")
 	var adjustedPosition = headPosition.rotated(Vector3.UP, skeleton.rotation.y ) 
 	return adjustedPosition
 	
@@ -402,7 +419,7 @@ func land():
 	impactFX.play()
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 	var retardation_vector = -translational_velocity.normalized()
-	var retardation_magnitude = max(1.0, translational_velocity.length()/2)
+	var retardation_magnitude = max(1.0, translational_velocity.length()/2.0)
 	var impulse = retardation_vector * retardation_magnitude * mass
 	apply_central_impulse(impulse)
 

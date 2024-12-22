@@ -217,10 +217,20 @@ func ragdoll_is_at_rest():
 	return ragdollVelocity.length() <= 0.25
 
 
-func head_position():
+func bone_position(bone_name):
 	
-	return ragdollSkeleton.get_bone_global_pose(ragdollSkeleton.find_bone("chin")).origin
-
+	return ragdollSkeleton.get_bone_global_pose(ragdollSkeleton.find_bone(bone_name)).origin
+	
+	
+func bone_rotation(bone_name):
+	
+	return ragdollSkeleton.get_bone_global_pose(ragdollSkeleton.find_bone(bone_name)).basis.get_euler()
+	
+	
+func bone_transform(bone_name):
+	
+	return ragdollSkeleton.get_bone_global_pose(ragdollSkeleton.find_bone(bone_name))		
+	
 
 func ragdoll_position():
 	
