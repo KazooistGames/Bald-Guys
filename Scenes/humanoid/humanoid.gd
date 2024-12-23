@@ -120,7 +120,7 @@ func _integrate_forces(state):
 	
 	if not floorcast.is_colliding():
 		pass
-	else:
+	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
 		state.transform.origin.y = floorcast.get_collision_point().y
 		
 	if not multiplayer.has_multiplayer_peer():

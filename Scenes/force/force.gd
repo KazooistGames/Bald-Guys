@@ -26,16 +26,15 @@ var contained_mass = 0
 
 var contained_bodies = []
 
-const hold_force = 5000.0	
+const hold_force = 6000.0	
 const throw_force = 750.0
 const push_force = 200.0
 
-var charge_period = 1.0
+var charge_period = 0.25
 var charge_timer = 0.0
-var early_discharge = false
+#var early_discharge = false
 
 var position_projection = 1.25
-
 
 func _ready():
 
@@ -86,8 +85,8 @@ func _physics_process(delta):
 			pass
 		elif progress >= 1.0:
 			rpc_trigger.rpc()
-		elif early_discharge and progress >= 0.25:
-			rpc_trigger.rpc()
+		#elif early_discharge and progress >= 0.25:
+			#rpc_trigger.rpc()
 			
 	elif action == Action.inert:	
 		hum.stream_paused = true
@@ -118,15 +117,15 @@ func rpc_trigger():
 			
 	elif action == Action.charging:
 	
-		if charge_timer < charge_period and not early_discharge:
-			early_discharge = true
+		if charge_timer < charge_period:
+			#early_discharge = true
 			return
 			
 		for node in contained_bodies:
 			rpc_push(node.get_path())	
 				
 	charge_timer = 0	
-	early_discharge = false
+	#early_discharge = false
 	action = Action.inert	
 		
 		
@@ -149,11 +148,9 @@ func rpc_throw(node_path):
 	
 	if can_be_held(node):
 
-		var direction = get_scattered_aim(node)
+		var direction = get_scattered_aim(node).lerp(Vector3.UP, 0.05)
 		var magnitude = throw_force
 		node.apply_central_impulse(magnitude * direction)
-		var lift = Vector3.UP * magnitude / 10.0
-		node.apply_central_force(lift)
 		
 			
 @rpc("call_local")
@@ -175,13 +172,10 @@ func rpc_push(node_path):
 		node.ragdoll.rpc(direction * magnitude)
 		
 	else:
-		var disposition = node.global_position - get_parent().global_position
-		disposition.y /= 10 	
-		var direction = Aim.lerp(disposition.normalized(), 1.0)
+		var disposition = (node.global_position - get_parent().global_position).normalized()
+		var direction = Aim.lerp(disposition.normalized(), 0.5)
 		var magnitude = push_force * sqrt(node.mass)
 		node.apply_central_impulse(magnitude * direction)
-		var lift = Vector3.UP * magnitude / 10.0
-		node.apply_central_force(lift)
 				
 			
 func get_scattered_aim(node):
