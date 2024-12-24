@@ -12,7 +12,7 @@ height = 1.25
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ita6i"]
 transparency = 1
-albedo_color = Color(1, 1, 1, 0.431373)
+albedo_color = Color(1, 1, 1, 0.196078)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_idmps"]
 properties/0/path = NodePath(".:Aim")
@@ -33,7 +33,7 @@ properties/4/replication_mode = 1
 
 [node name="Force" type="Area3D"]
 collision_layer = 16
-collision_mask = 14
+collision_mask = 10
 monitoring = false
 gravity_space_override = 3
 gravity_point = true
@@ -41,7 +41,7 @@ gravity_point_center = Vector3(0, 0, 0)
 gravity_direction = Vector3(0, 0, 0)
 gravity = 0.0
 linear_damp_space_override = 3
-linear_damp = 10.0
+linear_damp = 20.0
 angular_damp_space_override = 3
 angular_damp = 3.0
 script = ExtResource("1_8ejgp")

@@ -115,6 +115,7 @@ func _process(_delta):
 	FACING_VECTOR = Vector3(sin(skeleton.rotation.y), skeleton.rotation.x, cos(skeleton.rotation.y))
 	skeleton.processReach(LOOK_VECTOR)
 	skeleton.Reaching = REACHING
+	
 
 func _integrate_forces(state):
 	

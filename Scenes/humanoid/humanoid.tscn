@@ -3707,10 +3707,10 @@ properties/2/spawn = true
 properties/2/replication_mode = 1
 properties/3/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:linear_velocity")
 properties/3/spawn = true
-properties/3/replication_mode = 2
+properties/3/replication_mode = 1
 properties/4/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:angular_velocity")
 properties/4/spawn = true
-properties/4/replication_mode = 2
+properties/4/replication_mode = 1
 properties/5/path = NodePath(".:SKIN_COLOR")
 properties/5/spawn = true
 properties/5/replication_mode = 2
@@ -3723,9 +3723,6 @@ properties/7/replication_mode = 1
 properties/8/path = NodePath(".:REACHING")
 properties/8/spawn = true
 properties/8/replication_mode = 1
-properties/9/path = NodePath(".:ON_FLOOR")
-properties/9/spawn = true
-properties/9/replication_mode = 1
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_vpbvi"]
 random_pitch = 1.1
@@ -4147,24 +4144,24 @@ script = ExtResource("2_ldi4p")
 process_priority = 1
 root_bone = &"upperArm.l"
 tip_bone = &"hand.l"
+use_magnet = true
 magnet = Vector3(1, 1, -1)
 target_node = NodePath("../leftHandTarget")
 max_iterations = 25
 script = ExtResource("3_p6mjk")
-swayWidth = 0.22
-swayHeightBase = 0.8
+swayWidthBase = 0.15
 idleOffset = Vector3(0.2, 0.9, 0.1)
 
 [node name="rightHandIK" type="SkeletonIK3D" parent="Skeleton3D"]
 process_priority = 1
 root_bone = &"upperArm.r"
 tip_bone = &"hand.r"
+use_magnet = true
 magnet = Vector3(-1, 1, -1)
 target_node = NodePath("../rightHandTarget")
 max_iterations = 25
 script = ExtResource("3_p6mjk")
-swayWidth = -0.22
-swayHeightBase = 0.8
+swayWidthBase = 0.15
 idleOffset = Vector3(-0.2, 0.9, 0.1)
 
 [node name="leftHandTarget" type="Node3D" parent="Skeleton3D"]

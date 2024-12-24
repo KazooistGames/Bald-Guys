@@ -23,6 +23,6 @@ func updateWalking(topSpeed, velocity, is_back_pedaling):
 	
 func updateFalling(velocity):
 	set("parameters/MoveState/transition_request", "falling")
-	var jumpDeltaScale = gravity*2 if velocity.y > 0 else gravity/2
+	var jumpDeltaScale = gravity*2 if velocity.y > 0 else gravity/1.5
 	var jumpCrestScale = lerp(1, 0, abs(velocity.y)/jumpDeltaScale)
 	set("parameters/Jump/blend_position", jumpCrestScale)

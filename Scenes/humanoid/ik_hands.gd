@@ -1,7 +1,7 @@
 extends SkeletonIK3D
 
-@export var swayWidth = 0.15
-@export var swayHeightBase = 0.75
+@export var swayWidthBase = 0.18
+var swayHeightBase = 1.0
 
 @export var idleOffset = Vector3(0,0,0)
 
@@ -32,7 +32,7 @@ func _process(delta):
 	
 	
 func process_arm_forward(headTransform):
-	
+	use_magnet = true
 	var xSign = sign(idleOffset.x)
 	magnet = Vector3(2 * xSign, 0, 0)
 	var targetTransform = targeted_node.transform
@@ -43,25 +43,35 @@ func process_arm_forward(headTransform):
 	targeted_node.transform = targeted_node.transform.interpolate_with(targetTransform, 1.0 * lerp_scalar)
 	
 	
-func process_arm_sway(footTransform):
+func process_arm_sway(footTransform, magnitude = 1.0):
+	use_magnet = true
+	reset_magnet()
+	#magnet = Vector3(0, 1, -1)
 	
+	var xSign = sign(idleOffset.x)
 	var targetTransform = footTransform
 	var swayHeight = swayHeightBase
+	var swayWidth = swayWidthBase
+	var swayLength = -0.6 * magnitude
 	targetTransform.basis = get_hand_rest().basis.rotated(Vector3(-1,sign(idleOffset.x),0).normalized(), PI/6)
+	
 	if targetTransform.origin.z < 0:
 		axisOfRotation = Vector3(1.5,0,sign(idleOffset.x)).normalized()
-		#targetTransform.basis = targetTransform.basis.rotated(axisOfRotation, 2*footTransform.origin.z)
-		swayHeight += abs(footTransform.origin.z/3)
+		swayHeight += abs(footTransform.origin.z) / (3.0 - magnitude)
+
 	else:
 		axisOfRotation = Vector3(1,0,sign(idleOffset.x)).normalized()
+		#swayWidth -= abs(footTransform.origin.z) / (4.0)
+		swayLength *= 3.0
+		
 	targetTransform.basis = targetTransform.basis.rotated(axisOfRotation, 2.5*footTransform.origin.z)
-	targetTransform.origin *= Vector3(1, 0, -0.5)
-	targetTransform.origin += Vector3(swayWidth, swayHeight, 0)
+	targetTransform.origin *= Vector3(1, 0, swayLength)
+	targetTransform.origin += Vector3(swayWidth * xSign, swayHeight, 0)
 	get_node(target_node).transform = get_node(target_node).transform.interpolate_with(targetTransform, 0.75 * lerp_scalar)
 
 
 func process_arm_idle(footTransform):
-	
+	use_magnet = false
 	reset_magnet()
 	var targetTransform = footTransform
 	targetTransform.origin.y /= 2
@@ -72,7 +82,8 @@ func process_arm_idle(footTransform):
 
 
 func process_arm_falling(footTransform):
-	
+	use_magnet = false
+	reset_magnet()
 	var targetTransform = footTransform
 	targetTransform.origin.x *= 3.25
 	targetTransform.origin.y = 0.9 + footTransform.origin.y/1.5
@@ -91,6 +102,6 @@ func get_hand_rest():
 	
 func reset_magnet():
 	
-	magnet.x = clamp(sign(idleOffset.x), -1, 1)
-	magnet.y = 1
+	magnet.x = sign(idleOffset.x)
+	magnet.y = 0
 	magnet.z = -1
