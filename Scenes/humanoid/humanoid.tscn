@@ -4149,7 +4149,6 @@ magnet = Vector3(1, 1, -1)
 target_node = NodePath("../leftHandTarget")
 max_iterations = 25
 script = ExtResource("3_p6mjk")
-swayWidthBase = 0.15
 idleOffset = Vector3(0.2, 0.9, 0.1)
 
 [node name="rightHandIK" type="SkeletonIK3D" parent="Skeleton3D"]
@@ -4161,7 +4160,6 @@ magnet = Vector3(-1, 1, -1)
 target_node = NodePath("../rightHandTarget")
 max_iterations = 25
 script = ExtResource("3_p6mjk")
-swayWidthBase = 0.15
 idleOffset = Vector3(-0.2, 0.9, 0.1)
 
 [node name="leftHandTarget" type="Node3D" parent="Skeleton3D"]

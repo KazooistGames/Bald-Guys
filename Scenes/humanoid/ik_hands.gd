@@ -1,7 +1,7 @@
 extends SkeletonIK3D
 
-@export var swayWidthBase = 0.18
-var swayHeightBase = 1.0
+var swayWidthBase = 0.18
+var swayHeightBase = 0.75
 
 @export var idleOffset = Vector3(0,0,0)
 
@@ -21,7 +21,8 @@ func _ready():
 	
 	
 func _process(delta):
-	
+	swayHeightBase = 0.8
+	swayWidthBase = 0.22
 	if is_running() and lerp_scalar < 1.0:
 		lerp_scalar += delta
 		
@@ -50,7 +51,7 @@ func process_arm_sway(footTransform, magnitude = 1.0):
 	
 	var xSign = sign(idleOffset.x)
 	var targetTransform = footTransform
-	var swayHeight = swayHeightBase
+	var swayHeight = swayHeightBase 
 	var swayWidth = swayWidthBase
 	var swayLength = -0.6 * magnitude
 	targetTransform.basis = get_hand_rest().basis.rotated(Vector3(-1,sign(idleOffset.x),0).normalized(), PI/6)

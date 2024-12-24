@@ -129,8 +129,8 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	if Reaching == 2:
 		pass
 	elif Reaching == 0:
-		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")), 1.0)
-		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")), 1.0)
+		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")), 1.5)
+		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")), 1.5)
 		
 	elif leftHand != currentReacher:
 		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
