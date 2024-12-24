@@ -61,4 +61,9 @@ replication_config = SubResource("SceneReplicationConfig_idmps")
 [node name="hum" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("2_41484")
 volume_db = -27.0
-bus = &"phaser"
+bus = &"distortion"
+
+[node name="blast" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_41484")
+volume_db = -27.0
+bus = &"distortion"

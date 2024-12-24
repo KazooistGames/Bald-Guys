@@ -1,4 +1,4 @@
-[gd_resource type="AudioBusLayout" load_steps=7 format=3 uid="uid://bxiqlu7c70tkp"]
+[gd_resource type="AudioBusLayout" load_steps=8 format=3 uid="uid://bxiqlu7c70tkp"]
 
 [sub_resource type="AudioEffectHighPassFilter" id="AudioEffectHighPassFilter_u5rve"]
 resource_name = "HighPassFilter"
@@ -22,6 +22,10 @@ wet = 0.25
 resource_name = "Phaser"
 rate_hz = 2.0
 depth = 0.5
+
+[sub_resource type="AudioEffectDistortion" id="AudioEffectDistortion_vc76d"]
+resource_name = "Distortion"
+drive = 0.52
 
 [resource]
 bus/0/volume_db = 0.00282288
@@ -67,3 +71,11 @@ bus/5/volume_db = 0.0
 bus/5/send = &"Master"
 bus/5/effect/0/effect = SubResource("AudioEffectPhaser_3f3i7")
 bus/5/effect/0/enabled = true
+bus/6/name = &"distortion"
+bus/6/solo = false
+bus/6/mute = false
+bus/6/bypass_fx = false
+bus/6/volume_db = 0.0
+bus/6/send = &"beef"
+bus/6/effect/0/effect = SubResource("AudioEffectDistortion_vc76d")
+bus/6/effect/0/enabled = true

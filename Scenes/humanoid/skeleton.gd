@@ -189,8 +189,11 @@ func processReach(look_vector):
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", true)
 	
-	elif Reaching == 0:
-		pass
+	elif Reaching <= 0:
+		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
+		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
+		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
+		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", true)
 	
 	elif Reaching == 2:
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", false)

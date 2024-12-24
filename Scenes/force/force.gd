@@ -4,6 +4,7 @@ enum Action {
 	inert = 0,
 	holding = 1,
 	charging = 2,	
+	cooldown = -1,
 }
 
 @export var action = Action.inert
@@ -26,10 +27,13 @@ const hold_force = 8000.0
 const throw_force = 600.0
 const push_force = 200.0
 
-var charge_period = 0.5
+var charge_period = 0.25
 var charge_timer = 0.0
 
 var contained_bodies = []
+
+var cooldown_period = 1.0
+var cooldown_timer = 0.0
 
 
 func _ready():
@@ -87,14 +91,43 @@ func _physics_process(delta):
 		charge_timer = 0
 		collider.shape.radius = 0.0
 		collider.shape.height = 0.0
+		
+	elif action == Action.cooldown:
+		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
+		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+		charge_timer = 0
+		collider.shape.radius = 0.0
+		collider.shape.height = 0.0
+		cooldown_timer += delta
+		
+		if cooldown_timer >= cooldown_period:
+			rpc_reset.rpc()
+			
+		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
+		hum.stream_paused = false
+		hum.volume_db = lerp(-12.0, -27.0, progress)
+		hum.pitch_scale = lerp(2.5, 0.25, progress)
 			
 	mesh.mesh.top_radius = collider.shape.radius
 	mesh.mesh.bottom_radius = collider.shape.radius
 	mesh.mesh.height = collider.shape.height
 	position = base_position + Aim.normalized() * collider.shape.height/1.5
 		
+		
+@rpc("call_local", "reliable")
+func rpc_reset():
+	
+	hum.bus = "phaser"
+	hum.stop()
+	hum.play()
+	hum.stream_paused = true
+	charge_timer = 0	
+	cooldown_timer = 0.0
+	action = Action.inert
+	
 			
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func rpc_trigger():
 	
 	if action == Action.holding:
@@ -103,17 +136,15 @@ func rpc_trigger():
 			rpc_throw.rpc(node.get_path())
 			
 	elif action == Action.charging:
-	
+		hum.bus = "beef"
 		if charge_timer < charge_period:
 			return
 			
 		for node in contained_bodies:
 			rpc_push.rpc(node.get_path())	
-				
-	hum.stop()
-	hum.play()
-	charge_timer = 0	
-	action = Action.inert	
+			
+	action = Action.cooldown
+		
 		
 		
 @rpc("call_local")		
