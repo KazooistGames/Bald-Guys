@@ -26,6 +26,7 @@ enum Action {
 const hold_force = 8000.0	
 const throw_force = 750.0
 const push_force = 200.0
+const ragdoll_radius = 1.5
 
 var charge_period = 0.25
 var charge_timer = 0.0
@@ -35,12 +36,12 @@ var contained_bodies = []
 var cooldown_period = 1.0
 var cooldown_timer = 0.0
 
-var offset = 1.0
+var offset = 1.25
 
 
 func _ready():
 	
-	hum.play()
+	rpc_reset()
 	monitoring = true
 	
 
@@ -49,12 +50,11 @@ func _physics_process(delta):
 	get_contained_bodies()
 
 	if action == Action.holding:
-		
 		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 2.0, 5.0 * delta)
 		
 		if is_multiplayer_authority():
-					
+							
 			for node in contained_bodies:			
 				rpc_hold_object.rpc(node.get_path())
 				
@@ -76,7 +76,6 @@ func _physics_process(delta):
 		collider.shape.height = move_toward(collider.shape.height, 0, 5.0 * delta)
 		
 	elif action == Action.cooldown:
-
 		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 0, 8.0 * delta)
 		cooldown_timer += delta
@@ -84,9 +83,7 @@ func _physics_process(delta):
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
 		if cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
-			
-
-			
+		
 	mesh.mesh.top_radius = collider.shape.radius
 	mesh.mesh.bottom_radius = collider.shape.radius
 	mesh.mesh.height = collider.shape.height
@@ -98,12 +95,13 @@ func rpc_primary():
 	
 	if action != Action.inert:
 		return
-		
+					
 	collision_mask = 14
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	hum.play()
+	charge_timer = 0	
 	action = Action.charging
 
 
@@ -138,12 +136,16 @@ func rpc_reset():
 			
 @rpc("call_local", "reliable")
 func rpc_trigger():
+	
 	collision_mask = 0
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	
-	if action == Action.holding:
+	if not is_multiplayer_authority():
+		pass
+	
+	elif action == Action.holding:
 		
 		for node in contained_bodies:
 			rpc_throw_object.rpc(node.get_path())
@@ -152,15 +154,14 @@ func rpc_trigger():
 
 		if charge_timer < charge_period:
 			return
-			
-		hum.bus = "beef"
 		
 		for node in contained_bodies:
 			rpc_push_object.rpc(node.get_path())
 			
-	cooldown_timer = 0.0
+	hum.bus = "beef"		
 	hum.play()
 	hum.volume_db = -27
+	cooldown_timer = 0.0
 	action = Action.cooldown
 		
 		
@@ -182,8 +183,8 @@ func rpc_throw_object(node_path):
 	var node = get_node(node_path)
 	
 	if can_be_held(node):
-
-		var direction = get_scattered_aim(node).lerp(Vector3.UP, 0.05)
+		print(multiplayer.get_unique_id(), "	", node.name)
+		var direction = get_scattered_aim(node).lerp(Vector3.UP, 0.075)
 		var magnitude = throw_force
 		node.apply_central_impulse(magnitude * direction)
 		
@@ -200,11 +201,15 @@ func rpc_push_object(node_path):
 		
 		if multiplayer.get_unique_id() != node.get_multiplayer_authority():
 			return
-			
-		var disposition = (node.global_position - get_parent().global_position).normalized()
-		var direction = disposition.lerp(Vector3.UP, 0.25)
-		var magnitude = push_force / 8.0
-		node.ragdoll.rpc(direction * magnitude)
+	
+		var disposition = node.global_position - get_parent().global_position
+		var direction = disposition.normalized().lerp(Vector3.UP, 0.25)
+		var magnitude = push_force / 8.0 / disposition.length()
+		var impulse = direction * magnitude
+		if disposition.length() <= ragdoll_radius:
+			node.ragdoll.rpc(impulse)
+		else:
+			node.bump.rpc(impulse)
 		
 	else:
 		var disposition = (node.global_position - get_parent().global_position).normalized()
@@ -217,7 +222,7 @@ func get_scattered_aim(node):
 	
 	var count = contained_bodies.size()
 	var lerp_val = (count - 1) * 0.075
-	lerp_val = clampf(lerp_val, 0.0, 0.6)
+	lerp_val = clampf(lerp_val, 0.0, 0.5)
 	
 	var disposition = node.global_position - get_parent().global_position
 	disposition.y =0

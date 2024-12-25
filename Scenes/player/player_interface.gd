@@ -79,10 +79,5 @@ func abilities():
 			force.rpc_trigger.rpc()
 		else:
 			force.rpc_primary.rpc()
-			
-	elif Input.is_action_just_released("primary"):
-		
-		if force.action == force.Action.charging:
-			force.rpc_trigger.rpc()
 		
 

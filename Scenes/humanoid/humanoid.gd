@@ -364,6 +364,16 @@ func unragdoll():
 		RAGDOLLED = false
 		freeze = false
 
+@rpc("call_local")
+func bump(velocity_impulse):
+	
+	if ON_FLOOR:
+		ON_FLOOR = false
+		coyote_timer = coyote_duration
+		reverse_coyote_timer = 0.0
+		floorcast.enabled = false
+		apply_central_impulse(velocity_impulse * mass)
+		
 
 @rpc("call_local")
 func jump():
