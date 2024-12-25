@@ -25,7 +25,6 @@ func _process(_delta):
 		abilities()		
 		character.REACHING = force.action #enumerations are lined up via integer values
 		camera.HORIZONTAL_SENSITIVITY = 0.002 if character.REACHING else 0.004
-
 		force.Aim = (character.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
 		var offset_to_zero = 1.0 - abs(character.LOOK_VECTOR.normalized().dot(Vector3.UP))
 		force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
@@ -42,7 +41,6 @@ func movement():
 	
 	if character.RAGDOLLED:
 		return
-		
 	elif Input.is_action_just_pressed("jump"):
 		character.jump.rpc()
 	
@@ -66,21 +64,21 @@ func abilities():
 		character.unragdoll.rpc()
 	
 	if character.RAGDOLLED:
-		force.action = force.Action.inert
+		force.rpc_reset.rpc()
 		return
 	
 	if Input.is_action_just_pressed("secondary"):
-		force.action = force.Action.holding
+		force.rpc_secondary.rpc()
 		
 	elif Input.is_action_just_released("secondary"):
-		force.action = force.Action.inert
+		force.rpc_reset.rpc()
 		
 	if Input.is_action_just_pressed("primary"):
 		
 		if force.action == force.Action.holding:
 			force.rpc_trigger.rpc()
 		else:
-			force.action = force.Action.charging	
+			force.rpc_primary.rpc()
 			
 	elif Input.is_action_just_released("primary"):
 		

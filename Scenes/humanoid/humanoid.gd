@@ -232,7 +232,7 @@ func _physics_process(delta):
 		ragdoll_recovery_timer_seconds += delta
 					
 	if RAGDOLLED:
-		skeleton.processRagdollOrientation(delta)	
+		skeleton.processRagdollOrientation(delta)		
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:		

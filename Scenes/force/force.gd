@@ -24,7 +24,7 @@ enum Action {
 @onready var hum = $hum
 
 const hold_force = 8000.0	
-const throw_force = 600.0
+const throw_force = 750.0
 const push_force = 200.0
 
 var charge_period = 0.25
@@ -34,6 +34,8 @@ var contained_bodies = []
 
 var cooldown_period = 1.0
 var cooldown_timer = 0.0
+
+var offset = 1.0
 
 
 func _ready():
@@ -47,81 +49,88 @@ func _physics_process(delta):
 	get_contained_bodies()
 
 	if action == Action.holding:
-		collision_mask = 12
-		linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-		collider.shape.radius = move_toward(collider.shape.radius, 0.5, 2.0 * delta)
-		collider.shape.height = move_toward(collider.shape.height, 1.5, 5.0 * delta)
+		
+		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
+		collider.shape.height = move_toward(collider.shape.height, 2.0, 5.0 * delta)
 		
 		if is_multiplayer_authority():
 					
 			for node in contained_bodies:			
-				rpc_hold.rpc(node.get_path())
+				rpc_hold_object.rpc(node.get_path())
 				
-		hum.stream_paused = false
-		hum.volume_db = -27.0
-		hum.pitch_scale = 1.0
-			
 	elif action == Action.charging:
-		collision_mask = 14
-		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 		charge_timer += delta
 		var progress = clamp(charge_timer/charge_period, 0.0, 1.0)
-		collider.shape.radius = lerp(1.0, 0.75, progress)
-		collider.shape.height = lerp(0.75, 3.0, progress)
+		collider.shape.radius = lerp(0.0, 1.0, progress)
+		collider.shape.height = lerp(0.0, 2.0, progress)
+		hum.volume_db = lerp(-27.0, -18.0, progress)
+		hum.pitch_scale = lerp(0.5, 2.0, progress)
 		
 		if not is_multiplayer_authority():
 			pass
-			
 		elif progress >= 1.0:
 			rpc_trigger.rpc()
-			
-		hum.stream_paused = false
-		hum.volume_db = lerp(-27.0, -15.0, progress)
-		hum.pitch_scale = lerp(0.5, 2.0, progress)
-			
+		
 	elif action == Action.inert:	
-		hum.stream_paused = true
-		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
-		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-		charge_timer = 0
-		collider.shape.radius = 0.0
-		collider.shape.height = 0.0
+		collider.shape.radius = move_toward(collider.shape.radius, 0, 3.0 * delta)
+		collider.shape.height = move_toward(collider.shape.height, 0, 5.0 * delta)
 		
 	elif action == Action.cooldown:
-		linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-		angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
-		gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-		charge_timer = 0
-		collider.shape.radius = 0.0
-		collider.shape.height = 0.0
+
+		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
+		collider.shape.height = move_toward(collider.shape.height, 0, 8.0 * delta)
 		cooldown_timer += delta
-		
+		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
+		hum.pitch_scale = lerp(2.5, 0.5, progress)
 		if cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 			
-		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
-		hum.stream_paused = false
-		hum.volume_db = lerp(-12.0, -27.0, progress)
-		hum.pitch_scale = lerp(2.5, 0.25, progress)
+
 			
 	mesh.mesh.top_radius = collider.shape.radius
 	mesh.mesh.bottom_radius = collider.shape.radius
 	mesh.mesh.height = collider.shape.height
-	position = base_position + Aim.normalized() * collider.shape.height/1.5
+	position = base_position + Aim.normalized() * offset
+	
+	
+@rpc("call_local", "reliable")
+func rpc_primary():
+	
+	if action != Action.inert:
+		return
 		
+	collision_mask = 14
+	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	hum.play()
+	action = Action.charging
+
+
+@rpc("call_local", "reliable")
+func rpc_secondary():
+	
+	if action != Action.inert:
+		return	
 		
+	collision_mask = 12
+	linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+	angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+	gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+	hum.play()
+	hum.volume_db = -27.0
+	hum.pitch_scale = 1.0
+	action = Action.holding
+	
+	
 @rpc("call_local", "reliable")
 func rpc_reset():
-	
+	collision_mask = 0
+	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
+	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	hum.bus = "phaser"
 	hum.stop()
-	hum.play()
-	hum.stream_paused = true
 	charge_timer = 0	
 	cooldown_timer = 0.0
 	action = Action.inert
@@ -129,26 +138,34 @@ func rpc_reset():
 			
 @rpc("call_local", "reliable")
 func rpc_trigger():
+	collision_mask = 0
+	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
+	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	
 	if action == Action.holding:
 		
 		for node in contained_bodies:
-			rpc_throw.rpc(node.get_path())
+			rpc_throw_object.rpc(node.get_path())
 			
 	elif action == Action.charging:
-		hum.bus = "beef"
+
 		if charge_timer < charge_period:
 			return
 			
+		hum.bus = "beef"
+		
 		for node in contained_bodies:
-			rpc_push.rpc(node.get_path())	
+			rpc_push_object.rpc(node.get_path())
 			
+	cooldown_timer = 0.0
+	hum.play()
+	hum.volume_db = -27
 	action = Action.cooldown
 		
 		
-		
 @rpc("call_local")		
-func rpc_hold(node_path):
+func rpc_hold_object(node_path):
 	
 	var node = get_node(node_path)
 	
@@ -160,7 +177,7 @@ func rpc_hold(node_path):
 
 
 @rpc("call_local", "reliable")
-func rpc_throw(node_path):
+func rpc_throw_object(node_path):
 	
 	var node = get_node(node_path)
 	
@@ -172,7 +189,7 @@ func rpc_throw(node_path):
 		
 			
 @rpc("call_local", "reliable")
-func rpc_push(node_path):
+func rpc_push_object(node_path):
 	
 	var node = get_node(node_path)
 	
@@ -199,11 +216,11 @@ func rpc_push(node_path):
 func get_scattered_aim(node):
 	
 	var count = contained_bodies.size()
-	var lerp_val = (count - 1) * 0.1
+	var lerp_val = (count - 1) * 0.075
 	lerp_val = clampf(lerp_val, 0.0, 0.6)
 	
 	var disposition = node.global_position - get_parent().global_position
-	disposition.y /= 10
+	disposition.y =0
 	
 	return Aim.lerp(disposition.normalized(), lerp_val)
 		

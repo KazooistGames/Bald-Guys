@@ -62,7 +62,7 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	
 	if Reaching == 2:
 		pass
-	elif Reaching == 0:
+	elif Reaching <= 0:
 		leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 		rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
 	
@@ -102,7 +102,7 @@ func processIdleOrientation(delta, look_vector):
 	
 	if Reaching == 2:
 		pass
-	elif Reaching == 0:
+	elif Reaching <= 0:
 		leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 		rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
 		
@@ -128,7 +128,7 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	
 	if Reaching == 2:
 		pass
-	elif Reaching == 0:
+	elif Reaching <= 0:
 		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")), 1.5)
 		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")), 1.5)
 		
@@ -182,7 +182,7 @@ func processReach(look_vector):
 	var lookAngle = get_relative_look_angle(look_vector)
 	var deadband = PI/5
 	
-	if Reaching == 0 && currentReacher != null:
+	if Reaching <= 0 && currentReacher != null:
 		currentReacher = null
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
@@ -190,12 +190,10 @@ func processReach(look_vector):
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", true)
 	
 	elif Reaching <= 0:
-		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", true)
-		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", true)
-		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", true)
-		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.l", true)
+		pass
 	
 	elif Reaching == 2:
+		currentReacher = rightHand
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("lowerArm.r", false)
 		ragdollSkeleton.toggle_physical_bone_collider("upperArm.l", false)
