@@ -63,8 +63,8 @@ func _physics_process(delta):
 		var progress = clamp(charge_timer/charge_period, 0.0, 1.0)
 		collider.shape.radius = lerp(0.0, 1.0, progress)
 		collider.shape.height = lerp(0.0, 2.0, progress)
-		hum.volume_db = lerp(-27.0, -18.0, progress)
-		hum.pitch_scale = lerp(0.5, 2.0, progress)
+		hum.volume_db = lerp(-27.0, -21.0, progress)
+		hum.pitch_scale = lerp(0.5, 1.5, progress)
 		
 		if not is_multiplayer_authority():
 			pass
@@ -81,7 +81,7 @@ func _physics_process(delta):
 		collider.shape.height = move_toward(collider.shape.height, 0, 8.0 * delta)
 		cooldown_timer += delta
 		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
-		hum.pitch_scale = lerp(2.5, 0.5, progress)
+		hum.pitch_scale = lerp(1.5, 0.5, progress)
 		if cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 			
