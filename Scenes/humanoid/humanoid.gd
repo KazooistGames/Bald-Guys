@@ -88,7 +88,6 @@ func _process(_delta):
 	elif WALK_VECTOR == Vector3.ZERO:
 		RUNNING = false	
 
-	#TOPSPEED_MOD = 0.9 if REACHING else 1.0
 	animation.walkAnimBlendScalar = TOPSPEED
 	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
@@ -121,15 +120,19 @@ func _integrate_forces(state):
 	
 	if not floorcast.is_colliding():
 		pass
+		
 	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
 		state.transform.origin.y = floorcast.get_collision_point().y
 		
 	if not multiplayer.has_multiplayer_peer():
 		pass		
+		
 	elif is_multiplayer_authority():
 		AUTHORITY_POSITION = state.transform.origin			
+		
 	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 1.0)		
+		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 1.0)	
+			
 	else:
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 	
@@ -162,7 +165,6 @@ func _integrate_forces(state):
 		if impact >= IMPACT_THRESHOLD: 
 			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
-			#print(state.get_contact_local_shape(index))
 			
 		elif not ON_FLOOR:	
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
@@ -172,6 +174,7 @@ func _integrate_forces(state):
 			
 			if glancing and forceful and upright and looking_forward:
 				wall_jump.rpc(state.get_contact_impulse(index))
+				
 		index += 1
 			
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
@@ -183,12 +186,15 @@ func _integrate_forces(state):
 		
 	if RAGDOLLED:
 		pass
+		
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:			
 			impulse = -translational_velocity * get_acceleration() * mass
+			
 		elif translational_velocity.length() < speed_target:
 			impulse = WALK_VECTOR * get_acceleration() * 2 * mass
+			
 		else:
 			var removal_factor = WALK_VECTOR.project(translational_velocity).normalized()
 			impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
@@ -209,8 +215,10 @@ func _physics_process(delta):
 	
 	if floorcast.enabled:
 		reverse_coyote_timer = 0.0
+		
 	else:
 		reverse_coyote_timer += delta
+		
 	if reverse_coyote_timer >= coyote_duration:
 		floorcast.enabled = true
 	
@@ -218,6 +226,7 @@ func _physics_process(delta):
 	
 	if not is_on_floor():
 		coyote_timer += delta	
+		
 	elif not ON_FLOOR:
 		
 		if is_multiplayer_authority():
@@ -228,11 +237,13 @@ func _physics_process(delta):
 	
 	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta
+		
 	elif skeleton.ragdoll_is_at_rest():
 		ragdoll_recovery_timer_seconds += delta
 					
 	if RAGDOLLED:
-		skeleton.processRagdollOrientation(delta)		
+		skeleton.processRagdollOrientation(delta)	
+			
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:		
@@ -248,7 +259,6 @@ func _physics_process(delta):
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
 		
 		var scalar = 5.0 * delta
-		#collider.shape.radius = move_toward(collider.shape.radius, .20, scalar)
 		collider.shape.height = move_toward(collider.shape.height, 1.3, scalar)
 		collider.position.y = move_toward(collider.position.y, .65, scalar)
 		floorcast.target_position.y = move_toward(floorcast.target_position.y, -1.1, scalar)
@@ -257,7 +267,6 @@ func _physics_process(delta):
 		gravity_scale = 1.0
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
-		#collider.shape.radius = lerp(.2, .25, jumpDeltaScale)
 		collider.shape.height = lerp(1.3, .8, jumpDeltaScale)
 		collider.position.y = lerp(.65, .8, jumpDeltaScale)
 		floorcast.target_position.y = lerp(-1.1, -.65, jumpDeltaScale)
@@ -277,6 +286,7 @@ func is_on_floor():
 	
 	if floorcast.enabled:
 		return floorcast.is_colliding()
+		
 	else:
 		return false 
 		
@@ -292,6 +302,7 @@ func get_acceleration():
 	
 	if not ON_FLOOR:
 		return 8.0	
+		
 	else:	
 		var absolute = 25.0
 		var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
@@ -409,6 +420,7 @@ func double_jump():
 	
 	if ON_FLOOR:
 		pass	
+		
 	elif DOUBLE_JUMP_CHARGES > 0:
 		jumpFX.pitch_scale = 1.25
 		jumpFX.play()	
@@ -425,6 +437,7 @@ func reset_double_jump():
 		
 @rpc("call_local")
 func land():
+	
 	reset_double_jump()
 	coyote_timer = 0
 	impactFX.bus = "beef"

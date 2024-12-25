@@ -21,7 +21,6 @@ func _physics_process(delta):
 		
 	else:	
 		ragdollSkeleton.animate_physical_bones(delta)
-		#ragdollSkeleton.correct_physical_bones()
 
 
 func ragdoll_start():
@@ -42,6 +41,7 @@ func ragdoll_stop():
 	
 
 func processRagdollOrientation(_delta):
+	
 	leftHand.process_arm_falling(ragdollSkeleton.get_bone_global_pose_no_override(find_bone("head")))
 	rightHand.process_arm_falling(ragdollSkeleton.get_bone_global_pose_no_override(find_bone("head")))
 
@@ -62,19 +62,20 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	
 	if Reaching == 2:
 		pass
+		
 	elif Reaching <= 0:
 		leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
 		rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
 	
 	elif leftHand != currentReacher:
 		leftHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.l")))
+		
 	elif rightHand != currentReacher:
 		rightHand.process_arm_falling(get_bone_global_pose_no_override(find_bone("foot.r")))
 
 	var target_angle = atan2(-look_vector.x, -look_vector.z)
 
 	if walk_vector == Vector3.ZERO:
-		#print("Zero")
 		smooth_turn(look_vector, target_angle, 10, delta)
 		
 	elif is_back_pedaling(look_vector, walk_vector):
@@ -83,7 +84,6 @@ func processFallOrientation(delta, look_vector, walk_vector):
 		rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
 		
 	else:
-		#print(walk_vector)
 		target_angle = atan2(walk_vector.x, walk_vector.z)
 		var timeStep = LERP_VAL * delta
 		rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
@@ -102,12 +102,14 @@ func processIdleOrientation(delta, look_vector):
 	
 	if Reaching == 2:
 		pass
+		
 	elif Reaching <= 0:
 		leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 		rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.r")))
 		
 	elif leftHand != currentReacher:
 		leftHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
+		
 	elif rightHand != currentReacher:
 		rightHand.process_arm_idle(get_bone_global_pose_no_override(find_bone("foot.l")))
 
@@ -128,12 +130,14 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	
 	if Reaching == 2:
 		pass
+		
 	elif Reaching <= 0:
 		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")), 1.5)
 		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")), 1.5)
 		
 	elif leftHand != currentReacher:
 		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
+		
 	elif rightHand != currentReacher:
 		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
 		
@@ -296,6 +300,7 @@ func get_shortest_path(actual, target):
 	
 	
 func get_ragdoll_bone_position(bone_name):
+	
 	return ragdollSkeleton.get_bone_global_pose_no_override(ragdollSkeleton.find_bone(bone_name))
 
 

@@ -68,6 +68,7 @@ func _physics_process(delta):
 		
 		if not is_multiplayer_authority():
 			pass
+			
 		elif progress >= 1.0:
 			rpc_trigger.rpc()
 		
@@ -123,6 +124,7 @@ func rpc_secondary():
 	
 @rpc("call_local", "reliable")
 func rpc_reset():
+	
 	collision_mask = 0
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
@@ -183,7 +185,6 @@ func rpc_throw_object(node_path):
 	var node = get_node(node_path)
 	
 	if can_be_held(node):
-		print(multiplayer.get_unique_id(), "	", node.name)
 		var direction = get_scattered_aim(node).lerp(Vector3.UP, 0.075)
 		var magnitude = throw_force
 		node.apply_central_impulse(magnitude * direction)
@@ -223,10 +224,8 @@ func get_scattered_aim(node):
 	var count = contained_bodies.size()
 	var lerp_val = (count - 1) * 0.075
 	lerp_val = clampf(lerp_val, 0.0, 0.5)
-	
 	var disposition = node.global_position - get_parent().global_position
 	disposition.y =0
-	
 	return Aim.lerp(disposition.normalized(), lerp_val)
 		
 		
@@ -264,7 +263,6 @@ func get_contained_bodies():
 	
 	var raw_bodies = get_overlapping_bodies().filter(can_be_pushed)
 	raw_bodies.sort_custom(sort_fat)
-	
 	contained_bodies = []
 	var index = 0
 	var total_mass = 0
@@ -278,9 +276,7 @@ func get_contained_bodies():
 	
 func sort_fat(a, b):
 	
-	if a.mass > b.mass:
-		return true
-		
-	return false	
+	return a.mass > b.mass
+	
 	
 			
