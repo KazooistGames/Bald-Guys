@@ -60,7 +60,7 @@ func _unhandled_input(_event):
 
 
 func _process(delta):
-	print(multiplayer.get_unique_id(), "	", Client_Screennames)
+	
 	if State == ClientState.Lobby:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		music.volume_db = move_toward(music.volume_db, -24, delta * 6)
