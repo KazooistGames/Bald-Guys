@@ -78,7 +78,7 @@ func processFallOrientation(delta, look_vector, walk_vector):
 	if walk_vector == Vector3.ZERO:
 		smooth_turn(look_vector, target_angle, 10, delta)
 		
-	elif is_back_pedaling(look_vector, walk_vector):
+	elif back_pedaling(look_vector, walk_vector):
 		target_angle = atan2(-walk_vector.x, -walk_vector.z)
 		var timeStep = LERP_VAL * delta
 		rotation.y = lerp_angle(rotation.y, target_angle, timeStep/2)
@@ -132,8 +132,8 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 		pass
 		
 	elif Reaching <= 0:
-		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")), 1.5)
-		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")), 1.5)
+		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")), 1.25)
+		rightHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.r")), 1.25)
 		
 	elif leftHand != currentReacher:
 		leftHand.process_arm_sway(get_bone_global_pose_no_override(find_bone("foot.l")))
@@ -145,9 +145,8 @@ func processWalkOrientation(delta, look_vector, walk_vector):
 	var actual = rotation.y
 	var target
 	
-	if is_back_pedaling(look_vector, walk_vector):
+	if back_pedaling(look_vector, walk_vector):
 		target = atan2(-walk_vector.x, -walk_vector.z)
-		
 	else:
 		target = atan2(walk_vector.x, walk_vector.z)
 		
@@ -175,7 +174,7 @@ func processSkeletonRotation(look_vector, ratio, scalar):
 	var upperBody_rotation = look_relative * Vector3(bodyScale, bodyScale, 0)
 	var head_rotation = look_relative * Vector3(headScale, headScale, 0)
 	set_bone_pose_rotation(find_bone("upperBody"), Quaternion.from_euler(upperBody_rotation))
-	set_bone_pose_rotation(find_bone("head"), Quaternion.from_euler(head_rotation + Vector3.BACK * -lookAngle/4))
+	set_bone_pose_rotation(find_bone("head"), Quaternion.from_euler(head_rotation + Vector3.BACK * -lookAngle/4.0))
 	
 
 func processReach(look_vector):
@@ -237,12 +236,12 @@ func get_relative_look_angle(look_vector):
 	return lookAngle
 
 
-func isLookingBack(look_vector, threshold = 0.25):
+func looking_back(look_vector, threshold = 0.25):
 	
 	return Vector2(sin(rotation.y), cos(rotation.y)).dot(Vector2(-look_vector.x, -look_vector.z)) < threshold
 
 
-func is_back_pedaling(look_vector, walk_vector):
+func back_pedaling(look_vector, walk_vector):
 	
 	var walkVec2 = Vector2(walk_vector.x, walk_vector.z).normalized()
 	var lookVec2 = Vector2(look_vector.x, look_vector.z).normalized()
@@ -310,7 +309,7 @@ var turn_locked_in = false
 var turn_top_speed = 3
 func smooth_turn(look_vector, target_angle, speed, delta):
 	
-	if isLookingBack(look_vector, 0.25):
+	if looking_back(look_vector, 0.25):
 		turn_locked_in = true
 		
 	var difference = get_true_difference(rotation.y, target_angle)
@@ -321,7 +320,7 @@ func smooth_turn(look_vector, target_angle, speed, delta):
 		var step_size = delta * step_scale * turn_velocity
 		rotation.y = lerp_angle(rotation.y, target_angle, step_size)
 		
-		if not isLookingBack(look_vector, .95):
+		if not looking_back(look_vector, .95):
 			turn_locked_in = false
 			
 	elif abs(difference) >= PI/2:

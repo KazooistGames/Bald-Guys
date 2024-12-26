@@ -74,17 +74,12 @@ func _ready():
 func _process(_delta):
 			
 	if not RAGDOLLED: #ragdoll cooldown
-		pass
-		
-	elif not is_multiplayer_authority():
-		return
-		
-	elif get_ragdoll_recovered(): 
+		pass		
+	elif get_ragdoll_recovered() and is_multiplayer_authority(): 
 		unragdoll.rpc()
 		
 	if WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
-		RUNNING = false
-		
+		RUNNING = false	
 	elif WALK_VECTOR == Vector3.ZERO:
 		RUNNING = false	
 
@@ -102,8 +97,7 @@ func _process(_delta):
 		animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
 		
 		if(WALK_VECTOR):
-			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)
-			
+			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)		
 		else:
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.5, 1.0)
 			
@@ -119,20 +113,19 @@ func _process(_delta):
 func _integrate_forces(state):
 	
 	if not floorcast.is_colliding():
-		pass
-		
+		pass	
 	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
 		state.transform.origin.y = floorcast.get_collision_point().y
 		
 	if not multiplayer.has_multiplayer_peer():
-		pass		
-		
+		pass	
+				
 	elif is_multiplayer_authority():
-		AUTHORITY_POSITION = state.transform.origin			
-		
+		AUTHORITY_POSITION = state.transform.origin					
+	
 	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 1.0)	
-			
+		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 1.0)				
+	
 	else:
 		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 	
@@ -156,9 +149,7 @@ func _integrate_forces(state):
 		var shape = state.get_contact_local_shape(index)
 		
 		if shape == 0:
-			var directional_modifier = pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)	
-			impact *= directional_modifier
-			
+			impact *= pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)		
 		elif shape == 2:
 			impact *= 1.5
 				
@@ -215,27 +206,30 @@ func _physics_process(delta):
 			
 	if floorcast.enabled:
 		reverse_coyote_timer = 0.0	
+		
 	elif reverse_coyote_timer >= coyote_duration:	
 		floorcast.enabled = true
+		
 	else:	
 		reverse_coyote_timer += delta
 
 	if not is_on_floor():
-		coyote_timer += delta		
+		coyote_timer += delta	
+			
 	elif not ON_FLOOR and is_multiplayer_authority():		
 		land.rpc()		
+		
 	else:
 		coyote_timer = 0
 	
 	if not RAGDOLLED:
-		ragdoll_cooldown_timer_seconds += delta
-		
+		ragdoll_cooldown_timer_seconds += delta	
 	elif skeleton.ragdoll_is_at_rest():
 		ragdoll_recovery_timer_seconds += delta
 					
 	if RAGDOLLED:
-		skeleton.processRagdollOrientation(delta)	
-			
+		skeleton.processRagdollOrientation(delta)
+						
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:		
@@ -248,7 +242,7 @@ func _physics_process(delta):
 			
 		else:
 			gravity_scale = 1.0
-			skeleton.processWalkOrientation(delta , LOOK_VECTOR, lerp(linear_velocity, WALK_VECTOR, 0.5 ) )
+			skeleton.processWalkOrientation(delta , LOOK_VECTOR, WALK_VECTOR )
 		
 		var scalar = 5.0 * delta
 		collider.shape.height = move_toward(collider.shape.height, 1.3, scalar)
@@ -278,8 +272,7 @@ func _physics_process(delta):
 func is_on_floor():
 	
 	if floorcast.enabled:
-		return floorcast.is_colliding()
-		
+		return floorcast.is_colliding()	
 	else:
 		return false 
 		
@@ -288,14 +281,13 @@ func is_back_pedaling():
 	
 	var walkVec2 = Vector2(WALK_VECTOR.x, WALK_VECTOR.z).normalized()
 	var lookVec2 = Vector2(LOOK_VECTOR.x, LOOK_VECTOR.z).normalized()
-	return walkVec2.dot(lookVec2 ) > 0
+	return walkVec2.dot(lookVec2 ) > 0.25
 
 
 func get_acceleration():
 	
 	if not ON_FLOOR:
-		return 8.0	
-		
+		return 8.0		
 	else:	
 		var absolute = 25.0
 		var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
