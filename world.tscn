@@ -20,6 +20,9 @@ shader_parameter/maximum_range = 5.0
 properties/0/path = NodePath(".:State")
 properties/0/spawn = true
 properties/0/replication_mode = 1
+properties/1/path = NodePath(".:Client_Screennames")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_j31cu")
@@ -87,6 +90,11 @@ text = "Join"
 [node name="AddressEntry" type="LineEdit" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
 layout_mode = 2
 placeholder_text = "Enter Address to join Here"
+alignment = 1
+
+[node name="NameEntry" type="LineEdit" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "appear as name here"
 alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]

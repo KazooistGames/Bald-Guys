@@ -26,7 +26,7 @@ var session
 
 @export var LOCAL_PLAYER_INTERFACE : Node3D
 
-@export var Player_Lobby_Dict = {}
+@export var Client_Screennames = {}
 
 
 const ClientState = {
@@ -47,6 +47,7 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
 	sessionSpawner.spawned.connect(handle_new_session_spawn)
+	multiplayer.connected_to_server.connect(introduce_myself_to_server)
 	
 	
 func _unhandled_input(_event):
@@ -59,7 +60,7 @@ func _unhandled_input(_event):
 
 
 func _process(delta):
-	
+	print(multiplayer.get_unique_id(), "	", Client_Screennames)
 	if State == ClientState.Lobby:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		music.volume_db = move_toward(music.volume_db, -24, delta * 6)
@@ -112,8 +113,6 @@ func start_host_lobby():
 	if error:
 		return error
 	
-	Player_Lobby_Dict[1] = "host"
-	
 	multiplayer.multiplayer_peer = enet_peer
 	
 	session = session_Prefab.instantiate()
@@ -122,6 +121,8 @@ func start_host_lobby():
 	
 	multiplayer.peer_connected.connect(add_player_to_session)
 	multiplayer.peer_disconnected.connect(remove_player_from_session)
+	Client_Screennames[1] = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
+
 
 
 func join_lobby():
@@ -140,15 +141,13 @@ func join_lobby():
 func add_player_to_session(peer_id):
 	
 	print(str(peer_id) + " joined")
-	Player_Lobby_Dict[peer_id] = "client"
-	
 	session.create_player_humanoid(peer_id)
 	
 	
 func remove_player_from_session(peer_id):
 	
 	print(str(peer_id) + " left")
-	Player_Lobby_Dict.erase(peer_id)
+	Client_Screennames.erase(peer_id)
 	
 	session.destroy_player_humanoid(peer_id)
 
@@ -187,7 +186,7 @@ func leave_session():
 		
 	multiplayer.multiplayer_peer = null
 	
-	Player_Lobby_Dict.clear()
+	Client_Screennames.clear()
 	pause_menu.visible = false
 	
 	if session != null:
@@ -201,6 +200,11 @@ func quit():
 	
 	get_tree().quit()
 	
+func introduce_myself_to_server():
+	
+	var name = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
+	rpc_set_client_screenname.rpc(name)
+	
 		
 @rpc("call_local", "reliable")
 func rpc_handoff_object(path, auth_id):
@@ -210,3 +214,10 @@ func rpc_handoff_object(path, auth_id):
 	
 	if node:
 		node.set_multiplayer_authority(auth_id)
+		
+		
+@rpc("call_remote", "reliable", "any_peer")	
+func rpc_set_client_screenname(name):
+	
+	var id = multiplayer.get_remote_sender_id()
+	Client_Screennames[id] = name

@@ -67,8 +67,10 @@ func just_shallower(new_point):
 	
 	if bottom_position.normalized() != new_trajectory.normalized():
 		return false
+		
 	elif new_trajectory.length() < bottom_position.length():
 		return true
+		
 	else:
 		return false
 
