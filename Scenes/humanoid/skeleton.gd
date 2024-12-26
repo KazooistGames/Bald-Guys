@@ -305,7 +305,7 @@ func get_ragdoll_bone_position(bone_name):
 
 
 var turn_velocity = 0
-var turn_acceleration = 5
+var turn_acceleration = 3
 var turn_locked_in = false
 var turn_top_speed = 3
 func smooth_turn(look_vector, target_angle, speed, delta):

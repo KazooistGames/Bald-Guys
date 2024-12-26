@@ -212,26 +212,18 @@ func _integrate_forces(state):
 			
 
 func _physics_process(delta):
-	
-	if floorcast.enabled:
-		reverse_coyote_timer = 0.0
-		
-	else:
-		reverse_coyote_timer += delta
-		
-	if reverse_coyote_timer >= coyote_duration:
-		floorcast.enabled = true
-	
-	ON_FLOOR = coyote_timer <= coyote_duration
-	
-	if not is_on_floor():
-		coyote_timer += delta	
-		
-	elif not ON_FLOOR:
-		
-		if is_multiplayer_authority():
-			land.rpc()	
 			
+	if floorcast.enabled:
+		reverse_coyote_timer = 0.0	
+	elif reverse_coyote_timer >= coyote_duration:	
+		floorcast.enabled = true
+	else:	
+		reverse_coyote_timer += delta
+
+	if not is_on_floor():
+		coyote_timer += delta		
+	elif not ON_FLOOR and is_multiplayer_authority():		
+		land.rpc()		
 	else:
 		coyote_timer = 0
 	
@@ -271,6 +263,7 @@ func _physics_process(delta):
 		collider.position.y = lerp(.65, .8, jumpDeltaScale)
 		floorcast.target_position.y = lerp(-1.1, -.65, jumpDeltaScale)
 		
+	ON_FLOOR = coyote_timer <= coyote_duration
 	rotation.y = fmod(rotation.y, 2*PI)
 	collider2.transform = skeleton.bone_transform("neck")
 	var upperBody = skeleton.bone_transform("upperBody")

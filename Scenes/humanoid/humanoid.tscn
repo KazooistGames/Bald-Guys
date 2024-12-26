@@ -3723,6 +3723,9 @@ properties/7/replication_mode = 1
 properties/8/path = NodePath(".:REACHING")
 properties/8/spawn = true
 properties/8/replication_mode = 1
+properties/9/path = NodePath(".:ON_FLOOR")
+properties/9/spawn = true
+properties/9/replication_mode = 1
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_vpbvi"]
 random_pitch = 1.1
