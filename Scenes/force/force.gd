@@ -125,6 +125,9 @@ func rpc_secondary():
 @rpc("call_local", "reliable")
 func rpc_reset():
 	
+	if action == Action.cooldown && cooldown_timer <= cooldown_period:
+		return	
+		
 	collision_mask = 0
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
