@@ -36,20 +36,20 @@ func _process(_delta):
 		collider.shape.size.z = radius
 		
 
-func get_top_position(bottom_position):
+func get_top_position(bot_pos):
 	
-	return bottom_position.normalized() * top_height * -1.0
+	return bot_pos.normalized() * top_height * -1.0
 
 
-func get_mesh_position(bottom_position):
+func get_mesh_position(bot_pos):
 	
-	var top_position = get_top_position(bottom_position)
-	return bottom_position.lerp(top_position, 0.5)	
+	var top_position = get_top_position(bot_pos)
+	return bot_pos.lerp(top_position, 0.5)	
 	
 	
-func get_mesh_height(bottom_position):
+func get_mesh_height(bot_pos):
 	
-	var top_position = get_top_position(bottom_position)
-	return top_position.distance_to(bottom_position)
+	var top_position = get_top_position(bot_pos)
+	return top_position.distance_to(bot_pos)
 	
 	

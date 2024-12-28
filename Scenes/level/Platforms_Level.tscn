@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://hdo1moc2epoy"]
+[gd_scene load_steps=10 format=3 uid="uid://hdo1moc2epoy"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_8mrte"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_co0ev"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://tatel5rmq1h" path="res://Scenes/objects/block/block_tower.tscn" id="6_evcv0"]
 [ext_resource type="PackedScene" uid="uid://dnyf0qu40f6qt" path="res://Scenes/objects/ramp/ramp.tscn" id="8_22tnl"]
 [ext_resource type="PackedScene" uid="uid://dqp8ekibcvawv" path="res://Scenes/objects/Stage/shelf.tscn" id="8_yygct"]
+[ext_resource type="PackedScene" uid="uid://c3nyb0ufrrici" path="res://Scenes/objects/mesa/mesa.tscn" id="9_2j14m"]
 
 [node name="Platforms_Level" instance=ExtResource("1_8mrte")]
 
@@ -89,58 +90,54 @@ radius = 1.25
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 8.75, 14)
 radius = 1.5
 
-[node name="podium" parent="pillars" index="3" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+[node name="podium2" parent="pillars" index="3" instance=ExtResource("4_sucxh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12, 0)
 top_height = 0.0
-radius = 4.0
+radius = 0.25
 
-[node name="podium2" parent="pillars" index="4" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.5, 0)
-top_height = 0.0
-
-[node name="pillar4" parent="pillars" index="5" instance=ExtResource("4_sucxh")]
+[node name="pillar4" parent="pillars" index="4" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 7, 0)
 top_height = 2.0
 radius = 2.0
 
-[node name="pillar5" parent="pillars" index="6" instance=ExtResource("4_sucxh")]
+[node name="pillar5" parent="pillars" index="5" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7, -15)
 top_height = 2.0
 radius = 2.0
 
-[node name="pillar6" parent="pillars" index="7" instance=ExtResource("4_sucxh")]
+[node name="pillar6" parent="pillars" index="6" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 15, 0)
 radius = 2.5
 
-[node name="pillar7" parent="pillars" index="8" instance=ExtResource("4_sucxh")]
+[node name="pillar7" parent="pillars" index="7" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 15)
 radius = 2.5
 
-[node name="pillar8" parent="pillars" index="9" instance=ExtResource("4_sucxh")]
+[node name="pillar8" parent="pillars" index="8" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, 18)
 radius = 1.75
 
-[node name="pillar9" parent="pillars" index="10" instance=ExtResource("4_sucxh")]
+[node name="pillar9" parent="pillars" index="9" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5, 11.25, 22.5)
 radius = 2.0
 
-[node name="pillar10" parent="pillars" index="11" instance=ExtResource("4_sucxh")]
+[node name="pillar10" parent="pillars" index="10" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 15)
 radius = 1.0
 
-[node name="pillar11" parent="pillars" index="12" instance=ExtResource("4_sucxh")]
+[node name="pillar11" parent="pillars" index="11" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 30, 0)
 radius = 1.0
 
-[node name="pillar" parent="pillars" index="13" instance=ExtResource("4_sucxh")]
+[node name="pillar" parent="pillars" index="12" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, -15)
 radius = 1.0
 
-[node name="pillar12" parent="pillars" index="14" instance=ExtResource("4_sucxh")]
+[node name="pillar12" parent="pillars" index="13" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 30, 0)
 radius = 1.0
 
-[node name="pillar13" parent="pillars" index="15" instance=ExtResource("4_sucxh")]
+[node name="pillar13" parent="pillars" index="14" instance=ExtResource("4_sucxh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 18, -18)
 top_height = 0.0
 radius = 1.0
@@ -305,3 +302,17 @@ transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 24, 0,
 height = 10.0
 length = 17.0
 thickness = 2.0
+
+[node name="mesas" type="Node3D" parent="." index="9"]
+
+[node name="mesa" parent="mesas" index="0" instance=ExtResource("9_2j14m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 10, -24)
+radius = 2.0
+
+[node name="mesa2" parent="mesas" index="1" instance=ExtResource("9_2j14m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 10, -24)
+radius = 2.0
+
+[node name="beam" parent="mesas" index="2" instance=ExtResource("9_2j14m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+radius = 10.0

@@ -1,9 +1,10 @@
 [gd_scene load_steps=7 format=3 uid="uid://c3nyb0ufrrici"]
 
-[ext_resource type="Script" path="res://Scenes/objects/beam/beam.gd" id="1_syifw"]
+[ext_resource type="Script" path="res://Scenes/objects/mesa/mesa.gd" id="1_syifw"]
 [ext_resource type="Shader" path="res://shaders/circuits.gdshader" id="2_qxfh3"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_e2jge"]
+resource_local_to_scene = true
 size = Vector3(1, 1, 2)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ny34g"]
@@ -18,9 +19,10 @@ next_pass = SubResource("ShaderMaterial_ny34g")
 albedo_color = Color(0.501961, 0.501961, 0.501961, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1h6v4"]
+resource_local_to_scene = true
 size = Vector3(1, 2, 1)
 
-[node name="beam" type="StaticBody3D"]
+[node name="mesa" type="StaticBody3D"]
 script = ExtResource("1_syifw")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
