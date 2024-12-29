@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://daxnbcclkp03d"]
+
+[ext_resource type="Script" path="res://Scenes/objects/prison_bars/prison_bars.gd" id="1_a1djh"]
+[ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="1_tlufn"]
+
+[node name="PrisonBars" type="Node3D"]
+script = ExtResource("1_a1djh")
+
+[node name="bar1" parent="." instance=ExtResource("1_tlufn")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+preference = 0
+bottom_drop = 0.25
+top_height = 0.25
+radius = 0.25
+
+[node name="bar2" parent="." instance=ExtResource("1_tlufn")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 1, 0)
+preference = 0
+bottom_drop = 0.25
+top_height = 0.25
+radius = 0.25
+
+[node name="bar3" parent="." instance=ExtResource("1_tlufn")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 2, 0)
+preference = 0
+bottom_drop = 0.25
+top_height = 0.25
+radius = 0.25
+
+[node name="bar4" parent="." instance=ExtResource("1_tlufn")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 3, 0)
+preference = 0
+bottom_drop = 0.25
+top_height = 0.25
+radius = 0.25

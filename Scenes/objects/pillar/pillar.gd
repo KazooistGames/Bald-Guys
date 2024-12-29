@@ -16,7 +16,7 @@ enum Preference{
 @export var top_height = 0.0
 @export var radius = 0.5
 
-var bottom_position = Vector3.ZERO
+@export var bottom_position = Vector3.ZERO
 
 
 func _process(_delta):
@@ -33,20 +33,7 @@ func _process(_delta):
 		elif just_shallower(new_point) and preference == Preference.deep:
 			return
 		
-		bottom_position = new_point - global_position
-		var top_position = get_top_position(bottom_position)
-		
-		var mesh_position = get_mesh_position(bottom_position)
-		var mesh_height = get_mesh_height(bottom_position)
-			
-		mesh.global_position = mesh_position + global_position
-		mesh.mesh.height = mesh_height 
-		mesh.mesh.top_radius = radius
-		mesh.mesh.bottom_radius = radius
-		
-		collider.global_position = mesh_position + global_position
-		collider.shape.height = mesh_height
-		collider.shape.radius = radius
+		rerender()
 
 
 func just_deeper(new_point):
@@ -91,5 +78,22 @@ func get_mesh_height(bottom_position):
 	
 	var top_position = get_top_position(bottom_position)
 	return top_position.distance_to(bottom_position) + bottom_drop
+	
+func rerender():
+	var new_point = raycast.get_collision_point()
+	bottom_position = new_point - global_position
+	var top_position = get_top_position(bottom_position)
+	
+	var mesh_position = get_mesh_position(bottom_position)
+	var mesh_height = get_mesh_height(bottom_position)
+		
+	mesh.global_position = mesh_position + global_position
+	mesh.mesh.height = mesh_height 
+	mesh.mesh.top_radius = radius
+	mesh.mesh.bottom_radius = radius
+	
+	collider.global_position = mesh_position + global_position
+	collider.shape.height = mesh_height
+	collider.shape.radius = radius
 	
 
