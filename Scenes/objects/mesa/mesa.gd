@@ -7,6 +7,7 @@ extends Node3D
 
 
 @export var top_height = 0.0
+@export var bottom_drop = 0.0
 @export var radius = 0.5
 
 var bottom_position = Vector3.ZERO
@@ -50,6 +51,6 @@ func get_mesh_position(bot_pos):
 func get_mesh_height(bot_pos):
 	
 	var top_position = get_top_position(bot_pos)
-	return top_position.distance_to(bot_pos)
+	return top_position.distance_to(bot_pos) + bottom_drop
 	
 	

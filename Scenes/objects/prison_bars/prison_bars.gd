@@ -13,7 +13,7 @@ const extend_speed = 2.0
 
 const deadband = 0.25
 
-var last_retract = -1
+var last_retract_index = -1
 
 
 func _ready():
@@ -40,15 +40,19 @@ func _process(delta):
 			bar.position.x -= delta * extend_speed
 			bar.rerender()
 
+	retract_index = retract_index % (bars.size() - 1)
+	
 	if retract_index < 0:
 		
 		if bars_locked >= bars.size():
-			retract_index = randi_range(last_retract, bars.size())
-			retract_index = retract_index % bars.size()
+			retract_index = randi_range(0, bars.size() - 1)
+		
+	elif retract_index == last_retract_index:
+		retract_index += 1
 		
 	elif bars[retract_index].bottom_position.length() <= deadband:
 		bars[retract_index].position.x = max(bars[retract_index].position.x, 0.0)
-		last_retract = retract_index
+		last_retract_index = retract_index
 		retract_index = -1		
 		
 	else:
