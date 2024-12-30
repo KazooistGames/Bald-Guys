@@ -85,12 +85,12 @@ top_height = 0.0
 radius = 1.25
 
 [node name="pillar14" parent="pillars/pillar1" index="3" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.25, -1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1.25, -1.5)
 top_height = 0.0
 radius = 1.5
 
 [node name="pillar15" parent="pillars/pillar1" index="4" instance=ExtResource("4_sucxh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1.25, 5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.25, 5)
 top_height = 0.0
 radius = 1.5
 
@@ -121,7 +121,7 @@ bottom_drop = 1.0
 radius = 2.5
 
 [node name="mesa2" parent="pillars/pillar1/pillar3" index="4" instance=ExtResource("9_2j14m")]
-transform = Transform3D(0.996195, -0.0871557, -3.8097e-09, 0, -4.37114e-08, 1, -0.0871557, -0.996195, -4.35451e-08, 0, -1, 0)
+transform = Transform3D(0.996195, -0.0871557, -3.8097e-09, 0, -4.37114e-08, 1, -0.0871557, -0.996195, -4.35451e-08, 0.5, -1, 0)
 bottom_drop = 1.0
 radius = 2.0
 
@@ -131,7 +131,7 @@ top_height = 0.0
 radius = 2.5
 
 [node name="mesa" parent="pillars/pillar1/pillar4" index="3" instance=ExtResource("9_2j14m")]
-transform = Transform3D(-4.35451e-08, -0.996195, -0.0871557, 1, -4.37114e-08, 0, -3.8097e-09, -0.0871557, 0.996195, 0, -1, 0)
+transform = Transform3D(-4.35451e-08, -0.996195, -0.0871557, 1, -4.37114e-08, 0, -3.8097e-09, -0.0871557, 0.996195, 0, -1, 0.5)
 top_height = 1.0
 bottom_drop = 2.0
 radius = 2.0
@@ -323,6 +323,21 @@ transform = Transform3D(0.707107, 0.707107, 3.09086e-08, 0, -4.37114e-08, 1, 0.7
 top_height = 0.5
 bottom_drop = 1.0
 radius = 3.0
+
+[node name="mesa2" parent="beams" index="11" instance=ExtResource("9_2j14m")]
+transform = Transform3D(-4.37114e-08, 1, 4.37114e-08, 0, -4.37114e-08, 1, 1, 4.37114e-08, 1.91069e-15, 13, 14.875, 0)
+bottom_drop = 1.0
+radius = 1.75
+
+[node name="mesa3" parent="beams" index="12" instance=ExtResource("9_2j14m")]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 14.875, 13)
+bottom_drop = 1.0
+radius = 1.75
+
+[node name="Ramp" parent="beams" index="13" instance=ExtResource("8_22tnl")]
+transform = Transform3D(-4.37114e-08, -1, 4.37114e-08, 0, -4.37114e-08, -1, 1, -4.37114e-08, 1.91069e-15, 0, 15, -7.75)
+height = 15.5
+length = 15.5
 
 [node name="ramps" type="Node3D" parent="." index="8"]
 
