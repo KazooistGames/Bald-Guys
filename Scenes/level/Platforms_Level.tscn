@@ -319,10 +319,10 @@ top_height = 0.0
 radius = 1.5
 
 [node name="mesa" parent="beams" index="10" instance=ExtResource("9_2j14m")]
-transform = Transform3D(0.707107, 0.707107, 3.09086e-08, 0, -4.37114e-08, 1, 0.707107, -0.707107, -3.09086e-08, 14.5, 14.25, 0.5)
+transform = Transform3D(0.707107, 0.707107, 3.09086e-08, 0, -4.37114e-08, 1, 0.707107, -0.707107, -3.09086e-08, 14.5, 14.875, 0.5)
 top_height = 0.5
 bottom_drop = 1.0
-radius = 3.0
+radius = 1.75
 
 [node name="mesa2" parent="beams" index="11" instance=ExtResource("9_2j14m")]
 transform = Transform3D(-4.37114e-08, 1, 4.37114e-08, 0, -4.37114e-08, 1, 1, 4.37114e-08, 1.91069e-15, 13, 14.875, 0)
@@ -335,9 +335,10 @@ bottom_drop = 1.0
 radius = 1.75
 
 [node name="Ramp" parent="beams" index="13" instance=ExtResource("8_22tnl")]
-transform = Transform3D(-4.37114e-08, -1, 4.37114e-08, 0, -4.37114e-08, -1, 1, -4.37114e-08, 1.91069e-15, 0, 15, -7.75)
-height = 15.5
-length = 15.5
+transform = Transform3D(-4.37114e-08, -1, 4.37114e-08, 0, -4.37114e-08, -1, 1, -4.37114e-08, 1.91069e-15, 0.875, 14.875, -7.375)
+height = 16.5
+length = 16.5
+thickness = 1.75
 
 [node name="ramps" type="Node3D" parent="." index="8"]
 
