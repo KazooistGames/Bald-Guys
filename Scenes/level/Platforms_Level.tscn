@@ -393,14 +393,30 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13, 0)
 
 [node name="mesa7" parent="mesas" index="6" instance=ExtResource("9_2j14m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.75, 12, -21.75)
-radius = 4.0
+radius = 2.5
 
 [node name="mesa8" parent="mesas" index="7" instance=ExtResource("9_2j14m")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 12, -15)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 14.5, -15)
+radius = 2.5
+
+[node name="mesa" parent="mesas/mesa8" index="3" instance=ExtResource("9_2j14m")]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -2.5, -1)
+radius = 2.5
+
+[node name="mesa2" parent="mesas/mesa8" index="4" instance=ExtResource("9_2j14m")]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -1, -2.5, 0)
 radius = 2.5
 
 [node name="mesa9" parent="mesas" index="8" instance=ExtResource("9_2j14m")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 12, -10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 17, -10)
+radius = 2.5
+
+[node name="mesa" parent="mesas/mesa9" index="3" instance=ExtResource("9_2j14m")]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -2.5, -1)
+radius = 2.5
+
+[node name="mesa2" parent="mesas/mesa9" index="4" instance=ExtResource("9_2j14m")]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -1, -2.5, 0)
 radius = 2.5
 
 [node name="prison_bars" type="Node3D" parent="." index="10"]
