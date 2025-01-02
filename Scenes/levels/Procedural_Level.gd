@@ -44,6 +44,7 @@ func _ready():
 		new_mesa.preference = new_mesa.Preference.shallow
 		hover_mesas.append(new_mesa)
 		var new_vector = Vector3(randf(), randf(), randf()).normalized()
+		new_mesa.constant_linear_velocity = new_vector
 		hover_vectors.append(new_vector)
 
 
@@ -147,6 +148,7 @@ func reposition_hover_mesas(delta):
 
 		var step = extend_mesas_speed * delta * (index * 2.0 + 1) 
 		mesa.position += trajectory * step	
+		mesa.constant_linear_velocity = trajectory * step / delta
 		hover_vectors[index] = trajectory
 	
 		

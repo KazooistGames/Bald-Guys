@@ -55,6 +55,8 @@ var coyote_timer = 0.0
 var coyote_duration = 0.1
 var reverse_coyote_timer = 0.0
 
+var floor_velocity = Vector3(1,0,1)
+var walk_velocity = Vector3.ZERO
 
 func _enter_tree():
 	
@@ -94,7 +96,7 @@ func _process(_delta):
 		
 	elif ON_FLOOR:
 		TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
-		animation.updateWalking(TOPSPEED, linear_velocity, is_back_pedaling())
+		animation.updateWalking(TOPSPEED, walk_velocity, is_back_pedaling())
 		
 		if(WALK_VECTOR):
 			skeleton.processSkeletonRotation(LOOK_VECTOR, 0.7, 1.0)		
@@ -110,12 +112,23 @@ func _process(_delta):
 	skeleton.Reaching = REACHING
 	
 
-func _integrate_forces(state):
+func _integrate_forces(state):	
 	
 	if not floorcast.is_colliding():
 		pass	
+		
 	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
 		state.transform.origin.y = floorcast.get_collision_point().y
+		var floor_object = floorcast.get_collider()
+		
+		if floor_object is AnimatableBody3D:
+			floor_velocity = floor_object.constant_linear_velocity
+		else:
+			floor_velocity = Vector3.ZERO
+			
+		constant_force = floor_velocity * mass	
+		
+	walk_velocity = linear_velocity - floor_velocity
 		
 	if not multiplayer.has_multiplayer_peer():
 		pass	
@@ -168,10 +181,7 @@ func _integrate_forces(state):
 				
 		index += 1
 			
-	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
-		
-	WALK_VECTOR = WALK_VECTOR.normalized()
-	
+	var translational_velocity = Vector3(walk_velocity.x, 0, walk_velocity.z)
 	var speed_target = TOPSPEED * TOPSPEED_MOD
 	var impulse = Vector3.ZERO
 		
@@ -190,11 +200,9 @@ func _integrate_forces(state):
 			var removal_factor = WALK_VECTOR.project(translational_velocity).normalized()
 			impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
 
-	else:
+	elif WALK_VECTOR:
+		impulse = WALK_VECTOR * get_acceleration() * mass
 		
-		if WALK_VECTOR:
-			impulse = WALK_VECTOR * get_acceleration() * mass
-			
 	apply_central_force(impulse)
 	
 	if translational_velocity.length() > speed_target:
@@ -288,9 +296,10 @@ func get_acceleration():
 	
 	if not ON_FLOOR:
 		return 8.0		
+		
 	else:	
 		var absolute = 25.0
-		var translationalSpeed = Vector2(linear_velocity.x, linear_velocity.z).length()
+		var translationalSpeed = Vector2(walk_velocity.x, walk_velocity.z).length()
 		var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
 		return absolute * relative
 
