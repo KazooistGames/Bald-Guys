@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Scenes/objects/Stage/stage.gd" id="1_jtp3o"]
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="2_sq2iy"]
-[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/level/Wall/wall.material" id="3_rirfr"]
+[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/levels/Wall/wall.material" id="3_rirfr"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
 resource_local_to_scene = true

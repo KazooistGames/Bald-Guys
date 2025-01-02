@@ -180,7 +180,7 @@ func Commission_Next_Round():
 	
 	match unique_round_id:
 		0:
-			level_prefab_path = "res://Scenes/level/Platforms_Level.tscn"
+			level_prefab_path = "res://Scenes/levels/Procedural_Level.tscn"
 			game_prefab_path = "res://Scenes/games/Wig_FFA/Wig_FFA.tscn"
 	
 	if level_prefab_path != ""	and game_prefab_path != "":

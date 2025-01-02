@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=3 uid="uid://c2bxkh05oa1qf"]
 
 [ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="1_5c6k7"]
-[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/level/Wall/wall.material" id="1_qib3r"]
+[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/levels/Wall/wall.material" id="1_qib3r"]
 [ext_resource type="Script" path="res://Scenes/objects/Stage/stage.gd" id="2_d2r1i"]
 [ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="4_mgmyd"]
 

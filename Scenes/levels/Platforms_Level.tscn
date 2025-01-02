@@ -1,8 +1,8 @@
 [gd_scene load_steps=11 format=3 uid="uid://hdo1moc2epoy"]
 
-[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_8mrte"]
+[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Empty_Level.tscn" id="1_8mrte"]
 [ext_resource type="PackedScene" uid="uid://c2bxkh05oa1qf" path="res://Scenes/objects/Stage/stage.tscn" id="2_co0ev"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="3_5slih"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="3_5slih"]
 [ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="4_sucxh"]
 [ext_resource type="PackedScene" uid="uid://dkvhw01tsv755" path="res://Scenes/objects/brick/brick_field.tscn" id="5_fjkgg"]
 [ext_resource type="PackedScene" uid="uid://tatel5rmq1h" path="res://Scenes/objects/block/block_tower.tscn" id="6_evcv0"]

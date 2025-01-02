@@ -14,7 +14,7 @@ enum Preference{
 
 @export var top_height = 0.0
 @export var bottom_drop = 0.0
-@export var radius = 0.5
+@export var size = 0.5
 
 var bottom_position = Vector3.ZERO
 
@@ -62,14 +62,14 @@ func rerender():
 	var mesh_height = get_mesh_height(bottom_position)
 		
 	mesh.global_position = mesh_position + global_position
-	mesh.mesh.size.x = radius
-	mesh.mesh.size.y = radius
+	mesh.mesh.size.x = size
+	mesh.mesh.size.y = size
 	mesh.mesh.size.z = mesh_height 
 	
 	collider.global_position = mesh_position + global_position
 	collider.shape.size.y = mesh_height
-	collider.shape.size.x = radius
-	collider.shape.size.z = radius
+	collider.shape.size.x = size
+	collider.shape.size.z = size
 		
 		
 func just_deeper(new_point):

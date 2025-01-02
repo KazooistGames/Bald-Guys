@@ -1,10 +1,10 @@
 [gd_scene load_steps=7 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
-[ext_resource type="PackedScene" uid="uid://c635ib3vdy8sj" path="res://Scenes/level/Hub_Level.tscn" id="3_2so71"]
+[ext_resource type="PackedScene" uid="uid://c635ib3vdy8sj" path="res://Scenes/levels/Hub_Level.tscn" id="2_k5prn"]
+[ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/levels/borealis/borealis.tscn" id="3_qtjjs"]
 [ext_resource type="PackedScene" uid="uid://bi27y02b7i065" path="res://Scenes/session/HUD.tscn" id="4_ik81w"]
 [ext_resource type="PackedScene" uid="uid://4lgyaxekgwqy" path="res://Scenes/session/ambience.tscn" id="5_opotq"]
-[ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/level/borealis/borealis.tscn" id="7_8kuai"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]
 properties/0/path = NodePath(".:State")
@@ -17,7 +17,7 @@ properties/1/replication_mode = 2
 [node name="session" type="Node3D"]
 script = ExtResource("1_yhshl")
 
-[node name="Hub" parent="." instance=ExtResource("3_2so71")]
+[node name="Hub" parent="." instance=ExtResource("2_k5prn")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 50, 50, 0)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
@@ -27,10 +27,10 @@ replication_config = SubResource("SceneReplicationConfig_gpd36")
 _spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn")
 spawn_path = NodePath("..")
 
-[node name="Borealis" parent="." instance=ExtResource("7_8kuai")]
+[node name="Borealis" parent="." instance=ExtResource("3_qtjjs")]
 
 [node name="LevelSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/level/Platforms_Level.tscn")
+_spawnable_scenes = PackedStringArray("res://Scenes/levels/Platforms_Level.tscn", "res://Scenes/levels/Procedural_Level.tscn")
 spawn_path = NodePath("..")
 
 [node name="GameSpawner" type="MultiplayerSpawner" parent="."]

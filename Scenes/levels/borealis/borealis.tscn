@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dy3scco4yt1a4"]
 
-[ext_resource type="Script" path="res://Scenes/level/borealis/WorldEnvironment.gd" id="1_fpf7c"]
+[ext_resource type="Script" path="res://Scenes/levels/borealis/WorldEnvironment.gd" id="1_fpf7c"]
 
 [sub_resource type="Environment" id="Environment_fcgfc"]
 background_mode = 1

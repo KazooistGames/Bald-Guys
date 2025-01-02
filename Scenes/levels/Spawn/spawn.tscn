@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cdpxkq752u0vl"]
 
-[ext_resource type="Script" path="res://Scenes/level/Spawn/spawn.gd" id="1_j2sqr"]
+[ext_resource type="Script" path="res://Scenes/levels/Spawn/spawn.gd" id="1_j2sqr"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_n32i3"]
 height = 0.5

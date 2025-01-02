@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://c635ib3vdy8sj"]
 
-[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/level/Empty_Level.tscn" id="1_7p7gd"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/level/Spawn/spawn.tscn" id="2_7dr7p"]
+[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Empty_Level.tscn" id="1_7p7gd"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="2_7dr7p"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2rewv"]
 resource_local_to_scene = true
