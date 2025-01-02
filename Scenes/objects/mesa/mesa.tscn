@@ -21,7 +21,9 @@ next_pass = SubResource("ShaderMaterial_ny34g")
 resource_local_to_scene = true
 size = Vector3(1, 2, 1)
 
-[node name="mesa" type="StaticBody3D"]
+[node name="mesa" type="AnimatableBody3D"]
+collision_mask = 15
+sync_to_physics = false
 script = ExtResource("1_syifw")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

@@ -76,7 +76,7 @@ func just_deeper(new_point):
 	
 	var new_trajectory = (new_point - global_position)
 	
-	if bottom_position.normalized() != new_trajectory.normalized():
+	if (bottom_position.normalized() - new_trajectory.normalized()).length() >= 0.25:
 		return false
 	elif new_trajectory.length() > bottom_position.length():
 		return true
