@@ -12,6 +12,9 @@ enum Preference{
 @onready var collider = $CollisionShape3D
 @onready var raycast = $RayCast3D
 
+@onready var debugSphere = $DebugSphere
+@onready var debugBox = $DebugBox
+
 @export var top_height = 0.0
 @export var bottom_drop = 0.0
 @export var size = 0.5
@@ -22,7 +25,7 @@ var bottom_position = Vector3.ZERO
 func _process(_delta):
 	
 	if not raycast.is_colliding():
-		pass
+		bottom_position = raycast.target_position
 		
 	elif raycast.get_collision_point() != bottom_position:
 		
@@ -32,8 +35,10 @@ func _process(_delta):
 			return
 		elif just_shallower(new_point) and preference == Preference.deep:
 			return
+		else:
+			bottom_position = new_point - global_position
 		
-		rerender()
+	rerender(bottom_position)
 
 
 func get_top_position(bot_pos):
@@ -53,9 +58,8 @@ func get_mesh_height(bot_pos):
 	return top_position.distance_to(bot_pos) + bottom_drop
 	
 	
-func rerender():
+func rerender(bottom_position):
 
-	bottom_position = raycast.get_collision_point() - global_position
 	var top_position = get_top_position(bottom_position)
 	
 	var mesh_position = get_mesh_position(bottom_position)

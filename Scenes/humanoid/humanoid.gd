@@ -55,7 +55,7 @@ var coyote_timer = 0.0
 var coyote_duration = 0.1
 var reverse_coyote_timer = 0.0
 
-var floor_velocity = Vector3(1,0,1)
+var floor_velocity = Vector3(0,0,0)
 var walk_velocity = Vector3.ZERO
 
 func _enter_tree():
@@ -125,9 +125,8 @@ func _integrate_forces(state):
 			floor_velocity = floor_object.constant_linear_velocity
 		else:
 			floor_velocity = Vector3.ZERO
-			
-		constant_force = floor_velocity * mass	
 		
+	constant_force = floor_velocity * mass	
 	walk_velocity = linear_velocity - floor_velocity
 		
 	if not multiplayer.has_multiplayer_peer():
@@ -171,9 +170,9 @@ func _integrate_forces(state):
 			ragdoll.rpc()
 			
 		elif not ON_FLOOR:	
-			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 1.0/2.0	
+			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
 			var forceful = impact > IMPACT_THRESHOLD/3.0
-			var upright = abs(normal.dot(floor_normal)) <= 1.0/2.0
+			var upright = abs(normal.dot(floor_normal)) <= 2.0/3.0
 			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 3.0/4.0
 			
 			if glancing and forceful and upright and looking_forward:
@@ -259,7 +258,8 @@ func _physics_process(delta):
 		
 	else:
 		gravity_scale = 1.0
-		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)		
+		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)	
+		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, 0.1)
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
 		collider.shape.height = lerp(1.3, .8, jumpDeltaScale)
 		collider.position.y = lerp(.65, .8, jumpDeltaScale)
@@ -295,10 +295,10 @@ func is_back_pedaling():
 func get_acceleration():
 	
 	if not ON_FLOOR:
-		return 8.0		
+		return 10.0		
 		
 	else:	
-		var absolute = 25.0
+		var absolute = 50.0
 		var translationalSpeed = Vector2(walk_velocity.x, walk_velocity.z).length()
 		var relative = pow(1 / max(translationalSpeed, 1 ), 0.5)
 		return absolute * relative

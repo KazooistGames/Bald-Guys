@@ -15,7 +15,7 @@ var reconfigure_timer = 0.0
 var floor_mesa_count = 25
 var floor_mesas = []
 
-var hover_mesa_count = 5
+var hover_mesa_count = 10
 var hover_mesas = []
 #var hover_vectors = []
 
@@ -30,24 +30,24 @@ var mesa_config = MesaConfiguration.inert
 		
 		
 func _ready():
+	
 	reconfigure_timer = reconfigure_period - 5
 
 	for index in range(hover_mesa_count): #create hovering platforms
 		var new_mesa = mesa_prefab.instantiate()
 		$Mesas.add_child(new_mesa)		
-		var mesa_size = randi_range(3, 5)
+		var mesa_size = 3
 		var boundary = map_size/2.0 - mesa_size/2.0
 		new_mesa.size = mesa_size
 		new_mesa.position.x = randi_range(-boundary, boundary)
 		new_mesa.position.z = randi_range(-boundary, boundary)
-		new_mesa.position.y = -1
+		new_mesa.position.y = 1
 		new_mesa.bottom_drop = height_step
-		new_mesa.preference = new_mesa.Preference.shallow
+		new_mesa.preference = new_mesa.Preference.deep
+		new_mesa.raycast.target_position = Vector3.DOWN * height_step / 2.5
 		hover_mesas.append(new_mesa)
-		var new_vector = Vector3(randf(), randf() / 2.0, randf()).normalized()
-		var speed = extend_mesas_speed * (index * 2.0 + 1)
-		new_mesa.constant_linear_velocity = new_vector * speed
-		#hover_vectors.append(new_vector)
+
+	randomize_hover_trajectories()
 
 
 func _physics_process(delta):
@@ -64,13 +64,19 @@ func _physics_process(delta):
 	else:
 		reposition_floor_mesas(delta)
 	
+	
+func randomize_hover_trajectories():
+	
+	for index in range(hover_mesa_count):
+		var mesa = hover_mesas[index]
+		var new_vector = Vector3(randf(), randf() / 4.0, randf()).normalized()
+		var speed = index/5.0 + 3
+		mesa.constant_linear_velocity = new_vector * speed
+	
 		
 func reconfigure_mesas():
 	
-	#hover_vectors.clear()
-	for mesa in hover_mesas:
-		var new_vector = Vector3(randf(), randf(), randf()).normalized()
-		mesa.constant_linear_velocity = new_vector
+	randomize_hover_trajectories()
 	
 	for mesa in floor_mesas:
 		mesa.queue_free()
@@ -131,38 +137,38 @@ func sweep_hover_collider(mesa):
 	query.exclude = [mesa.get_rid(), self.get_parent_node_3d()]
 	query.collision_mask = 0b0001
 	var result = physics_state.collide_shape(query)
+	
 	if result.size() > 0:
 		var offset = result[0] - mesa.collider.global_transform.origin
 		return offset 
-	#var result = space_state.intersect_ray(query)
 	
 func reposition_hover_mesas(delta):
 	
 	for index in range(hover_mesas.size()): #move hover mesas	
 		var mesa = hover_mesas[index]
 		var intersection = sweep_hover_collider(mesa)
-		var height = (index + 1) * height_step * 5.0
-		var boundary = map_size/2.0 - mesa.size/2.0
+		var height = 15
+		var xz_bounds = mesa.size / 2.05
+		var y_bounds = mesa.raycast.target_position.length() / 2.05
 		var trajectory = mesa.constant_linear_velocity
 		
 		if intersection == null:
 			pass
-		else:
-			#trajectory.y /= 2
-			if abs(intersection.x) >= mesa.size/2.05:
-				var x_pen = mesa.size/2.0 - abs(intersection.x)
-				x_pen *= sign(intersection.x)
+			
+		elif abs(intersection.x) >= xz_bounds:
+				var x_pen = (xz_bounds - abs(intersection.x)) * sign(intersection.x)
 				mesa.position.x += x_pen
 				trajectory.x = -trajectory.x 
 	
-			elif abs(intersection.z) >= mesa.size/2.05:
-				var z_pen = mesa.size/2.0 - abs(intersection.z)
-				z_pen *= sign(intersection.z)
-				mesa.position.z += z_pen
-				trajectory.z = -trajectory.z 
-				
-			elif abs(intersection.y) >= height_step / 2.0:
-				print("y pen")
+		elif abs(intersection.z) >= xz_bounds:
+			var z_pen = (xz_bounds - abs(intersection.z)) * sign(intersection.z)
+			mesa.position.z += z_pen
+			trajectory.z = -trajectory.z 
+			
+		elif abs(intersection.y) >= y_bounds:
+			var y_pen = (y_bounds - abs(intersection.y) / 2.0) * sign(intersection.y)
+			mesa.position.y += y_pen
+			trajectory.y = -trajectory.y
 
 		if mesa.position.y > height:
 			trajectory.y = -trajectory.y
@@ -171,20 +177,9 @@ func reposition_hover_mesas(delta):
 		elif mesa.position.y < height_step:
 			trajectory.y = -trajectory.y
 			mesa.position.y = height_step
-			
-		#elif abs(mesa.position.x) > boundary:
-			#trajectory.x = -trajectory.x
-			#var offset = abs(mesa.position.x) - boundary
-			#mesa.position.x -= sign(mesa.position.x) * offset
-			#
-		#elif abs(mesa.position.z) > boundary:
-			#trajectory.z = -trajectory.z
-			#var offset = abs(mesa.position.z) - boundary
-			#mesa.position.x -= sign(mesa.position.z) * offset
 
 		mesa.position += trajectory * delta
 		mesa.constant_linear_velocity = trajectory
-		#hover_vectors[index] = trajectory
 	
 		
 func extend_mesas():
