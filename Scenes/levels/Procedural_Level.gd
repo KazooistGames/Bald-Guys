@@ -31,11 +31,14 @@ var mesa_config = MesaConfiguration.inert
 		
 func _ready():
 	
+	if not is_multiplayer_authority():
+		return
+	
 	reconfigure_timer = reconfigure_period - 5
 
 	for index in range(hover_mesa_count): #create hovering platforms
 		var new_mesa = mesa_prefab.instantiate()
-		$Mesas.add_child(new_mesa)		
+		$Mesas.add_child(new_mesa, true)		
 		var mesa_size = 3
 		var boundary = map_size/2.0 - mesa_size/2.0
 		new_mesa.size = mesa_size
@@ -51,6 +54,9 @@ func _ready():
 
 
 func _physics_process(delta):
+	
+	if not is_multiplayer_authority():
+		return
 	
 	reposition_hover_mesas(delta)	
 	
@@ -76,7 +82,8 @@ func randomize_hover_trajectories():
 		
 func reconfigure_mesas():
 	
-	randomize_hover_trajectories()
+	if not is_multiplayer_authority():
+		return
 	
 	for mesa in floor_mesas:
 		mesa.queue_free()
@@ -85,7 +92,7 @@ func reconfigure_mesas():
 
 	for index in range(floor_mesa_count):
 		var new_mesa = mesa_prefab.instantiate()
-		$Mesas.add_child(new_mesa)		
+		$Mesas.add_child(new_mesa, true)		
 		var mesa_size = randi_range(2, 5)
 		var boundary = map_size/2.0 - mesa_size/2.0
 		new_mesa.size = mesa_size
@@ -147,7 +154,6 @@ func reposition_hover_mesas(delta):
 	for index in range(hover_mesas.size()): #move hover mesas	
 		var mesa = hover_mesas[index]
 		var intersection = sweep_hover_collider(mesa)
-		var height = 15
 		var xz_bounds = mesa.size / 2.05
 		var y_bounds = mesa.raycast.target_position.length() / 2.05
 		var trajectory = mesa.constant_linear_velocity
@@ -170,13 +176,13 @@ func reposition_hover_mesas(delta):
 			mesa.position.y += y_pen
 			trajectory.y = -trajectory.y
 
-		if mesa.position.y > height:
+		if mesa.position.y > 15:
 			trajectory.y = -trajectory.y
-			mesa.position.y = height
+			mesa.position.y = 15
 			
-		elif mesa.position.y < height_step:
+		elif mesa.position.y < 1.25:
 			trajectory.y = -trajectory.y
-			mesa.position.y = height_step
+			mesa.position.y = 1.25
 
 		mesa.position += trajectory * delta
 		mesa.constant_linear_velocity = trajectory

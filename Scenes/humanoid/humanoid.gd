@@ -259,7 +259,8 @@ func _physics_process(delta):
 	else:
 		gravity_scale = 1.0
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)	
-		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, 0.1)
+		print(floor_velocity.length())
+		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 2.0) * delta)
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
 		collider.shape.height = lerp(1.3, .8, jumpDeltaScale)
 		collider.position.y = lerp(.65, .8, jumpDeltaScale)

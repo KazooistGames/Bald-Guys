@@ -12,9 +12,6 @@ enum Preference{
 @onready var collider = $CollisionShape3D
 @onready var raycast = $RayCast3D
 
-@onready var debugSphere = $DebugSphere
-@onready var debugBox = $DebugBox
-
 @export var top_height = 0.0
 @export var bottom_drop = 0.0
 @export var size = 0.5
