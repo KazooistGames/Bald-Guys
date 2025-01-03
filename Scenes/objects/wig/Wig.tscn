@@ -55,7 +55,7 @@ physics_material_override = SubResource("PhysicsMaterial_8sl1w")
 gravity_scale = 0.75
 max_contacts_reported = 10
 contact_monitor = true
-linear_damp = 0.5
+linear_damp = 0.25
 constant_force = Vector3(0, -9.8, 0)
 script = ExtResource("1_rx6rq")
 

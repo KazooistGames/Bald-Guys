@@ -103,8 +103,7 @@ func get_body_from_cast(targets_position):
 	var result = space_state.intersect_ray(query)
 	
 	if result == {}:
-		return null
-		
+		return null		
 	else:
 		return result.collider
 		
