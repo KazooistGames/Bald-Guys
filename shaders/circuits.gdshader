@@ -112,8 +112,8 @@ bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, float offset){
 }
 
 vec4 random_vec4(float zero, float span, int seed){
-	float float_seed = float(seed);
 	
+	float float_seed = float(seed);
 	vec4 return_val;
 	return_val.x = zero + sin(float_seed * 43758.82309) * span;
 	return_val.y = zero + sin(float_seed * 72191.32920) * span;

@@ -30,7 +30,7 @@ spawn_path = NodePath("..")
 [node name="Borealis" parent="." instance=ExtResource("3_qtjjs")]
 
 [node name="LevelSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/levels/Platforms_Level.tscn", "res://Scenes/levels/Procedural_Level.tscn")
+_spawnable_scenes = PackedStringArray("res://Scenes/levels/procedural/Procedural_Level.tscn")
 spawn_path = NodePath("..")
 
 [node name="GameSpawner" type="MultiplayerSpawner" parent="."]

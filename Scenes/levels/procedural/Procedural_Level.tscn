@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Empty_Level.tscn" id="1_g0okr"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="2_3uy1y"]
-[ext_resource type="Script" path="res://Scenes/levels/Procedural_Level.gd" id="2_bwyy0"]
+[ext_resource type="Script" path="res://Scenes/levels/procedural/Procedural_Level.gd" id="2_bwyy0"]
 
 [node name="Procedural_Level" instance=ExtResource("1_g0okr")]
 script = ExtResource("2_bwyy0")
@@ -46,3 +46,5 @@ _spawnable_scenes = PackedStringArray("res://Scenes/objects/mesa/mesa.tscn")
 spawn_path = NodePath("../Mesas")
 
 [node name="Mesas" type="Node3D" parent="." index="3"]
+
+[node name="Hover" type="Node3D" parent="." index="4"]

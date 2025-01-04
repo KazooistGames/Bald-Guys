@@ -39,9 +39,8 @@ func _ready():
 	for index in range(hover_mesa_count): #create hovering platforms
 		var new_mesa = mesa_prefab.instantiate()
 		$Mesas.add_child(new_mesa, true)		
-		var mesa_size = 3
-		var boundary = map_size/2.0 - mesa_size/2.0
-		new_mesa.size = mesa_size
+		new_mesa.size =  3
+		var boundary = map_size / 2.0 - new_mesa.size / 2.0
 		new_mesa.position.x = randi_range(-boundary, boundary)
 		new_mesa.position.z = randi_range(-boundary, boundary)
 		new_mesa.position.y = 1
@@ -93,14 +92,14 @@ func reconfigure_mesas():
 	for index in range(floor_mesa_count):
 		var new_mesa = mesa_prefab.instantiate()
 		$Mesas.add_child(new_mesa, true)		
-		var mesa_size = randi_range(2, 5)
-		var boundary = map_size/2.0 - mesa_size/2.0
-		new_mesa.size = mesa_size
-		new_mesa.position.x = randi_range(-boundary, boundary)
-		new_mesa.position.z = randi_range(-boundary, boundary)
-		new_mesa.position.y = -1
+		new_mesa.size = randi_range(2, 5)
 		new_mesa.bottom_drop = height_step
 		new_mesa.preference = new_mesa.Preference.deep
+		var boundary = map_size/4.0 - new_mesa.size/4.0
+		new_mesa.position.x = randi_range(-boundary, boundary) * 2.0
+		new_mesa.position.z = randi_range(-boundary, boundary) * 2.0
+		new_mesa.position.y = -1
+		new_mesa.rotation.y = randi_range(0, 3) * PI/2
 
 		floor_mesas.append(new_mesa)
 		
@@ -136,6 +135,7 @@ func reposition_floor_mesas(delta):
 	
 	
 func sweep_hover_collider(mesa):
+	
 	var physics_state = get_world_3d().direct_space_state
 	var query = PhysicsShapeQueryParameters3D.new()
 	query.shape = mesa.collider.shape
@@ -148,44 +148,6 @@ func sweep_hover_collider(mesa):
 	if result.size() > 0:
 		var offset = result[0] - mesa.collider.global_transform.origin
 		return offset 
-	
-func reposition_hover_mesas(delta):
-	
-	for index in range(hover_mesas.size()): #move hover mesas	
-		var mesa = hover_mesas[index]
-		var intersection = sweep_hover_collider(mesa)
-		var xz_bounds = mesa.size / 2.05
-		var y_bounds = mesa.raycast.target_position.length() / 2.05
-		var trajectory = mesa.constant_linear_velocity
-		
-		if intersection == null:
-			pass
-			
-		elif abs(intersection.x) >= xz_bounds:
-				var x_pen = (xz_bounds - abs(intersection.x)) * sign(intersection.x)
-				mesa.position.x += x_pen
-				trajectory.x = -trajectory.x 
-	
-		elif abs(intersection.z) >= xz_bounds:
-			var z_pen = (xz_bounds - abs(intersection.z)) * sign(intersection.z)
-			mesa.position.z += z_pen
-			trajectory.z = -trajectory.z 
-			
-		elif abs(intersection.y) >= y_bounds:
-			var y_pen = (y_bounds - abs(intersection.y) / 2.0) * sign(intersection.y)
-			mesa.position.y += y_pen
-			trajectory.y = -trajectory.y
-
-		if mesa.position.y > 15:
-			trajectory.y = -trajectory.y
-			mesa.position.y = 15
-			
-		elif mesa.position.y < 1.25:
-			trajectory.y = -trajectory.y
-			mesa.position.y = 1.25
-
-		mesa.position += trajectory * delta
-		mesa.constant_linear_velocity = trajectory
 	
 		
 func extend_mesas():
@@ -210,4 +172,43 @@ func stop_mesas():
 		return
 	else:
 		mesa_config = MesaConfiguration.inert
+	
+	
+func reposition_hover_mesas(delta):
+	
+	for index in range(hover_mesas.size()): #move hover mesas	
+		var mesa = hover_mesas[index]
+		var intersection = sweep_hover_collider(mesa)
+		var xz_bounds = mesa.size / 2.05
+		var y_bounds = mesa.raycast.target_position.length() / 2.05
+		var trajectory = mesa.constant_linear_velocity
+		
+		if intersection == null:
+			pass
+			
+		elif abs(intersection.x) >= xz_bounds:
+			var x_pen = (xz_bounds - abs(intersection.x)) * sign(intersection.x)
+			mesa.position.x += x_pen
+			trajectory.x = -trajectory.x 
+	
+		elif abs(intersection.z) >= xz_bounds:
+			var z_pen = (xz_bounds - abs(intersection.z)) * sign(intersection.z)
+			mesa.position.z += z_pen
+			trajectory.z = -trajectory.z 
+			
+		elif abs(intersection.y) >= y_bounds:
+			var y_pen = (y_bounds - abs(intersection.y) / 2.0) * sign(intersection.y)
+			mesa.position.y += y_pen
+			trajectory.y = -trajectory.y
+
+		if mesa.position.y > 15:
+			trajectory.y = -trajectory.y
+			mesa.position.y = 15
+			
+		elif mesa.position.y < 1.25:
+			trajectory.y = -trajectory.y
+			mesa.position.y = 1.25
+
+		mesa.position += trajectory * delta
+		mesa.constant_linear_velocity = trajectory
 

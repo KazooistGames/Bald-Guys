@@ -37,6 +37,7 @@ void fragment() {
 	uvs[1] = vec2(SCREEN_UV.x, max(0.0, SCREEN_UV.y - texel_size.y * outline_width));
 	uvs[2] = vec2(min(1.0 - 0.001, SCREEN_UV.x + texel_size.x * outline_width), SCREEN_UV.y);
 	uvs[3] = vec2(max(0.0, SCREEN_UV.x - texel_size.x * outline_width), SCREEN_UV.y);
+	
 	for (int i = 0; i < 4; i++) {
 		float d = get_depth(uvs[i], INV_PROJECTION_MATRIX);
 		depth_diff += depth - d;
