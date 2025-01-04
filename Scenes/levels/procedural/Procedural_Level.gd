@@ -74,7 +74,8 @@ func randomize_hover_trajectories():
 	
 	for index in range(hover_mesa_count):
 		var mesa = hover_mesas[index]
-		var new_vector = Vector3(randf(), randf() / 4.0, randf()).normalized()
+
+		var new_vector = Vector3(randf_range(-1.0, 1.0), randf_range(0.05, 0.25), randf_range(-1.0, 1.0)).normalized()
 		var speed = index/5.0 + 3
 		mesa.constant_linear_velocity = new_vector * speed
 	
