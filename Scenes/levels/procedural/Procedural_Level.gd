@@ -94,10 +94,10 @@ func reconfigure_mesas():
 		$Mesas.add_child(new_mesa, true)		
 		new_mesa.size = randi_range(2, 5)
 		new_mesa.bottom_drop = height_step
-		new_mesa.preference = new_mesa.Preference.deep
-		var boundary = map_size/4.0 - new_mesa.size/4.0
-		new_mesa.position.x = randi_range(-boundary, boundary) * 2.0
-		new_mesa.position.z = randi_range(-boundary, boundary) * 2.0
+		new_mesa.preference = new_mesa.Preference.deep 
+		var boundary = map_size/2.0 - new_mesa.size/2.0
+		new_mesa.position.x = randi_range(-boundary, boundary) * 1.0
+		new_mesa.position.z = randi_range(-boundary, boundary) * 1.0
 		new_mesa.position.y = -1
 		new_mesa.rotation.y = randi_range(0, 3) * PI/2
 
