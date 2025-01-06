@@ -1,13 +1,10 @@
 extends MultiplayerSynchronizer
 
-
 @export var AUTHORITY_ORIGIN = Vector3.ZERO
 @export var AUTHORITY_BASIS = Basis.IDENTITY
 
-@export var Authority_Angular_Velocity = Vector3.ZERO
-@export var Authority_Linear_Velocity = Vector3.ZERO
-
 @export var lerp_val = 0.25
+
 
 var parent
 
@@ -31,29 +28,21 @@ func _physics_process(_delta):
 	elif is_multiplayer_authority():
 		AUTHORITY_ORIGIN = parent.transform.origin
 		AUTHORITY_BASIS = parent.transform.basis
-		Authority_Angular_Velocity = parent.angular_velocity
-		Authority_Linear_Velocity = parent.linear_velocity
 		
 	else:
 		parent.transform.basis = AUTHORITY_BASIS
-		parent.angular_velocity = Authority_Angular_Velocity
 		
 		if parent.position.distance_to(AUTHORITY_ORIGIN) > 1.0:
 			parent.transform.origin = AUTHORITY_ORIGIN	
 		else:
 			parent.transform.origin = parent.transform.origin.lerp(AUTHORITY_ORIGIN, lerp_val)
 
-		if parent.linear_velocity.distance_to(Authority_Linear_Velocity) > 1.0:
-			parent.linear_velocity = Authority_Linear_Velocity
-		else:
-			parent.linear_velocity = parent.linear_velocity.lerp(Authority_Linear_Velocity, lerp_val)
-
 
 func parent_is_valid():
 	
 	if parent != null:
 		return true
-	elif parent is RigidBody3D:
+	elif parent is Node3D:
 		return true
 	else:
 		return false

@@ -38,10 +38,7 @@ func _ready():
 	
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 	gameSpawner.spawned.connect(handle_new_game)
-	gameSpawner.set_spawn_function(load_game)
 	levelSpawner.spawned.connect(handle_new_level)
-	levelSpawner.set_spawn_function(load_level)
-	
 	
 	if is_multiplayer_authority():
 		Commission_Next_Round()
@@ -187,10 +184,8 @@ func Commission_Next_Round():
 			game_prefab_path = "res://Scenes/games/Wig_FFA/Wig_FFA.tscn"
 	
 	if level_prefab_path != ""	and game_prefab_path != "":
-		levelSpawner.spawn(level_prefab_path)
-		gameSpawner.spawn(game_prefab_path)
-		#load_level(level_prefab_path)
-		#load_game(game_prefab_path)
+		load_level(level_prefab_path)
+		load_game(game_prefab_path)
 	
 
 func load_level(path):

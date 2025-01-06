@@ -4,7 +4,7 @@
 [ext_resource type="Shader" path="res://shaders/circuits.gdshader" id="2_3p2s3"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_l7a5v"]
-render_priority = 0
+render_priority = 1
 shader = ExtResource("1_nexbr")
 shader_parameter/outline_multiplier = 0.1
 shader_parameter/outline_width = 1.0

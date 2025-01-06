@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bfj6oao2wp4ge"]
+
+[ext_resource type="Script" path="res://Scenes/levels/procedural/bouncing_geometry.gd" id="1_vg5lr"]
+
+[node name="Bouncing_Geometry" type="Node3D"]
+script = ExtResource("1_vg5lr")
+
+[node name="Spawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/objects/mesa/mesa.tscn")
+spawn_path = NodePath("..")

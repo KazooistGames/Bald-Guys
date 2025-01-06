@@ -109,7 +109,13 @@ func dawn_wig(node):
 	elif not node.is_in_group("humanoids"):
 		pass
 		
-	elif not Bearer:
+	elif Bearer:
+		pass
+		
+	elif node.RAGDOLLED:
+		pass
+		
+	else:
 		Wig.interactable.gained_interaction.disconnect(dawn_wig)
 		node.ragdolled.connect(drop_wig)
 		
@@ -171,6 +177,7 @@ func set_wig_bearer(path_to_new_bearer):
 		wig_remote.position = Vector3(0, 0.275, -.075)		
 		Wig.toggle_strobing(false)
 		Wig.Dawn.play()
+		
 
 @rpc("call_local", "reliable")
 func rpc_start():

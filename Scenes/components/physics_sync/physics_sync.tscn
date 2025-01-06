@@ -12,6 +12,12 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath("PhysicsSync:Authority_Angular_Velocity")
 properties/2/spawn = true
 properties/2/replication_mode = 1
+properties/3/path = NodePath("PhysicsSync:Authority_Linear_Velocity")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath("PhysicsSync:lerp_val")
+properties/4/spawn = true
+properties/4/replication_mode = 1
 
 [node name="PhysicsSync" type="MultiplayerSynchronizer"]
 replication_config = SubResource("SceneReplicationConfig_q45re")

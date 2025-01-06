@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://c3nyb0ufrrici"]
+[gd_scene load_steps=7 format=3 uid="uid://c3nyb0ufrrici"]
 
 [ext_resource type="Script" path="res://Scenes/objects/mesa/mesa.gd" id="1_syifw"]
 [ext_resource type="Material" uid="uid://svosidjb5wsa" path="res://Materials/geometry.tres" id="2_iojno"]
+[ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="3_oxcs1"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_e2jge"]
 resource_local_to_scene = true
@@ -11,31 +12,22 @@ size = Vector3(1, 1, 2)
 resource_local_to_scene = true
 size = Vector3(1, 2, 1)
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_uq3yq"]
-properties/0/path = NodePath(".:position")
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_be56u"]
+properties/0/path = NodePath(".:top_height")
 properties/0/spawn = true
-properties/0/replication_mode = 2
-properties/1/path = NodePath(".:rotation")
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:bottom_drop")
 properties/1/spawn = true
-properties/1/replication_mode = 2
-properties/2/path = NodePath(".:constant_linear_velocity")
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:size")
 properties/2/spawn = true
-properties/2/replication_mode = 2
-properties/3/path = NodePath(".:size")
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:preference")
 properties/3/spawn = true
-properties/3/replication_mode = 2
-properties/4/path = NodePath(".:bottom_drop")
+properties/3/replication_mode = 1
+properties/4/path = NodePath("RayCast3D:target_position")
 properties/4/spawn = true
-properties/4/replication_mode = 2
-properties/5/path = NodePath(".:preference")
-properties/5/spawn = true
-properties/5/replication_mode = 2
-properties/6/path = NodePath(".:top_height")
-properties/6/spawn = true
-properties/6/replication_mode = 2
-properties/7/path = NodePath("RayCast3D:target_position")
-properties/7/spawn = true
-properties/7/replication_mode = 2
+properties/4/replication_mode = 1
 
 [node name="mesa" type="AnimatableBody3D"]
 collision_mask = 11
@@ -58,4 +50,6 @@ hit_back_faces = false
 debug_shape_thickness = 5
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_uq3yq")
+replication_config = SubResource("SceneReplicationConfig_be56u")
+
+[node name="TransformSync" parent="." instance=ExtResource("3_oxcs1")]

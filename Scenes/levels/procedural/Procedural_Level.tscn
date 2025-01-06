@@ -1,8 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://b5fc4lv4wybum"]
+[gd_scene load_steps=7 format=3 uid="uid://b5fc4lv4wybum"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Empty_Level.tscn" id="1_g0okr"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="2_3uy1y"]
 [ext_resource type="Script" path="res://Scenes/levels/procedural/Procedural_Level.gd" id="2_bwyy0"]
+[ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/levels/procedural/bouncing_geometry.tscn" id="4_luhar"]
+[ext_resource type="PackedScene" uid="uid://bihhmgl2g08o3" path="res://Scenes/levels/procedural/mesa_grower.tscn" id="5_l4mtl"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_6qhqu"]
+properties/0/path = NodePath("Mesa_Grower:configuration")
+properties/0/spawn = true
+properties/0/replication_mode = 1
 
 [node name="Procedural_Level" instance=ExtResource("1_g0okr")]
 script = ExtResource("2_bwyy0")
@@ -41,10 +48,9 @@ skeleton = NodePath("../..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 10, 0)
 skeleton = NodePath("../..")
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="." index="2"]
-_spawnable_scenes = PackedStringArray("res://Scenes/objects/mesa/mesa.tscn")
-spawn_path = NodePath("../Mesas")
+[node name="Bouncing_Geometry" parent="." index="2" instance=ExtResource("4_luhar")]
 
-[node name="Mesas" type="Node3D" parent="." index="3"]
+[node name="Mesa_Grower" parent="." index="3" instance=ExtResource("5_l4mtl")]
 
-[node name="Hover" type="Node3D" parent="." index="4"]
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="." index="4"]
+replication_config = SubResource("SceneReplicationConfig_6qhqu")
