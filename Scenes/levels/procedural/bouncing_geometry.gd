@@ -37,9 +37,9 @@ func _physics_process(delta):
 			trajectory.y = -trajectory.y
 			body.position.y = 15
 			
-		elif body.position.y < -1:
+		elif body.position.y < 0:
 			trajectory.y = -trajectory.y
-			body.position.y = 1.25
+			body.position.y = 0
 
 		body.position += trajectory * delta
 		body.constant_linear_velocity = trajectory

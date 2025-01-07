@@ -87,7 +87,7 @@ func spawn_mesas(count):
 	for index in range(count):
 		var new_mesa = prefab.instantiate()
 		add_child(new_mesa, true)		
-		new_mesa.size = randi_range(2, 5)
+		new_mesa.size = randi_range(4, 10) * 0.5
 		new_mesa.bottom_drop = 0.25
 		new_mesa.preference = new_mesa.Preference.deep 
 		var boundary = map_size/2.0 - new_mesa.size/2.0
