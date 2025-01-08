@@ -2,17 +2,13 @@
 
 [ext_resource type="Script" path="res://Scenes/force/force.gd" id="1_8ejgp"]
 [ext_resource type="AudioStream" uid="uid://dhgcmldg3e6k7" path="res://audio/energy-hum-29083.mp3" id="2_41484"]
+[ext_resource type="Material" uid="uid://hugun5vavy75" path="res://Materials/force.tres" id="2_xehpu"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_yifoa"]
 resource_local_to_scene = true
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_b2kif"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_x7mjd"]
 resource_local_to_scene = true
-height = 1.25
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ita6i"]
-transparency = 1
-albedo_color = Color(1, 1, 1, 0.196078)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_idmps"]
 properties/0/path = NodePath(".:Aim")
@@ -52,8 +48,8 @@ shape = SubResource("CylinderShape3D_yifoa")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-mesh = SubResource("CylinderMesh_b2kif")
-surface_material_override/0 = SubResource("StandardMaterial3D_ita6i")
+mesh = SubResource("CapsuleMesh_x7mjd")
+surface_material_override/0 = ExtResource("2_xehpu")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_idmps")
