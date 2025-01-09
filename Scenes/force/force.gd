@@ -87,6 +87,8 @@ func _physics_process(delta):
 		
 	mesh.mesh.radius = collider.shape.radius/2.
 	mesh.mesh.height = collider.shape.height
+	mesh.rotate(Vector3.FORWARD, delta)
+	
 	position = base_position + Aim.normalized() * offset
 	
 	

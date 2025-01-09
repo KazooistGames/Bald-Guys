@@ -3,6 +3,9 @@ shader_type spatial;
 uniform int cell_amount = 10;
 uniform vec2 period = vec2(10., 10.);
 
+uniform float waviness = 0.05;
+uniform float transparency = 0.25;
+
 vec2 modulo(vec2 divident, vec2 divisor){
 	vec2 positiveDivident = mod(divident, divisor) + divisor;
 	return mod(positiveDivident, divisor);
@@ -38,8 +41,18 @@ float seamless_noise(vec2 uv, vec2 _period) {
                      dot( upperRightDirection, fraction - vec2(1, 1) ), blur.x), blur.y) * 0.8 + 0.5;
 }
 
+void vertex(){
+	float positional_offset = (VERTEX.x + VERTEX.y) * 11.0;
+	VERTEX.z += waviness * sin(TIME * 7.0 + positional_offset);
+	
+	positional_offset = (VERTEX.z + VERTEX.y) * 7.0;
+	VERTEX.x += waviness * sin(TIME * 11.0 + positional_offset);
+	
+	VERTEX.y += waviness * sin(TIME * 3.0);
+}
+
 void fragment(){
 	float noise = seamless_noise(UV, period);
 	ALBEDO = vec3(0., noise, noise);
-	ALPHA = smoothstep(0.25, 1.0, noise) * 0.25;
+	ALPHA = smoothstep(0.25, 1.0, noise) * pow(sin(TIME * 3.), 2.0) * transparency;
 }

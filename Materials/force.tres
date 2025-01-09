@@ -3,7 +3,10 @@
 [ext_resource type="Shader" path="res://shaders/perlin.gdshader" id="1_ih4sn"]
 
 [resource]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_ih4sn")
 shader_parameter/cell_amount = 10
 shader_parameter/period = Vector2(10, 10)
+shader_parameter/waviness = 0.05
+shader_parameter/transparency = 0.5
