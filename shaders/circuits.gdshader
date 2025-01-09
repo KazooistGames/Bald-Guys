@@ -1,6 +1,6 @@
 shader_type spatial;
 
-render_mode unshaded;
+render_mode unshaded, shadows_disabled;
 
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 
@@ -8,6 +8,8 @@ uniform float track_thickness = 0.001;
 uniform float tail_length = 0.1;
 
 uniform float phase_scalar = 1.0;
+
+
 
 int comet_cycle(float period, float offset){
 	return int( (TIME + offset) / period);

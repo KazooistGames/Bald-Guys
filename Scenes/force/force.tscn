@@ -7,7 +7,7 @@
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_yifoa"]
 resource_local_to_scene = true
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_x7mjd"]
+[sub_resource type="SphereMesh" id="SphereMesh_iuwd1"]
 resource_local_to_scene = true
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_idmps"]
@@ -47,8 +47,7 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 shape = SubResource("CylinderShape3D_yifoa")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-mesh = SubResource("CapsuleMesh_x7mjd")
+mesh = SubResource("SphereMesh_iuwd1")
 surface_material_override/0 = ExtResource("2_xehpu")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]

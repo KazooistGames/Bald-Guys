@@ -38,26 +38,33 @@ var cooldown_timer = 0.0
 
 var offset = 1.25
 
+var material;
 
 func _ready():
 	
 	rpc_reset()
 	monitoring = true
-	
+
 
 func _physics_process(delta):
 	
+			
+	material = mesh.get_surface_override_material(0)
+	
 	get_contained_bodies()
+
 
 	if action == Action.holding:
 		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 2.0, 5.0 * delta)
+		#material.set_shader_parameter("transparency", 0.05)
+		material.set_shader_parameter("color", Vector3(0., 1., 0.))
 		
 		if is_multiplayer_authority():
 							
 			for node in contained_bodies:			
 				rpc_hold_object.rpc(node.get_path())
-				
+			
 	elif action == Action.charging:
 		charge_timer += delta
 		var progress = clamp(charge_timer/charge_period, 0.0, 1.0)
@@ -65,7 +72,9 @@ func _physics_process(delta):
 		collider.shape.height = lerp(0.0, 2.0, progress)
 		hum.volume_db = lerp(-27.0, -21.0, progress)
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
-		
+
+		#material.set_shader_parameter("transparency", 0.25)
+		material.set_shader_parameter("color", Vector3(1., 0., 1.))
 		if not is_multiplayer_authority():
 			pass
 			
@@ -79,25 +88,29 @@ func _physics_process(delta):
 	elif action == Action.cooldown:
 		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 0, 8.0 * delta)
+		if collider.shape.radius == 0:
+			mesh.visible = false	
 		cooldown_timer += delta
 		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
 		if cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		
-	mesh.mesh.radius = collider.shape.radius/2.
+	mesh.mesh.radius = collider.shape.radius
 	mesh.mesh.height = collider.shape.height
+	mesh.rotate(Vector3.UP, delta)
 	mesh.rotate(Vector3.FORWARD, delta)
-	
+	mesh.rotate(Vector3.RIGHT, delta)
+	mesh.set_surface_override_material(0, material)
 	position = base_position + Aim.normalized() * offset
-	
 	
 @rpc("call_local", "reliable")
 func rpc_primary():
 	
 	if action != Action.inert:
 		return
-					
+				
+	mesh.visible = true	
 	collision_mask = 14
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
@@ -113,6 +126,7 @@ func rpc_secondary():
 	if action != Action.inert:
 		return	
 		
+	mesh.visible = true
 	collision_mask = 12
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
@@ -129,6 +143,7 @@ func rpc_reset():
 	if action == Action.cooldown && cooldown_timer <= cooldown_period:
 		return	
 		
+	mesh.visible = false	
 	collision_mask = 0
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	

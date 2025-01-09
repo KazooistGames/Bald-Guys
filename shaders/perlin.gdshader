@@ -1,10 +1,17 @@
 shader_type spatial;
 
 uniform int cell_amount = 10;
-uniform vec2 period = vec2(10., 10.);
+uniform vec2 cell_period = vec2(10., 10.);
+uniform float cell_size = 0.5;
 
-uniform float waviness = 0.05;
-uniform float transparency = 0.25;
+uniform float waviness = 0.025;
+uniform float glow = 0.5;
+uniform float transparency = 0.025;
+
+uniform float base_freq = 1.3;
+uniform	float glow_freq = 3.1;
+
+uniform vec3 color = vec3(0.0, 1.0, 1.0);
 
 vec2 modulo(vec2 divident, vec2 divisor){
 	vec2 positiveDivident = mod(divident, divisor) + divisor;
@@ -42,17 +49,26 @@ float seamless_noise(vec2 uv, vec2 _period) {
 }
 
 void vertex(){
-	float positional_offset = (VERTEX.x + VERTEX.y) * 11.0;
-	VERTEX.z += waviness * sin(TIME * 7.0 + positional_offset);
-	
-	positional_offset = (VERTEX.z + VERTEX.y) * 7.0;
+	float shift = seamless_noise(UV, cell_period) / 9.0;
+	float positional_offset = (VERTEX.z + VERTEX.y) * 13.0;
 	VERTEX.x += waviness * sin(TIME * 11.0 + positional_offset);
+	VERTEX.x += sign(VERTEX.x) * shift;
 	
-	VERTEX.y += waviness * sin(TIME * 3.0);
+	positional_offset = (VERTEX.x + VERTEX.z) * 13.0;
+	VERTEX.y += waviness * sin(TIME * 13.0 + positional_offset);
+	VERTEX.y += sign(VERTEX.y) * shift;
+	
+	positional_offset = (VERTEX.x + VERTEX.y) * 13.0;
+	VERTEX.z += waviness * sin(TIME * 7.0 + positional_offset);
+	VERTEX.z += sign(VERTEX.z) * shift;	
+
 }
 
 void fragment(){
-	float noise = seamless_noise(UV, period);
-	ALBEDO = vec3(0., noise, noise);
-	ALPHA = smoothstep(0.25, 1.0, noise) * pow(sin(TIME * 3.), 2.0) * transparency;
+	float noise = seamless_noise(UV, cell_period);
+	ALBEDO = color;
+	EMISSION = color;
+	float phasic = smoothstep(1.0 - cell_size, 1.0, noise) * abs(sin(TIME * glow_freq)) * glow;
+	float baseline = abs(sin(TIME * base_freq)) * transparency;
+	ALPHA = phasic + baseline;
 }
