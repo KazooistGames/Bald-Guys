@@ -17,7 +17,7 @@ void fragment()
 	float swirl = swirl(UV, swirl_size, swirl_arms);
 	vec3 sample_color = vec3(0.0, 0.5, 1.0);
 	ALBEDO = sample_color;
-	ALPHA = smoothstep(0.0, 1.0, swirl) * 0.5;
+	ALPHA = smoothstep(0.0, 1.0, swirl) * 0.25;
 	
 }
 

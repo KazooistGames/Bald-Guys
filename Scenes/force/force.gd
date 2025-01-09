@@ -85,7 +85,7 @@ func _physics_process(delta):
 		if cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		
-	mesh.mesh.radius = collider.shape.radius
+	mesh.mesh.radius = collider.shape.radius/2.
 	mesh.mesh.height = collider.shape.height
 	position = base_position + Aim.normalized() * offset
 	

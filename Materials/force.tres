@@ -1,10 +1,9 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://hugun5vavy75"]
 
-[ext_resource type="Shader" path="res://shaders/swirl.gdshader" id="1_5ppa7"]
+[ext_resource type="Shader" path="res://shaders/perlin.gdshader" id="1_ih4sn"]
 
 [resource]
 render_priority = 0
-shader = ExtResource("1_5ppa7")
-shader_parameter/swirl_speed = 0.0
-shader_parameter/swirl_arms = 12
-shader_parameter/swirl_size = 9.0
+shader = ExtResource("1_ih4sn")
+shader_parameter/cell_amount = 10
+shader_parameter/period = Vector2(10, 10)

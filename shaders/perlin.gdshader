@@ -1,7 +1,7 @@
 shader_type spatial;
 
-uniform int cell_amount = 20;
-uniform vec2 period = vec2(5., 10.);
+uniform int cell_amount = 10;
+uniform vec2 period = vec2(10., 10.);
 
 vec2 modulo(vec2 divident, vec2 divisor){
 	vec2 positiveDivident = mod(divident, divisor) + divisor;
@@ -11,7 +11,7 @@ vec2 modulo(vec2 divident, vec2 divisor){
 vec2 random(vec2 value){
 	value = vec2( dot(value, vec2(127.1,311.7) ),
 				  dot(value, vec2(269.5,183.3) ) );
-	return -1.0 + 2.0 * fract(sin(value) * 43758.5453123);
+	return -1.0 + 2.0 * fract(sin(value ) * 43758.5453123);
 }
 
 float seamless_noise(vec2 uv, vec2 _period) {
@@ -40,5 +40,6 @@ float seamless_noise(vec2 uv, vec2 _period) {
 
 void fragment(){
 	float noise = seamless_noise(UV, period);
-	ALBEDO = vec3(noise);
+	ALBEDO = vec3(0., noise, noise);
+	ALPHA = smoothstep(0.25, 1.0, noise) * 0.25;
 }
