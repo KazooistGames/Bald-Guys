@@ -48,7 +48,6 @@ func _ready():
 
 func _physics_process(delta):
 	
-			
 	material = mesh.get_surface_override_material(0)
 	
 	get_contained_bodies()
@@ -57,8 +56,6 @@ func _physics_process(delta):
 	if action == Action.holding:
 		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 2.0, 5.0 * delta)
-		#material.set_shader_parameter("transparency", 0.05)
-		material.set_shader_parameter("color", Vector3(0., 1., 0.))
 		
 		if is_multiplayer_authority():
 							
@@ -73,8 +70,6 @@ func _physics_process(delta):
 		hum.volume_db = lerp(-27.0, -21.0, progress)
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
-		#material.set_shader_parameter("transparency", 0.25)
-		material.set_shader_parameter("color", Vector3(1., 0., 1.))
 		if not is_multiplayer_authority():
 			pass
 			
@@ -88,8 +83,10 @@ func _physics_process(delta):
 	elif action == Action.cooldown:
 		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 0, 8.0 * delta)
+		
 		if collider.shape.radius == 0:
 			mesh.visible = false	
+			
 		cooldown_timer += delta
 		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
@@ -98,11 +95,12 @@ func _physics_process(delta):
 		
 	mesh.mesh.radius = collider.shape.radius
 	mesh.mesh.height = collider.shape.height
-	mesh.rotate(Vector3.UP, delta)
+	mesh.rotate(Vector3.UP, delta * 0.9)
 	mesh.rotate(Vector3.FORWARD, delta)
-	mesh.rotate(Vector3.RIGHT, delta)
+	mesh.rotate(Vector3.RIGHT, delta * 1.1)
 	mesh.set_surface_override_material(0, material)
 	position = base_position + Aim.normalized() * offset
+	
 	
 @rpc("call_local", "reliable")
 func rpc_primary():
@@ -117,6 +115,8 @@ func rpc_primary():
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	hum.play()
 	charge_timer = 0	
+	material.set_shader_parameter("glow_freq", 0.0)
+	material.set_shader_parameter("color", Vector3(1., 0., 1.))
 	action = Action.charging
 
 
@@ -134,6 +134,8 @@ func rpc_secondary():
 	hum.play()
 	hum.volume_db = -27.0
 	hum.pitch_scale = 1.0
+	material.set_shader_parameter("glow_freq", 3.1)
+	material.set_shader_parameter("color", Vector3(0., 1., 0.))
 	action = Action.holding
 	
 	

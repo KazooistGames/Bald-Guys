@@ -46,7 +46,7 @@ void fragment() {
 	vec2 uvs[4];
 	uvs[0] = vec2(SCREEN_UV.x, min(1.0 - 0.001, SCREEN_UV.y + texel_size.y));
 	uvs[1] = vec2(SCREEN_UV.x, max(0.0, SCREEN_UV.y - texel_size.y));
-	uvs[2] = vec2(min(1.0 - 0.001, SCREEN_UV.x + texel_size.x), SCREEN_UV.y);
+	uvs[2] = vec2(min(1.0, SCREEN_UV.x + texel_size.x), SCREEN_UV.y);
 	uvs[3] = vec2(max(0.0, SCREEN_UV.x - texel_size.x), SCREEN_UV.y);
 	
 	float depth_diff = 0.0;
@@ -74,6 +74,7 @@ void fragment() {
 		
 		normal_sum += dot(normal_diff, normal_diff) * normal_indicator;
 	}
+	
 	float depth_edge = step(depth_threshold, depth_diff);
 	
 	float reverse_depth_edge = step(reverse_depth_threshold, depth_diff_reversed); 
@@ -90,6 +91,7 @@ void fragment() {
             INV_VIEW_MATRIX[1].xyz,
             INV_VIEW_MATRIX[2].xyz
 	);
+	
 	float ld = dot((view_to_world_normal_mat * normal), normalize(light_direction));
 	
 	vec3 depth_col = nearest;

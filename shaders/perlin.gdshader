@@ -68,7 +68,7 @@ void fragment(){
 	float noise = seamless_noise(UV, cell_period);
 	ALBEDO = color;
 	EMISSION = color;
-	float phasic = smoothstep(1.0 - cell_size, 1.0, noise) * abs(sin(TIME * glow_freq)) * glow;
+	float phasic = smoothstep(1.0 - cell_size, 1.0, noise) * abs(cos(TIME * glow_freq)) * glow;
 	float baseline = abs(sin(TIME * base_freq)) * transparency;
 	ALPHA = phasic + baseline;
 }

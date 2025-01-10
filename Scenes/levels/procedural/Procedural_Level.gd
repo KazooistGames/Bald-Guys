@@ -5,6 +5,7 @@ const map_size = 50
 
 @onready var bouncing_geometry = $Bouncing_Geometry
 @onready var mesa_grower = $Mesa_Grower
+@onready var brick_fields = $Brick_Fields
 
 
 var extend_mesas_speed = 0.5
@@ -20,6 +21,7 @@ func _ready():
 	
 	reconfigure_timer = reconfigure_period - 5
 	bouncing_geometry.spawn_hover_boards(10)
+	brick_fields.spawn_field(5, 5, 1, Vector3.UP * 10)
 
 
 func _physics_process(delta):

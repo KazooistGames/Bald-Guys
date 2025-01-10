@@ -79,6 +79,7 @@ func getRandomHairColor():
 	var b = colorBase/255.0
 	
 	HAIR_COLOR = Color(r, g, b)
+	print("Wig Color: ", HAIR_COLOR)
 
 
 func toggle_strobing(enable):

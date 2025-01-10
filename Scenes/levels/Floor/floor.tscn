@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cxh4be4uwbmtf"]
 
-[ext_resource type="PlaneMesh" uid="uid://bkcwl7e51sjbe" path="res://Scenes/levels/Wall/wall.tres" id="1_88uwo"]
-[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/levels/Wall/wall.material" id="1_eebqw"]
+[ext_resource type="PlaneMesh" path="res://Scenes/levels/Wall/wall.tres" id="1_88uwo"]
+[ext_resource type="Material" path="res://Materials/wall.material" id="2_jbp7w"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
 size = Vector3(50, 1, 50)
@@ -9,7 +9,7 @@ size = Vector3(50, 1, 50)
 [node name="floor" type="MeshInstance3D"]
 mesh = ExtResource("1_88uwo")
 skeleton = NodePath("../..")
-surface_material_override/0 = ExtResource("1_eebqw")
+surface_material_override/0 = ExtResource("2_jbp7w")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." groups=["floor"]]
 

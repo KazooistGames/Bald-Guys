@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cq0iv8xqbqvro"]
 
-[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Scenes/levels/Wall/wall.material" id="1_ki8im"]
-[ext_resource type="PlaneMesh" uid="uid://bkcwl7e51sjbe" path="res://Scenes/levels/Wall/wall.tres" id="1_sx8fj"]
+[ext_resource type="PlaneMesh" path="res://Scenes/levels/Wall/wall.tres" id="1_sx8fj"]
+[ext_resource type="Material" path="res://Materials/wall.material" id="2_a7q73"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
 size = Vector3(50, 1, 50)
@@ -9,7 +9,7 @@ size = Vector3(50, 1, 50)
 [node name="ceiling" type="MeshInstance3D"]
 transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 25, 0)
 mesh = ExtResource("1_sx8fj")
-surface_material_override/0 = ExtResource("1_ki8im")
+surface_material_override/0 = ExtResource("2_a7q73")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 collision_mask = 5
