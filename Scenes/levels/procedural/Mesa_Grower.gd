@@ -20,11 +20,12 @@ enum MesaConfiguration
 @export var configuration = MesaConfiguration.inert
 
 var in_position = false
+var mesas = []
 
 
 func _physics_process(delta):
 	
-	var mesas = get_mesas()
+	mesas = get_mesas()
 	
 	if configuration == MesaConfiguration.inert or mesas.size() == 0:
 		in_position = true
@@ -47,6 +48,7 @@ func _physics_process(delta):
 			
 		if mesa.position.y == target:
 			in_position_count += 1
+			mesa.preference = mesa.Preference.shallow 
 			
 	if in_position_count == mesas.size():
 		in_position = true
@@ -77,6 +79,9 @@ func stop_mesas():
 	else:
 		configuration = MesaConfiguration.inert
 		in_position = true
+		
+		for mesa in mesas:
+			mesa.preference = mesa.Preference.deep 
 
 
 func spawn_mesas(count):
@@ -88,7 +93,7 @@ func spawn_mesas(count):
 		var new_mesa = prefab.instantiate()
 		add_child(new_mesa, true)		
 		new_mesa.size = randi_range(4, 10) * 0.5
-		new_mesa.bottom_drop = 0.25
+		new_mesa.bottom_drop = 0.5
 		new_mesa.preference = new_mesa.Preference.deep 
 		var boundary = map_size/2.0 - new_mesa.size/2.0
 		new_mesa.position.x = randi_range(-boundary, boundary) * 1.0

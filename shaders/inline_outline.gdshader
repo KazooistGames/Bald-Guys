@@ -76,9 +76,9 @@ void fragment() {
 	vec3 nearest = texture(screen_texture, nearest_uv).rgb;
 	
 	mat3 view_to_world_normal_mat = mat3(
-            INV_VIEW_MATRIX[0].xyz, 
-            INV_VIEW_MATRIX[1].xyz,
-            INV_VIEW_MATRIX[2].xyz
+        INV_VIEW_MATRIX[0].xyz, 
+        INV_VIEW_MATRIX[1].xyz,
+        INV_VIEW_MATRIX[2].xyz
 	);
 	float ld = dot((view_to_world_normal_mat * normal), normalize(light_direction));
 	

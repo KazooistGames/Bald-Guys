@@ -205,12 +205,13 @@ func _integrate_forces(state):
 	apply_central_force(impulse)
 	
 	if translational_velocity.length() > speed_target:
-		impulse = -translational_velocity * get_acceleration() * mass
+		var overshoot_scalar = (translational_velocity.length() / speed_target) - 1.0
+		impulse = -translational_velocity * get_acceleration() * overshoot_scalar * mass
 		apply_central_force(impulse)
 			
 
 func _physics_process(delta):
-			
+		
 	if floorcast.enabled:
 		reverse_coyote_timer = 0.0	
 		
@@ -298,11 +299,9 @@ func get_acceleration():
 		return 10.0		
 		
 	else:	
-		var absolute = 25.0
-		var translationalSpeed = Vector2(walk_velocity.x, walk_velocity.z).length()
-		var relative = pow(1 / max(translationalSpeed, 1 ), 0.25)
-		return absolute * relative
-
+		var translationalSpeed = walk_velocity.length()
+		return 10 + translationalSpeed 
+		
 
 func getRandomSkinTone():
 	
@@ -419,7 +418,6 @@ func double_jump():
 		jumpFX.pitch_scale = 1.25
 		jumpFX.play()	
 		DOUBLE_JUMP_CHARGES -= 1
-		#var total_change = 3 - min(0.0, linear_velocity.y)
 		set_axis_velocity(Vector3.UP * JUMP_SPEED)
 		
 

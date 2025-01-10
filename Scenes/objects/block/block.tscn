@@ -17,6 +17,7 @@ collision_layer = 8
 collision_mask = 13
 mass = 500.0
 physics_material_override = SubResource("PhysicsMaterial_xydkg")
+can_sleep = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_ythp8")

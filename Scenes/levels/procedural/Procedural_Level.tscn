@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://b5fc4lv4wybum"]
+[gd_scene load_steps=9 format=3 uid="uid://b5fc4lv4wybum"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Empty_Level.tscn" id="1_g0okr"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="2_3uy1y"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/levels/procedural/bouncing_geometry.tscn" id="4_luhar"]
 [ext_resource type="PackedScene" uid="uid://bihhmgl2g08o3" path="res://Scenes/levels/procedural/mesa_grower.tscn" id="5_l4mtl"]
 [ext_resource type="PackedScene" uid="uid://drujlef4qyslo" path="res://Scenes/levels/procedural/brick_fields.tscn" id="6_rllxl"]
+[ext_resource type="PackedScene" uid="uid://dnyf0qu40f6qt" path="res://Scenes/objects/ramp/ramp.tscn" id="7_4m7y7"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_6qhqu"]
 properties/0/path = NodePath("Mesa_Grower:configuration")
@@ -57,3 +58,8 @@ skeleton = NodePath("../..")
 [node name="Mesa_Grower" parent="." index="4" instance=ExtResource("5_l4mtl")]
 
 [node name="Brick_Fields" parent="." index="5" instance=ExtResource("6_rllxl")]
+
+[node name="Ramp" parent="." index="6" instance=ExtResource("7_4m7y7")]
+height = 5.0
+length = 10.0
+thickness = 3.0

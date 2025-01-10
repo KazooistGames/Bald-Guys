@@ -7,8 +7,9 @@ uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nea
 uniform float track_thickness = 0.001;
 uniform float tail_length = 0.1;
 
-uniform float phase_scalar = 1.0;
+uniform float phase_scalar = 2.0;
 
+uniform float emission_amplitude = 3.0;
 
 
 int comet_cycle(float period, float offset){
@@ -133,7 +134,7 @@ void vertex() {
 
 void fragment() {
 	
-	vec3 sample_color = texture(screen_texture, SCREEN_UV).rgb;
+	vec3 original = texture(screen_texture, SCREEN_UV).rgb;
 	
 	float reseed_interval = 8.0 * phase_scalar;
 	float seed_phase = TIME + time_offset;
@@ -146,20 +147,20 @@ void fragment() {
 	float fade = abs(sin(seed_phase));
 
 	if (energized(UV, x_rails, y_rails, speeds, time_offset)){
-		sample_color.r = fade;		
-		EMISSION = sample_color;
+		original.r = fade;		
+		EMISSION = original * emission_amplitude;
 	}
 	else if(energized(UV, x_rails, y_rails, speeds/2.0, time_offset))
 	{
-		sample_color.r = fade;	
-		EMISSION = sample_color;
+		original.r = fade;	
+		EMISSION = original * emission_amplitude;
 	}
 	else if(energized(UV, x_rails, y_rails, speeds*2.0, time_offset))
 	{
-		sample_color.r = fade;	
-		EMISSION = sample_color;
+		original.r = fade;	
+		EMISSION = original * emission_amplitude;
 	}
-	ALBEDO = sample_color;
+	ALBEDO = original;
 }
 
 
