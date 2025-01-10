@@ -1,11 +1,14 @@
 extends Camera3D
 
 const MAX_ANGLE = PI/2.3
+
 @export var VERTICAL_SENSATIVITY = 0.005
 @export var HORIZONTAL_SENSITIVITY = 0.005
 
 @onready var reticle = $reticle
 @onready var raycast = $RayCast3D
+
+@onready var postprocessing = $postprocessing
 
 
 func _ready():
@@ -19,6 +22,8 @@ func _process(_delta):
 	reticle.expand_mode = 1
 	reticle.size = Vector2.ONE * 4
 	reticle.position = get_center_of_screen() - reticle.size/2
+	var light_direction = postprocessing.get_surface_override_material(0).get_shader_parameter("light_direction")
+	
 	
 func _input(event):
 	

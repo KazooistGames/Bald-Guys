@@ -18,10 +18,11 @@ const ambient_green_zsf = Vector3(0.35, 0.20, 11)
 const ambient_blue_zsf = Vector3(0.35, 0.20, 13)
 const ambient_energy_zsf = Vector3(0.65, 0.3, 1)
 
-@onready var directional_light = $DirectionalLight3D
-
 const light_tilt_zsf = Vector3(-90, 10, 47)
 const light_angle_zsf = Vector3(180, 180, 37)
+
+const postprocessing_material = preload("res://Materials/post_processing.tres")
+@onready var directional_light = $DirectionalLight3D
 
 func _process(delta):
 	
@@ -34,6 +35,9 @@ func _process(delta):
 	timer += delta
 	set_environment_phase.rpc(timer)	
 	
+	#update post processing shader to use the directional lights actual point direction in its highlight/lowlight calculation
+	var light_direction = Vector3(cos(directional_light.rotation.y), directional_light.rotation.x, sin(directional_light.rotation.y)).normalized()
+	postprocessing_material.set_shader_parameter("light_direction", light_direction)
 	
 func get_zsf_instant(phase, zsf, offset = 0):
 	return zsf.x + zsf.y * sin(offset + phase/zsf.z) 

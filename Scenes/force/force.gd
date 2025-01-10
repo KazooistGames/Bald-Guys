@@ -116,6 +116,8 @@ func rpc_primary():
 	hum.play()
 	charge_timer = 0	
 	material.set_shader_parameter("glow_freq", 0.0)
+	material.set_shader_parameter("base_freq", 0.0)
+	material.set_shader_parameter("transparency", 0.25)
 	material.set_shader_parameter("color", Vector3(1., 0., 1.))
 	action = Action.charging
 
@@ -134,7 +136,9 @@ func rpc_secondary():
 	hum.play()
 	hum.volume_db = -27.0
 	hum.pitch_scale = 1.0
-	material.set_shader_parameter("glow_freq", 3.1)
+	material.set_shader_parameter("glow_freq", PI)
+	material.set_shader_parameter("base_freq", 1.3)
+	material.set_shader_parameter("transparency", 0.025)
 	material.set_shader_parameter("color", Vector3(0., 1., 0.))
 	action = Action.holding
 	

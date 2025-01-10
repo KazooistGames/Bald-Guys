@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://bco5lktfdwxre"]
 
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="2_8epmy"]
-[ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Scenes/environment/rail.material" id="2_n6e4d"]
+[ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Materials/rail.material" id="2_n6e4d"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xydkg"]
 bounce = 0.15

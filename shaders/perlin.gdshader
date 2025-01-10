@@ -1,4 +1,5 @@
 shader_type spatial;
+render_mode cull_back;
 
 uniform int cell_amount = 10;
 uniform vec2 cell_period = vec2(10., 10.);
@@ -69,6 +70,6 @@ void fragment(){
 	ALBEDO = color;
 	EMISSION = color;
 	float phasic = smoothstep(1.0 - cell_size, 1.0, noise) * abs(cos(TIME * glow_freq)) * glow;
-	float baseline = abs(sin(TIME * base_freq)) * transparency;
+	float baseline = abs(cos(TIME * base_freq)) * transparency;
 	ALPHA = phasic + baseline;
 }
