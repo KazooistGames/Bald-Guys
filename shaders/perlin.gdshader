@@ -14,6 +14,8 @@ uniform	float glow_freq = 3.1;
 
 uniform vec3 color = vec3(0.0, 1.0, 1.0);
 
+uniform float emission_magnitude = 3.0;
+
 vec2 modulo(vec2 divident, vec2 divisor){
 	vec2 positiveDivident = mod(divident, divisor) + divisor;
 	return mod(positiveDivident, divisor);
@@ -68,7 +70,7 @@ void vertex(){
 void fragment(){
 	float noise = seamless_noise(UV, cell_period);
 	ALBEDO = color;
-	EMISSION = color;
+	EMISSION = color * emission_magnitude;
 	float phasic = smoothstep(1.0 - cell_size, 1.0, noise) * abs(cos(TIME * glow_freq)) * glow;
 	float baseline = abs(cos(TIME * base_freq)) * transparency;
 	ALPHA = phasic + baseline;
