@@ -6,7 +6,7 @@
 render_priority = 2
 shader = ExtResource("1_31juo")
 shader_parameter/outline_multiplier = 0.3
-shader_parameter/outline_width = 1.0
+shader_parameter/outline_width = 2.0
 
 [resource]
 resource_local_to_scene = true

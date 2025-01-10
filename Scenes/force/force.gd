@@ -64,7 +64,7 @@ func _physics_process(delta):
 			
 	elif action == Action.charging:
 		charge_timer += delta
-		var progress = clamp(charge_timer/charge_period, 0.0, 1.0)
+		var progress = pow(clamp(charge_timer/charge_period, 0.0, 1.0), 3.0)
 		collider.shape.radius = lerp(0.0, 1.0, progress)
 		collider.shape.height = lerp(0.0, 2.0, progress)
 		hum.volume_db = lerp(-27.0, -21.0, progress)
@@ -93,8 +93,8 @@ func _physics_process(delta):
 		if cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		
-	mesh.mesh.radius = collider.shape.radius
-	mesh.mesh.height = collider.shape.height
+	mesh.mesh.radius = collider.shape.radius * 0.8
+	mesh.mesh.height = collider.shape.height* 0.8
 	mesh.rotate(Vector3.UP, delta * 0.9)
 	mesh.rotate(Vector3.FORWARD, delta)
 	mesh.rotate(Vector3.RIGHT, delta * 1.1)
