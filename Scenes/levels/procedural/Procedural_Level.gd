@@ -21,7 +21,7 @@ func _ready():
 	
 	reconfigure_timer = reconfigure_period - 5
 	bouncing_geometry.spawn_hover_boards(10)
-	brick_fields.spawn_field(5, 5, 1, Vector3.UP * 10)
+	brick_fields.spawn_field(5, 5, 1, Vector3.UP * 25)
 
 
 func _physics_process(delta):

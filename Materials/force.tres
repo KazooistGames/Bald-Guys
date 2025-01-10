@@ -4,7 +4,7 @@
 
 [resource]
 resource_local_to_scene = true
-render_priority = 3
+render_priority = 5
 shader = ExtResource("1_ih4sn")
 shader_parameter/cell_amount = 10
 shader_parameter/cell_period = Vector2(10, 10)

@@ -9,17 +9,19 @@ uniform float depth_threshold : hint_range(0, 1) = 0.03;
 uniform float reverse_depth_threshold : hint_range(0, 1) = 0.35;
 uniform float normal_threshold : hint_range(0, 1) = 0.35;
 
-uniform float darken_amount : hint_range(0, 1, 0.01) = 0.8;
+uniform float darken_amount : hint_range(0, 2, 0.01) = 0.8;
 uniform float lighten_amount : hint_range(0, 10, 0.01) = 1.20;
 
 uniform vec3 normal_edge_bias = vec3(0, -1, 0);
 uniform vec3 light_direction = vec3(0.0, -1.0, 0.0);
 
-uniform float maximum_range : hint_range(1,50) = 15;
+uniform float max_range : hint_range(1,50) = 15;
+uniform float range_boost = 4.0;
+uniform float range_shrink = 0.25;
 
 float scale_by_range(float range, float depth) {
-	float maximum_value = 2.0;
-	float minimum_value = 0.0;
+	float maximum_value = range_boost;
+	float minimum_value = range_shrink;
 	float scale_range = maximum_value - minimum_value;
 	float ratio = 1.0 - smoothstep(0.0, 1.0, depth/range);
 	float scale = scale_range * ratio;
@@ -68,7 +70,6 @@ void fragment() {
 		vec3 n = texture(normal_texture, uvs[i]).xyz * 2.0 - 1.0;
 		vec3 normal_diff = normal - n;
 		
-		// Edge pixels should yield to the normal closest to the bias direction
 		float normal_bias_diff = dot(normal_diff, normal_edge_bias);
 		float normal_indicator = smoothstep(-0.01, 0.01, normal_bias_diff);
 		
@@ -79,7 +80,7 @@ void fragment() {
 	
 	float reverse_depth_edge = step(reverse_depth_threshold, depth_diff_reversed); 
 	
-	float normal_scale = scale_by_range(maximum_range, depth);
+	float normal_scale = scale_by_range(max_range, depth);
 	float indicator = sqrt(normal_sum * normal_scale);
 	float normal_edge = step(normal_threshold, indicator - reverse_depth_edge);
 	

@@ -1,15 +1,17 @@
 [gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bnku3p4cuequa"]
 
-[ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="1_dybjo"]
+[ext_resource type="Shader" path="res://shaders/detail_lines.gdshader" id="1_kchha"]
 
 [resource]
-render_priority = 0
-shader = ExtResource("1_dybjo")
-shader_parameter/depth_threshold = 0.02
-shader_parameter/reverse_depth_threshold = 0.25
-shader_parameter/normal_threshold = 0.2
-shader_parameter/darken_amount = 0.3
-shader_parameter/lighten_amount = 1.5
+render_priority = 1
+shader = ExtResource("1_kchha")
+shader_parameter/depth_threshold = 0.03
+shader_parameter/reverse_depth_threshold = 0.35
+shader_parameter/normal_threshold = 0.5
+shader_parameter/darken_amount = 1.25
+shader_parameter/lighten_amount = 1.25
 shader_parameter/normal_edge_bias = Vector3(1, 1, 1)
 shader_parameter/light_direction = Vector3(0, -1, 0)
-shader_parameter/maximum_range = 5.0
+shader_parameter/max_range = 25.0
+shader_parameter/range_boost = 4.0
+shader_parameter/range_shrink = 0.0

@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
-[ext_resource type="Shader" path="res://shaders/postprocessing_highlight.gdshader" id="2_76mdc"]
+[ext_resource type="Shader" path="res://shaders/detail_lines.gdshader" id="2_76mdc"]
 [ext_resource type="AudioStream" uid="uid://do2svkh5yqq6a" path="res://audio/Beas Mote2.wav" id="3_w7uwt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ddwpy"]
