@@ -56,12 +56,10 @@ func get_mesh_height(bot_pos):
 	return top_position.distance_to(bot_pos) + bottom_drop
 	
 	
-func rerender(bottom_position):
+func rerender(bottom):
 
-	var top_position = get_top_position(bottom_position)
-	
-	var mesh_position = get_mesh_position(bottom_position)
-	var mesh_height = get_mesh_height(bottom_position)
+	var mesh_position = get_mesh_position(bottom)
+	var mesh_height = get_mesh_height(bottom)
 		
 	mesh.global_position = mesh_position + global_position
 	mesh.mesh.size.x = size

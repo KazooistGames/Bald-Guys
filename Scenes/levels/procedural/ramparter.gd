@@ -1,5 +1,6 @@
 extends Node3D
 
+
 const ramp_prefab = preload("res://Scenes/objects/ramp/ramp.tscn")
 
 const map_size = 50.0
@@ -7,8 +8,6 @@ const map_size = 50.0
 const max_dimension = 15.0
 
 const spacing = 10.0
-
-var ramps = []
 
 enum Configuration 
 {
@@ -18,21 +17,14 @@ enum Configuration
 }
 @export var configuration = Configuration.inert
 
-var in_position = false
+var ramps = []
 
 var lift_speed = 2.0
 var collapse_speed = 2.0
 
-
 func _physics_process(delta):
 	
 	ramps = get_ramps()
-	
-	if configuration == Configuration.inert or ramps.size() == 0:
-		in_position = true
-		return
-	
-	var in_position_count = 0
 	
 	for index in range(ramps.size()): #move floor mesas
 		var ramp = ramps[index]
@@ -40,44 +32,45 @@ func _physics_process(delta):
 		var step = delta
 		
 		if configuration == Configuration.lifting:
-			target = (1+index)
+			target = 1.0
 			step *= lift_speed 
 		
 		elif configuration == Configuration.collapsing:
 			step *= collapse_speed
 			
+		var height_change = clamp(target - ramp.height, -step, step)
 		ramp.height = move_toward(ramp.height, target, step)
-		if ramp.height == target:
-			in_position_count += 1
-			
-	if in_position_count == ramps.size():
-		in_position = true 
+		ramp.position.y += height_change/2.0
 
-
-func spawn_ramps(count):
+func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = false):
 	
-	print("pulling up ", count, " ramps")
+	var new_ramp = ramp_prefab.instantiate()
+	add_child(new_ramp, true)		
+	new_ramp.length = length
+	new_ramp.thickness = thickness
+	new_ramp.height = 0.0
+	new_ramp.position = coordinates
+	new_ramp.rotation.y = randi_range(0, 3) * PI/2
 	
-	if not is_multiplayer_authority():
-		return
+	if verify_position:			
+		new_ramp.position.y = height_at_coordinates(coordinates) + 0.5
 		
-	for index in range(count):
-		var new_ramp = ramp_prefab.instantiate()
-		add_child(new_ramp, true)		
+	print("pulling up ramp at ", new_ramp.position)
 		
-		new_ramp.length = randi_range(1 + index * 2, max_dimension)
-		new_ramp.thickness = max(1, abs(max_dimension - new_ramp.length ))
-		new_ramp.height = 0.0
-		var boundary = map_size/2.0 - max(new_ramp.thickness, new_ramp.length)/2.0
-		new_ramp.position.x =  randi_range(-boundary/spacing, boundary/spacing) * spacing
-		new_ramp.position.z = randi_range(-boundary/spacing, boundary/spacing) * spacing
-		new_ramp.position.y = 0
-		new_ramp.rotation.y = randi_range(0, 3) * PI/2
-		
-		
-func clear_mesas():
+func height_at_coordinates(coordinates):
 	
-	var ramps = get_ramps()
+	var origin = Vector3(coordinates.x, map_size, coordinates.z)
+	var destination = Vector3(coordinates.x, -map_size - 1, coordinates.z)
+	var query = PhysicsRayQueryParameters3D.create(origin, destination, 0b0001, [])
+	query.hit_back_faces = false
+	query.hit_from_inside = false
+	var collision = get_world_3d().direct_space_state.intersect_ray(query)
+	return collision["position"].y
+	
+		
+func clear_ramps():
+	
+	ramps = get_ramps()
 	
 	for ramp in ramps:
 		ramp.queue_free()
@@ -86,19 +79,19 @@ func clear_mesas():
 	
 
 func lift():
+	
 	if configuration == Configuration.lifting:
 		return
 	else:
 		configuration = Configuration.lifting
-		in_position = false
 	
 	
 func collapse():
+	
 	if configuration == Configuration.collapsing:
 		return
 	else:
 		configuration = Configuration.collapsing
-		in_position = false
 	
 
 func get_ramps():

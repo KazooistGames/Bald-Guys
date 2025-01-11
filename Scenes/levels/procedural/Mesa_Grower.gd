@@ -102,11 +102,12 @@ func spawn_mesas(count):
 		new_mesa.position.z = randi_range(-boundary, boundary) * 1.0
 		new_mesa.position.y = -1
 		new_mesa.rotation.y = randi_range(0, 3) * PI/2
-
+		mesas.append(new_mesa)
+		
 
 func clear_mesas():
 	
-	var mesas = get_mesas()
+	mesas = get_mesas()
 	
 	for mesa in mesas:
 		mesa.queue_free()

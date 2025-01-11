@@ -22,7 +22,6 @@ func _process(_delta):
 	reticle.expand_mode = 1
 	reticle.size = Vector2.ONE * 4
 	reticle.position = get_center_of_screen() - reticle.size/2
-	var light_direction = postprocessing.get_surface_override_material(0).get_shader_parameter("light_direction")
 	
 	
 func _input(event):

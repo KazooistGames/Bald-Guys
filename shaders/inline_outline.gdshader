@@ -6,15 +6,20 @@ uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nea
 uniform sampler2D depth_texture : source_color, hint_depth_texture, filter_nearest;
 uniform sampler2D normal_texture : source_color, hint_normal_roughness_texture, filter_nearest;
 
-uniform float depth_threshold : hint_range(0, 1) = 0.03;
+uniform float max_depth : hint_range(5, 100) = 25.0;
+uniform float min_depth : hint_range(0, 10) = 3.0;
+uniform float depth_scale : hint_range(1, 25) = 15.0;
+
+uniform float depth_threshold : hint_range(0, 1) = 0.005;
 uniform float reverse_depth_threshold : hint_range(0, 1) = 0.25;
-uniform float normal_threshold : hint_range(0, 1) = 0.5;
+uniform float normal_threshold : hint_range(0, 1) = 0.6;
 
-uniform float darken_amount : hint_range(0, 1, 0.01) = 0.15;
-uniform float lighten_amount : hint_range(0, 10, 0.01) = 1.5;
+uniform float darken_amount : hint_range(0, 1, 0.01) = 0.0;
+uniform float lighten_amount : hint_range(0, 10, 0.01) = 1.75;
 
-uniform vec3 normal_edge_bias = vec3(1, 1, 1);
+uniform vec3 normal_edge_bias = vec3(1.0, 1.0, 1.0);
 uniform vec3 light_direction = vec3(0.01, -1.0, 0.01);
+
 
 float get_depth(vec2 screen_uv, mat4 inv_projection_matrix) {
 	float depth = texture(depth_texture, screen_uv).r;
@@ -22,6 +27,11 @@ float get_depth(vec2 screen_uv, mat4 inv_projection_matrix) {
 	vec4 view = inv_projection_matrix * vec4(ndc, 1.0);
 	view.xyz /= view.w;
 	return -view.z;
+}
+
+float dynamic_depth_scaler(float depth, float magnitude){
+	float scaled_ratio = smoothstep(min_depth, max_depth, depth);
+	return mix(1, magnitude, scaled_ratio);
 }
 
 void vertex() {
@@ -64,8 +74,11 @@ void fragment() {
 		
 		normal_sum += dot(normal_diff, normal_diff) * normal_indicator;
 	}
-	float depth_edge = step(depth_threshold, depth_diff);
 	
+	float depth_edge = step(dynamic_depth_scaler(depth, depth_scale) * depth_threshold, depth_diff);
+	
+
+
 	// The reverse depth sum produces depth lines inside of the object, but they don't look as nice as the normal depth_diff
 	// Instead, we can use this value to mask the normal edge along the outside of the object
 	float reverse_depth_edge = step(reverse_depth_threshold, depth_diff_reversed); 

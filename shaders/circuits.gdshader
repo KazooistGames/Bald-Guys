@@ -1,7 +1,5 @@
 shader_type spatial;
 
-
-
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 
 uniform float track_thickness = 0.001;
@@ -12,6 +10,9 @@ uniform float phase_scalar = 2.0;
 uniform float emission_amplitude = 3.0;
 
 uniform vec3 comet_color = vec3(1.0, 0.0, 1.0);
+
+uniform float height_factor = 5.0;
+uniform float lateral_factor = 0.0;
 
 
 int comet_cycle(float period, float offset){
@@ -131,7 +132,10 @@ vec4 random_vec4(float zero, float span, int seed){
 
 varying float time_offset;
 void vertex() {
-	time_offset = NODE_POSITION_WORLD.g * 5.0 + 1.0;
+	
+	time_offset = NODE_POSITION_WORLD.g * height_factor;
+	time_offset += (NODE_POSITION_WORLD.r * NODE_POSITION_WORLD.b) + max(NODE_POSITION_WORLD.r, NODE_POSITION_WORLD.b) * lateral_factor;
+	
 }
 
 void fragment() {

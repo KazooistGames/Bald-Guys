@@ -124,7 +124,6 @@ func start_host_lobby():
 	Client_Screennames[1] = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
 
 
-
 func join_lobby():
 	
 	var enet_peer = ENetMultiplayerPeer.new()
@@ -202,8 +201,8 @@ func quit():
 	
 func introduce_myself_to_server():
 	
-	var name = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
-	rpc_set_client_screenname.rpc(name)
+	var player_name = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
+	rpc_set_client_screenname.rpc(player_name)
 	
 		
 @rpc("call_local", "reliable")
@@ -217,7 +216,7 @@ func rpc_handoff_object(path, auth_id):
 		
 		
 @rpc("call_remote", "reliable", "any_peer")	
-func rpc_set_client_screenname(name):
+func rpc_set_client_screenname(player_name):
 	
 	var id = multiplayer.get_remote_sender_id()
-	Client_Screennames[id] = name
+	Client_Screennames[id] = player_name
