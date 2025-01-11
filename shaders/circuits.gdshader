@@ -1,6 +1,6 @@
 shader_type spatial;
 
-render_mode unshaded, shadows_disabled;
+
 
 uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
 
@@ -129,7 +129,7 @@ vec4 random_vec4(float zero, float span, int seed){
 
 varying float time_offset;
 void vertex() {
-	time_offset = max(NODE_POSITION_WORLD.r, NODE_POSITION_WORLD.g) * NODE_POSITION_WORLD.b;
+	time_offset = NODE_POSITION_WORLD.g * 5.0 + 1.0;
 }
 
 void fragment() {

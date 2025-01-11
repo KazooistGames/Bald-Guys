@@ -5,8 +5,8 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ny34g"]
 render_priority = 0
 shader = ExtResource("2_h1g05")
-shader_parameter/track_thickness = 0.002
-shader_parameter/tail_length = 0.1
+shader_parameter/track_thickness = 0.01
+shader_parameter/tail_length = 0.02
 shader_parameter/phase_scalar = 2.0
 shader_parameter/emission_amplitude = 8.0
 

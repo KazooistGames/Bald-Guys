@@ -4,6 +4,7 @@ const prefab = preload("res://Scenes/objects/mesa/mesa.tscn")
 
 var map_size = 50
 
+
 func _physics_process(delta):
 	
 	var boards = get_boards()
@@ -17,21 +18,23 @@ func _physics_process(delta):
 		
 		if intersection == null:
 			pass
-			
-		elif abs(intersection.x) >= xz_bounds:
-			var x_pen = (xz_bounds - abs(intersection.x)) * sign(intersection.x)
-			body.position.x += x_pen
-			trajectory.x = -trajectory.x 
-	
-		elif abs(intersection.z) >= xz_bounds:
-			var z_pen = (xz_bounds - abs(intersection.z)) * sign(intersection.z)
-			body.position.z += z_pen
-			trajectory.z = -trajectory.z 
-			
+					
 		else:
-			var y_pen = (y_bounds - abs(intersection.y)) * sign(intersection.y)
-			body.position.y -= y_pen
-			trajectory.y = -trajectory.y
+			
+			if abs(intersection.x) >= xz_bounds:
+				var x_pen = (xz_bounds - abs(intersection.x)) * sign(intersection.x)
+				body.position.x += x_pen
+				trajectory.x = -trajectory.x 
+		
+			if abs(intersection.z) >= xz_bounds:
+				var z_pen = (xz_bounds - abs(intersection.z)) * sign(intersection.z)
+				body.position.z += z_pen
+				trajectory.z = -trajectory.z 
+				
+			if abs(intersection.y) >= y_bounds:
+				var y_pen = (y_bounds - abs(intersection.y)) * sign(intersection.y)
+				body.position.y -= y_pen
+				trajectory.y = -trajectory.y
 
 		if body.position.y > 15:
 			trajectory.y = -trajectory.y

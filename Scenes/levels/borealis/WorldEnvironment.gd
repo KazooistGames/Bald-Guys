@@ -18,8 +18,8 @@ const ambient_green_zsf = Vector3(0.35, 0.20, 11)
 const ambient_blue_zsf = Vector3(0.35, 0.20, 13)
 const ambient_energy_zsf = Vector3(0.65, 0.3, 1)
 
-const light_tilt_zsf = Vector3(-90, 10, 47)
-const light_angle_zsf = Vector3(180, 180, 37)
+const light_tilt_zsf = Vector3(-90, 15, 37)
+const light_angle_zsf = Vector3(180, 180, 31)
 
 const postprocessing_material = preload("res://Materials/post_processing.tres")
 @onready var directional_light = $DirectionalLight3D

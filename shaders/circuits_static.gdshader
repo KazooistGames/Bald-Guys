@@ -1,14 +1,11 @@
 shader_type spatial;
 
-render_mode unshaded, shadows_disabled;
-
-uniform sampler2D screen_texture : source_color, hint_screen_texture, filter_nearest;
+uniform sampler2D screen_texture : hint_screen_texture;
 
 uniform float track_thickness = 0.001;
 uniform float tail_length = 0.1;
 
 uniform float phase_scalar = 1.0;
-
 
 
 int comet_cycle(float period, float offset){
@@ -129,7 +126,7 @@ vec4 random_vec4(float zero, float span, int seed){
 
 void fragment() {
 	
-	vec3 sample_color = texture(screen_texture, SCREEN_UV).rgb;
+	vec3 sample_color = texture(screen_texture, UV).rgb;
 	
 	float reseed_interval = 8.0 * phase_scalar;
 	float seed_phase = TIME;

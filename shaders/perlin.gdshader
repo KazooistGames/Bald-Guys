@@ -1,4 +1,5 @@
 shader_type spatial;
+
 render_mode cull_back;
 
 uniform int cell_amount = 10;
