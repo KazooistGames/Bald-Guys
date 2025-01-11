@@ -2,7 +2,9 @@ extends Node3D
 
 const prefab = preload("res://Scenes/objects/mesa/mesa.tscn")
 
-var map_size = 50
+const board_thickness = 0.5
+
+const map_size = 50
 
 
 func _physics_process(delta):
@@ -21,17 +23,17 @@ func _physics_process(delta):
 					
 		else:
 			
-			if abs(intersection.x) >= xz_bounds:
+			if abs(intersection.x) >= xz_bounds and intersection.x >= intersection.z:
 				var x_pen = (xz_bounds - abs(intersection.x)) * sign(intersection.x)
 				body.position.x += x_pen
 				trajectory.x = -trajectory.x 
 		
-			if abs(intersection.z) >= xz_bounds:
+			elif abs(intersection.z) >= xz_bounds:
 				var z_pen = (xz_bounds - abs(intersection.z)) * sign(intersection.z)
 				body.position.z += z_pen
 				trajectory.z = -trajectory.z 
 				
-			if abs(intersection.y) >= y_bounds:
+			elif abs(intersection.y) >= y_bounds:
 				var y_pen = (y_bounds - abs(intersection.y)) * sign(intersection.y)
 				body.position.y -= y_pen
 				trajectory.y = -trajectory.y
@@ -71,12 +73,12 @@ func spawn_hover_boards(count):
 		add_child(new_board, true)		
 		new_board.size =  3
 		var boundary = map_size / 2.0 - new_board.size / 2.0
-		new_board.position.x = randi_range(-boundary, boundary)
-		new_board.position.z = randi_range(-boundary, boundary)
-		new_board.position.y = 1
 		new_board.bottom_drop = 0.0
 		new_board.preference = new_board.Preference.deep
-		new_board.raycast.target_position = Vector3.DOWN * 0.5
+		new_board.raycast.target_position = Vector3.DOWN * board_thickness
+		new_board.position.x = randi_range(-boundary, boundary)
+		new_board.position.z = randi_range(-boundary, boundary)
+		new_board.position.y = board_thickness
 		
 		var new_vector = Vector3(randf_range(-1.0, 1.0), randf_range(0.05, 0.25), randf_range(-1.0, 1.0)).normalized()
 		var speed = index/5.0 + 3
@@ -86,3 +88,5 @@ func spawn_hover_boards(count):
 func get_boards():
 	
 	return find_children("*", "AnimatableBody3D", true, false)
+	
+

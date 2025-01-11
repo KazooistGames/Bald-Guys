@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://dnyf0qu40f6qt"]
+[gd_scene load_steps=7 format=3 uid="uid://dnyf0qu40f6qt"]
 
 [ext_resource type="Script" path="res://Scenes/objects/ramp/ramp.gd" id="1_1aw7e"]
-[ext_resource type="Material" uid="uid://dsl744elr5q4v" path="res://Materials/rail.material" id="2_ceo84"]
+[ext_resource type="Material" uid="uid://svosidjb5wsa" path="res://Materials/geometry.tres" id="2_d6no5"]
+[ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="3_357y2"]
 
 [sub_resource type="PrismMesh" id="PrismMesh_3as30"]
 resource_local_to_scene = true
@@ -12,12 +13,29 @@ size = Vector3(2, 1, 1)
 resource_local_to_scene = true
 points = PackedVector3Array(1, 0.5, 0.5, 1, 0.5, -0.5, -1, -0.5, 0.5, 1, -0.5, 0.5, 1, -0.5, -0.5, -1, -0.5, -0.5)
 
-[node name="Ramp" type="StaticBody3D"]
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pg2oy"]
+properties/0/path = NodePath(".:height")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:length")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+properties/2/path = NodePath(".:thickness")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+
+[node name="Ramp" type="AnimatableBody3D"]
+sync_to_physics = false
 script = ExtResource("1_1aw7e")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("PrismMesh_3as30")
-surface_material_override/0 = ExtResource("2_ceo84")
+surface_material_override/0 = ExtResource("2_d6no5")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("ConvexPolygonShape3D_2x6vj")
+
+[node name="TransformSync" parent="." instance=ExtResource("3_357y2")]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_pg2oy")

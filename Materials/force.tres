@@ -13,6 +13,6 @@ shader_parameter/waviness = 0.025
 shader_parameter/glow = 0.5
 shader_parameter/transparency = 0.025
 shader_parameter/base_freq = 1.3
-shader_parameter/glow_freq = 6.3
+shader_parameter/glow_freq = 3.1
 shader_parameter/color = Vector3(0, 0, 1)
 shader_parameter/emission_magnitude = 3.0

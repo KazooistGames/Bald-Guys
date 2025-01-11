@@ -7,10 +7,10 @@ var bricks = []
 
 func spawn_field(rows, columns, spacing, spawn_point):
 	
+	print("dropping ", rows * columns, " bricks")
+	
 	var new_bricks = []
-	
 	var span = spacing / 2.0
-	
 	
 	for row_num in range(rows):
 		var z_offset = (row_num - rows / 2.0) * spacing

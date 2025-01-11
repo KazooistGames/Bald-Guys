@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxvldmj0gbd3m"]
+
+[ext_resource type="Script" path="res://Scenes/levels/procedural/ramparter.gd" id="1_1cb03"]
+
+[node name="Ramparter" type="Node3D"]
+script = ExtResource("1_1cb03")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://Scenes/objects/ramp/ramp.tscn")
+spawn_path = NodePath("..")
