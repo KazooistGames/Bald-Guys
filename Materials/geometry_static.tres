@@ -1,0 +1,17 @@
+[gd_resource type="StandardMaterial3D" load_steps=3 format=3 uid="uid://pgt4npxf4b83"]
+
+[ext_resource type="Shader" path="res://shaders/circuits.gdshader" id="1_tbpiy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ny34g"]
+render_priority = 0
+shader = ExtResource("1_tbpiy")
+shader_parameter/track_thickness = 0.003
+shader_parameter/tail_length = 1.0
+shader_parameter/phase_scalar = 8.0
+shader_parameter/emission_amplitude = 1000.0
+shader_parameter/comet_color = Vector3(1, 0, 1)
+
+[resource]
+next_pass = SubResource("ShaderMaterial_ny34g")
+metallic = 1.0
+roughness = 0.0

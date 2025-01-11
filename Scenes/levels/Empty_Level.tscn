@@ -1,22 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://c1uj8nhliop8j"]
+[gd_scene load_steps=2 format=3 uid="uid://c1uj8nhliop8j"]
 
-[ext_resource type="PackedScene" uid="uid://cxh4be4uwbmtf" path="res://Scenes/levels/Floor/floor.tscn" id="2_ata1q"]
 [ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/levels/Wall/wall.tscn" id="3_siirb"]
-[ext_resource type="PackedScene" uid="uid://cq0iv8xqbqvro" path="res://Scenes/levels/Ceiling/ceiling.tscn" id="4_hexsd"]
 
 [node name="Empty_Level" type="Node3D"]
 
 [node name="room" type="Node3D" parent="."]
 
-[node name="floor" parent="room" instance=ExtResource("2_ata1q")]
-skeleton = NodePath("../../..")
+[node name="floor" parent="room" instance=ExtResource("3_siirb")]
+
+[node name="ceiling" parent="room" instance=ExtResource("3_siirb")]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 50, 0)
 
 [node name="wall" parent="room" instance=ExtResource("3_siirb")]
 transform = Transform3D(4.37114e-08, 1, -8.74228e-08, 1, -4.37114e-08, 0, -3.82137e-15, -8.74228e-08, -1, -25, 25, 0)
-skeleton = NodePath("../..")
-
-[node name="ceiling" parent="room" instance=ExtResource("4_hexsd")]
-transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 50, 0)
 skeleton = NodePath("../..")
 
 [node name="wall2" parent="room" instance=ExtResource("3_siirb")]

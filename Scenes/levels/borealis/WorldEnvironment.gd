@@ -22,7 +22,7 @@ const light_tilt_zsf = Vector3(-90, 15, 37)
 const light_angle_zsf = Vector3(180, 180, 31)
 
 const postprocessing_material = preload("res://Materials/post_processing.tres")
-const wall_circuits = preload("res://Materials/wall.material")
+#const wall_circuits = preload("res://Materials/wall.material")
 
 @onready var directional_light = $DirectionalLight3D
 
@@ -42,10 +42,10 @@ func _process(delta):
 	postprocessing_material.set_shader_parameter("light_direction", light_direction)
 	
 	#make wall circuits have the opposite color as the ambient lighting to create contrast
-	var inverted_color = environment.ambient_light_color.inverted() * environment.ambient_light_color.inverted()
-	var circuit_color = Vector3(inverted_color.r, inverted_color.g, inverted_color.b).normalized()
-	wall_circuits.next_pass.set_shader_parameter("comet_color", circuit_color)
-	print(wall_circuits.next_pass.get_shader_parameter("comet_color"))
+	#var inverted_color = environment.ambient_light_color.inverted() * environment.ambient_light_color.inverted()
+	#var circuit_color = Vector3(inverted_color.r, inverted_color.g, inverted_color.b).normalized()
+	#wall_circuits.next_pass.set_shader_parameter("comet_color", circuit_color)
+	#print(wall_circuits.next_pass.get_shader_parameter("comet_color"))
 	
 	
 func get_zsf_instant(phase, zsf, offset = 0):

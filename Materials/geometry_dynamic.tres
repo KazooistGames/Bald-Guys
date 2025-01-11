@@ -3,14 +3,15 @@
 [ext_resource type="Shader" path="res://shaders/circuits.gdshader" id="2_h1g05"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ny34g"]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("2_h1g05")
-shader_parameter/track_thickness = 0.01
-shader_parameter/tail_length = 0.02
+shader_parameter/track_thickness = 0.02
+shader_parameter/tail_length = 0.05
 shader_parameter/phase_scalar = 2.0
-shader_parameter/emission_amplitude = 8.0
+shader_parameter/emission_amplitude = 3.0
+shader_parameter/comet_color = Vector3(1, 0, 1)
 
 [resource]
-resource_local_to_scene = true
 next_pass = SubResource("ShaderMaterial_ny34g")
 albedo_color = Color(0.392157, 0.392157, 0.392157, 1)

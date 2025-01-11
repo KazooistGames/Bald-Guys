@@ -12,5 +12,4 @@ shader_parameter/emission_amplitude = 1000.0
 shader_parameter/comet_color = Vector3(1, 0, 1)
 
 [resource]
-resource_local_to_scene = true
 next_pass = SubResource("ShaderMaterial_ny34g")
