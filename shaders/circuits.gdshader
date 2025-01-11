@@ -11,6 +11,8 @@ uniform float phase_scalar = 2.0;
 
 uniform float emission_amplitude = 3.0;
 
+uniform vec3 comet_color = vec3(1.0, 0.0, 1.0);
+
 
 int comet_cycle(float period, float offset){
 	return int( (TIME + offset) / period);
@@ -144,23 +146,22 @@ void fragment() {
 	vec4 y_rails = random_vec4(0.5, 0.35, seed);
 	vec4 speeds = vec4(1.0, 1.5, -1.0, -1.5);
 
-	float fade = abs(sin(seed_phase));
+	
+	float fade_b = abs(cos(seed_phase / 1.3)) / 2.0 + 0.5;
+	
+	bool rail_1 = energized(UV, x_rails, y_rails, speeds, time_offset);
+	bool rail_2 = energized(UV, x_rails, y_rails, speeds / 2.0, time_offset);
+	bool rail_3 = energized(UV, x_rails, y_rails, speeds * 2.0, time_offset);
 
-	if (energized(UV, x_rails, y_rails, speeds, time_offset)){
-		original.r = fade;		
-		EMISSION = original * emission_amplitude;
+	if (rail_1 || rail_2 || rail_3){
+		float ratio = abs(cos(seed_phase / 2.1)) / 2.0 + 0.5;
+		ALBEDO = mix(original, comet_color, ratio);
+		EMISSION = ALBEDO * emission_amplitude;
 	}
-	else if(energized(UV, x_rails, y_rails, speeds/2.0, time_offset))
-	{
-		original.r = fade;	
-		EMISSION = original * emission_amplitude;
+	else{
+		ALBEDO = original;
 	}
-	else if(energized(UV, x_rails, y_rails, speeds*2.0, time_offset))
-	{
-		original.r = fade;	
-		EMISSION = original * emission_amplitude;
-	}
-	ALBEDO = original;
+
 }
 
 

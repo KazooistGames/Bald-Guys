@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://1v5p2mj7bl3y"]
 
-[ext_resource type="PlaneMesh" path="res://Scenes/levels/Wall/wall.tres" id="1_saatn"]
-[ext_resource type="Material" path="res://Materials/wall.material" id="2_so77d"]
+[ext_resource type="PlaneMesh" uid="uid://bkcwl7e51sjbe" path="res://Scenes/levels/Wall/wall.tres" id="1_saatn"]
+[ext_resource type="Material" uid="uid://d1j362inqf22g" path="res://Materials/wall.material" id="2_so77d"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]
 size = Vector3(50, 1, 50)

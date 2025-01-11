@@ -22,6 +22,8 @@ const light_tilt_zsf = Vector3(-90, 15, 37)
 const light_angle_zsf = Vector3(180, 180, 31)
 
 const postprocessing_material = preload("res://Materials/post_processing.tres")
+const wall_circuits = preload("res://Materials/wall.material")
+
 @onready var directional_light = $DirectionalLight3D
 
 func _process(delta):
@@ -39,7 +41,15 @@ func _process(delta):
 	var light_direction = Vector3(cos(directional_light.rotation.y), directional_light.rotation.x, sin(directional_light.rotation.y)).normalized()
 	postprocessing_material.set_shader_parameter("light_direction", light_direction)
 	
+	#make wall circuits have the opposite color as the ambient lighting to create contrast
+	var inverted_color = environment.ambient_light_color.inverted() * environment.ambient_light_color.inverted()
+	var circuit_color = Vector3(inverted_color.r, inverted_color.g, inverted_color.b).normalized()
+	wall_circuits.next_pass.set_shader_parameter("comet_color", circuit_color)
+	print(wall_circuits.next_pass.get_shader_parameter("comet_color"))
+	
+	
 func get_zsf_instant(phase, zsf, offset = 0):
+	
 	return zsf.x + zsf.y * sin(offset + phase/zsf.z) 
 
 
@@ -55,9 +65,10 @@ func set_environment_phase(phase):
 	var ambient_green = get_zsf_instant(phase, ambient_green_zsf)	
 	var ambient_blue = get_zsf_instant(phase, ambient_blue_zsf)	
 
-	environment.ambient_light_color = Color(ambient_red, ambient_green, ambient_blue)
 	#environment.volumetric_fog_emission_energy = get_zsf_instant(timer, fog_density_zsf)	
+	environment.ambient_light_color = Color(ambient_red, ambient_green, ambient_blue)
 	environment.ambient_light_energy = get_zsf_instant(timer, ambient_energy_zsf)
+	
 	
 	var x = get_zsf_instant(phase, light_tilt_zsf)
 	var y = get_zsf_instant(phase, light_angle_zsf)

@@ -23,7 +23,7 @@ func _ready():
 	progress_backdrop.custom_minimum_size = Vector2(progress_bar_length, progress_bar_width)
 	
 	
-func _process(delta):
+func _process(_delta):
 	
 	scoreboard.visible = Input.is_action_pressed("tab")
 	progress_fill.custom_minimum_size.x = progress_bar_length * clampf(ProgressPercent, 0.0, 1.0)
