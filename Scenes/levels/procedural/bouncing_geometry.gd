@@ -1,6 +1,6 @@
 extends Node3D
 
-const prefab = preload("res://Scenes/objects/mesa/mesa.tscn")
+const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
 
 const board_thickness = 0.5
 

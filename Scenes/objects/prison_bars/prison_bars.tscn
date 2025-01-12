@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://daxnbcclkp03d"]
 
 [ext_resource type="Script" path="res://Scenes/objects/prison_bars/prison_bars.gd" id="1_a1djh"]
-[ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/objects/pillar/pillar.tscn" id="1_tlufn"]
+[ext_resource type="PackedScene" uid="uid://16j7ru0475kt" path="res://Scenes/geometry/pillar/pillar.tscn" id="1_tlufn"]
 
 [node name="PrisonBars" type="Node3D"]
 script = ExtResource("1_a1djh")

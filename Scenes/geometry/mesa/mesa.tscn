@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://c3nyb0ufrrici"]
 
-[ext_resource type="Script" path="res://Scenes/objects/mesa/mesa.gd" id="1_syifw"]
+[ext_resource type="Script" path="res://Scenes/geometry/mesa/mesa.gd" id="1_syifw"]
 [ext_resource type="Material" uid="uid://svosidjb5wsa" path="res://Materials/geometry.tres" id="2_iojno"]
 [ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="3_oxcs1"]
 

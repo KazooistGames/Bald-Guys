@@ -1,7 +1,7 @@
 extends Node3D
 
 
-const ramp_prefab = preload("res://Scenes/objects/ramp/ramp.tscn")
+const ramp_prefab = preload("res://Scenes/geometry/ramp/ramp.tscn")
 
 const map_size = 50.0
 

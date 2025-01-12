@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dkvhw01tsv755"]
 
-[ext_resource type="PackedScene" uid="uid://km6if1awx5dt" path="res://Scenes/objects/brick/brick.tscn" id="1_1ygqn"]
+[ext_resource type="PackedScene" uid="uid://km6if1awx5dt" path="res://Scenes/geometry_dynamic/brick/brick.tscn" id="1_1ygqn"]
 
 [node name="Bricks" type="Node3D"]
 

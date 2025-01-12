@@ -4,7 +4,8 @@ extends Node3D
 enum Preference{
 	inert = -1,
 	shallow = 0,
-	deep = 1
+	deep = 1,
+	none = 2,
 }
 
 @export var preference = Preference.deep

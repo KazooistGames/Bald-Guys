@@ -6,5 +6,5 @@
 script = ExtResource("1_4cqld")
 
 [node name="Spawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/objects/mesa/mesa.tscn")
+_spawnable_scenes = PackedStringArray("res://Scenes/geometry/mesa/mesa.tscn")
 spawn_path = NodePath("..")

@@ -15,5 +15,3 @@ shader_parameter/lateral_factor = 5.0
 
 [resource]
 next_pass = SubResource("ShaderMaterial_ny34g")
-metallic = 1.0
-roughness = 0.0

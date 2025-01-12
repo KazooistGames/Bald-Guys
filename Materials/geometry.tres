@@ -10,6 +10,8 @@ shader_parameter/tail_length = 0.1
 shader_parameter/phase_scalar = 2.0
 shader_parameter/emission_amplitude = 1000.0
 shader_parameter/comet_color = Vector3(1, 0, 1)
+shader_parameter/height_factor = 5.0
+shader_parameter/lateral_factor = 0.0
 
 [resource]
 next_pass = SubResource("ShaderMaterial_ny34g")

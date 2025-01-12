@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://16j7ru0475kt"]
 
-[ext_resource type="Script" path="res://Scenes/objects/pillar/pillar.gd" id="1_bs8dr"]
+[ext_resource type="Script" path="res://Scenes/geometry/pillar/pillar.gd" id="1_bs8dr"]
 [ext_resource type="Shader" path="res://shaders/circuits.gdshader" id="2_6flk8"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_7xvkk"]

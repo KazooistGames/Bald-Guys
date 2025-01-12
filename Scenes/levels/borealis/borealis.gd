@@ -1,6 +1,5 @@
 extends WorldEnvironment
 
-var timer = 0.0
 
 #	"ZSF" = zero / span / frequency
 #	used with fluctuating variables
@@ -21,11 +20,20 @@ const ambient_energy_zsf = Vector3(0.65, 0.3, 1)
 const light_tilt_zsf = Vector3(-90, 15, 37)
 const light_angle_zsf = Vector3(180, 180, 31)
 
+const geometry_metallic_zsf = Vector3(0.5, 0.5, 47)
+const geometry_roughness_zsf = Vector3(0.5, 0.5, 43)
+
 const postprocessing_material = preload("res://Materials/post_processing.tres")
+var geometry_static_material = preload("res://Materials/geometry_static.tres")
+var geometry_material = preload("res://Materials/geometry.tres")
 #const wall_circuits = preload("res://Materials/wall.material")
+
 
 @onready var directional_light = $DirectionalLight3D
 
+@onready var timer = randi()
+
+	
 func _process(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
@@ -40,12 +48,6 @@ func _process(delta):
 	#update post processing shader to use the directional lights actual point direction in its highlight/lowlight calculation
 	var light_direction = Vector3(cos(directional_light.rotation.y), directional_light.rotation.x, sin(directional_light.rotation.y)).normalized()
 	postprocessing_material.set_shader_parameter("light_direction", light_direction)
-	
-	#make wall circuits have the opposite color as the ambient lighting to create contrast
-	#var inverted_color = environment.ambient_light_color.inverted() * environment.ambient_light_color.inverted()
-	#var circuit_color = Vector3(inverted_color.r, inverted_color.g, inverted_color.b).normalized()
-	#wall_circuits.next_pass.set_shader_parameter("comet_color", circuit_color)
-	#print(wall_circuits.next_pass.get_shader_parameter("comet_color"))
 	
 	
 func get_zsf_instant(phase, zsf, offset = 0):
@@ -69,6 +71,10 @@ func set_environment_phase(phase):
 	environment.ambient_light_color = Color(ambient_red, ambient_green, ambient_blue)
 	environment.ambient_light_energy = get_zsf_instant(timer, ambient_energy_zsf)
 	
+	geometry_material.metallic = get_zsf_instant(phase, geometry_metallic_zsf)
+	geometry_material.roughness = get_zsf_instant(phase, geometry_roughness_zsf)
+	geometry_static_material.metallic = geometry_material.metallic
+	geometry_static_material.roughness = geometry_material.roughness	
 	
 	var x = get_zsf_instant(phase, light_tilt_zsf)
 	var y = get_zsf_instant(phase, light_angle_zsf)

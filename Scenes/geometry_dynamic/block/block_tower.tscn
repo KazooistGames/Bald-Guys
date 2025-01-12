@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://tatel5rmq1h"]
 
-[ext_resource type="PackedScene" uid="uid://bco5lktfdwxre" path="res://Scenes/objects/block/block.tscn" id="1_efwyi"]
+[ext_resource type="PackedScene" uid="uid://bco5lktfdwxre" path="res://Scenes/geometry_dynamic/block/block.tscn" id="1_efwyi"]
 
 [node name="Block_Tower" type="Node3D"]
 

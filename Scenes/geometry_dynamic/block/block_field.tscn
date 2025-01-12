@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://18samsvurxnl"]
 
-[ext_resource type="PackedScene" uid="uid://bco5lktfdwxre" path="res://Scenes/objects/block/block.tscn" id="1_4wi3n"]
+[ext_resource type="PackedScene" uid="uid://bco5lktfdwxre" path="res://Scenes/geometry_dynamic/block/block.tscn" id="1_4wi3n"]
 
 [node name="Block_Field" type="Node3D"]
 

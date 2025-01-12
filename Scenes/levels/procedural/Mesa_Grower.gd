@@ -1,6 +1,6 @@
 extends Node3D
 
-const prefab = preload("res://Scenes/objects/mesa/mesa.tscn")
+const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
 
 const map_size = 50
 
@@ -96,7 +96,7 @@ func spawn_mesas(count):
 		add_child(new_mesa, true)		
 		new_mesa.size = randi_range(4, 10) * 0.5
 		new_mesa.bottom_drop = 1.0
-		new_mesa.preference = new_mesa.Preference.inert 
+		new_mesa.preference = new_mesa.Preference.none 
 		var boundary = map_size/2.0 - new_mesa.size/2.0
 		new_mesa.position.x = randi_range(-boundary, boundary) * 1.0
 		new_mesa.position.z = randi_range(-boundary, boundary) * 1.0

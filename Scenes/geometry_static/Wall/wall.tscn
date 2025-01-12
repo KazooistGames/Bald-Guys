@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://1v5p2mj7bl3y"]
 
-[ext_resource type="PlaneMesh" uid="uid://bkcwl7e51sjbe" path="res://Scenes/levels/Wall/wall.tres" id="1_saatn"]
+[ext_resource type="PlaneMesh" uid="uid://bkcwl7e51sjbe" path="res://Scenes/geometry_static/Wall/wall.tres" id="1_saatn"]
 [ext_resource type="Material" uid="uid://pgt4npxf4b83" path="res://Materials/geometry_static.tres" id="2_untwh"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a03rp"]

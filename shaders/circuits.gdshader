@@ -97,6 +97,7 @@ bool energized(vec2 uv, vec4 x_rails, vec4 y_rails, vec4 speeds, float offset){
 		float UV_tail = uv.y;
 		float tail_start = 0.0;	
 		float tail_end = uv.x;	
+		
 		if(phase > 0){
 			UV_track = uv.y;
 			UV_tail = uv.x;
@@ -130,12 +131,20 @@ vec4 random_vec4(float zero, float span, int seed){
 	return return_val;
 }
 
-varying float time_offset;
+varying float seed_offset;
 void vertex() {
 	
-	time_offset = NODE_POSITION_WORLD.g * height_factor;
-	time_offset += (NODE_POSITION_WORLD.r * NODE_POSITION_WORLD.b) + max(NODE_POSITION_WORLD.r, NODE_POSITION_WORLD.b) * lateral_factor;
-	
+	seed_offset = NODE_POSITION_WORLD.g * height_factor;
+	float x_wave = sin(NODE_POSITION_WORLD.r);
+	float z_wave = cos(NODE_POSITION_WORLD.b);
+	float lateral_offset = .0;
+	if(x_wave >= z_wave){
+		lateral_offset = NODE_POSITION_WORLD.r;
+	}
+	else{
+		lateral_offset = NODE_POSITION_WORLD.b;
+	}
+	seed_offset += lateral_offset * lateral_factor;
 }
 
 void fragment() {
@@ -143,7 +152,7 @@ void fragment() {
 	vec3 original = texture(screen_texture, SCREEN_UV).rgb;
 	
 	float reseed_interval = 8.0 * phase_scalar;
-	float seed_phase = TIME + time_offset;
+	float seed_phase = TIME + seed_offset;
 	int seed = int(seed_phase / reseed_interval);
 	
 	vec4 x_rails = random_vec4(0.5, 0.35, seed);
@@ -153,9 +162,9 @@ void fragment() {
 	
 	float fade_b = abs(cos(seed_phase / 1.3)) / 2.0 + 0.5;
 	
-	bool rail_1 = energized(UV, x_rails, y_rails, speeds, time_offset);
-	bool rail_2 = energized(UV, x_rails, y_rails, speeds / 2.0, time_offset);
-	bool rail_3 = energized(UV, x_rails, y_rails, speeds * 2.0, time_offset);
+	bool rail_1 = energized(UV, x_rails, y_rails, speeds, seed_offset);
+	bool rail_2 = energized(UV, x_rails, y_rails, speeds / 2.0, seed_offset);
+	bool rail_3 = energized(UV, x_rails, y_rails, speeds * 2.0, seed_offset);
 
 	if (rail_1 || rail_2 || rail_3){
 		float ratio = abs(cos(seed_phase / 2.1)) / 2.0 + 0.5;
