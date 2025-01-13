@@ -1,6 +1,7 @@
-[gd_scene load_steps=44 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=45 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
+[ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="2_jteu5"]
 [ext_resource type="Script" path="res://Scenes/humanoid/skeleton.gd" id="2_ldi4p"]
 [ext_resource type="AnimationNodeBlendTree" uid="uid://o282sfra1obc" path="res://Scenes/humanoid/animTree.tres" id="3_1nlf8"]
 [ext_resource type="Script" path="res://Scenes/humanoid/ik_hands.gd" id="3_p6mjk"]
@@ -21,10 +22,8 @@ resource_local_to_scene = true
 radius = 0.15
 height = 1.2
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ynv38"]
-resource_local_to_scene = true
-radius = 0.2
-height = 0.5
+[sub_resource type="BoxShape3D" id="BoxShape3D_pclj4"]
+size = Vector3(0.4, 0.25, 0.2)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_e1a1j"]
 radius = 0.1
@@ -3702,18 +3701,12 @@ properties/4/replication_mode = 1
 properties/5/path = NodePath(".:SKIN_COLOR")
 properties/5/spawn = true
 properties/5/replication_mode = 2
-properties/6/path = NodePath(".:AUTHORITY_POSITION")
+properties/6/path = NodePath(".:REACHING")
 properties/6/spawn = true
 properties/6/replication_mode = 1
-properties/7/path = NodePath(".:linear_velocity")
+properties/7/path = NodePath(".:ON_FLOOR")
 properties/7/spawn = true
 properties/7/replication_mode = 1
-properties/8/path = NodePath(".:REACHING")
-properties/8/spawn = true
-properties/8/replication_mode = 1
-properties/9/path = NodePath(".:ON_FLOOR")
-properties/9/spawn = true
-properties/9/replication_mode = 1
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_vpbvi"]
 random_pitch = 1.1
@@ -3732,16 +3725,19 @@ freeze_mode = 1
 continuous_cd = true
 script = ExtResource("1_omd7n")
 
+[node name="PhysicsSync" parent="." instance=ExtResource("2_jteu5")]
+lerp_val = 0.1
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("CapsuleShape3D_26vqe")
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 1.4, 0)
-shape = SubResource("CapsuleShape3D_ynv38")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+shape = SubResource("BoxShape3D_pclj4")
 
 [node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
 shape = SubResource("CapsuleShape3D_e1a1j")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="."]
@@ -5507,11 +5503,11 @@ disabled = true
 [node name="SlappyFoot" parent="Skeleton3D/Ragdoll/Physical Bone foot_r" instance=ExtResource("8_g1pbr")]
 
 [node name="Physical Bone toes_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.999804, 0.00848645, -0.0179149, -0.000354975, 0.911261, 0.411831, 0.0198199, -0.411744, 0.911084, 0.187014, 0.0122994, 0.0757172)
+transform = Transform3D(0.999804, 0.00848642, -0.0179149, -0.000354975, 0.911262, 0.411831, 0.0198199, -0.411743, 0.911084, 0.187014, 0.0122994, 0.0757172)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
-body_offset = Transform3D(0.978994, 0.200005, 0.039643, 0.0332458, -0.348408, 0.936754, 0.201167, -0.915757, -0.347738, 0, 0, 0)
+body_offset = Transform3D(0.978994, 0.200005, 0.039643, 0.0332458, -0.348408, 0.936754, 0.201167, -0.915758, -0.347738, 0, 0, 0)
 mass = 1.25
 bounce = 0.2
 bone_name = "toes.l"

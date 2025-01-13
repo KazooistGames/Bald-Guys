@@ -27,15 +27,19 @@ const floor_angle = PI/4.0
 @export var RUNNING = false
 @export var DOUBLE_JUMP_CHARGES = 1
 
-@export var AUTHORITY_POSITION = Vector3.ZERO
+@export var floor_velocity = Vector3(0,0,0)
+@export var walk_velocity = Vector3.ZERO
 
 @onready var skeleton = $Skeleton3D
 @onready var animation = $AnimationTree
 @onready var collider = $CollisionShape3D
-@onready var collider2 = $CollisionShape3D2
-@onready var collider3 = $CollisionShape3D3
+@onready var chest_collider = $CollisionShape3D2
+@onready var head_collider = $CollisionShape3D3
 @onready var synchronizer = $MultiplayerSynchronizer
 @onready var floorcast = $FloorCast3D
+
+@onready var impactFX = $ImpactAudio
+@onready var jumpFX = $JumpAudio
 
 var TOPSPEED = 0
 var TOPSPEED_MOD = 1
@@ -48,15 +52,10 @@ var ragdoll_recovery_timer_seconds = 0
 
 signal ragdolled
 
-@onready var impactFX = $ImpactAudio
-@onready var jumpFX = $JumpAudio
-
 var coyote_timer = 0.0
 var coyote_duration = 0.1
 var reverse_coyote_timer = 0.0
 
-var floor_velocity = Vector3(0,0,0)
-var walk_velocity = Vector3.ZERO
 
 func _enter_tree():
 	
@@ -128,18 +127,6 @@ func _integrate_forces(state):
 		
 	constant_force = floor_velocity * mass	
 	walk_velocity = linear_velocity - floor_velocity
-		
-	if not multiplayer.has_multiplayer_peer():
-		pass	
-				
-	elif is_multiplayer_authority():
-		AUTHORITY_POSITION = state.transform.origin					
-	
-	elif position.distance_to(AUTHORITY_POSITION) > 1.0:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 1.0)				
-	
-	else:
-		state.transform.origin = state.transform.origin.lerp(AUTHORITY_POSITION, 0.05)
 	
 	var contact_count = state.get_contact_count()
 	var index = 0
@@ -263,14 +250,19 @@ func _physics_process(delta):
 		
 	ON_FLOOR = coyote_timer <= coyote_duration
 	rotation.y = fmod(rotation.y, 2*PI)
-	collider2.transform = skeleton.bone_transform("neck")
+	
+	chest_collider.transform = skeleton.bone_transform("neck")
 	var upperBody = skeleton.bone_transform("upperBody")
-	collider2.transform.basis = collider2.transform.basis.slerp(upperBody.basis, 0.7)
-	collider2.transform.origin = collider2.transform.origin.slerp(upperBody.origin, 0.5)
-	collider2.transform = collider2.transform.rotated(Vector3.UP, skeleton.rotation.y)
-	collider3.transform.origin = skeleton.bone_transform("chin").origin
-	collider3.transform.basis = skeleton.bone_transform("head").basis
-	collider3.transform = collider3.transform.rotated(Vector3.UP, skeleton.rotation.y)
+	chest_collider.transform.basis = chest_collider.transform.basis.slerp(upperBody.basis.orthonormalized(), 0.7)
+	#chest_collider.transform.basis = chest_collider.transform.basis.rotated(Vector3.FORWARD, PI/2.)
+	chest_collider.position = chest_collider.transform.origin.slerp(upperBody.origin, 0.5)	
+	chest_collider.position += Vector3(0, 0.05, 0.0)
+	chest_collider.transform = chest_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
+	#chest_collider.transform.basis = chest_collider.transform.basis.rotated(Vector3.RIGHT, PI/2.)
+	
+	head_collider.position = skeleton.bone_transform("chin").origin
+	head_collider.rotation = skeleton.bone_rotation("head")
+	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
 	
 func is_on_floor():
@@ -325,7 +317,7 @@ func get_ragdoll_recovered():
 	return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
 	
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func ragdoll(velocity_override = Vector3.ZERO):
 	
 	if not RAGDOLLED:
@@ -351,7 +343,7 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		freeze = true
 		
 		
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func unragdoll():
 	
 	if RAGDOLLED:
@@ -363,7 +355,7 @@ func unragdoll():
 		RAGDOLLED = false
 		freeze = false
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func bump(velocity_impulse):
 	
 	if ON_FLOOR:
@@ -374,7 +366,7 @@ func bump(velocity_impulse):
 		apply_central_impulse(velocity_impulse * mass)
 		
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func jump():
 	
 	if ON_FLOOR:
@@ -391,7 +383,7 @@ func jump():
 		double_jump()
 		
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func wall_jump(impulse):
 	
 	apply_central_impulse(impulse)
@@ -403,7 +395,7 @@ func wall_jump(impulse):
 	impactFX.play()
 	
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func double_jump():
 	
 	if ON_FLOOR:
@@ -416,13 +408,13 @@ func double_jump():
 		set_axis_velocity(Vector3.UP * JUMP_SPEED)
 		
 
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func reset_double_jump():
 	
 	DOUBLE_JUMP_CHARGES = 1
 		
 		
-@rpc("call_local")
+@rpc("call_local", "reliable")
 func land():
 	
 	reset_double_jump()

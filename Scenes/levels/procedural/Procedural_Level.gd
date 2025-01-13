@@ -8,7 +8,7 @@ const map_size = 50
 @onready var ramparter = $Ramparter
 @onready var limb_grower = $Limb_Grower
 
-var reconfigure_period = 15.0
+var reconfigure_period = 90.0
 var reconfigure_timer = 0.0
 
 var mesa_count = 25
@@ -54,6 +54,7 @@ func _physics_process(delta):
 	elif reconfigure_timer >= reconfigure_period:
 		reconfigure_timer = -1
 		unstage_limbs()
+		print("reconfiguring map...")
 		
 	else:
 		reconfigure_timer += delta

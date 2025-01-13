@@ -94,8 +94,6 @@ func stop_mesas():
 
 func spawn_mesas(count):
 	
-	print("growing ", count, " mesas")
-	
 	if not is_multiplayer_authority():
 		return
 
