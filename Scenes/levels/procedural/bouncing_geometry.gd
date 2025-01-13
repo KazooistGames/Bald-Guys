@@ -12,42 +12,40 @@ func _physics_process(delta):
 	var boards = get_boards()
 	
 	for index in range(boards.size()): #move hover mesas	
-		var body = boards[index]
-		var intersection = get_collider_intersections(body)
-		var xz_bounds = body.size / 2.05
-		var y_bounds = body.raycast.target_position.length() / 2.0
-		var trajectory = body.constant_linear_velocity
+		var board = boards[index]
+		var intersections = get_collider_intersections(board)
+
+		var xz_bounds = board.size / 2.0
+		var y_bounds = board.raycast.target_position.length() / 2.0
+		var trajectory = board.constant_linear_velocity
 		
-		if intersection == null:
+		if intersections == null:
 			pass
 					
-		else:
+		else:		
+			var penetration = intersections[0] - intersections[1] 
+			board.position -= penetration
 			
-			if abs(intersection.x) >= xz_bounds and intersection.x >= intersection.z:
-				var x_pen = (xz_bounds - abs(intersection.x)) * sign(intersection.x)
-				body.position.x += x_pen
-				trajectory.x = -trajectory.x 
-		
-			elif abs(intersection.z) >= xz_bounds:
-				var z_pen = (xz_bounds - abs(intersection.z)) * sign(intersection.z)
-				body.position.z += z_pen
-				trajectory.z = -trajectory.z 
-				
-			elif abs(intersection.y) >= y_bounds:
-				var y_pen = (y_bounds - abs(intersection.y)) * sign(intersection.y)
-				body.position.y -= y_pen
-				trajectory.y = -trajectory.y
+			if abs(penetration.y) >= abs(penetration.x) and abs(penetration.y) >= abs(penetration.z):		
+				trajectory.y *= -1
 
-		if body.position.y > 15:
+			elif abs(penetration.x) >= abs(penetration.z):
+				trajectory.x *= -1
+
+			else:
+				trajectory.z *= -1
+					
+
+		if board.position.y > 15:
 			trajectory.y = -trajectory.y
-			body.position.y = 15
+			board.position.y = 15
 			
-		elif body.position.y < 0:
+		elif board.position.y < 0:
 			trajectory.y = -trajectory.y
-			body.position.y = 0
+			board.position.y = 0
 
-		body.position += trajectory * delta
-		body.constant_linear_velocity = trajectory
+		board.position += trajectory * delta
+		board.constant_linear_velocity = trajectory
 		
 		
 func get_collider_intersections(body):
@@ -62,8 +60,7 @@ func get_collider_intersections(body):
 	var result = physics_state.collide_shape(query)
 	
 	if result.size() > 0:
-		var offset = result[0] - body.collider.global_transform.origin
-		return offset 
+		return result 
 		
 		
 func spawn_hover_boards(count):
