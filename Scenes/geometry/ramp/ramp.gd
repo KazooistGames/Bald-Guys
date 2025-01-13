@@ -14,20 +14,33 @@ var cached_height = 1.0
 var cached_length = 2.0
 var cached_thickness = 1.0
 
+const debounce_period = 0.2
+var debounce_timer = 0.0
+
+var need_new_collider = false
+
 
 func _ready():
 	pass # Replace with function body.
 
 
-func _process(_delta):
+func _process(delta):
 	
 	collider = find_child("CollisionShape3D*")
+	debounce_timer += delta
 	
-	if collider == null:
-		mesh.create_convex_collision(false, false)
+	if not need_new_collider:
+		pass
 		
-	elif mesh_has_changed():
+	elif debounce_timer >= debounce_period:
+		debounce_timer -= debounce_period
 		collider.queue_free()
+		mesh.create_convex_collision(true, false)
+		need_new_collider = false
+		
+	if mesh_has_changed():
+		#collider.queue_free()
+		need_new_collider = true
 		mesh.mesh.size.x = length
 		mesh.mesh.size.y = height
 		mesh.mesh.size.z = thickness

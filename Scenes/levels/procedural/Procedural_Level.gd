@@ -25,57 +25,104 @@ func _ready():
 	bouncing_geometry.spawn_hover_boards(10)
 	item_dropper.spawn_field(0, 10, 10, 5, Vector3.UP * 25)
 	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * 25)
-
+	
+	#going up
+	mesa_grower.finished_extending.connect(stage_ramps)
+	ramparter.finished_lifting.connect(stage_limbs)
+	limb_grower.finished_extending.connect(start_reconfigure_timer)
+		
+	#going down
+	limb_grower.finished_retracting.connect(unstage_ramps) #unstage the limbs to kick everything off
+	ramparter.finished_collapsing.connect(unstage_mesas)
+	
+	#loops here!
+	mesa_grower.finished_retracting.connect(stage_mesas) 
+	
+	stage_mesas()
+	
 
 func _physics_process(delta):
 	
 	if not is_multiplayer_authority():
 		return
 		
-	reconfigure_period = 15
+	reconfigure_period = 10
 	
-	var progress = reconfigure_timer / reconfigure_period;
-	
-	if not mesa_grower.in_position:
+	if reconfigure_timer < 0:
 		pass
 		
-	elif progress >= 1.0:
-		reconfigure_timer -= reconfigure_period
-		mesa_grower.retract_mesas()
-		ramparter.clear_ramps()
-		limb_grower.clear_limbs()
+	elif reconfigure_timer >= reconfigure_period:
+		reconfigure_timer = -1
+		unstage_limbs()
 		
-	elif mesa_grower.configuration == mesa_grower.Configuration.inert:
-		reconfigure_timer += delta	
-		
-		if progress >= 0.90:
-			ramparter.collapse()
-			limb_grower.retract_limbs()
-		
-	elif mesa_grower.configuration == mesa_grower.Configuration.retracting:
-		
-		mesa_grower.clear_mesas()
-		mesa_grower.spawn_mesas(mesa_count)	
-		mesa_grower.extend_mesas()
-		
-	elif mesa_grower.configuration == mesa_grower.Configuration.extending:
-		mesa_grower.stop_mesas()
-		var orientation_to_use = 0
-		for mesa in mesa_grower.mesas:
-			
-			if randf() <= ramp_freq:
-				ramparter.spawn_ramp(mesa.position, mesa.size, mesa.size)
-			
-			var limbs_on_mesa = 0
+	else:
+		reconfigure_timer += delta
 	
-			#while randf() <= limb_freq and limbs_on_mesa < 4:
-			if randf() <= limb_freq:
-				limb_grower.spawn_limb(orientation_to_use, mesa.global_position)
-				orientation_to_use += PI / 2.0
-				orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
-				
-		ramparter.lift()
-		limb_grower.extend_limbs()
+	
+
+func stage_mesas():
+	
+	mesa_grower.clear_mesas()
+	mesa_grower.extend_mesas()
+	mesa_grower.spawn_mesas(mesa_count)	
+
+
+func stage_ramps():
+	
+	mesa_grower.stop_mesas()
+	
+	for mesa in mesa_grower.mesas:
+			
+		if randf() <= ramp_freq:
+			ramparter.spawn_ramp(mesa.position, mesa.size, mesa.size)
+			
+	ramparter.lift()
+	
+	
+func stage_limbs():
+	
+	mesa_grower.stop_mesas()
+	ramparter.stop()
+
+	var orientation_to_use = 0
+	for mesa in mesa_grower.mesas:
+		
+		var limbs_on_mesa = 0
+
+		while randf() <= limb_freq and limbs_on_mesa < 4:
+		#if randf() <= limb_freq:
+			limb_grower.spawn_limb(orientation_to_use, mesa.global_position)
+			orientation_to_use += PI / 2.0
+			orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
+			
+	limb_grower.extend_limbs()
+			
+			
+func start_reconfigure_timer():
+	
+	limb_grower.stop_limbs()
+	reconfigure_timer = 0			
+	
+			
+func unstage_limbs():
+	
+	limb_grower.retract_limbs()
+		
+	
+func unstage_ramps():
+	
+	limb_grower.stop_limbs()
+	limb_grower.clear_limbs()
+	ramparter.collapse()
+	
+	
+func unstage_mesas():
+	
+	ramparter.stop()
+	ramparter.clear_ramps()
+	mesa_grower.retract_mesas()
+	
+
 	
 
 

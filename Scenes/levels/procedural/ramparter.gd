@@ -17,17 +17,24 @@ enum Configuration
 
 var ramps = []
 
-var lift_speed = 2.0
-var collapse_speed = 2.0
+var lift_speed = 3.0
+var collapse_speed = 3.0
+
+var in_position = false
+
+signal finished_lifting
+signal finished_collapsing
 
 
 func _physics_process(delta):
 	
 	ramps = get_ramps()
 	
-	if configuration == Configuration.inert:
-		return
+	in_position = true
 	
+	if configuration == Configuration.inert or ramps.size() == 0:
+		return
+
 	for index in range(ramps.size()): #move floor mesas
 		var ramp = ramps[index]
 		var target = 0
@@ -43,6 +50,19 @@ func _physics_process(delta):
 		var height_change = clamp(target - ramp.height, -step, step)
 		ramp.height = move_toward(ramp.height, target, step)
 		#ramp.position.y += height_change * sin(ramp.height/ramp.length)
+		
+		if ramp.height != target:
+			in_position = false
+			
+	if not in_position:
+		pass
+		
+	elif configuration == Configuration.lifting:
+		finished_lifting.emit()
+		
+	elif configuration == Configuration.collapsing:
+		
+		finished_collapsing.emit()
 
 
 func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = false):
@@ -81,6 +101,13 @@ func clear_ramps():
 			
 	ramps.clear()	
 	
+func stop():
+	
+	if configuration == Configuration.inert:
+		return
+	else:
+		configuration = Configuration.inert
+		
 
 func lift():
 	
@@ -101,3 +128,4 @@ func collapse():
 func get_ramps():
 	
 	return find_children("*", "AnimatableBody3D", false, false)
+

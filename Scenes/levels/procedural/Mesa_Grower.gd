@@ -20,6 +20,9 @@ enum Configuration
 var in_position = false
 var mesas = []
 
+signal finished_extending
+signal finished_retracting
+
 
 func _physics_process(delta):
 	
@@ -46,6 +49,16 @@ func _physics_process(delta):
 		
 		if mesa.position.y != target:
 			in_position = false
+	
+	if not in_position:
+		pass
+		
+	elif configuration == Configuration.extending:
+		finished_extending.emit()
+		
+	elif configuration == Configuration.retracting:
+		finished_retracting.emit()
+
 
 
 func extend_mesas():
@@ -54,7 +67,7 @@ func extend_mesas():
 		return
 	else:
 		configuration = Configuration.extending
-		in_position = false
+
 		
 		
 func retract_mesas():
@@ -63,7 +76,7 @@ func retract_mesas():
 		return
 	else:
 		configuration = Configuration.retracting
-		in_position = false
+	
 		
 		
 func stop_mesas():
@@ -74,10 +87,9 @@ func stop_mesas():
 		return
 	else:
 		configuration = Configuration.inert
-		in_position = true
 		
 		for mesa in mesas:
-			mesa.preference = mesa.Preference.deep 
+			mesa.preference = mesa.Preference.locked 
 
 
 func spawn_mesas(count):
