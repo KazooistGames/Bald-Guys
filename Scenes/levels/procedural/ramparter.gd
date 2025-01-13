@@ -5,9 +5,7 @@ const ramp_prefab = preload("res://Scenes/geometry/ramp/ramp.tscn")
 
 const map_size = 50.0
 
-const max_dimension = 15.0
-
-const spacing = 10.0
+const slope = 0.5
 
 enum Configuration 
 {
@@ -22,9 +20,13 @@ var ramps = []
 var lift_speed = 2.0
 var collapse_speed = 2.0
 
+
 func _physics_process(delta):
 	
 	ramps = get_ramps()
+	
+	if configuration == Configuration.inert:
+		return
 	
 	for index in range(ramps.size()): #move floor mesas
 		var ramp = ramps[index]
@@ -32,7 +34,7 @@ func _physics_process(delta):
 		var step = delta
 		
 		if configuration == Configuration.lifting:
-			target = 1.0
+			target = ramp.length * slope
 			step *= lift_speed 
 		
 		elif configuration == Configuration.collapsing:
@@ -40,7 +42,8 @@ func _physics_process(delta):
 			
 		var height_change = clamp(target - ramp.height, -step, step)
 		ramp.height = move_toward(ramp.height, target, step)
-		ramp.position.y += height_change/2.0
+		#ramp.position.y += height_change * sin(ramp.height/ramp.length)
+
 
 func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = false):
 	
@@ -55,7 +58,8 @@ func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = fa
 	if verify_position:			
 		new_ramp.position.y = height_at_coordinates(coordinates) + 0.5
 		
-	print("pulling up ramp at ", new_ramp.position)
+	#print("pulling up ramp at ", new_ramp.position)
+		
 		
 func height_at_coordinates(coordinates):
 	

@@ -2,10 +2,11 @@ extends Node3D
 
 
 enum Preference{
+	locked = -1,
 	shallow = 0,
-	deep = 1
+	deep = 1,
+	none = 2
 }
-
 @export var preference = Preference.deep
 
 @onready var mesh = $MeshInstance3D
@@ -18,11 +19,19 @@ enum Preference{
 
 @export var bottom_position = Vector3.ZERO
 
+@export var reverse_growth_scale = 1.0
+
+
+func _ready():
+	rerender(Vector3.ZERO)
 
 func _process(_delta):
+	
+	if preference == Preference.locked:
+		return
 		
-	if not raycast.is_colliding():
-		pass
+	elif not raycast.is_colliding():
+		bottom_position = raycast.target_position
 		
 	elif raycast.get_collision_point() != bottom_position:
 		
@@ -32,15 +41,49 @@ func _process(_delta):
 			return
 		elif just_shallower(new_point) and preference == Preference.deep:
 			return
+		else:
+			bottom_position = new_point - global_position
 		
-		rerender()
+	rerender(bottom_position)
 
+
+func get_top_position(bot_pos):
+	
+	return bot_pos.normalized() * top_height * -1.0
+
+
+func get_mesh_position(bot_pos):
+	
+	var top_position = get_top_position(bot_pos)
+	return bot_pos.lerp(top_position, 0.5)	
+	
+	
+func get_mesh_height(bot_pos):
+	
+	var top_position = get_top_position(bot_pos)
+	return top_position.distance_to(bot_pos) + bottom_drop
+	
+	
+func rerender(bottom):
+	
+	var mesh_position = get_mesh_position(bottom) * reverse_growth_scale
+	var mesh_height = get_mesh_height(bottom) * reverse_growth_scale
+		
+	mesh.global_position = mesh_position + global_position
+	mesh.mesh.height = mesh_height 
+	mesh.mesh.top_radius = radius
+	mesh.mesh.bottom_radius = radius
+	
+	collider.global_position = mesh_position + global_position
+	collider.shape.height = mesh_height
+	collider.shape.radius = radius
+	
 
 func just_deeper(new_point):
 	
 	var new_trajectory = (new_point - global_position)
 	
-	if bottom_position.normalized() != new_trajectory.normalized():
+	if (bottom_position.normalized() - new_trajectory.normalized()).length() >= 0.25:
 		return false
 	elif new_trajectory.length() > bottom_position.length():
 		return true
@@ -60,40 +103,3 @@ func just_shallower(new_point):
 		
 	else:
 		return false
-
-
-func get_top_position(bottom_position):
-	
-	return bottom_position.normalized() * top_height * -1.0
-
-
-func get_mesh_position(bottom_position):
-	
-	var top_position = get_top_position(bottom_position)
-	var extra_drop = (bottom_position - top_position).normalized() * bottom_drop
-	return (bottom_position + extra_drop).lerp(top_position, 0.5)	
-	
-	
-func get_mesh_height(bottom_position):
-	
-	var top_position = get_top_position(bottom_position)
-	return top_position.distance_to(bottom_position) + bottom_drop
-	
-func rerender():
-	var new_point = raycast.get_collision_point()
-	bottom_position = new_point - global_position
-	var top_position = get_top_position(bottom_position)
-	
-	var mesh_position = get_mesh_position(bottom_position)
-	var mesh_height = get_mesh_height(bottom_position)
-		
-	mesh.global_position = mesh_position + global_position
-	mesh.mesh.height = mesh_height 
-	mesh.mesh.top_radius = radius
-	mesh.mesh.bottom_radius = radius
-	
-	collider.global_position = mesh_position + global_position
-	collider.shape.height = mesh_height
-	collider.shape.radius = radius
-	
-

@@ -6,8 +6,8 @@ const map_size = 50
 
 @export var height_step = 0.5
 
-var extend_mesas_speed = 0.5
-var retract_mesas_speed = 2.0
+var extend_speed = 0.5
+var retract_speed = 2.0
 
 enum Configuration 
 {
@@ -21,16 +21,14 @@ var in_position = false
 var mesas = []
 
 
-
 func _physics_process(delta):
 	
 	mesas = get_mesas()
 	
-	if configuration == Configuration.inert or mesas.size() == 0:
-		in_position = true
-		return
+	in_position = true
 	
-	var in_position_count = 0
+	if configuration == Configuration.inert or mesas.size() == 0:
+		return
 	
 	for index in range(mesas.size()): #move floor mesas
 		var mesa = mesas[index]
@@ -39,19 +37,15 @@ func _physics_process(delta):
 		
 		if configuration == Configuration.extending:
 			target = (1+index) * height_step
-			step *= extend_mesas_speed * (1+index)
+			step *= extend_speed * (1+index)
 		
 		elif configuration == Configuration.retracting:
-			step *= retract_mesas_speed
+			step *= retract_speed
 	
 		mesa.position.y = move_toward(mesa.position.y, target, step)
-			
-		if mesa.position.y == target:
-			in_position_count += 1
-			mesa.preference = mesa.Preference.shallow 
-			
-	if in_position_count == mesas.size():
-		in_position = true
+		
+		if mesa.position.y != target:
+			in_position = false
 
 
 func extend_mesas():
@@ -74,6 +68,8 @@ func retract_mesas():
 		
 func stop_mesas():
 	
+	mesas = get_mesas()
+	
 	if configuration == Configuration.inert:
 		return
 	else:
@@ -95,6 +91,7 @@ func spawn_mesas(count):
 		var new_mesa = prefab.instantiate()
 		add_child(new_mesa, true)		
 		new_mesa.size = randi_range(4, 10) * 0.5
+		new_mesa.top_height = 0.0
 		new_mesa.bottom_drop = 1.0
 		new_mesa.preference = new_mesa.Preference.none 
 		var boundary = map_size/2.0 - new_mesa.size/2.0

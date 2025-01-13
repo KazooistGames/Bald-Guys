@@ -2,7 +2,7 @@ extends Node3D
 
 
 enum Preference{
-	inert = -1,
+	locked = -1,
 	shallow = 0,
 	deep = 1,
 	none = 2,
@@ -23,7 +23,10 @@ var bottom_position = Vector3.ZERO
 
 func _process(_delta):
 	
-	if not raycast.is_colliding() or preference == Preference.inert:
+	if preference == Preference.locked:
+		return
+		
+	elif not raycast.is_colliding():
 		bottom_position = raycast.target_position
 		
 	elif raycast.get_collision_point() != bottom_position:
