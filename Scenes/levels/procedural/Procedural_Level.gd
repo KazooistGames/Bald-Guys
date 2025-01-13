@@ -45,8 +45,6 @@ func _physics_process(delta):
 	
 	if not is_multiplayer_authority():
 		return
-		
-	reconfigure_period = 10
 	
 	if reconfigure_timer < 0:
 		pass

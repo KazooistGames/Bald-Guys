@@ -4551,11 +4551,11 @@ skin = SubResource("Skin_vic1c")
 surface_material_override/0 = ExtResource("6_5scnh")
 
 [node name="Physical Bone lowerLeg_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.997163, 0.0752708, -0.00018388, 0.0728388, -0.964321, 0.254513, 0.0189802, -0.253804, -0.967069, 0.144959, 0.539175, 0.0564373)
+transform = Transform3D(0.997163, 0.0752708, -0.000183873, 0.0728388, -0.964321, 0.254513, 0.0189802, -0.253804, -0.967069, 0.144959, 0.539175, 0.0564373)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
-body_offset = Transform3D(1, -1.60653e-07, 2.58908e-07, 7.21775e-08, 0.999999, -1.04308e-07, -3.35276e-07, 4.61936e-07, 1, 0, 0, 0)
+body_offset = Transform3D(1, -1.60653e-07, 2.62633e-07, 7.21775e-08, 0.999999, -5.96046e-08, -3.35276e-07, 4.61936e-07, 1, 0, 0, 0)
 mass = 5.0
 bounce = 0.2
 bone_name = "lowerLeg.l"
@@ -4798,12 +4798,12 @@ transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 
 shape = SubResource("CapsuleShape3D_usxk3")
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.999996, -9.10461e-05, -2.07722e-05, 9.25511e-05, 0.999989, 1.03116e-05, 2.14577e-05, -1.07288e-05, 0.999997, -0.208618, 1.54967, -0.0231976)
+transform = Transform3D(0.999994, -9.07034e-05, -2.03848e-05, 9.40412e-05, 0.99988, 9.98378e-06, 2.21133e-05, -1.34706e-05, 0.999995, -0.208618, 1.54967, -0.0231976)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
 joint_offset = Transform3D(0.999998, 0, 0, 0, 0.999998, 0, 0, 0, 1, 0, 0, 0)
-body_offset = Transform3D(0.691771, -0.463315, -0.553877, -0.561435, -0.827462, -0.00903324, -0.454132, 0.317213, -0.832546, 0, 0, 0)
+body_offset = Transform3D(0.691769, -0.463262, -0.553876, -0.561435, -0.827372, -0.00903316, -0.454131, 0.317181, -0.832544, 0, 0, 0)
 mass = 5.0
 bounce = 0.2
 bone_name = "upperArm.r"
@@ -5343,11 +5343,11 @@ transform = Transform3D(0.712869, -0.0366416, 0.700341, 0.030981, 0.999305, 0.02
 shape = SubResource("CapsuleShape3D_uqipt")
 
 [node name="Physical Bone foot_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(1, 5.96046e-08, 1.2666e-07, 0, 1, 7.15256e-07, -1.04308e-07, -6.85453e-07, 0.999999, 0.181908, 0.0658082, -0.0681502)
+transform = Transform3D(1, -1.49012e-08, 2.16067e-07, 3.8743e-07, 0.999999, 1.07288e-06, 3.72529e-08, -3.8743e-07, 0.999999, 0.181908, 0.0658082, -0.0681502)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
-body_offset = Transform3D(0.978993, 0.200004, 0.0396432, 0.0332458, -0.348409, 0.936753, 0.201166, -0.915756, -0.347739, 0, 0, 0)
+body_offset = Transform3D(0.978993, 0.200004, 0.0396433, 0.0332458, -0.348409, 0.936752, 0.201166, -0.915755, -0.347739, 0, 0, 0)
 mass = 1.25
 bounce = 0.2
 bone_name = "foot.l"
@@ -5503,11 +5503,11 @@ disabled = true
 [node name="SlappyFoot" parent="Skeleton3D/Ragdoll/Physical Bone foot_r" instance=ExtResource("8_g1pbr")]
 
 [node name="Physical Bone toes_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.999804, 0.00848642, -0.0179149, -0.000354975, 0.911262, 0.411831, 0.0198199, -0.411743, 0.911084, 0.187014, 0.0122994, 0.0757172)
+transform = Transform3D(0.999805, 0.00848612, -0.0179151, -0.00035505, 0.911263, 0.411832, 0.0198199, -0.411744, 0.911084, 0.187014, 0.0122994, 0.0757172)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
-body_offset = Transform3D(0.978994, 0.200005, 0.039643, 0.0332458, -0.348408, 0.936754, 0.201167, -0.915758, -0.347738, 0, 0, 0)
+body_offset = Transform3D(0.978994, 0.200005, 0.039643, 0.0332458, -0.348408, 0.936754, 0.201167, -0.91576, -0.347739, 0, 0, 0)
 mass = 1.25
 bounce = 0.2
 bone_name = "toes.l"

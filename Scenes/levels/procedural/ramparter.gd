@@ -46,10 +46,8 @@ func _physics_process(delta):
 		
 		elif configuration == Configuration.collapsing:
 			step *= collapse_speed
-			
-		var height_change = clamp(target - ramp.height, -step, step)
+
 		ramp.height = move_toward(ramp.height, target, step)
-		#ramp.position.y += height_change * sin(ramp.height/ramp.length)
 		
 		if ramp.height != target:
 			in_position = false

@@ -148,7 +148,7 @@ func _integrate_forces(state):
 		var shape = state.get_contact_local_shape(index)
 		
 		if shape == 0:
-			impact *= pow((1.0 - normal.dot(Vector3.UP)/2), 1.25)		
+			impact *= pow((1.0 - normal.dot(Vector3.UP)/2.0), 1.25)		
 		elif shape == 2:
 			impact *= 1.5
 				
@@ -157,10 +157,10 @@ func _integrate_forces(state):
 			ragdoll.rpc()
 			
 		elif not ON_FLOOR:	
-			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0	
+			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 0.667
 			var forceful = impact > IMPACT_THRESHOLD/3.0
-			var upright = abs(normal.dot(floor_normal)) <= 2.0/3.0
-			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 3.0/4.0
+			var upright = abs(normal.dot(floor_normal)) <= 0.667
+			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 0.75
 			
 			if glancing and forceful and upright and looking_forward:
 				wall_jump.rpc(state.get_contact_impulse(index))
@@ -186,7 +186,7 @@ func _integrate_forces(state):
 		
 	apply_central_force(impulse)
 	
-	if translational_velocity.length() > speed_target:
+	if translational_velocity.length() > speed_target and speed_target > 0:
 		var overshoot_scalar = (translational_velocity.length() / speed_target) - 1.0
 		impulse = -translational_velocity * get_acceleration() * overshoot_scalar * mass
 		apply_central_force(impulse)
@@ -254,12 +254,10 @@ func _physics_process(delta):
 	chest_collider.transform = skeleton.bone_transform("neck")
 	var upperBody = skeleton.bone_transform("upperBody")
 	chest_collider.transform.basis = chest_collider.transform.basis.slerp(upperBody.basis.orthonormalized(), 0.7)
-	#chest_collider.transform.basis = chest_collider.transform.basis.rotated(Vector3.FORWARD, PI/2.)
 	chest_collider.position = chest_collider.transform.origin.slerp(upperBody.origin, 0.5)	
 	chest_collider.position += Vector3(0, 0.05, 0.0)
 	chest_collider.transform = chest_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
-	#chest_collider.transform.basis = chest_collider.transform.basis.rotated(Vector3.RIGHT, PI/2.)
-	
+
 	head_collider.position = skeleton.bone_transform("chin").origin
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
