@@ -7,17 +7,17 @@ extends StaticBody3D
 @export var thickness = 1.0
 
 @onready var mesh = $MeshInstance3D
-
-var collider
+@onready var collider = $CollisionShape3D
 
 var cached_height = 1.0
 var cached_length = 2.0
 var cached_thickness = 1.0
 
-const debounce_period = 0.2
+const debounce_period = 0.2 #limit rate that we re-generate a convex mesh
 var debounce_timer = 0.0
 
 var need_new_collider = false
+
 
 
 func _ready():
@@ -26,26 +26,23 @@ func _ready():
 
 func _process(delta):
 	
-	collider = find_child("CollisionShape3D*")
 	debounce_timer += delta
-	
-	if not need_new_collider:
-		pass
-		
-	elif debounce_timer >= debounce_period:
-		debounce_timer -= debounce_period
-		collider.queue_free()
-		mesh.create_convex_collision(true, false)
-		need_new_collider = false
-		
+			
 	if mesh_has_changed():
-		#collider.queue_free()
 		need_new_collider = true
 		mesh.mesh.size.x = length
 		mesh.mesh.size.y = height
 		mesh.mesh.size.z = thickness
 		mesh.position = Vector3.UP * height / 2.0
 		cache_mesh_size()
+
+	elif not need_new_collider:
+		pass
+		
+	elif debounce_timer >= debounce_period:
+		debounce_timer = 0.0
+		collider.make_convex_from_siblings()
+		need_new_collider = false
 
 
 func mesh_has_changed():

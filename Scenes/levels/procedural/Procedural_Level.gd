@@ -13,7 +13,7 @@ var reconfigure_timer = 0.0
 
 var mesa_count = 25
 var ramp_freq = 0.5
-var limb_freq = 0.5
+var limb_freq = 1./3.
 		
 		
 func _ready():

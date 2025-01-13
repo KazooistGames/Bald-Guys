@@ -191,13 +191,8 @@ func _integrate_forces(state):
 		
 		if WALK_VECTOR == Vector3.ZERO:			
 			impulse = -translational_velocity * get_acceleration() * mass
-			
-		elif translational_velocity.length() < speed_target:
-			impulse = WALK_VECTOR * get_acceleration() * 2 * mass
-			
 		else:
-			var removal_factor = WALK_VECTOR.project(translational_velocity).normalized()
-			impulse = (WALK_VECTOR - removal_factor).normalized() * get_acceleration() * 2 * mass
+			impulse = WALK_VECTOR.normalized() * get_acceleration() * 2 * mass
 
 	elif WALK_VECTOR:
 		impulse = WALK_VECTOR * get_acceleration() * mass
