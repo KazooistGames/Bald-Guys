@@ -33,7 +33,6 @@ properties/5/spawn = true
 properties/5/replication_mode = 1
 
 [node name="mesa" type="AnimatableBody3D"]
-collision_mask = 11
 sync_to_physics = false
 script = ExtResource("1_syifw")
 

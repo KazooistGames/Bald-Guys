@@ -122,11 +122,11 @@ func _integrate_forces(state):
 		
 		if floor_object is AnimatableBody3D:
 			floor_velocity = floor_object.constant_linear_velocity
+			#apply_central_force(floor_velocity * mass	)
 		else:
 			floor_velocity = Vector3.ZERO
 		
 	constant_force = floor_velocity * mass	
-	walk_velocity = linear_velocity - floor_velocity
 	
 	var contact_count = state.get_contact_count()
 	var index = 0
@@ -165,9 +165,8 @@ func _integrate_forces(state):
 			if glancing and forceful and upright and looking_forward:
 				wall_jump.rpc(state.get_contact_impulse(index))
 				
-		index += 1
-			
-	var translational_velocity = Vector3(walk_velocity.x, 0, walk_velocity.z)
+		index += 1			
+
 	var speed_target = TOPSPEED * TOPSPEED_MOD
 	var impulse = Vector3.ZERO
 		
@@ -177,7 +176,9 @@ func _integrate_forces(state):
 	elif ON_FLOOR:
 		
 		if WALK_VECTOR == Vector3.ZERO:			
-			impulse = -translational_velocity * get_acceleration() * mass
+			impulse = -walk_velocity * get_acceleration() * mass
+			#if walk_velocity.length() < 1.0:
+				#impulse *= 2
 		else:
 			impulse = WALK_VECTOR.normalized() * get_acceleration() * 2 * mass
 
@@ -186,13 +187,20 @@ func _integrate_forces(state):
 		
 	apply_central_force(impulse)
 	
+	var translational_velocity = Vector3(walk_velocity.x, 0, walk_velocity.z)
+	
 	if translational_velocity.length() > speed_target and speed_target > 0:
 		var overshoot_scalar = (translational_velocity.length() / speed_target) - 1.0
+		overshoot_scalar = min(0.75, sqrt(overshoot_scalar * 5.0))
 		impulse = -translational_velocity * get_acceleration() * overshoot_scalar * mass
 		apply_central_force(impulse)
 			
+	walk_velocity = linear_velocity - floor_velocity
+	
 
 func _physics_process(delta):
+	
+
 		
 	if floorcast.enabled:
 		reverse_coyote_timer = 0.0	

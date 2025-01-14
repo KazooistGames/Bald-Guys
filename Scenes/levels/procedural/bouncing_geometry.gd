@@ -33,8 +33,7 @@ func _physics_process(delta):
 				trajectory.x *= -1
 
 			else:
-				trajectory.z *= -1
-					
+				trajectory.z *= -1		
 
 		if board.position.y > 15:
 			trajectory.y = -trajectory.y
