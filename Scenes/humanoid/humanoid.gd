@@ -89,12 +89,12 @@ func _process(_delta):
 	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
 	
 	IMPACT_THRESHOLD = 6.0 * mass
+	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
 	
 	if RAGDOLLED:
 		pass
 		
 	elif ON_FLOOR:
-		TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
 		animation.updateWalking(TOPSPEED, walk_velocity, is_back_pedaling())
 		
 		if(WALK_VECTOR):
@@ -114,19 +114,9 @@ func _process(_delta):
 func _integrate_forces(state):	
 	
 	if not floorcast.is_colliding():
-		pass	
-		
+		pass		
 	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
 		state.transform.origin.y = floorcast.get_collision_point().y
-		var floor_object = floorcast.get_collider()
-		
-		if floor_object is AnimatableBody3D:
-			floor_velocity = floor_object.constant_linear_velocity
-			#apply_central_force(floor_velocity * mass	)
-		else:
-			floor_velocity = Vector3.ZERO
-		
-	constant_force = floor_velocity * mass	
 	
 	var contact_count = state.get_contact_count()
 	var index = 0
@@ -167,56 +157,42 @@ func _integrate_forces(state):
 				
 		index += 1			
 
-	var speed_target = TOPSPEED * TOPSPEED_MOD
-	var impulse = Vector3.ZERO
-		
-	if RAGDOLLED:
+
+var floor_object = null
+var cached_floor_obj = null
+var cached_floor_pos = Vector3.ZERO
+
+
+func _physics_process(delta):		
+			
+	floor_object = floorcast.get_collider()
+	
+	if floor_object == null:
 		pass
 		
-	elif ON_FLOOR:
+	elif floor_object == cached_floor_obj:
+		floor_velocity = (floor_object.position - cached_floor_pos) / delta
+		cached_floor_pos = floor_object.position
 		
-		if WALK_VECTOR == Vector3.ZERO:			
-			impulse = -walk_velocity * get_acceleration() * mass
-			#if walk_velocity.length() < 1.0:
-				#impulse *= 2
-		else:
-			impulse = WALK_VECTOR.normalized() * get_acceleration() * 2 * mass
-
-	elif WALK_VECTOR:
-		impulse = WALK_VECTOR * get_acceleration() * mass
+	else:
+		cached_floor_pos = floor_object.position
+		floor_velocity = Vector3.ZERO
 		
-	apply_central_force(impulse)
-	
-	var translational_velocity = Vector3(walk_velocity.x, 0, walk_velocity.z)
-	
-	if translational_velocity.length() > speed_target and speed_target > 0:
-		var overshoot_scalar = (translational_velocity.length() / speed_target) - 1.0
-		overshoot_scalar = min(0.75, sqrt(overshoot_scalar * 5.0))
-		impulse = -translational_velocity * get_acceleration() * overshoot_scalar * mass
-		apply_central_force(impulse)
-			
+	cached_floor_obj = floor_object
+	constant_force = floor_velocity * mass	
 	walk_velocity = linear_velocity - floor_velocity
 	
-
-func _physics_process(delta):
-	
-
-		
 	if floorcast.enabled:
-		reverse_coyote_timer = 0.0	
-		
+		reverse_coyote_timer = 0.0			
 	elif reverse_coyote_timer >= coyote_duration:	
-		floorcast.enabled = true
-		
+		floorcast.enabled = true		
 	else:	
 		reverse_coyote_timer += delta
 
 	if not is_on_floor():
-		coyote_timer += delta	
-			
+		coyote_timer += delta				
 	elif not ON_FLOOR and is_multiplayer_authority():		
-		land.rpc()		
-		
+		land.rpc()				
 	else:
 		coyote_timer = 0
 	
@@ -232,7 +208,8 @@ func _physics_process(delta):
 		
 		if WALK_VECTOR == Vector3.ZERO:		
 			gravity_scale = 0.0
-				
+			#apply_central_force(-walk_velocity * get_acceleration() * mass)
+			
 			if floorcast.enabled:
 				linear_velocity.y = 0.0
 				
@@ -240,8 +217,10 @@ func _physics_process(delta):
 			
 		else:
 			gravity_scale = 1.0
+			apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, WALK_VECTOR )
-		
+
+			
 		var scalar = 5.0 * delta
 		collider.shape.height = move_toward(collider.shape.height, 1.3, scalar)
 		collider.position.y = move_toward(collider.position.y, .65, scalar)
@@ -249,6 +228,7 @@ func _physics_process(delta):
 		
 	else:
 		gravity_scale = 1.0
+		apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)	
 		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 2.0) * delta)
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
@@ -269,6 +249,24 @@ func _physics_process(delta):
 	head_collider.position = skeleton.bone_transform("chin").origin
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
+	
+	var speed_target = TOPSPEED * TOPSPEED_MOD if WALK_VECTOR else 0
+	var translational_velocity = Vector3(walk_velocity.x, 0, walk_velocity.z)	
+	
+	if translational_velocity.length() > speed_target and ON_FLOOR:
+		
+		var delta_step = get_acceleration() * mass * delta
+		var velocity_target = WALK_VECTOR.normalized() * speed_target
+		var full_step = (velocity_target - translational_velocity).length()  * mass
+		
+		if full_step < delta_step:
+			pass
+		
+		var overshoot_scalar = (translational_velocity.length() / speed_target) - 1.0
+		overshoot_scalar = min(0.75, sqrt(overshoot_scalar * 1.0))
+		var impulse = -translational_velocity.normalized() * overshoot_scalar * get_acceleration() * mass
+		print(overshoot_scalar, "	", translational_velocity.length(), "	", full_step, "		", delta_step)
+		apply_central_force(impulse)
 	
 	
 func is_on_floor():
@@ -293,7 +291,7 @@ func get_acceleration():
 		
 	else:	
 		var translationalSpeed = walk_velocity.length()
-		return 10 + translationalSpeed 
+		return 10 + translationalSpeed * 4
 		
 
 func getRandomSkinTone():
