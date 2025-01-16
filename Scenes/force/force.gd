@@ -23,6 +23,8 @@ enum Action {
 
 @onready var hum = $hum
 
+@onready var raycast = $RayCast3D
+
 const hold_force = 8000.0	
 const throw_force = 750.0
 const push_force = 200.0
@@ -100,6 +102,7 @@ func _physics_process(delta):
 	mesh.rotate(Vector3.RIGHT, delta * 1.1)
 	mesh.set_surface_override_material(0, material)
 	position = base_position + Aim.normalized() * offset
+	#print(Aim)
 	
 	
 @rpc("call_local", "reliable")
@@ -239,7 +242,7 @@ func rpc_push_object(node_path):
 		
 	else:
 		var disposition = (node.global_position - get_parent().global_position).normalized()
-		var direction = Aim.lerp(disposition.normalized(), 0.5)
+		var direction = launch_trajectory().lerp(disposition.normalized(), 0.5)
 		var magnitude = push_force * sqrt(node.mass)
 		node.apply_central_impulse(magnitude * direction)
 				
@@ -251,7 +254,7 @@ func get_scattered_aim(node):
 	lerp_val = clampf(lerp_val, 0.0, 0.5)
 	var disposition = node.global_position - get_parent().global_position
 	disposition.y =0
-	return Aim.lerp(disposition.normalized(), lerp_val)
+	return launch_trajectory().lerp(disposition.normalized(), lerp_val)
 		
 		
 func can_be_pushed(node):
@@ -302,6 +305,14 @@ func get_contained_bodies():
 func sort_fat(a, b):
 	
 	return a.mass > b.mass
+	
+
+func launch_trajectory():
+	
+	if raycast.is_colliding():
+		return (raycast.get_collision_point() - global_position).normalized()
+	else:
+		return Aim.normalized()
 	
 	
 			

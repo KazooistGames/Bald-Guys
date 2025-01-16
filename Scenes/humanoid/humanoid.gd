@@ -95,6 +95,7 @@ func _process(_delta):
 		pass
 		
 	elif ON_FLOOR:
+
 		animation.updateWalking(TOPSPEED, walk_velocity, is_back_pedaling())
 		
 		if(WALK_VECTOR):
@@ -208,7 +209,6 @@ func _physics_process(delta):
 		
 		if WALK_VECTOR == Vector3.ZERO:		
 			gravity_scale = 0.0
-			#apply_central_force(-walk_velocity * get_acceleration() * mass)
 			
 			if floorcast.enabled:
 				linear_velocity.y = 0.0
@@ -217,9 +217,8 @@ func _physics_process(delta):
 			
 		else:
 			gravity_scale = 1.0
-			apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
+			#apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, WALK_VECTOR )
-
 			
 		var scalar = 5.0 * delta
 		collider.shape.height = move_toward(collider.shape.height, 1.3, scalar)
@@ -228,7 +227,7 @@ func _physics_process(delta):
 		
 	else:
 		gravity_scale = 1.0
-		apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
+		#apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)	
 		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 2.0) * delta)
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
@@ -250,24 +249,20 @@ func _physics_process(delta):
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
-	var speed_target = TOPSPEED * TOPSPEED_MOD if WALK_VECTOR else 0
-	var translational_velocity = Vector3(walk_velocity.x, 0, walk_velocity.z)	
 	
-	if translational_velocity.length() > speed_target and ON_FLOOR:
-		
-		var delta_step = get_acceleration() * mass * delta
-		var velocity_target = WALK_VECTOR.normalized() * speed_target
-		var full_step = (velocity_target - translational_velocity).length()  * mass
-		
-		if full_step < delta_step:
-			pass
-		
-		var overshoot_scalar = (translational_velocity.length() / speed_target) - 1.0
-		overshoot_scalar = min(0.75, sqrt(overshoot_scalar * 1.0))
-		var impulse = -translational_velocity.normalized() * overshoot_scalar * get_acceleration() * mass
-		print(overshoot_scalar, "	", translational_velocity.length(), "	", full_step, "		", delta_step)
-		apply_central_force(impulse)
+	var step = get_acceleration() * delta
+	var walk_target
 	
+	if ON_FLOOR or WALK_VECTOR:
+		walk_target = WALK_VECTOR.normalized() * TOPSPEED * TOPSPEED_MOD
+	else:
+		walk_target = linear_velocity - floor_velocity
+		
+	var target_linear_velocity = walk_target + floor_velocity
+	target_linear_velocity.y = linear_velocity.y
+	linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
+	
+	print(linear_velocity.length())
 	
 func is_on_floor():
 	
@@ -337,7 +332,7 @@ func ragdoll(velocity_override = Vector3.ZERO):
 			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = linear_velocity
 			
-		RUNNING = false
+		RUNNING = true
 		ragdolled.emit()
 		skeleton.ragdoll_start()
 		ragdoll_recovery_timer_seconds = 0

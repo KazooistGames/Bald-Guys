@@ -63,3 +63,6 @@ bus = &"distortion"
 stream = ExtResource("2_41484")
 volume_db = -27.0
 bus = &"distortion"
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+target_position = Vector3(0, 0, -100)
