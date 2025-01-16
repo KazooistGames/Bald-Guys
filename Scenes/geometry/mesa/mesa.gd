@@ -14,9 +14,9 @@ enum Preference{
 @onready var collider = $CollisionShape3D
 @onready var raycast = $RayCast3D
 
-@export var top_height = 0.0
+@export var top_height = 0.0		
 @export var bottom_drop = 0.0
-@export var size = 0.5
+@export var size = 0.0
 
 var bottom_position = Vector3.ZERO
 
@@ -100,3 +100,4 @@ func just_shallower(new_point):
 		
 	else:
 		return false
+		

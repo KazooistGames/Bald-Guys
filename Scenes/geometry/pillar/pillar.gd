@@ -15,11 +15,11 @@ enum Preference{
 
 @export var bottom_drop = 0.0
 @export var top_height = 0.0
-@export var radius = 0.5
+@export var radius = 0.0
 
 @export var bottom_position = Vector3.ZERO
 
-@export var reverse_growth_scale = 1.0
+@export var reverse_growth_scale = 0.0
 
 
 func _ready():

@@ -2,16 +2,16 @@
 
 extends StaticBody3D
 
-@export var height = 1.0
-@export var length = 2.0
-@export var thickness = 1.0
+@export var height = 0.0
+@export var length = 0.0
+@export var thickness = 0.0
 
 @onready var mesh = $MeshInstance3D
 @onready var collider = $CollisionShape3D
 
-var cached_height = 1.0
-var cached_length = 2.0
-var cached_thickness = 1.0
+var cached_height = 0.0
+var cached_length = 0.0
+var cached_thickness = 0.0
 
 const debounce_period = 0.2 #limit rate that we re-generate a convex mesh
 var debounce_timer = 0.0

@@ -46,11 +46,10 @@ func _physics_process(delta):
 		
 		elif configuration == Configuration.collapsing:
 			step *= collapse_speed
-
-		ramp.height = move_toward(ramp.height, target, step)
 		
 		if ramp.height != target:
 			in_position = false
+			ramp.height = move_toward(ramp.height, target, step)
 			
 	if not in_position:
 		pass

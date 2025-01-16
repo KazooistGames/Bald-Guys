@@ -38,6 +38,7 @@ func movement():
 	direction = direction.rotated(Vector3.UP, camera.rotation.y)
 	character.WALK_VECTOR = direction
 	character.RUNNING = Input.is_action_pressed("run")
+	force.external_velocity = character.linear_velocity
 	#if Input.is_action_just_pressed("run"):
 		#character.RUNNING = false
 	#elif Input.is_action_just_released("run"):

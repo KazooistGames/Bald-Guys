@@ -1,6 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://bfj6oao2wp4ge"]
+[gd_scene load_steps=3 format=3 uid="uid://bfj6oao2wp4ge"]
 
 [ext_resource type="Script" path="res://Scenes/levels/procedural/bouncing_geometry.gd" id="1_vg5lr"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_l5ie3"]
+properties/0/path = NodePath(".:speeds")
+properties/0/spawn = true
+properties/0/replication_mode = 2
 
 [node name="Bouncing_Geometry" type="Node3D"]
 script = ExtResource("1_vg5lr")
@@ -8,3 +13,6 @@ script = ExtResource("1_vg5lr")
 [node name="Spawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/geometry/mesa/mesa.tscn")
 spawn_path = NodePath("..")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_l5ie3")

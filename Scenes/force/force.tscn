@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://bg13x1s1aib1u"]
+[gd_scene load_steps=8 format=3 uid="uid://bg13x1s1aib1u"]
 
 [ext_resource type="Script" path="res://Scenes/force/force.gd" id="1_8ejgp"]
 [ext_resource type="AudioStream" uid="uid://dhgcmldg3e6k7" path="res://audio/energy-hum-29083.mp3" id="2_41484"]
 [ext_resource type="Material" uid="uid://hugun5vavy75" path="res://Materials/force.tres" id="2_xehpu"]
+[ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="4_rwylc"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_yifoa"]
 resource_local_to_scene = true
@@ -17,15 +18,12 @@ properties/0/replication_mode = 1
 properties/1/path = NodePath(".:action")
 properties/1/spawn = true
 properties/1/replication_mode = 2
-properties/2/path = NodePath(".:position")
+properties/2/path = NodePath(".:base_position")
 properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:rotation")
+properties/2/replication_mode = 2
+properties/3/path = NodePath(".:external_velocity")
 properties/3/spawn = true
 properties/3/replication_mode = 1
-properties/4/path = NodePath(".:base_position")
-properties/4/spawn = true
-properties/4/replication_mode = 2
 
 [node name="Force" type="Area3D"]
 collision_layer = 16
@@ -66,3 +64,5 @@ bus = &"distortion"
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
 target_position = Vector3(0, 0, -100)
+
+[node name="TransformSync" parent="." instance=ExtResource("4_rwylc")]

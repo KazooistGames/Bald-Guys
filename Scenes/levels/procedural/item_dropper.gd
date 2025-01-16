@@ -1,6 +1,12 @@
 extends Node3D
 
 
+enum item_types {
+	brick = 0,
+	block = 1,
+	boulder = 2,	
+}
+
 const item_paths = [
 	"res://Scenes/geometry_dynamic/brick/brick.tscn",
 	"res://Scenes/geometry_dynamic/block/block.tscn",
@@ -10,7 +16,7 @@ const item_paths = [
 
 @onready var spawner = $MultiplayerSpawner
 
-var items = {}
+var all_items = {}
 
 
 func _ready():
@@ -44,10 +50,41 @@ func spawn_field(item_index, rows, columns, spacing, spawn_point):
 			add_child(new_item, true)
 			new_item.position = spawn_point + Vector3(x_offset, 0, z_offset)
 			
-			#if not items.has(prefab):
-				#items[prefab] = []
-				#
-			#items[prefab].append(new_item)
+			if not all_items.has(path):
+				all_items[path] = []
+				
+			all_items[path].append(new_item)
+			
+			
+func get_items(item_index):
+	
+	var path = item_paths[item_index]
+	
+	if all_items.has(path):
+		return all_items[path]
+	else:
+		return [] 
+			
 
+			
+func clear_items(item_index):
+	
+	var items = get_items(item_index)
+	
+	for item in items:
+		item.queue_free()
+	
+	all_items[item_paths[item_index]].clear()
+	
+	
+
+func clear_all_items():
+	
+	for items in all_items.values():
+		
+		for item in items:
+			item.queue_free()
+	
+	all_items = {}
 
 

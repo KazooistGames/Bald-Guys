@@ -28,8 +28,7 @@ var geometry_static_material = preload("res://Materials/geometry_static.tres")
 var geometry_material = preload("res://Materials/geometry.tres")
 #const wall_circuits = preload("res://Materials/wall.material")
 
-
-@onready var directional_light = $DirectionalLight3D
+@onready var sun = $DirectionalLight3D
 
 @onready var timer = randi()
 
@@ -45,10 +44,11 @@ func _process(delta):
 	timer += delta
 	set_environment_phase.rpc(timer)	
 	
-	#update post processing shader to use the directional lights actual point direction in its highlight/lowlight calculation
-	var light_direction = Vector3(cos(directional_light.rotation.y), directional_light.rotation.x, sin(directional_light.rotation.y)).normalized()
-	postprocessing_material.set_shader_parameter("light_direction", light_direction)
+	#update post processing shader to use the directional lights actual point direction
+	var light_dir = Vector3(cos(sun.rotation.y), sun.rotation.x, sin(sun.rotation.y)).normalized()
+	postprocessing_material.set_shader_parameter("light_direction", light_dir)
 	
+
 	
 func get_zsf_instant(phase, zsf, offset = 0):
 	
@@ -78,7 +78,7 @@ func set_environment_phase(phase):
 	
 	var x = get_zsf_instant(phase, light_tilt_zsf)
 	var y = get_zsf_instant(phase, light_angle_zsf)
-	directional_light.rotation_degrees = Vector3(x, y, 0)
+	sun.rotation_degrees = Vector3(x, y, 0)
 	
 	
 @export var light_wave_period = 60
@@ -88,14 +88,8 @@ func set_environment_phase(phase):
 func set_light_phase(phase):
 	
 	var raw_wave = sin (phase / light_wave_period)
-	
 	var rectified_wave = abs(raw_wave)
-	
 	var scaled_wave = pow (rectified_wave, 0.5)
-	
 	var clamped_wave = clamp (scaled_wave, light_energy_min, light_energy_max)
-
-	directional_light.light_energy = clamped_wave
+	sun.light_energy = clamped_wave
 	
-
-	#print(raw_wave, "   ", rectified_wave,"   ", scaled_wave, "   ", clamped_wave)

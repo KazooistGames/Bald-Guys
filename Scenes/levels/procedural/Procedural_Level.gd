@@ -8,6 +8,8 @@ const map_size = 50
 @onready var ramparter = $Ramparter
 @onready var limb_grower = $Limb_Grower
 
+@onready var session = get_parent()
+
 var reconfigure_period = 90.0
 var reconfigure_timer = 0.0
 
@@ -21,11 +23,6 @@ func _ready():
 	if not is_multiplayer_authority():
 		return
 	
-	reconfigure_timer = reconfigure_period - 10.0
-	bouncing_geometry.spawn_hover_boards(10)
-	item_dropper.spawn_field(0, 10, 10, 5, Vector3.UP * 25)
-	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * 25)
-	
 	#going up
 	mesa_grower.finished_extending.connect(stage_ramps)
 	ramparter.finished_lifting.connect(stage_limbs)
@@ -38,14 +35,16 @@ func _ready():
 	#loops here!
 	mesa_grower.finished_retracting.connect(stage_mesas) 
 	
-	stage_mesas()
+	#stage_mesas()
+	session.Started_Round.connect(start_map)
+	session.Ended_Round.connect(stop_map)
 	
 
 func _physics_process(delta):
 	
 	if not is_multiplayer_authority():
 		return
-	
+
 	if reconfigure_timer < 0:
 		pass
 		
@@ -56,7 +55,6 @@ func _physics_process(delta):
 		
 	else:
 		reconfigure_timer += delta
-	
 	
 
 func stage_mesas():
@@ -89,7 +87,6 @@ func stage_limbs():
 		var limbs_on_mesa = 0
 
 		while randf() <= limb_freq and limbs_on_mesa < 4:
-		#if randf() <= limb_freq:
 			limb_grower.spawn_limb(orientation_to_use, mesa.global_position)
 			orientation_to_use += PI / 2.0
 			orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
@@ -120,6 +117,23 @@ func unstage_mesas():
 	ramparter.stop()
 	ramparter.clear_ramps()
 	mesa_grower.retract_mesas()
+	
+	
+func start_map():
+	reconfigure_timer = reconfigure_period - 10.0
+	bouncing_geometry.spawn_hover_boards(5)
+	item_dropper.spawn_field(0, 5, 5, 10, Vector3.UP * 25)
+	item_dropper.spawn_field(2, 3, 3, 10, Vector3.UP * 25)
+	stage_mesas()
+	
+
+func stop_map():
+	
+	item_dropper.clear_all_items()
+	limb_grower.clear_limbs()
+	ramparter.clear_ramps()
+	mesa_grower.clear_mesas()
+	bouncing_geometry.clear_boards()
 	
 
 	

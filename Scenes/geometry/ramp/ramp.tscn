@@ -27,6 +27,9 @@ properties/2/replication_mode = 2
 [node name="Ramp" type="AnimatableBody3D"]
 sync_to_physics = false
 script = ExtResource("1_1aw7e")
+height = 1.0
+length = 2.0
+thickness = 1.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("PrismMesh_3as30")

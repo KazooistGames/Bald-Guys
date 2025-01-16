@@ -17,6 +17,8 @@ enum Action {
 
 @export var wielder : Node3D = null
 
+@export var external_velocity = Vector3.ZERO
+
 @onready var collider = $CollisionShape3D
 
 @onready var mesh = $MeshInstance3D
@@ -205,6 +207,7 @@ func rpc_hold_object(node_path):
 		var direction = disposition.normalized()
 		var magnitude = hold_force * pow(disposition.length(), 2.0)
 		node.apply_central_force(direction * magnitude)
+		node.apply_central_force(external_velocity * node.mass)
 
 
 @rpc("call_local", "reliable")

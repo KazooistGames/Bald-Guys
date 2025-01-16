@@ -6,16 +6,15 @@ const board_thickness = 0.5
 
 const map_size = 50
 
-var boards = []
-var speeds = []
+@export var boards = []
+@export var speeds = []
+
 
 func _physics_process(delta):
 	
-	#boards = get_boards()
-	#if is_multiplayer_authority():
-		#print(multiplayer.get_unique_id())
+	boards = get_boards()
 	
-	for index in range(boards.size()): #move hover mesas	
+	for index in range(speeds.size()): #move hover mesas	
 		var board = boards[index]
 		var intersections = get_collider_intersections(board)
 
@@ -92,3 +91,11 @@ func get_boards():
 	return find_children("*", "AnimatableBody3D", true, false)
 	
 
+func clear_boards():
+	
+	boards = get_boards()
+	
+	for board in boards:
+		board.queue_free()
+			
+	boards.clear()	
