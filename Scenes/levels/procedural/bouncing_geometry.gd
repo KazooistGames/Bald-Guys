@@ -6,10 +6,14 @@ const board_thickness = 0.5
 
 const map_size = 50
 
+var boards = []
+var speeds = []
 
 func _physics_process(delta):
 	
-	var boards = get_boards()
+	#boards = get_boards()
+	#if is_multiplayer_authority():
+		#print(multiplayer.get_unique_id())
 	
 	for index in range(boards.size()): #move hover mesas	
 		var board = boards[index]
@@ -17,7 +21,7 @@ func _physics_process(delta):
 
 		var xz_bounds = board.size / 2.0
 		var y_bounds = board.raycast.target_position.length() / 2.0
-		var trajectory = board.constant_linear_velocity
+		var trajectory = speeds[index]
 		
 		if intersections == null:
 			pass
@@ -44,7 +48,7 @@ func _physics_process(delta):
 			board.position.y = 0
 
 		board.position += trajectory * delta
-		board.constant_linear_velocity = trajectory
+		speeds[index] = trajectory
 		
 		
 func get_collider_intersections(body):
@@ -78,7 +82,9 @@ func spawn_hover_boards(count):
 		
 		var new_vector = Vector3(randf_range(-1.0, 1.0), randf_range(0.05, 0.25), randf_range(-1.0, 1.0)).normalized()
 		var speed = index/5.0 + 3
-		new_board.constant_linear_velocity = new_vector * speed
+		#new_board.constant_linear_velocity = new_vector * speed
+		boards.append(new_board)
+		speeds.append(new_vector * speed)
 
 
 func get_boards():

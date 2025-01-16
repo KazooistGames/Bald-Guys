@@ -249,7 +249,6 @@ func _physics_process(delta):
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
-	
 	var step = get_acceleration() * delta
 	var walk_target
 	
@@ -262,7 +261,7 @@ func _physics_process(delta):
 	target_linear_velocity.y = linear_velocity.y
 	linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
 	
-	print(linear_velocity.length())
+	#print(linear_velocity.length())
 	
 func is_on_floor():
 	

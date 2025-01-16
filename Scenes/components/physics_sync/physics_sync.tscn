@@ -17,7 +17,7 @@ properties/3/spawn = true
 properties/3/replication_mode = 1
 properties/4/path = NodePath("PhysicsSync:lerp_val")
 properties/4/spawn = true
-properties/4/replication_mode = 1
+properties/4/replication_mode = 2
 
 [node name="PhysicsSync" type="MultiplayerSynchronizer"]
 replication_config = SubResource("SceneReplicationConfig_q45re")
