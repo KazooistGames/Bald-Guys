@@ -44,3 +44,4 @@ func get_center_of_screen():
 	screenCenter.x = snapped(screenCenter.x, 1)
 	screenCenter.y = snapped(screenCenter.y, 1)
 	return screenCenter
+	

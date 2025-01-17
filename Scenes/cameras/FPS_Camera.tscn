@@ -25,7 +25,7 @@ surface_material_override/0 = ExtResource("2_ndtcw")
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
 target_position = Vector3(0, 0, -100)
-collision_mask = 7
+collision_mask = 15
 hit_back_faces = false
 
 [node name="reticle" type="TextureRect" parent="."]

@@ -8,6 +8,8 @@ const camera_prefab = preload("res://Scenes/cameras/FPS_Camera.tscn")
 @export var camera : Node3D
 
 @export var force : Node3D
+
+@export var targeted_object : Node3D
 	
 	
 func _process(_delta):
@@ -28,7 +30,8 @@ func _process(_delta):
 		force.Aim = (character.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
 		var offset_to_zero = 1.0 - abs(character.LOOK_VECTOR.normalized().dot(Vector3.UP))
 		force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
-		force.rotation = camera.rotation 		
+		force.rotation = camera.rotation 	
+		targeted_object = camera.raycast.get_collider()
 
 	
 func movement():
