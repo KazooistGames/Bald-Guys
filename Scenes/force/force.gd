@@ -37,7 +37,7 @@ var charge_timer = 0.0
 
 var contained_bodies = []
 
-var cooldown_period = 1.0
+var cooldown_period = 0.75
 var cooldown_timer = 0.0
 
 var offset = 1.25
@@ -51,7 +51,7 @@ func _ready():
 
 
 func _physics_process(delta):
-	
+
 	material = mesh.get_surface_override_material(0)
 	
 	get_contained_bodies()
@@ -241,7 +241,7 @@ func rpc_push_object(node_path):
 		if disposition.length() <= ragdoll_radius:
 			node.ragdoll.rpc(impulse)
 		else:
-			node.bump.rpc(impulse)
+			node.bump.rpc(impulse / 2.0)
 		
 	else:
 		var disposition = (node.global_position - get_parent().global_position).normalized()

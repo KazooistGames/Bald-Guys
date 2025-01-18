@@ -32,9 +32,11 @@ const floor_angle = PI/4.0
 
 @onready var skeleton = $Skeleton3D
 @onready var animation = $AnimationTree
-@onready var collider = $CollisionShape3D
-@onready var chest_collider = $CollisionShape3D2
-@onready var head_collider = $CollisionShape3D3
+
+@onready var leg_collider = $CollisionShapeLegs
+@onready var chest_collider = $CollisionShapeChest
+@onready var head_collider = $CollisionShapeHead
+
 @onready var synchronizer = $MultiplayerSynchronizer
 @onready var floorcast = $FloorCast3D
 
@@ -221,8 +223,8 @@ func _physics_process(delta):
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, WALK_VECTOR )
 			
 		var scalar = 5.0 * delta
-		collider.shape.height = move_toward(collider.shape.height, 1.3, scalar)
-		collider.position.y = move_toward(collider.position.y, .65, scalar)
+		leg_collider.shape.height = move_toward(leg_collider.shape.height, 1.3, scalar)
+		leg_collider.position.y = move_toward(leg_collider.position.y, .65, scalar)
 		floorcast.target_position.y = move_toward(floorcast.target_position.y, -1.1, scalar)
 		
 	else:
@@ -231,8 +233,8 @@ func _physics_process(delta):
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)	
 		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 3.0) * delta)
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
-		collider.shape.height = lerp(1.3, .8, jumpDeltaScale)
-		collider.position.y = lerp(.65, .8, jumpDeltaScale)
+		leg_collider.shape.height = lerp(1.3, .8, jumpDeltaScale)
+		leg_collider.position.y = lerp(.65, .8, jumpDeltaScale)
 		floorcast.target_position.y = lerp(-1.1, -.65, jumpDeltaScale)
 		
 	ON_FLOOR = coyote_timer <= coyote_duration
@@ -336,7 +338,9 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		skeleton.ragdoll_start()
 		ragdoll_recovery_timer_seconds = 0
 		animation.active = false
-		collider.disabled = true
+		leg_collider.disabled = true
+		head_collider.disabled = true
+		chest_collider.disabled = true
 		RAGDOLLED = true
 		freeze = true
 		
@@ -349,9 +353,22 @@ func unragdoll():
 		position = skeleton.ragdoll_position()
 		skeleton.ragdoll_stop()
 		animation.active = true
-		collider.disabled = false
+		leg_collider.disabled = false
+		chest_collider.disabled = false
+		head_collider.disabled = false
 		RAGDOLLED = false
 		freeze = false
+
+@rpc("call_local", "reliable")
+func lunge(velocity_impulse):
+	
+	if ON_FLOOR:
+		ON_FLOOR = false
+		coyote_timer = coyote_duration
+		reverse_coyote_timer = 0.0
+		floorcast.enabled = false
+		
+	linear_velocity = velocity_impulse
 
 @rpc("call_local", "reliable")
 func bump(velocity_impulse):
@@ -361,7 +378,8 @@ func bump(velocity_impulse):
 		coyote_timer = coyote_duration
 		reverse_coyote_timer = 0.0
 		floorcast.enabled = false
-		apply_central_impulse(velocity_impulse * mass)
+		
+	apply_central_impulse(velocity_impulse * mass)
 		
 
 @rpc("call_local", "reliable")

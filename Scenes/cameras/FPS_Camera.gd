@@ -4,6 +4,7 @@ const MAX_ANGLE = PI/2.3
 
 @export var VERTICAL_SENSATIVITY = 0.005
 @export var HORIZONTAL_SENSITIVITY = 0.005
+@export var Locked = false
 
 @onready var reticle = $reticle
 @onready var raycast = $RayCast3D
@@ -29,7 +30,9 @@ func _input(event):
 	set_current(true)
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
-	if event is InputEventMouseMotion:
+	if Locked:
+		pass
+	elif event is InputEventMouseMotion:
 		rotate_y(-event.relative.x * HORIZONTAL_SENSITIVITY )
 		rotate_object_local(Vector3(1,0,0), -event.relative.y * VERTICAL_SENSATIVITY)
 		rotation.x = clamp(rotation.x, -MAX_ANGLE, MAX_ANGLE)
