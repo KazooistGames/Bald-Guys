@@ -1,9 +1,9 @@
 [gd_scene load_steps=10 format=3 uid="uid://b5fc4lv4wybum"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Empty_Level.tscn" id="1_halqj"]
-[ext_resource type="Script" path="res://Scenes/levels/procedural/Procedural_Level.gd" id="2_lukeg"]
+[ext_resource type="Script" path="res://Scenes/levels/Procedural_Level.gd" id="2_lukeg"]
 [ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="3_kq3gr"]
-[ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/levels/procedural/bouncing_geometry.tscn" id="4_0mrgq"]
+[ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/levels/procedural/board_hoverer.tscn" id="4_0mrgq"]
 [ext_resource type="PackedScene" uid="uid://bihhmgl2g08o3" path="res://Scenes/levels/procedural/mesa_grower.tscn" id="5_aojpy"]
 [ext_resource type="PackedScene" uid="uid://drujlef4qyslo" path="res://Scenes/levels/procedural/item_dropper.tscn" id="6_nuajx"]
 [ext_resource type="PackedScene" uid="uid://bxvldmj0gbd3m" path="res://Scenes/levels/procedural/ramparter.tscn" id="7_fnc5j"]
@@ -54,7 +54,7 @@ skeleton = NodePath("../..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 10, 0)
 skeleton = NodePath("../..")
 
-[node name="Bouncing_Geometry" parent="." index="3" instance=ExtResource("4_0mrgq")]
+[node name="Board_Hoverer" parent="." index="3" instance=ExtResource("4_0mrgq")]
 
 [node name="Mesa_Grower" parent="." index="4" instance=ExtResource("5_aojpy")]
 

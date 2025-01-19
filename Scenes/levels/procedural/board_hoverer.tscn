@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bfj6oao2wp4ge"]
 
-[ext_resource type="Script" path="res://Scenes/levels/procedural/bouncing_geometry.gd" id="1_vg5lr"]
+[ext_resource type="Script" path="res://Scenes/levels/procedural/board_hoverer.gd" id="1_vg5lr"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_l5ie3"]
 properties/0/path = NodePath(".:speeds")

@@ -65,6 +65,7 @@ func aiming():
 		
 	targeted_object = camera.raycast.get_collider()
 	
+	
 func abilities():
 	
 	force.external_velocity = character.linear_velocity

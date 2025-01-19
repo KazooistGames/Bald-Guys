@@ -2,7 +2,7 @@ extends Node3D
 
 const map_size = 50
 
-@onready var bouncing_geometry = $Bouncing_Geometry
+@onready var board_hoverer = $Board_Hoverer
 @onready var mesa_grower = $Mesa_Grower
 @onready var item_dropper = $Item_Dropper
 @onready var ramparter = $Ramparter
@@ -121,7 +121,9 @@ func unstage_mesas():
 	
 func start_map():
 	reconfigure_timer = reconfigure_period - 10.0
-	bouncing_geometry.spawn_hover_boards(5)
+	board_hoverer.spawn_boards(5, 3, 4, Vector2(0, 15))
+	board_hoverer.spawn_boards(3, 5, 2, Vector2(15, 20))
+	board_hoverer.spawn_boards(1, 8, 1, Vector2(20, 25))
 	item_dropper.spawn_field(0, 5, 5, 10, Vector3.UP * 25)
 	item_dropper.spawn_field(2, 3, 3, 10, Vector3.UP * 25)
 	stage_mesas()
@@ -133,7 +135,7 @@ func stop_map():
 	limb_grower.clear_limbs()
 	ramparter.clear_ramps()
 	mesa_grower.clear_mesas()
-	bouncing_geometry.clear_boards()
+	board_hoverer.clear_boards()
 	
 
 	
