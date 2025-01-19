@@ -121,8 +121,8 @@ func unstage_mesas():
 	
 func start_map():
 	reconfigure_timer = reconfigure_period - 10.0
-	board_hoverer.spawn_boards(5, 3, 4, Vector2(0, 15))
-	board_hoverer.spawn_boards(3, 5, 2, Vector2(15, 20))
+	board_hoverer.spawn_boards(5, 3, 5, Vector2(0, 15))
+	board_hoverer.spawn_boards(3, 5, 3, Vector2(15, 20))
 	board_hoverer.spawn_boards(1, 8, 1, Vector2(20, 25))
 	item_dropper.spawn_field(0, 5, 5, 10, Vector3.UP * 25)
 	item_dropper.spawn_field(2, 3, 3, 10, Vector3.UP * 25)
