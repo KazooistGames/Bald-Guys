@@ -7,6 +7,8 @@ const SessionState = {
 	Round = 1,
 }
 
+@export var Client_Screennames = {}
+
 @export var State = SessionState.Hub
 
 @export var Commissioned = false

@@ -14,7 +14,7 @@ var Bearer : Node3D
 
 @onready var HUD = $HUD
 
-var local_player_name
+var local_player_id
 
 enum GameState {
 	reset,
@@ -33,7 +33,7 @@ var countDown_value = 0
 
 func _ready():
 	
-	local_player_name = str(multiplayer.get_unique_id())
+	local_player_id = str(multiplayer.get_unique_id())
 	session.Started_Round.connect(start)
 	session.Ended_Round.connect(reset)
 	
@@ -67,29 +67,31 @@ func _process(delta):
 	
 	elif State == GameState.playing:
 		
+		var screenname = session.Client_Screennames[int(str(Bearer.name))] if Bearer != null else ' '
+		
 		if not Bearer:
 			pass
 			
-		elif Bearer_Times.has(Bearer.name):
-			Bearer_Times[Bearer.name] += delta
+		elif Bearer_Times.has(screenname):
+			Bearer_Times[screenname] += delta
 			
-			if Bearer_Times[Bearer.name] >= Goal_Time:
+			if Bearer_Times[screenname] >= Goal_Time:
 				rpc_finish.rpc()
-				session.Finished_Round(str(Bearer.name))
+				session.Finished_Round(str(screenname))
 		else:
-			Bearer_Times[Bearer.name] = delta
+			Bearer_Times[screenname] = delta
 			
 	elif State == GameState.finished:
 		pass
 		
 	if Bearer:
-		HUD.find_child("Progress").visible = local_player_name == Bearer.name
+		HUD.find_child("Progress").visible = local_player_id == Bearer.name
 			
 	else:
 		HUD.find_child("Progress").visible = false
 		
-	if Bearer_Times.has(local_player_name):	
-		var accumulated_time = Bearer_Times[local_player_name]
+	if Bearer_Times.has(local_player_id):	
+		var accumulated_time = Bearer_Times[local_player_id]
 		HUD.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
 
 

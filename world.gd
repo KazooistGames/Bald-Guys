@@ -26,7 +26,6 @@ var session
 
 @export var LOCAL_PLAYER_INTERFACE : Node3D
 
-@export var Client_Screennames = {}
 
 
 const ClientState = {
@@ -121,7 +120,7 @@ func start_host_lobby():
 	
 	multiplayer.peer_connected.connect(add_player_to_session)
 	multiplayer.peer_disconnected.connect(remove_player_from_session)
-	Client_Screennames[1] = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
+	session.Client_Screennames[1] = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
 
 
 func join_lobby():
@@ -146,7 +145,7 @@ func add_player_to_session(peer_id):
 func remove_player_from_session(peer_id):
 	
 	print(str(peer_id) + " left")
-	Client_Screennames.erase(peer_id)
+	session.Client_Screennames.erase(peer_id)
 	
 	session.destroy_player_humanoid(peer_id)
 
@@ -185,7 +184,7 @@ func leave_session():
 		
 	multiplayer.multiplayer_peer = null
 	
-	Client_Screennames.clear()
+	#session.Client_Screennames.clear()
 	pause_menu.visible = false
 	
 	if session != null:
@@ -198,6 +197,7 @@ func leave_session():
 func quit():
 	
 	get_tree().quit()
+	
 	
 func introduce_myself_to_server():
 	
@@ -219,4 +219,4 @@ func rpc_handoff_object(path, auth_id):
 func rpc_set_client_screenname(player_name):
 	
 	var id = multiplayer.get_remote_sender_id()
-	Client_Screennames[id] = player_name
+	session.Client_Screennames[id] = player_name
