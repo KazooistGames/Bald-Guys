@@ -22,7 +22,7 @@ func _process(_delta):
 	
 	reticle.expand_mode = 1
 	reticle.size = Vector2.ONE * 4
-	reticle.position = get_center_of_screen() - reticle.size/2
+	reticle.position = get_center_of_screen() - reticle.size/2.0
 	
 	
 func _input(event):

@@ -135,7 +135,7 @@ func _integrate_forces(state):
 			var relative_velocity = their_velocity - my_velocity
 			
 			if my_velocity.length() < relative_velocity.length():	
-				var kinetic_impulse = sqrt(relative_velocity.length())
+				var kinetic_impulse = pow(relative_velocity.length(), 0.75)
 				impact *= kinetic_impulse
 		
 		var shape = state.get_contact_local_shape(index)
@@ -146,6 +146,7 @@ func _integrate_forces(state):
 			impact *= 1.5
 				
 		if impact >= IMPACT_THRESHOLD: 
+
 			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
 			
@@ -157,9 +158,11 @@ func _integrate_forces(state):
 			
 			if glancing and forceful and upright and looking_forward:
 				wall_jump.rpc(state.get_contact_impulse(index))
+
+		if impact > 100:
+			print(impact)
 				
 		index += 1			
-
 
 var floor_object = null
 var cached_floor_obj = null

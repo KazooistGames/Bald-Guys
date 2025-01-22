@@ -54,6 +54,10 @@ func _process(_delta):
 	
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	
+	for humanoid in Humanoids:
+		var head_position = humanoid.position + humanoid.head_position()
+		HUD.place_nameplate(humanoid.name, head_position + Vector3.UP * 0.25)
+	
 
 
 func _unhandled_key_input(event):
