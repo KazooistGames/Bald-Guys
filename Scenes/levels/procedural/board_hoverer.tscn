@@ -3,9 +3,12 @@
 [ext_resource type="Script" path="res://Scenes/levels/procedural/board_hoverer.gd" id="1_vg5lr"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_l5ie3"]
-properties/0/path = NodePath(".:speeds")
+properties/0/path = NodePath(".:board_speeds")
 properties/0/spawn = true
 properties/0/replication_mode = 2
+properties/1/path = NodePath(".:height_bounds")
+properties/1/spawn = true
+properties/1/replication_mode = 2
 
 [node name="Bouncing_Geometry" type="Node3D"]
 script = ExtResource("1_vg5lr")

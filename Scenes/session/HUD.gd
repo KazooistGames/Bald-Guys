@@ -1,18 +1,18 @@
 extends CanvasLayer
 
-
-@onready var PSA = $PSA/Label
-var psaTTL = 1
-
 @export var TableValues = {}
 
-@export var ProgressPercent = 0
+@onready var nameplates = $Nameplates
 
-const progress_bar_length = 1000
-const progress_bar_width = 75
+@onready var PSA = $PSA/Label
+
+var psaTTL = 1
+
 	
 	
 func _process(delta):
+	
+	print(nameplates.get_children())
 
 	if psaTTL > 0:
 		psaTTL -= min(delta, psaTTL)
@@ -34,4 +34,23 @@ func set_psa(message = "", ttl = 1):
 func get_psa():
 
 	return PSA.text
+	
+	
+func place_nameplate(player_id, coordinates):
+	var nameplate = nameplates.find_child(str(player_id))
+	
+
+func add_nameplate(player_id, player_name):
+	
+	var new_nameplate = Label.new()
+	new_nameplate.name = player_id
+	new_nameplate.text = player_name
+	nameplates.add_child(new_nameplate)
+	
+	
+func remove_nameplate(player_id):
+	
+	var nameplate = nameplates.find_child(str(player_id), false, false)
+	nameplate.queue_free()
+	
 	

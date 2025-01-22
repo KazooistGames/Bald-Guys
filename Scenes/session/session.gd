@@ -39,6 +39,7 @@ signal Ended_Round
 func _ready():
 	
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
+	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(str(node.name)))
 	gameSpawner.spawned.connect(handle_new_game)
 	levelSpawner.spawned.connect(handle_new_level)
 	
@@ -142,13 +143,15 @@ func destroy_player_humanoid(peer_id):
 	
 	if playerHumanoid:
 		Humanoids.erase(playerHumanoid)
-		playerHumanoid.queue_free()
+		playerHumanoid.queue_free()		
+		HUD.remove_nameplate(str(peer_id))
 
 
 func signal_to_handoff_player_humanoid(node):
 	
 	Created_Player_Humanoid.emit(node)
-
+	HUD.add_nameplate(str(node.name), str(node.name))
+	
 
 @rpc("call_local", "authority", "reliable")
 func rpc_move_to_hub():
