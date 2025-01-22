@@ -55,8 +55,12 @@ func _process(_delta):
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	
 	for humanoid in Humanoids:
-		var head_position = humanoid.position + humanoid.head_position()
-		HUD.place_nameplate(humanoid.name, head_position + Vector3.UP * 0.25)
+		var peer_id = humanoid.get_multiplayer_authority()
+		
+		if Client_Screennames.has(peer_id):
+			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
+			var screenname = Client_Screennames[peer_id]
+			HUD.update_nameplate(humanoid.name, head_position, screenname)
 	
 
 

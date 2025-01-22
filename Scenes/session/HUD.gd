@@ -34,7 +34,7 @@ func get_psa():
 	return PSA.text
 	
 	
-func place_nameplate(player_id, coordinates):
+func update_nameplate(player_id, coordinates, label):
 	
 	var nameplate = nameplates.find_child(str(player_id), false, false)
 	
@@ -45,6 +45,8 @@ func place_nameplate(player_id, coordinates):
 		var screen_offset = Vector2(0, screen_size.y / 50.0)	
 		var label_size = nameplate.size / 2.0
 		nameplate.position = screen_coordinates - screen_offset - label_size 
+		nameplate.visible = not camera.is_position_behind(coordinates)
+		nameplate.text = label
 	
 
 func add_nameplate(player_id, player_name):

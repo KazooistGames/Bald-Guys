@@ -158,9 +158,6 @@ func _integrate_forces(state):
 			
 			if glancing and forceful and upright and looking_forward:
 				wall_jump.rpc(state.get_contact_impulse(index))
-
-		if impact > 100:
-			print(impact)
 				
 		index += 1			
 
