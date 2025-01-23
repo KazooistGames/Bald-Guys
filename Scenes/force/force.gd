@@ -236,7 +236,7 @@ func rpc_push_object(node_path):
 	
 		var disposition = node.global_position - get_parent().global_position
 		var direction = disposition.normalized().lerp(Vector3.UP, 0.15)
-		var magnitude = push_force / 8.0 / max(0.5, disposition.length())
+		var magnitude = push_force / 8.0 / max(0.75, disposition.length())
 		var impulse = direction * magnitude
 		if disposition.length() <= ragdoll_radius:
 			node.ragdoll.rpc(impulse)

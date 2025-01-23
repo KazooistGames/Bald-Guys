@@ -4,15 +4,24 @@ const camera_prefab = preload("res://Scenes/cameras/FPS_Camera.tscn")
 #const force_prefab = preload("res://Scenes/force/force.tscn")
 
 @export var character : Node3D
-
 @export var camera : Node3D
-
 @export var force : Node3D
-
 @export var targeted_object : Node3D
+
+@onready var recovery_bar = $Recovery
+@onready var recovery_fill = $Recovery/Fill
+@onready var recovery_backdrop = $Recovery/BackDrop
+@onready var recovery_target = $Recovery/Target
+@onready var recovery_lever = $Recovery/Lever
+var lever_phase = 0.0
 	
 	
-func _process(_delta):
+func _ready():
+	
+	recovery_bar.visible = false
+	
+	
+func _process(delta):	
 	
 	if not character:	
 		camera = null
@@ -25,14 +34,36 @@ func _process(_delta):
 		movement()
 		aiming()
 		abilities()		
-		character.REACHING = force.action #enumerations are lined up via integer values
-		camera.HORIZONTAL_SENSITIVITY = 0.002 if character.REACHING else 0.004
-		force.Aim = (character.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
-		var offset_to_zero = 1.0 - abs(character.LOOK_VECTOR.normalized().dot(Vector3.UP))
-		force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
-		force.rotation = camera.rotation 	
+		hmi(delta)
 
 
+func hmi(delta):
+	
+	recovery_bar.visible = character.RAGDOLLED
+	
+	var total_length = recovery_backdrop.size.x
+	var total_position = recovery_backdrop.position.x
+	recovery_fill.size.x = total_length * character.ragdoll_recovery_progress
+	recovery_fill.position.x = total_position * character.ragdoll_recovery_progress
+	
+	var ragdoll_speed = character.find_child("*lowerBody", true, false).linear_velocity.length()
+	lever_phase += delta * pow(max(character.ragdoll_recovery_default_duration, ragdoll_speed), 0.75)
+	
+	recovery_lever.position.x = sin(lever_phase) * total_length / 2.0
+	
+	if recovery_lever_on_target():
+		recovery_lever.position.y = -2
+		recovery_lever.size.y = 8	
+	else:
+		recovery_lever.position.y = -6
+		recovery_lever.size.y = 16
+	
+	
+func recovery_lever_on_target():
+	
+	return abs(recovery_lever.position.x) <= recovery_target.size.x / 2.0
+	
+	
 	
 func movement():
 	
@@ -48,26 +79,25 @@ func movement():
 		character.jump.rpc()
 	
 
-	
-
-	
-		
 func aiming():
 	
+	camera.HORIZONTAL_SENSITIVITY = 0.002 if character.REACHING else 0.004
 	var cam_depth = -1.5 if character.RAGDOLLED else 0.115
 	var adjustedOffset = character.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * cam_depth
 	var adjustedPosition = character.head_position()
 	camera.position = adjustedPosition + adjustedOffset	
 	var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 	character.LOOK_VECTOR = look
-	
-
-		
 	targeted_object = camera.raycast.get_collider()
+	force.Aim = (character.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
+	var offset_to_zero = 1.0 - abs(character.LOOK_VECTOR.normalized().dot(Vector3.UP))
+	force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
+	force.rotation = camera.rotation 
 	
 	
 func abilities():
 	
+	character.REACHING = force.action #enumerations are lined up via integer values
 	force.external_velocity = character.linear_velocity
 	
 	if force.action == force.Action.inert:
@@ -86,7 +116,9 @@ func abilities():
 		character.ragdoll.rpc()
 	
 	if Input.is_action_just_pressed("drop"):
-		character.unragdoll.rpc()
+		
+		if recovery_lever_on_target():
+			character.unragdoll.rpc()
 	
 	if character.RAGDOLLED:
 		force.rpc_reset.rpc()
@@ -108,19 +140,20 @@ func abilities():
 		
 		else:
 			force.rpc_primary.rpc()
+			lunge_at_target(targeted_object)
 			
-			if targeted_object != null:
-				var disposition = targeted_object.global_position - character.global_position
-				var distance = disposition.length()
-				
-				if distance > 4:
-					pass
-					
-				elif targeted_object.is_in_group("humanoids"):
-					var lunge_velocity = disposition.normalized() * distance * 3.5
-					character.lunge.rpc(lunge_velocity)
-					#character.linear_velocity = disposition.normalized() * distance * 3.5
-			
-		
+
+func lunge_at_target(targeted_object):
 	
+	if targeted_object != null:
+		var disposition = targeted_object.global_position - character.global_position
+		var distance = disposition.length()
+		
+		if distance > 4:
+			pass
+			
+		elif targeted_object.is_in_group("humanoids"):
+			var lunge_velocity = disposition.normalized() * distance * 3.5
+			character.lunge.rpc(lunge_velocity)
+
 

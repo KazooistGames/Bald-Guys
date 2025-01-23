@@ -49,8 +49,13 @@ var TOPSPEED_MOD = 1
 var IMPACT_THRESHOLD =  6.5
 var ragdoll_cooldown_period_seconds = 0.5
 var ragdoll_cooldown_timer_seconds = 0
-var ragdoll_recovery_period_seconds = 1
-var ragdoll_recovery_timer_seconds = 0
+
+#var ragdoll_recovery_period_seconds = 1
+#var ragdoll_recovery_timer_seconds = 0
+
+var ragdoll_recovery_progress = 0.0
+var ragdoll_recovery_default_duration = 3.0
+var ragdoll_recovery_default_boost = 0.1
 
 signal ragdolled
 
@@ -147,7 +152,7 @@ func _integrate_forces(state):
 				
 		if impact >= IMPACT_THRESHOLD: 
 
-			ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
+			#ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
 			
 		elif not ON_FLOOR:	
@@ -201,8 +206,11 @@ func _physics_process(delta):
 	
 	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta	
-	elif skeleton.ragdoll_is_at_rest():
-		ragdoll_recovery_timer_seconds += delta
+	else:
+		var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
+		var recovery_scalar = ragdoll_recovery_default_duration * sqrt(ragdoll_velocity)
+		ragdoll_recovery_progress += delta / recovery_scalar
+		#ragdoll_recovery_timer_seconds += delta
 					
 	if RAGDOLLED:
 		skeleton.processRagdollOrientation(delta)
@@ -251,7 +259,7 @@ func _physics_process(delta):
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
-	var step = get_acceleration() * delta
+	#var step = get_acceleration() * delta
 	var walk_target
 	
 	if ON_FLOOR or WALK_VECTOR:
@@ -314,7 +322,8 @@ func get_ragdoll_ready():
 	
 func get_ragdoll_recovered():
 	
-	return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
+	#return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
+	return ragdoll_recovery_progress >= 1.0
 	
 
 @rpc("call_local", "reliable")
@@ -336,7 +345,8 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		RUNNING = true
 		ragdolled.emit()
 		skeleton.ragdoll_start()
-		ragdoll_recovery_timer_seconds = 0
+		#ragdoll_recovery_timer_seconds = 0
+		ragdoll_recovery_progress = 0.0
 		animation.active = false
 		leg_collider.disabled = true
 		head_collider.disabled = true
@@ -444,5 +454,13 @@ func land():
 	var retardation_magnitude = max(1.0, translational_velocity.length()/2.0)
 	var impulse = retardation_vector * retardation_magnitude * mass
 	apply_central_impulse(impulse)
+	
+
+#func boost_recovery():
+	#
+	#if RAGDOLLED:
+		#var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
+		#var boost_scalar = sqrt(ragdoll_velocity)
+		#ragdoll_recovery_progress += ragdoll_recovery_default_boost / boost_scalar
 
 	

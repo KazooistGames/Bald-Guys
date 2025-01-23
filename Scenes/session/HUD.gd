@@ -9,7 +9,6 @@ extends CanvasLayer
 var psaTTL = 1
 
 	
-	
 func _process(delta):
 
 	if psaTTL > 0:

@@ -36,8 +36,8 @@ func bounce_geometry(geometry, trajectory):
 	
 	var intersections = get_collider_intersections(geometry)
 
-	var xz_bounds = geometry.size / 2.0
-	var y_bounds = geometry.raycast.target_position.length() / 2.0
+	#var xz_bounds = geometry.size / 2.0
+	#var y_bounds = geometry.raycast.target_position.length() / 2.0
 	
 	if intersections == null:
 		pass
@@ -58,7 +58,7 @@ func bounce_geometry(geometry, trajectory):
 	return trajectory
 	
 
-func constrain_geometry(geometry, trajectory, height_bounds):
+func constrain_geometry(geometry, trajectory, height_limits):
 	
 	var xz_boundaries = map_size / 2.0
 	#	X
@@ -71,13 +71,13 @@ func constrain_geometry(geometry, trajectory, height_bounds):
 		geometry.position.x = -xz_boundaries
 		
 	#	Y
-	if geometry.position.y > height_bounds.y:
+	if geometry.position.y > height_limits.y:
 		trajectory.y = -trajectory.y
-		geometry.position.y = height_bounds.y
+		geometry.position.y = height_limits.y
 			
-	elif geometry.position.y < height_bounds.x:
+	elif geometry.position.y < height_limits.x:
 		trajectory.y = -trajectory.y
-		geometry.position.y = height_bounds.x
+		geometry.position.y = height_limits.x
 		
 	#	Z
 	if geometry.position.z > xz_boundaries:
