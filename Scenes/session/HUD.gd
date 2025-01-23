@@ -36,9 +36,15 @@ func get_psa():
 func update_nameplate(player_id, coordinates, label):
 	
 	var nameplate = nameplates.find_child(str(player_id), false, false)
+	var camera = get_viewport().get_camera_3d()
 	
-	if nameplate != null:
-		var camera = get_viewport().get_camera_3d()
+	if nameplate == null:
+		pass
+		
+	elif camera == null:
+		pass
+		
+	else:
 		var screen_coordinates = camera.unproject_position(coordinates)
 		var screen_size = DisplayServer.screen_get_size()
 		var screen_offset = Vector2(0, screen_size.y / 50.0)	

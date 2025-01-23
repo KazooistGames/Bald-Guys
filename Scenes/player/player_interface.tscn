@@ -41,7 +41,7 @@ offset_right = 25.0
 offset_bottom = 6.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
-color = Color(0.72549, 0.517647, 0.341176, 1)
+color = Color(1, 0.766032, 0.329285, 1)
 
 [node name="Lever" type="ColorRect" parent="Recovery"]
 layout_mode = 2
@@ -54,6 +54,7 @@ size_flags_vertical = 4
 color = Color(0, 0, 0, 1)
 
 [node name="Lever_fill" type="ColorRect" parent="Recovery/Lever"]
+layout_mode = 0
 offset_left = 1.0
 offset_top = 1.0
 offset_right = 5.0

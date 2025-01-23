@@ -47,22 +47,19 @@ func hmi(delta):
 	recovery_fill.position.x = total_position * character.ragdoll_recovery_progress
 	
 	var ragdoll_speed = character.find_child("*lowerBody", true, false).linear_velocity.length()
-	lever_phase += delta * pow(max(character.ragdoll_recovery_default_duration, ragdoll_speed), 0.75)
+	lever_phase += delta * pow(max(character.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
 	
 	recovery_lever.position.x = sin(lever_phase) * total_length / 2.0
 	
 	if recovery_lever_on_target():
-		recovery_lever.position.y = -2
-		recovery_lever.size.y = 8	
+		recovery_target.color = Color('ffc354')
 	else:
-		recovery_lever.position.y = -6
-		recovery_lever.size.y = 16
+		recovery_target.color = Color('b98457')
 	
 	
 func recovery_lever_on_target():
 	
 	return abs(recovery_lever.position.x) <= recovery_target.size.x / 2.0
-	
 	
 	
 func movement():
