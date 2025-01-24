@@ -66,6 +66,25 @@ func get_items(item_index):
 		return [] 
 			
 
+func collect_items(item_index, collection_point, speed = 2.0):
+	
+	var items = get_items(item_index)
+	
+	for item in items:
+		item.gravity_scale = 0.0
+		var disposition = collection_point - item.global_position
+		item.apply_central_force(disposition.normalized() * speed * item.mass)
+		
+		
+func disperse_items(item_index, magnitude = 12.0):
+	
+	var items = get_items(item_index)
+	
+	for item in items:
+		item.gravity_scale = 1.0
+		var random_direction = Vector3(randf() - 0.5, randf() - 0.5, randf() - 0.5).normalized()
+		item.apply_central_impulse(random_direction * magnitude * item.mass)
+		
 			
 func clear_items(item_index):
 	

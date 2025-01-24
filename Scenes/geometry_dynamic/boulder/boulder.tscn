@@ -7,8 +7,11 @@
 bounce = 0.15
 
 [sub_resource type="SphereMesh" id="SphereMesh_vla70"]
+radius = 0.75
+height = 1.5
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_w0hiu"]
+radius = 0.75
 
 [node name="Boulder" type="RigidBody3D"]
 collision_layer = 8

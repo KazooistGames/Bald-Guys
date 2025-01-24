@@ -10,15 +10,19 @@ var cycle_timer = 0.0
 var cycle_period = 60
 
 var burst_size = 2
+var burst_bpm_ratio = 2.0
 
 var boop_count = 0
-var boop_period = 0.75
+var boop_period = 2.0/3.0
 var boop_timer = 0.0
 
-var echo_chance = 0.5
-var echo_period_ratio = 1.0/3.0
+const echo_chance = 0.5
+const echo_period_ratio = 1.0/3.0
 var echo_this_boop = false
 
+const logging = true
+
+const new_time_sig_chance = 0.75
 
 func _ready():
 	
@@ -41,10 +45,18 @@ func _process(delta):
 		cycle_timer += boop_count * boop_period
 		boop_count = 0
 		boop_timer = 0.0
-		burst_size = randi_range(1, 4)
+		burst_size = randi_range(2, 6)
+		boop_period = cycle_period / ( burst_size * burst_bpm_ratio)
 		
-		if randf() > 0.8:
+		if logging:
+			print("burst size: ", burst_size, ", period: ", boop_period)
+		
+		if randf() > new_time_sig_chance:
 			bpm = randi_range(1, 4) * 3
+			burst_bpm_ratio = randi_range(1, 4)
+			
+			if logging:
+				print("new time signature, bpm: ", bpm, ", burst_bpm_ratio: ", burst_bpm_ratio)
 			
 		cycle_period = 60.0/bpm
 	

@@ -5,8 +5,7 @@
 [ext_resource type="AudioStream" uid="uid://byljgo4xhofxy" path="res://audio/harmonic-hum-100812.mp3" id="3_2h1at"]
 
 [sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_t6ct2"]
-random_pitch = 1.25
-random_volume_offset_db = 6.0
+random_pitch = 1.5
 streams_count = 1
 stream_0/stream = ExtResource("3_2h1at")
 stream_0/weight = 1.0
@@ -24,4 +23,4 @@ bus = &"stank"
 [node name="boop" type="AudioStreamPlayer" parent="."]
 stream = SubResource("AudioStreamRandomizer_t6ct2")
 volume_db = -21.0
-max_polyphony = 5
+max_polyphony = 6

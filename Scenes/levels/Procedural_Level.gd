@@ -11,7 +11,7 @@ const map_size = 50
 @onready var session = get_parent()
 
 var reconfigure_period = 90.0
-var reconfigure_timer = 0.0
+var reconfigure_timer = -1.0
 
 var mesa_count = 25
 var ramp_freq = 0.5
@@ -41,12 +41,14 @@ func _ready():
 	
 
 func _physics_process(delta):
-	
+
+
 	if not is_multiplayer_authority():
 		return
 
 	if reconfigure_timer < 0:
-		pass
+		item_dropper.collect_items(0, Vector3.UP * 35)
+		item_dropper.collect_items(2, Vector3.UP * 35, 0.75)
 		
 	elif reconfigure_timer >= reconfigure_period:
 		reconfigure_timer = -1
@@ -95,7 +97,8 @@ func stage_limbs():
 			
 			
 func start_reconfigure_timer():
-	
+	item_dropper.disperse_items(0)
+	item_dropper.disperse_items(2, 6.0)
 	limb_grower.stop_limbs()
 	reconfigure_timer = 0			
 	
@@ -120,7 +123,7 @@ func unstage_mesas():
 	
 	
 func start_map():
-	reconfigure_timer = reconfigure_period - 10.0
+	reconfigure_timer = -1
 	board_hoverer.spawn_boards(5, 3, 5, Vector2(0, 15))
 	board_hoverer.spawn_boards(3, 5, 3, Vector2(15, 20))
 	board_hoverer.spawn_boards(1, 8, 1, Vector2(20, 25))

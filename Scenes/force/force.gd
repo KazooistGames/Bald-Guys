@@ -13,7 +13,7 @@ enum Action {
 
 @export var Aim = Vector3.ZERO
 
-@export var Max_kg = 500
+@export var Max_kg = 100
 
 @export var wielder : Node3D = null
 
