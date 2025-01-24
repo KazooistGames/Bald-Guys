@@ -98,9 +98,6 @@ func _notification(what):
 	
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		pause_menu.visible = true
-		
-	#elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		#pause_menu.visible = false
 
 
 func start_host_lobby():
@@ -184,7 +181,6 @@ func leave_session():
 		
 	multiplayer.multiplayer_peer = null
 	
-	#session.Client_Screennames.clear()
 	pause_menu.visible = false
 	
 	if session != null:

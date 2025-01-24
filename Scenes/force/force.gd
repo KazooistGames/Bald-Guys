@@ -44,6 +44,8 @@ var offset = 1.25
 
 var material;
 
+var target_position
+
 func _ready():
 	
 	rpc_reset()
@@ -54,7 +56,7 @@ func _physics_process(delta):
 
 	material = mesh.get_surface_override_material(0)
 	
-	get_contained_bodies()
+	capture_bodies()
 
 
 	if action == Action.holding:
@@ -103,8 +105,8 @@ func _physics_process(delta):
 	mesh.rotate(Vector3.FORWARD, delta)
 	mesh.rotate(Vector3.RIGHT, delta * 1.1)
 	mesh.set_surface_override_material(0, material)
-	position = base_position + Aim.normalized() * offset
-	#print(Aim)
+	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
+	position = position.move_toward(target_position, delta * 5.0)
 	
 	
 @rpc("call_local", "reliable")
@@ -290,7 +292,21 @@ func can_be_held(node):
 		return true
 
 
-func get_contained_bodies():
+func held_mass():
+	
+	if action != Action.holding:
+		return 0
+		
+	else:
+		var total_mass = 0
+		
+		for body in contained_bodies:
+			total_mass += body.mass
+			
+		return total_mass
+
+
+func capture_bodies():
 	
 	var raw_bodies = get_overlapping_bodies().filter(can_be_pushed)
 	raw_bodies.sort_custom(sort_fat)

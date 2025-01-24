@@ -35,9 +35,6 @@ func _physics_process(delta):
 func bounce_geometry(geometry, trajectory):
 	
 	var intersections = get_collider_intersections(geometry)
-
-	#var xz_bounds = geometry.size / 2.0
-	#var y_bounds = geometry.raycast.target_position.length() / 2.0
 	
 	if intersections == null:
 		pass

@@ -20,9 +20,10 @@ const echo_chance = 0.5
 const echo_period_ratio = 1.0/3.0
 var echo_this_boop = false
 
-const logging = true
+const logging = false
 
-const new_time_sig_chance = 0.75
+const new_time_sig_chance = 0.25
+
 
 func _ready():
 	
@@ -51,7 +52,7 @@ func _process(delta):
 		if logging:
 			print("burst size: ", burst_size, ", period: ", boop_period)
 		
-		if randf() > new_time_sig_chance:
+		if randf() <= new_time_sig_chance:
 			bpm = randi_range(1, 4) * 3
 			burst_bpm_ratio = randi_range(1, 4)
 			

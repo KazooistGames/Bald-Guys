@@ -50,9 +50,6 @@ var IMPACT_THRESHOLD =  6.5
 var ragdoll_cooldown_period_seconds = 0.5
 var ragdoll_cooldown_timer_seconds = 0
 
-#var ragdoll_recovery_period_seconds = 1
-#var ragdoll_recovery_timer_seconds = 0
-
 var ragdoll_recovery_progress = 0.0
 var ragdoll_recovery_default_duration = 3.0
 var ragdoll_recovery_default_boost = 0.1
