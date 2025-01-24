@@ -451,13 +451,5 @@ func land():
 	var retardation_magnitude = max(1.0, translational_velocity.length()/2.0)
 	var impulse = retardation_vector * retardation_magnitude * mass
 	apply_central_impulse(impulse)
-	
-
-#func boost_recovery():
-	#
-	#if RAGDOLLED:
-		#var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
-		#var boost_scalar = sqrt(ragdoll_velocity)
-		#ragdoll_recovery_progress += ragdoll_recovery_default_boost / boost_scalar
 
 	
