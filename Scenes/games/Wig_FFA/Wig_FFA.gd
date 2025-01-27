@@ -45,6 +45,7 @@ func _process(delta):
 
 	HUD.TableValues = Bearer_Times
 	HUD.visible = session.State == session.SessionState.Round 
+	var screenname = session.Client_Screennames[int(str(Bearer.name))] if Bearer != null else ''
 	
 	if not is_multiplayer_authority():
 		pass
@@ -67,8 +68,6 @@ func _process(delta):
 	
 	elif State == GameState.playing:
 		
-		var screenname = session.Client_Screennames[int(str(Bearer.name))] if Bearer != null else ' '
-		
 		if not Bearer:
 			pass
 			
@@ -90,8 +89,8 @@ func _process(delta):
 	else:
 		HUD.find_child("Progress").visible = false
 		
-	if Bearer_Times.has(local_player_id):	
-		var accumulated_time = Bearer_Times[local_player_id]
+	if Bearer_Times.has(screenname):	
+		var accumulated_time = Bearer_Times[screenname]
 		HUD.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
 
 
