@@ -12,13 +12,17 @@ const MAX_CONNECTIONS = 8
 
 var session
 
-@onready var main_menu = $CanvasLayer/MainMenu
+@onready var viewPort = $SubViewportContainer/SubViewport
 
+@onready var main_menu = $CanvasLayer/MainMenu
 @onready var pause_menu = $CanvasLayer/PauseMenu
 
-@onready var address_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/AddressEntry
+@onready var popup = $CanvasLayer/Popup
+@onready var popup_message = $CanvasLayer/Popup/MarginContainer/VBoxContainer/Message
+@onready var popup_acknowledge = $CanvasLayer/Popup/MarginContainer/VBoxContainer/Acknowledge
 
-@onready var viewPort = $SubViewportContainer/SubViewport
+@onready var address_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/AddressEntry
+@onready var screenname_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry
 
 @onready var sessionSpawner = $MultiplayerSpawner
 
@@ -47,6 +51,7 @@ func _ready():
 	
 	sessionSpawner.spawned.connect(handle_new_session_spawn)
 	multiplayer.connected_to_server.connect(introduce_myself_to_server)
+	multiplayer.connected_to_server.connect(acknowledge_popup)
 	
 	
 func _unhandled_input(_event):
@@ -80,8 +85,19 @@ func _process(delta):
 	if not multiplayer.has_multiplayer_peer():
 		return
 		
+	elif multiplayer.multiplayer_peer.get_connection_status() == 0:
+		display_popup("Failed to connect", null)
+		multiplayer.multiplayer_peer = null
+	
+	elif multiplayer.multiplayer_peer.get_connection_status() == 1:
+		var seconds = Time.get_time_dict_from_system()["second"]
+		var ellipses = ""
+		for i in range(seconds % 4):
+			ellipses += "."
+		display_popup("connecting" + ellipses, null)
+		
 	elif not is_multiplayer_authority():
-		return
+		pass
 
 	elif not session:
 		session = viewPort.get_node_or_null("session")
@@ -102,34 +118,50 @@ func _notification(what):
 
 func start_host_lobby():
 	
+	if get_screenname() == '':
+		display_popup("Enter a screen name first!", null)
+		return
+	
 	var enet_peer = ENetMultiplayerPeer.new()
 	main_menu.hide()
-	var error = enet_peer.create_server(PORT, MAX_CONNECTIONS)
+	var error_code = enet_peer.create_server(PORT, MAX_CONNECTIONS)
 	
-	if error:
-		return error
+	if error_code:
+		display_popup("Cannot create server,\n ERROR CODE: " + str(error_code), null)
+		return error_code
 	
 	multiplayer.multiplayer_peer = enet_peer
 	
 	session = session_Prefab.instantiate()
 	session.Created_Player_Humanoid.connect(give_humanoid_to_client)
+	session.Client_Screennames[1] = get_screenname()
 	viewPort.add_child(session)
 	
 	multiplayer.peer_connected.connect(add_player_to_session)
 	multiplayer.peer_disconnected.connect(remove_player_from_session)
-	session.Client_Screennames[1] = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
+	session.Client_Screennames[1] = get_screenname()
 
 
 func join_lobby():
+	
+	if get_screenname() == '':
+		display_popup("Choose a screen name first!", null)
+		return
+		
+	elif address_entry.text == "":
+		display_popup("Enter Host Address!", null)
+		return
 	
 	var enet_peer = ENetMultiplayerPeer.new()
 	main_menu.hide()
 	
 	var hostIP = "127.0.0.1" if address_entry.text == "" else address_entry.text
-	enet_peer.create_client(hostIP, PORT)
-		
+	var error = enet_peer.create_client(hostIP, PORT)
+	
 	multiplayer.multiplayer_peer = enet_peer
 	
+	multiplayer.connected_to_server
+	multiplayer.server_disconnected.connect(func (): display_popup("Server connection lost.", null))
 	multiplayer.server_disconnected.connect(leave_session)
 	
 
@@ -197,8 +229,39 @@ func quit():
 	
 func introduce_myself_to_server():
 	
-	var player_name = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry.text
+	var player_name = get_screenname()
 	rpc_set_client_screenname.rpc(player_name)
+	
+	
+func get_screenname():
+	
+	return screenname_entry.text
+	
+	
+func display_popup(message, callback):
+	
+	popup_message.text = message
+	popup.visible = true
+	
+	if callback == null:
+		pass
+	elif not callback is Callable:
+		pass
+	else:
+		popup_acknowledge.pressed.connect(callback)
+	
+	
+func acknowledge_popup():
+	
+	popup.visible = false
+	
+	for connection in popup_acknowledge.pressed.get_connections():
+		
+		var callback = connection["callable"]
+		
+		if callback != acknowledge_popup:
+			popup_acknowledge.pressed.disconnect(callback)
+		
 	
 		
 @rpc("call_local", "reliable")
@@ -216,3 +279,4 @@ func rpc_set_client_screenname(player_name):
 	
 	var id = multiplayer.get_remote_sender_id()
 	session.Client_Screennames[id] = player_name
+
