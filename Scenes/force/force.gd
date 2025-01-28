@@ -75,8 +75,7 @@ func _physics_process(delta):
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
 		if not is_multiplayer_authority():
-			pass
-			
+			pass	
 		elif progress >= 1.0:
 			rpc_trigger.rpc()
 		
@@ -94,7 +93,10 @@ func _physics_process(delta):
 		cooldown_timer += delta
 		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
-		if cooldown_timer >= cooldown_period:
+		
+		if not is_multiplayer_authority():
+			pass	
+		elif cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		
 	mesh.mesh.radius = collider.shape.radius * 0.8

@@ -147,7 +147,7 @@ func lunge_at_target(targeted_object):
 		var disposition = targeted_object.global_position - character.global_position
 		var distance = disposition.length()
 		
-		if distance > 4:
+		if distance > 3:
 			pass
 			
 		elif targeted_object.is_in_group("humanoids"):

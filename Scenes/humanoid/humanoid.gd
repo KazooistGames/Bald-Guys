@@ -149,8 +149,6 @@ func _integrate_forces(state):
 			impact *= 1.5
 				
 		if impact >= IMPACT_THRESHOLD: 
-
-			#ragdoll_recovery_period_seconds = sqrt (impact / IMPACT_THRESHOLD)
 			ragdoll.rpc()
 			
 		elif not ON_FLOOR:	

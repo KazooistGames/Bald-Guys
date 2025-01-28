@@ -28,6 +28,8 @@ func ragdoll_start():
 	leftHand.stop()
 	rightHand.stop()
 	ragdollSkeleton.set_gravity(1.0)
+	$"Ragdoll/Physical Bone foot_l".set("joint_constraints/y/angular_limit_enabled", true)
+	$"Ragdoll/Physical Bone foot_r".set("joint_constraints/y/angular_limit_enabled", true)
 	RAGDOLLED = true
 	
 	
@@ -37,6 +39,8 @@ func ragdoll_stop():
 	rightHand.start()
 	ragdollSkeleton.set_gravity(0.0)
 	ragdollSkeleton.reset_skeleton()
+	$"Ragdoll/Physical Bone foot_l".set("joint_constraints/y/angular_limit_enabled", false)
+	$"Ragdoll/Physical Bone foot_r".set("joint_constraints/y/angular_limit_enabled", false)
 	RAGDOLLED = false
 	
 

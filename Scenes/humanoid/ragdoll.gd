@@ -37,7 +37,7 @@ var bone_modifiers = {
 
 
 const MAX_VELOCITY = 100
-const MAX_DISPLACEMENT = 2
+const MAX_DISPLACEMENT = 1
 const MAX_ANGULAR_DISPLACEMENT = PI
 
 var correct_physical_bones_trigger
@@ -64,9 +64,7 @@ func animate_physical_bones(delta):
 	for boneIndex in mockBoneIndices:
 		instantly_match_animated_bone(boneIndex)
 		
-	for physical_bone in physicalBones:
-		
-	
+	for physical_bone in physicalBones:	
 		var bone_modifier = bone_modifiers.get(physical_bone.bone_name, 1.0)
 		var physical_transform = get_physical_transform(physical_bone)
 		var animated_transform = get_animated_transform(physical_bone)	
@@ -90,6 +88,7 @@ func animate_physical_bones(delta):
 			physical_bone.linear_velocity += linear_force * delta
 			var angular_torque = get_hookes_law_force(ANGULAR_STIFFNESS * bone_modifier, angular_displacement.get_euler(), ANGULAR_DAMPING * bone_modifier, physical_bone.angular_velocity)
 			physical_bone.angular_velocity += angular_torque * delta
+			
 	process_slappy_feet(delta)
 
 
