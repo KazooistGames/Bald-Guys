@@ -25,6 +25,7 @@ func _process(delta):
 	
 	if not character:	
 		camera = null
+		recovery_bar.visible = false
 		
 	elif not camera:
 		camera = camera_prefab.instantiate()

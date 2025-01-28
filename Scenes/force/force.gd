@@ -63,10 +63,8 @@ func _physics_process(delta):
 		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 2.0, 5.0 * delta)
 		
-		if is_multiplayer_authority():
-							
-			for node in contained_bodies:			
-				rpc_hold_object.rpc(node.get_path())
+		for node in contained_bodies:			
+			rpc_hold_object(node.get_path())
 			
 	elif action == Action.charging:
 		charge_timer += delta

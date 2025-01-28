@@ -120,6 +120,7 @@ func _integrate_forces(state):
 	
 	if not floorcast.is_colliding():
 		pass		
+		
 	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
 		state.transform.origin.y = floorcast.get_collision_point().y
 	
@@ -158,7 +159,7 @@ func _integrate_forces(state):
 			var upright = abs(normal.dot(floor_normal)) <= 0.667
 			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 0.75
 			
-			if glancing and forceful and upright and looking_forward:
+			if glancing and forceful and upright and looking_forward and shape != 2:
 				wall_jump.rpc(state.get_contact_impulse(index))
 				
 		index += 1			
