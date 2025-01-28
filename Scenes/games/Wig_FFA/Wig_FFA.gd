@@ -45,7 +45,14 @@ func _process(delta):
 
 	HUD.TableValues = Bearer_Times
 	HUD.visible = session.State == session.SessionState.Round 
-	var screenname = session.Client_Screennames[int(str(Bearer.name))] if Bearer != null else ''
+	
+	var screenname = ''
+	
+	if Bearer == null:
+		pass
+		
+	elif session.Client_Screennames.has(int(str(Bearer.name))):	
+		screenname = session.Client_Screennames[int(str(Bearer.name))] if Bearer != null else ''
 	
 	if not is_multiplayer_authority():
 		pass
@@ -95,10 +102,12 @@ func _process(delta):
 
 
 func start():
+	
 	rpc_start.rpc()
 	
 	
 func reset():
+	
 	rpc_reset.rpc()	
 
 

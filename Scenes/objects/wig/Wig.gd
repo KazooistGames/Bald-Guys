@@ -33,7 +33,6 @@ extends RigidBody3D
 var strobing_enabled = false
 var strobing_phase = 0
 
-
 func _enter_tree():
 	
 	add_to_group("wigs")
@@ -57,26 +56,26 @@ func _process(delta):
 	var material = mesh.get_surface_override_material(0)
 	
 	if strobing_enabled:
-		material.emission_energy_multiplier = 2 + 2 * abs(sin(strobing_phase))
+		material.emission_energy_multiplier = 1 * abs(sin(strobing_phase))
 		strobing_phase += delta
 	
 	else:
-		material.emission_energy_multiplier = 4
+		material.emission_energy_multiplier = 0.5
 
 
 func getRandomHairColor():
 	var rng = RandomNumberGenerator.new()
 
-	var colorBase = rng.randf_range(0.0, 200.0 )
+	var colorBase = rng.randf_range(0.0, 0.5)
 	
-	var maxShift = (255.0 - colorBase) / 3.0
-	var redShift = rng.randf_range(0.0, maxShift)
+	var maxShift = (1.0 - colorBase)
+	var redShift = randf() * maxShift
 	
 	var greenShift = rng.randf_range(0.0, redShift )
 	
-	var r = (colorBase + redShift)/255.0
-	var g = (colorBase + greenShift)/255.0
-	var b = colorBase/255.0
+	var r = colorBase + redShift
+	var g = colorBase + greenShift
+	var b = colorBase
 	
 	HAIR_COLOR = Color(r, g, b)
 	print("Wig Color: ", HAIR_COLOR)
@@ -85,5 +84,3 @@ func getRandomHairColor():
 func toggle_strobing(enable):
 	strobing_enabled = enable
 		
-	
-	

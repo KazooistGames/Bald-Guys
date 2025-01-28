@@ -30,7 +30,7 @@ enum Action {
 const hold_force = 8000.0	
 const throw_force = 750.0
 const push_force = 200.0
-const ragdoll_radius = 1.5
+const ragdoll_radius = 2.0
 
 var charge_period = 0.25
 var charge_timer = 0.0

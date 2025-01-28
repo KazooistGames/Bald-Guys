@@ -22,8 +22,9 @@ height = 0.5
 resource_local_to_scene = true
 next_pass = ExtResource("3_1t4ee")
 diffuse_mode = 1
-albedo_color = Color(0.6, 0.560784, 0.32549, 1)
+albedo_color = Color(0.813434, 0.279787, 0.278207, 1)
 emission_enabled = true
+emission = Color(0.813434, 0.279787, 0.278207, 1)
 normal_texture = ExtResource("2_bv5em")
 rim_tint = 0.0
 heightmap_scale = 5.826
@@ -54,6 +55,7 @@ contact_monitor = true
 linear_damp = 0.5
 constant_force = Vector3(0, -9.8, 0)
 script = ExtResource("1_rx6rq")
+HAIR_COLOR = Color(0.813434, 0.279787, 0.278207, 1)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_k7sog")
