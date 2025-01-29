@@ -6,7 +6,7 @@ var Wig : Node3D
 
 var Bearer : Node3D
 
-@export var Goal_Time = 60
+@export var Goal_Time = 90
 
 @export var Bearer_Times = {}
 
@@ -127,6 +127,7 @@ func dawn_wig(node):
 		
 	else:
 		Wig.interactable.gained_interaction.disconnect(dawn_wig)
+		Wig.whispers.stream_paused = true
 		node.ragdolled.connect(drop_wig)
 		
 		move_wig_remote_controller.rpc(node.find_child("*head").get_path())
@@ -139,6 +140,7 @@ func dawn_wig(node):
 func drop_wig():
 	
 	Wig.interactable.gained_interaction.connect(dawn_wig)
+	Wig.whispers.stream_paused = false
 	Bearer.ragdolled.disconnect(drop_wig)
 	
 	var current_position = Wig.global_position

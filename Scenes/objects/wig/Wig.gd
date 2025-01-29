@@ -1,6 +1,8 @@
 
 extends RigidBody3D
 
+const beas_mote_transition = 54.65
+
 @export var HAIR_COLOR : Color:
 	
 	get:
@@ -19,19 +21,18 @@ extends RigidBody3D
 @export var radius = 0.25
 
 @onready var Dawn = $Dawn
-
 @onready var Drop = $Drop
+@onready var whispers = $Whispers
+@onready var theme = $Theme
 
 @onready var mesh = $MeshInstance3D
-
 @onready var collider = $CollisionShape3D
-
 @onready var interactable = $Interactable
-
 @onready var synchronizer = $MultiplayerSynchronizer
 
 var strobing_enabled = false
 var strobing_phase = 0
+
 
 func _enter_tree():
 	
@@ -46,7 +47,7 @@ func _ready():
 		return
 		
 	getRandomHairColor()
-	
+	whispers.stream_paused = false
 
 func _process(delta):
 	
@@ -61,18 +62,25 @@ func _process(delta):
 	
 	else:
 		material.emission_energy_multiplier = 0.5
+		
+	if whispers.get_playback_position() >= beas_mote_transition:
+		whispers.seek(0)
+		
+	if theme.get_playback_position() < beas_mote_transition:
+		theme.seek(beas_mote_transition)
+		
+	theme.stream_paused = not whispers.stream_paused
 
 
 func getRandomHairColor():
-	var rng = RandomNumberGenerator.new()
-
-	var colorBase = rng.randf_range(0.0, 0.5)
 	
+	var rng = RandomNumberGenerator.new()
+	
+	var colorBase = rng.randf_range(0.0, 0.5)
 	var maxShift = (1.0 - colorBase)
 	var redShift = randf() * maxShift
-	
 	var greenShift = rng.randf_range(0.0, redShift )
-	
+
 	var r = colorBase + redShift
 	var g = colorBase + greenShift
 	var b = colorBase
@@ -82,5 +90,6 @@ func getRandomHairColor():
 
 
 func toggle_strobing(enable):
+	
 	strobing_enabled = enable
 		
