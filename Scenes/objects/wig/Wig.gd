@@ -48,6 +48,7 @@ func _ready():
 		
 	getRandomHairColor()
 	whispers.stream_paused = false
+	theme.stream_paused = true
 
 func _process(delta):
 	

@@ -80,13 +80,16 @@ func _physics_process(delta):
 			rpc_trigger.rpc()
 		
 	elif action == Action.inert:	
-		collider.shape.radius = move_toward(collider.shape.radius, 0, 3.0 * delta)
-		collider.shape.height = move_toward(collider.shape.height, 0, 5.0 * delta)
+		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
+		collider.shape.height = move_toward(collider.shape.height, 0, 12.0 * delta)
+		
+		if collider.shape.radius == 0:
+			mesh.visible = false	
 		
 	elif action == Action.cooldown:
 		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
-		collider.shape.height = move_toward(collider.shape.height, 0, 8.0 * delta)
-		
+		collider.shape.height = move_toward(collider.shape.height, 0, 12.0 * delta)
+			
 		if collider.shape.radius == 0:
 			mesh.visible = false	
 			
@@ -156,7 +159,6 @@ func rpc_reset():
 	if action == Action.cooldown && cooldown_timer <= cooldown_period:
 		return	
 		
-	mesh.visible = false	
 	collision_mask = 0
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
