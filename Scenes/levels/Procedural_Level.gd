@@ -15,7 +15,7 @@ var reconfigure_timer = -1.0
 
 var mesa_count = 25
 var ramp_freq = 0.5
-var limb_freq = 1./3.
+var limb_freq = 1.0/3.0
 		
 		
 func _ready():
@@ -72,8 +72,15 @@ func stage_ramps():
 	
 	for mesa in mesa_grower.mesas:
 			
-		if randf() <= ramp_freq:
-			ramparter.spawn_ramp(mesa.position, mesa.size, mesa.size)
+		if randf() <= ramp_freq: #roof
+			ramparter.spawn_ramp(mesa.position, mesa.size, mesa.size, false, randi_range(0, 3) * PI/2)
+			
+		if randf() <= ramp_freq: #floor
+			var y_rotation = randi_range(0, 3) * PI/2
+			var base_offset = Vector3(-cos(y_rotation), 0, sin(y_rotation)).normalized() * mesa.size
+			var ramp_position = mesa.position + base_offset
+			ramp_position.y = 0
+			ramparter.spawn_ramp(ramp_position, mesa.size, mesa.size, false, y_rotation)
 			
 	ramparter.lift()
 	

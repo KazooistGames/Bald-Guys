@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cs5vme3m6f1ux"]
+[gd_scene load_steps=13 format=3 uid="uid://cs5vme3m6f1ux"]
 
 [ext_resource type="Script" path="res://Scenes/objects/wig/Wig.gd" id="1_rx6rq"]
 [ext_resource type="Texture2D" uid="uid://wnmv7ic5wt76" path="res://Textures/afro.png" id="2_bv5em"]
@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="4_m1qom"]
 [ext_resource type="AudioStream" uid="uid://caispurkdm8u8" path="res://audio/dawn.wav" id="6_awnx7"]
 [ext_resource type="AudioStream" uid="uid://cd5err1tmmn8a" path="res://audio/drop.wav" id="7_12mry"]
-[ext_resource type="AudioStream" uid="uid://do2svkh5yqq6a" path="res://audio/Beas Mote2.wav" id="8_eyxcw"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_8sl1w"]
 bounce = 0.5
@@ -81,14 +80,3 @@ volume_db = -6.0
 [node name="Drop" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("7_12mry")
 volume_db = -6.0
-
-[node name="Whispers" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource("8_eyxcw")
-volume_db = -30.0
-unit_size = 5.0
-autoplay = true
-
-[node name="Theme" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("8_eyxcw")
-volume_db = -9.0
-autoplay = true

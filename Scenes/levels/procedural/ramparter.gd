@@ -62,7 +62,7 @@ func _physics_process(delta):
 		finished_collapsing.emit()
 
 
-func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = false):
+func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = false, y_rotation = 0):
 	
 	var new_ramp = ramp_prefab.instantiate()
 	add_child(new_ramp, true)		
@@ -70,7 +70,7 @@ func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = fa
 	new_ramp.thickness = thickness
 	new_ramp.height = 0.0
 	new_ramp.position = coordinates
-	new_ramp.rotation.y = randi_range(0, 3) * PI/2
+	new_ramp.rotation.y = y_rotation
 	
 	if verify_position:			
 		new_ramp.position.y = height_at_coordinates(coordinates) + 0.5

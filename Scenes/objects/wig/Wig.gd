@@ -1,8 +1,6 @@
 
 extends RigidBody3D
 
-const beas_mote_transition = 54.65
-
 @export var HAIR_COLOR : Color:
 	
 	get:
@@ -22,8 +20,7 @@ const beas_mote_transition = 54.65
 
 @onready var Dawn = $Dawn
 @onready var Drop = $Drop
-@onready var whispers = $Whispers
-@onready var theme = $Theme
+
 
 @onready var mesh = $MeshInstance3D
 @onready var collider = $CollisionShape3D
@@ -47,8 +44,7 @@ func _ready():
 		return
 		
 	getRandomHairColor()
-	whispers.stream_paused = false
-	theme.stream_paused = true
+
 
 func _process(delta):
 	
@@ -64,13 +60,9 @@ func _process(delta):
 	else:
 		material.emission_energy_multiplier = 0.5
 		
-	if whispers.get_playback_position() >= beas_mote_transition:
-		whispers.seek(0)
+
 		
-	if theme.get_playback_position() < beas_mote_transition:
-		theme.seek(beas_mote_transition)
-		
-	theme.stream_paused = not whispers.stream_paused
+
 
 
 func getRandomHairColor():

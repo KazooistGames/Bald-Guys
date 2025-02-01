@@ -1,20 +1,7 @@
 extends Node3D
 
 const wig_prefab = preload("res://Scenes/objects/wig/Wig.tscn")
-
-var Wig : Node3D
-
-var Bearer : Node3D
-
-@export var Goal_Time = 90
-
-@export var Bearer_Times = {}
-
-@onready var wig_remote = $RemoteTransform3D
-
-@onready var HUD = $HUD
-
-var local_player_id
+const beas_mote_transition = 54.66
 
 enum GameState {
 	reset,
@@ -24,8 +11,21 @@ enum GameState {
 }
 
 @export var State = GameState.reset
+@export var Goal_Time = 90
+
+@export var Bearer_Times = {}
+
+@onready var wig_remote = $RemoteTransform3D
+@onready var HUD = $HUD
+@onready var whispers = $Whispers
+@onready var theme = $Theme
 
 @onready var session = get_parent()
+
+var Wig : Node3D
+var Bearer : Node3D
+
+var local_player_id
 
 var countDown_timer = 0
 var countDown_value = 0
@@ -36,12 +36,16 @@ func _ready():
 	local_player_id = str(multiplayer.get_unique_id())
 	session.Started_Round.connect(start)
 	session.Ended_Round.connect(reset)
+	whispers.stream_paused = false
+	theme.stream_paused = true
 	
 	
 func _process(delta):
-			
+	
+	update_music()
+	
 	if not Wig:
-		Wig = get_node_or_null("Wig")
+		Wig = get_node_or_null("Wig")	
 
 	HUD.TableValues = Bearer_Times
 	HUD.visible = session.State == session.SessionState.Round 
@@ -101,6 +105,33 @@ func _process(delta):
 		HUD.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
 
 
+func update_music():
+	
+	if Wig == null:
+		whispers.stream_paused = true
+		theme.stream_paused = true
+		
+	else:
+		whispers.global_position = Wig.global_position
+		whispers.stream_paused = bearer_is_local_player()
+		theme.stream_paused = not whispers.stream_paused
+
+	if whispers.get_playback_position() >= beas_mote_transition:
+		whispers.seek(0)
+		
+	if theme.get_playback_position() < beas_mote_transition:
+		theme.seek(beas_mote_transition)
+
+
+func bearer_is_local_player():
+	
+	if Bearer == null:
+		return false
+		
+	else:	
+		return local_player_id == Bearer.name
+
+
 func start():
 	
 	rpc_start.rpc()
@@ -127,7 +158,6 @@ func dawn_wig(node):
 		
 	else:
 		Wig.interactable.gained_interaction.disconnect(dawn_wig)
-		Wig.whispers.stream_paused = true
 		node.ragdolled.connect(drop_wig)
 		
 		move_wig_remote_controller.rpc(node.find_child("*head").get_path())
@@ -140,7 +170,6 @@ func dawn_wig(node):
 func drop_wig():
 	
 	Wig.interactable.gained_interaction.connect(dawn_wig)
-	Wig.whispers.stream_paused = false
 	Bearer.ragdolled.disconnect(drop_wig)
 	
 	var current_position = Wig.global_position
