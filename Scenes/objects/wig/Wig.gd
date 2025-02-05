@@ -61,10 +61,6 @@ func _process(delta):
 		material.emission_energy_multiplier = 0.5
 		
 
-		
-
-
-
 func getRandomHairColor():
 	
 	var rng = RandomNumberGenerator.new()

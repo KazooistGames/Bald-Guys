@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://yaefhdh5sdlv"]
+[gd_scene load_steps=6 format=3 uid="uid://yaefhdh5sdlv"]
 
 [ext_resource type="Script" path="res://Scenes/cameras/FPS_Camera.gd" id="1_12e8i"]
 [ext_resource type="Material" uid="uid://bnku3p4cuequa" path="res://Materials/post_processing.tres" id="2_ndtcw"]
@@ -7,6 +7,9 @@
 [sub_resource type="QuadMesh" id="QuadMesh_e76kf"]
 flip_faces = true
 size = Vector2(2, 2)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_mq3ua"]
+radius = 0.25
 
 [node name="Camera3D" type="Camera3D"]
 doppler_tracking = 2
@@ -40,3 +43,9 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("3_p33es")
 expand_mode = 1
+
+[node name="ShapeCast3D" type="ShapeCast3D" parent="."]
+shape = SubResource("SphereShape3D_mq3ua")
+target_position = Vector3(0, 0, -100)
+collision_mask = 11
+debug_shape_custom_color = Color(1, 0, 0, 1)

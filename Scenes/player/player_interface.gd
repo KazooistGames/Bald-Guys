@@ -86,7 +86,7 @@ func aiming():
 	camera.position = adjustedPosition + adjustedOffset	
 	var look = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 	character.LOOK_VECTOR = look
-	targeted_object = camera.raycast.get_collider()
+	targeted_object = camera.shapecast.get_collider(0)
 	force.Aim = (character.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
 	var offset_to_zero = 1.0 - abs(character.LOOK_VECTOR.normalized().dot(Vector3.UP))
 	force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
@@ -139,7 +139,7 @@ func abilities():
 		else:
 			force.rpc_primary.rpc()
 			lunge_at_target(targeted_object)
-			
+				
 
 func lunge_at_target(targeted_object):
 	

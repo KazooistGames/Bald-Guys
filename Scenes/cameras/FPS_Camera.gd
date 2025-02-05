@@ -8,6 +8,7 @@ const MAX_ANGLE = PI/2.3
 
 @onready var reticle = $reticle
 @onready var raycast = $RayCast3D
+@onready var shapecast = $ShapeCast3D
 
 @onready var postprocessing = $postprocessing
 
