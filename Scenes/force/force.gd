@@ -285,7 +285,7 @@ func can_be_held(node):
 	if not can_be_pushed(node):
 		return false
 			
-	elif node.linear_velocity.length() >= 20:
+	elif node.linear_velocity.length() >= 10:
 		return false
 		
 	elif node.is_in_group("humanoids"):

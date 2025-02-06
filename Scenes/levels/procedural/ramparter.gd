@@ -16,6 +16,7 @@ enum Configuration
 @export var configuration = Configuration.inert
 
 var ramps = []
+var heights = []
 
 var lift_speed = 3.0
 var collapse_speed = 3.0
@@ -41,7 +42,7 @@ func _physics_process(delta):
 		var step = delta
 		
 		if configuration == Configuration.lifting:
-			target = ramp.length * slope
+			target = heights[index]
 			step *= lift_speed 
 		
 		elif configuration == Configuration.collapsing:
@@ -62,7 +63,7 @@ func _physics_process(delta):
 		finished_collapsing.emit()
 
 
-func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = false, y_rotation = 0):
+func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify_position = false, y_rotation = 0):
 	
 	var new_ramp = ramp_prefab.instantiate()
 	add_child(new_ramp, true)		
@@ -75,6 +76,7 @@ func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, verify_position = fa
 	if verify_position:			
 		new_ramp.position.y = height_at_coordinates(coordinates) + 0.5
 		
+	heights.append(height)
 	#print("pulling up ramp at ", new_ramp.position)
 		
 		
@@ -97,6 +99,8 @@ func clear_ramps():
 		ramp.queue_free()
 			
 	ramps.clear()	
+	heights.clear()
+	
 	
 func stop():
 	

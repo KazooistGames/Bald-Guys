@@ -1,7 +1,7 @@
 extends RigidBody3D
 
 const floor_normal = Vector3(0, 1, 0)
-const floor_angle = PI/4.0
+const floor_dot_product = 0.75
 
 @export var SKIN_COLOR : Color:
 	
@@ -57,8 +57,15 @@ var ragdoll_recovery_default_boost = 0.1
 signal ragdolled
 
 var coyote_timer = 0.0
-var coyote_duration = 0.1
+var coyote_duration = 0.15
 var reverse_coyote_timer = 0.0
+
+var floor_object = null
+var cached_floor_obj = null
+var cached_floor_pos = Vector3.ZERO
+
+var just_jumped_timer = 0.0
+var just_jumped_period = 1.0/3.0
 
 
 func _enter_tree():
@@ -154,17 +161,16 @@ func _integrate_forces(state):
 		elif not ON_FLOOR:	
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 0.667
 			var forceful = impact > IMPACT_THRESHOLD/3.0
-			var upright = abs(normal.dot(floor_normal)) <= 0.667
+			var upright = abs(normal.dot(floor_normal)) <= floor_dot_product
 			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 0.75
+			var just_jumped = just_jumped_timer < just_jumped_period
 			
-			if glancing and forceful and upright and looking_forward and shape != 2:
+			if glancing and forceful and upright and looking_forward and shape != 2 and just_jumped:
 				wall_jump.rpc(state.get_contact_impulse(index))
 				
 		index += 1			
 
-var floor_object = null
-var cached_floor_obj = null
-var cached_floor_pos = Vector3.ZERO
+
 
 
 func _physics_process(delta):		
@@ -194,9 +200,12 @@ func _physics_process(delta):
 		reverse_coyote_timer += delta
 
 	if not is_on_floor():
-		coyote_timer += delta				
+		coyote_timer += delta	
+		just_jumped_timer += delta		
+			
 	elif not ON_FLOOR and is_multiplayer_authority():		
-		land.rpc()				
+		land.rpc()			
+			
 	else:
 		coyote_timer = 0
 	
@@ -271,10 +280,13 @@ func _physics_process(delta):
 	
 func is_on_floor():
 	
-	if floorcast.enabled:
-		return floorcast.is_colliding()	
-	else:
-		return false 
+	if not floorcast.enabled:
+		return false
+	elif not floorcast.is_colliding():
+		return false
+	elif floorcast.get_collision_normal().dot(Vector3.UP) > floor_dot_product:
+		#print(floorcast.get_collision_normal(), "	", floorcast.get_collision_normal().dot(Vector3.UP))
+		return true 
 		
 	
 func is_back_pedaling():
@@ -388,10 +400,12 @@ func bump(velocity_impulse):
 	apply_central_impulse(velocity_impulse * mass)
 		
 
+
 @rpc("call_local", "reliable")
 func jump():
 	
 	if ON_FLOOR:
+		just_jumped_timer = 0.0
 		ON_FLOOR = false
 		coyote_timer = coyote_duration
 		reverse_coyote_timer = 0.0
@@ -424,6 +438,7 @@ func double_jump():
 		pass	
 		
 	elif DOUBLE_JUMP_CHARGES > 0:
+		just_jumped_timer = 0.0
 		jumpFX.pitch_scale = 1.25
 		jumpFX.play()	
 		DOUBLE_JUMP_CHARGES -= 1

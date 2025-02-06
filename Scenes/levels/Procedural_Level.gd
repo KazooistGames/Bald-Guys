@@ -73,14 +73,21 @@ func stage_ramps():
 	for mesa in mesa_grower.mesas:
 			
 		if randf() <= ramp_freq: #roof
-			ramparter.spawn_ramp(mesa.position, mesa.size, mesa.size, false, randi_range(0, 3) * PI/2)
+			ramparter.spawn_ramp(mesa.position, mesa.size, mesa.size, mesa.size/2.0, false, randi_range(0, 3) * PI/2)
 			
 		if randf() <= ramp_freq: #floor
 			var y_rotation = randi_range(0, 3) * PI/2
 			var base_offset = Vector3(-cos(y_rotation), 0, sin(y_rotation)).normalized() * mesa.size
 			var ramp_position = mesa.position + base_offset
 			ramp_position.y = 0
-			ramparter.spawn_ramp(ramp_position, mesa.size, mesa.size, false, y_rotation)
+			var ramp_height
+			
+			if mesa.position.y > mesa.size * 2.0:		
+				ramp_height = minf(mesa.size * 2.0, mesa.position.y / 2.0)
+			else:
+				ramp_height = mesa.position.y
+				
+			ramparter.spawn_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation)
 			
 	ramparter.lift()
 	
@@ -131,9 +138,9 @@ func unstage_mesas():
 	
 func start_map():
 	reconfigure_timer = -1
-	board_hoverer.spawn_boards(5, 3, 5, Vector2(0, 15))
-	board_hoverer.spawn_boards(3, 5, 3, Vector2(15, 20))
-	board_hoverer.spawn_boards(1, 8, 1, Vector2(20, 25))
+	board_hoverer.spawn_boards(5, 3, 4, Vector2(0, 15))
+	board_hoverer.spawn_boards(3, 6, 2, Vector2(15, 20))
+	board_hoverer.spawn_boards(1, 12, 1, Vector2(20, 25))
 	item_dropper.spawn_field(0, 5, 5, 10, Vector3.UP * 25)
 	item_dropper.spawn_field(2, 3, 3, 10, Vector3.UP * 25)
 	stage_mesas()

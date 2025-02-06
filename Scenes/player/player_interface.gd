@@ -13,7 +13,8 @@ const camera_prefab = preload("res://Scenes/cameras/FPS_Camera.tscn")
 @onready var recovery_backdrop = $Recovery/BackDrop
 @onready var recovery_target = $Recovery/Target
 @onready var recovery_lever = $Recovery/Lever
-var lever_phase = 0.0
+var recovery_lever_phase = 0.0
+var early_recovery_locked = false
 	
 	
 func _ready():
@@ -41,6 +42,11 @@ func _process(delta):
 func hmi(delta):
 	
 	recovery_bar.visible = character.RAGDOLLED
+	recovery_lever.visible = not early_recovery_locked
+	recovery_target.visible = not early_recovery_locked
+	
+	if not character.RAGDOLLED:
+		early_recovery_locked = false
 	
 	var total_length = recovery_backdrop.size.x
 	var total_position = recovery_backdrop.position.x
@@ -48,19 +54,14 @@ func hmi(delta):
 	recovery_fill.position.x = total_position * character.ragdoll_recovery_progress
 	
 	var ragdoll_speed = character.find_child("*lowerBody", true, false).linear_velocity.length()
-	lever_phase += delta * pow(max(character.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
+	recovery_lever_phase += delta * pow(max(character.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
 	
-	recovery_lever.position.x = sin(lever_phase) * total_length / 2.0
+	recovery_lever.position.x = sin(recovery_lever_phase) * total_length / 2.0
 	
 	if recovery_lever_on_target():
 		recovery_target.color = Color('ffc354')
 	else:
 		recovery_target.color = Color('b98457')
-	
-	
-func recovery_lever_on_target():
-	
-	return abs(recovery_lever.position.x) <= recovery_target.size.x / 2.0
 	
 	
 func movement():
@@ -116,7 +117,9 @@ func abilities():
 	if Input.is_action_just_pressed("drop"):
 		
 		if recovery_lever_on_target():
-			character.unragdoll.rpc()
+			early_recovery()
+		else:
+			lockout_early_recovery()
 	
 	if character.RAGDOLLED:
 		force.rpc_reset.rpc()
@@ -139,7 +142,25 @@ func abilities():
 		else:
 			force.rpc_primary.rpc()
 			lunge_at_target(targeted_object)
-				
+			
+			
+func recovery_lever_on_target():
+	
+	return abs(recovery_lever.position.x) <= recovery_target.size.x / 2.0
+	
+
+func lockout_early_recovery():
+	
+	recovery_target.visible = false
+	recovery_lever.visible = false
+	early_recovery_locked = true
+	
+	
+func early_recovery():
+	
+	if character.RAGDOLLED:
+		character.unragdoll.rpc()
+	
 
 func lunge_at_target(targeted_object):
 	

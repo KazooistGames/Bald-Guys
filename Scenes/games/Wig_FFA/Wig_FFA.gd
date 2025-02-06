@@ -2,6 +2,7 @@ extends Node3D
 
 const wig_prefab = preload("res://Scenes/objects/wig/Wig.tscn")
 const beas_mote_transition = 54.66
+const beas_mote_end = 162.0
 
 enum GameState {
 	reset,
@@ -11,7 +12,7 @@ enum GameState {
 }
 
 @export var State = GameState.reset
-@export var Goal_Time = 90
+@export var Goal_Time = 107.34
 
 @export var Bearer_Times = {}
 

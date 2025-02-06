@@ -1,5 +1,3 @@
-@tool
-
 extends StaticBody3D
 
 @export var height = 0.0
@@ -17,11 +15,6 @@ const debounce_period = 0.2 #limit rate that we re-generate a convex mesh
 var debounce_timer = 0.0
 
 var need_new_collider = false
-
-
-
-func _ready():
-	pass # Replace with function body.
 
 
 func _process(delta):
