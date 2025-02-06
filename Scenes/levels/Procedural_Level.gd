@@ -35,7 +35,7 @@ func _ready():
 	#loops here!
 	mesa_grower.finished_retracting.connect(stage_mesas) 
 	
-	#stage_mesas()
+	#hook into session framework
 	session.Started_Round.connect(start_map)
 	session.Ended_Round.connect(stop_map)
 	
@@ -73,7 +73,8 @@ func stage_ramps():
 	for mesa in mesa_grower.mesas:
 			
 		if randf() <= ramp_freq: #roof
-			ramparter.spawn_ramp(mesa.position, mesa.size, mesa.size, mesa.size/2.0, false, randi_range(0, 3) * PI/2)
+			var y_offset = Vector3.DOWN * randi_range(0, 1) * 0.75
+			ramparter.spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false, randi_range(0, 3) * PI/2)
 			
 		if randf() <= ramp_freq: #floor
 			var y_rotation = randi_range(0, 3) * PI/2
@@ -82,10 +83,12 @@ func stage_ramps():
 			ramp_position.y = 0
 			var ramp_height
 			
-			if mesa.position.y > mesa.size * 2.0:		
-				ramp_height = minf(mesa.size * 2.0, mesa.position.y / 2.0)
-			else:
-				ramp_height = mesa.position.y
+			if mesa.position.y >= mesa.size * 2.0:
+				ramp_height = mesa.size * 2.0
+			elif mesa.position.y >= mesa.size:
+				ramp_height = mesa.size
+			else:		
+				ramp_height = minf(mesa.position.y, mesa.size / 2.0)
 				
 			ramparter.spawn_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation)
 			
@@ -103,18 +106,18 @@ func stage_limbs():
 		var limbs_on_mesa = 0
 
 		while randf() <= limb_freq and limbs_on_mesa < 4:
-			limb_grower.spawn_limb(orientation_to_use, mesa.global_position)
+			limb_grower.spawn_limb(orientation_to_use, mesa.global_position - Vector3.UP * 0.375)
 			orientation_to_use += PI / 2.0
 			orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
 			
 	limb_grower.extend_limbs()
 			
 			
-func start_reconfigure_timer():
+func start_reconfigure_timer(preset = 0):
 	item_dropper.disperse_items(0)
 	item_dropper.disperse_items(2, 6.0)
 	limb_grower.stop_limbs()
-	reconfigure_timer = 0			
+	reconfigure_timer = preset			
 	
 			
 func unstage_limbs():

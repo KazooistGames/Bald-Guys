@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://dkvhw01tsv755"]
+[gd_scene load_steps=2 format=3 uid="uid://dyvg3c8dpow1p"]
 
 [ext_resource type="PackedScene" uid="uid://km6if1awx5dt" path="res://Scenes/geometry_dynamic/brick/brick.tscn" id="1_1ygqn"]
 

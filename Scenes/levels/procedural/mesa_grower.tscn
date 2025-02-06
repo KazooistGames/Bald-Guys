@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bihhmgl2g08o3"]
 
-[ext_resource type="Script" path="res://Scenes/levels/procedural/Mesa_Grower.gd" id="1_4cqld"]
+[ext_resource type="Script" path="res://Scenes/levels/procedural/mesa_grower.gd" id="1_4cqld"]
 
 [node name="Mesa_Grower" type="Node3D"]
 script = ExtResource("1_4cqld")

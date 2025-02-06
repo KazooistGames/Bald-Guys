@@ -3,6 +3,7 @@ extends Node3D
 const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
 
 const map_size = 50
+const gap = 2.0
 
 @export var height_step = 0.5
 
@@ -105,8 +106,9 @@ func spawn_mesas(count):
 		new_mesa.bottom_drop = 1.0
 		new_mesa.preference = new_mesa.Preference.none 
 		var boundary = map_size/2.0 - new_mesa.size/2.0
-		new_mesa.position.x = randi_range(-boundary, boundary) * 1.0
-		new_mesa.position.z = randi_range(-boundary, boundary) * 1.0
+		boundary /= gap
+		new_mesa.position.x = randi_range(-boundary, boundary) * gap
+		new_mesa.position.z = randi_range(-boundary, boundary) * gap
 		new_mesa.position.y = -1
 		new_mesa.rotation.y = randi_range(0, 3) * PI/2
 		mesas.append(new_mesa)

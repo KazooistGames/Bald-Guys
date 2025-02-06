@@ -1,7 +1,7 @@
 extends RigidBody3D
 
 const floor_normal = Vector3(0, 1, 0)
-const floor_dot_product = 0.75
+const floor_dot_product = 2.0 / 3.0
 
 @export var SKIN_COLOR : Color:
 	
@@ -162,10 +162,10 @@ func _integrate_forces(state):
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 0.667
 			var forceful = impact > IMPACT_THRESHOLD/3.0
 			var upright = abs(normal.dot(floor_normal)) <= floor_dot_product
-			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= 0.75
+			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= floor_dot_product
 			var just_jumped = just_jumped_timer < just_jumped_period
 			
-			if glancing and forceful and upright and looking_forward and shape != 2 and just_jumped:
+			if glancing and forceful and upright and shape != 2 and just_jumped:
 				wall_jump.rpc(state.get_contact_impulse(index))
 				
 		index += 1			
@@ -284,8 +284,9 @@ func is_on_floor():
 		return false
 	elif not floorcast.is_colliding():
 		return false
+	elif linear_velocity.y >= JUMP_SPEED:
+		return false
 	elif floorcast.get_collision_normal().dot(Vector3.UP) > floor_dot_product:
-		#print(floorcast.get_collision_normal(), "	", floorcast.get_collision_normal().dot(Vector3.UP))
 		return true 
 		
 	
@@ -425,6 +426,8 @@ func wall_jump(impulse):
 	apply_central_impulse(impulse)
 	apply_central_impulse(Vector3.UP * JUMP_SPEED/2.0 * mass)
 	reset_double_jump()
+	var speed_boost = impulse.normalized() * JUMP_SPEED / 2.0
+	floor_velocity += speed_boost
 	impactFX.bus = "beef"
 	impactFX.volume_db = -18
 	impactFX.pitch_scale = 1.0

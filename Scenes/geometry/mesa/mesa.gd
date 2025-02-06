@@ -14,9 +14,9 @@ enum Preference{
 @onready var collider = $CollisionShape3D
 @onready var raycast = $RayCast3D
 
-@export var top_height = 0.0		
-@export var bottom_drop = 0.0
-@export var size = 0.0
+@export var top_height : float = 0.0		
+@export var bottom_drop  : float = 0.0
+@export var size  : float = 0.0
 
 var bottom_position = Vector3.ZERO
 
@@ -57,11 +57,12 @@ func get_mesh_position(bot_pos):
 func get_mesh_height(bot_pos):
 	
 	var top_position = get_top_position(bot_pos)
-	return top_position.distance_to(bot_pos) + bottom_drop
+	return top_position.distance_to(bot_pos) 
 	
 	
 func rerender(bottom):
 
+	bottom += bottom.normalized() * bottom_drop
 	var mesh_position = get_mesh_position(bottom)
 	var mesh_height = get_mesh_height(bottom)
 		
