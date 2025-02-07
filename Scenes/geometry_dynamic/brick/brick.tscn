@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://km6if1awx5dt"]
 
-[ext_resource type="Material" uid="uid://cvfeaotln6arx" path="res://Materials/geometry_dynamic.tres" id="1_xdt1r"]
+[ext_resource type="Material" uid="uid://cvfeaotln6arx" path="res://audio/geometry_dynamic.tres" id="1_xdt1r"]
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="3_k633c"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xydkg"]
