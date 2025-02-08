@@ -31,19 +31,15 @@ func set_psa(message = "", ttl = 1):
 func get_psa():
 
 	return PSA.text
+
 	
+func update_nameplate(key, coordinates, label):
 	
-func update_nameplate(player_id, coordinates, label):
-	
-	var nameplate = nameplates.find_child(str(player_id), false, false)
+	var nameplate = nameplates.find_child(str(key), false, false)
 	var camera = get_viewport().get_camera_3d()
 	
-	if nameplate == null:
+	if nameplate == null or camera == null:
 		pass
-		
-	elif camera == null:
-		pass
-		
 	else:
 		var screen_coordinates = camera.unproject_position(coordinates)
 		var screen_size = DisplayServer.screen_get_size()
@@ -54,20 +50,30 @@ func update_nameplate(player_id, coordinates, label):
 		nameplate.text = label
 	
 
-func add_nameplate(player_id, player_name):
+func add_nameplate(key, label):
 	
 	var new_nameplate = Label.new()
-	new_nameplate.name = player_id
-	new_nameplate.text = player_name
+	new_nameplate.name = key
+	new_nameplate.text = label
 	new_nameplate.add_theme_color_override("font_shadow_color", Color.BLACK)
 	new_nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	new_nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	nameplates.add_child(new_nameplate)
+	return new_nameplate
 	
 	
-func remove_nameplate(player_id):
+func remove_nameplate(key):
 	
-	var nameplate = nameplates.find_child(str(player_id), false, false)
-	nameplate.queue_free()
+	var nameplate = nameplates.find_child(str(key), false, false)
 	
+	if nameplate != null:
+		nameplate.queue_free()
+	
+	
+func modify_nameplate(key, variable, value):
+	
+	var nameplate = nameplates.find_child(str(key), false, false)
+	
+	if nameplate != null:
+		nameplate.set(variable, value)
 	

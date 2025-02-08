@@ -284,7 +284,7 @@ func is_on_floor():
 		return false
 	elif not floorcast.is_colliding():
 		return false
-	elif linear_velocity.y >= JUMP_SPEED:
+	elif abs(linear_velocity.y) >= JUMP_SPEED:
 		return false
 	elif floorcast.get_collision_normal().dot(Vector3.UP) > floor_dot_product:
 		return true 

@@ -62,6 +62,9 @@ func get_mesh_height(bot_pos):
 	
 func rerender(bottom):
 
+	if size == 0:
+		return
+		
 	bottom += bottom.normalized() * bottom_drop
 	var mesh_position = get_mesh_position(bottom)
 	var mesh_height = get_mesh_height(bottom)

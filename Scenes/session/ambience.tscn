@@ -29,4 +29,4 @@ bus = &"stank"
 [node name="boop" type="AudioStreamPlayer" parent="."]
 stream = SubResource("AudioStreamRandomizer_t6ct2")
 volume_db = -21.0
-max_polyphony = 6
+max_polyphony = 10

@@ -168,11 +168,11 @@ func lunge_at_target(targeted_object):
 		var disposition = targeted_object.global_position - character.global_position
 		var distance = disposition.length()
 		
-		if distance > 3:
+		if distance > 3.5:
 			pass
 			
 		elif targeted_object.is_in_group("humanoids"):
-			var lunge_velocity = disposition.normalized() * distance * 4
+			var lunge_velocity = disposition.normalized() * distance * 3.5
 			character.lunge.rpc(lunge_velocity)
 
 

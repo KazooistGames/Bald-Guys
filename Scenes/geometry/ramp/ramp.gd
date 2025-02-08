@@ -1,6 +1,6 @@
 extends StaticBody3D
 
-const debounce_period = 0.2 #limit rate that we re-generate a convex mesh
+const debounce_period = 0.5 #limit rate that we re-generate a convex mesh
 
 @export var height : float = 0.0
 @export var length : float= 0.0
@@ -20,7 +20,6 @@ var need_new_collider = false
 var slope = 0.0
 
 func _process(delta):
-	
 
 	collider.position = Vector3.ZERO
 			
@@ -31,10 +30,12 @@ func _process(delta):
 		mesh.mesh.size.z = thickness
 		slope = height / length
 		mesh.position = Vector3.UP * height / 2.0
-		#print(mesh.position, "	", height)
 		cache_mesh_size()
 
-	if debounce_timer >= debounce_period:
+	if not need_new_collider:
+		pass
+		
+	elif debounce_timer >= debounce_period:
 		debounce_timer += delta
 		
 	elif need_new_collider:

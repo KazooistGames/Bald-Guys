@@ -24,9 +24,7 @@ const SessionState = {
 @onready var Hub = $Hub
 
 @onready var humanoidSpawner = $HumanoidSpawner
-
 @onready var levelSpawner = $LevelSpawner
-
 @onready var gameSpawner = $GameSpawner
 
 signal Created_Player_Humanoid
