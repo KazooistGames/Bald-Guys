@@ -15,7 +15,7 @@ size = Vector3(0.25, 0.2, 0.5)
 [node name="Brick" type="RigidBody3D"]
 collision_layer = 8
 collision_mask = 11
-mass = 15.0
+mass = 10.0
 physics_material_override = SubResource("PhysicsMaterial_xydkg")
 can_sleep = false
 continuous_cd = true

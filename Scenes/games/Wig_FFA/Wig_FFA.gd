@@ -23,10 +23,10 @@ enum GameState {
 
 @onready var session = get_parent()
 
+@onready var local_player_id = str(multiplayer.get_unique_id())
+
 var Wig : Node3D
 var Bearer : Node3D
-
-var local_player_id
 
 var countDown_timer = 0
 var countDown_value = 0
@@ -34,9 +34,9 @@ var countDown_value = 0
 
 func _ready():
 	
-	local_player_id = str(multiplayer.get_unique_id())
 	session.Started_Round.connect(start)
 	session.Ended_Round.connect(reset)
+	session.Destroying_Player_Humanoid.connect(func (node): if node == Bearer: drop_wig())
 	whispers.stream_paused = false
 	theme.stream_paused = true
 	
@@ -143,12 +143,14 @@ func bearer_is_local_player():
 
 func start():
 	
-	rpc_start.rpc()
+	if is_multiplayer_authority(): 
+		rpc_start.rpc()
 	
 	
 func reset():
 	
-	rpc_reset.rpc()	
+	if is_multiplayer_authority(): 
+		rpc_reset.rpc()	
 
 
 func dawn_wig(node):
@@ -178,11 +180,13 @@ func dawn_wig(node):
 func drop_wig():
 	
 	Wig.interactable.gained_interaction.connect(dawn_wig)
-	Bearer.ragdolled.disconnect(drop_wig)
+	
+	if Bearer:
+		Bearer.ragdolled.disconnect(drop_wig)
 	
 	var current_position = Wig.global_position
 	
-	move_wig_remote_controller.rpc(Bearer.get_parent().get_path())
+	move_wig_remote_controller.rpc(session.get_path())
 	toggle_wig_mount.rpc(false)
 	
 	Wig.global_position = current_position
@@ -194,9 +198,9 @@ func drop_wig():
 @rpc("call_local", "reliable")
 func toggle_wig_mount(value):
 	
-	if not Wig: return
-	Wig.collider.disabled = value
-	Wig.freeze = value
+	if Wig: 
+		Wig.collider.disabled = value
+		Wig.freeze = value
 
 
 @rpc("call_local", "reliable")
@@ -248,7 +252,7 @@ func rpc_start():
 func rpc_reset():
 	
 	session.HUD.remove_nameplate("WIG")
-	
+
 	if is_multiplayer_authority(): 	
 		wig_ffa_hud.find_child("Progress").visible = false
 		
@@ -262,9 +266,7 @@ func rpc_reset():
 		
 		Bearer_Times = {}
 		State = GameState.reset
-		
-	session.HUD.remove_nameplate("WIG")
-	
+
 	
 @rpc("call_local", "reliable")
 func rpc_play():
@@ -286,13 +288,12 @@ func rpc_play():
 @rpc("call_local", "reliable")
 func rpc_finish():
 	
-	if not is_multiplayer_authority(): 
-		return
-	
-	if Bearer:
-		Bearer.ragdolled.disconnect(drop_wig)
+	if is_multiplayer_authority(): 
+
+		if Bearer:
+			Bearer.ragdolled.disconnect(drop_wig)
 		
-	State = GameState.finished
+		State = GameState.finished
 
 	
 	

@@ -29,6 +29,8 @@ const SessionState = {
 
 signal Created_Player_Humanoid
 
+signal Destroying_Player_Humanoid
+
 signal Started_Round
 
 signal Ended_Round
@@ -146,6 +148,7 @@ func create_player_humanoid(peer_id):
 func destroy_player_humanoid(peer_id):
 	
 	var playerHumanoid = get_node_or_null(str(peer_id))
+	Destroying_Player_Humanoid.emit(playerHumanoid)
 	
 	if playerHumanoid:
 		Humanoids.erase(playerHumanoid)
