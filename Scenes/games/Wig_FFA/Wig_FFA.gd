@@ -37,6 +37,10 @@ func _ready():
 	session.Started_Round.connect(start)
 	session.Ended_Round.connect(reset)
 	session.Destroying_Player_Humanoid.connect(func (node): if node == Bearer: drop_wig())
+	session.humanoidSpawner.despawned.connect( func (node): if node == Bearer: 
+		move_wig_remote_controller(session.get_path())
+		toggle_wig_mount(false))
+	
 	whispers.stream_paused = false
 	theme.stream_paused = true
 	
@@ -55,13 +59,13 @@ func _process(delta):
 		session.HUD.modify_nameplate("WIG", "visible", false)
 		
 	else:
-		session.HUD.update_nameplate("WIG", Wig.global_position, "WIG")
+		session.HUD.update_nameplate("WIG", Wig.global_position, "WIG")		
 		
-		
-	var screenname = get_bearers_name()
+	var local_name = session.local_screenname()
+	var bearer_name = get_bearers_screenname()
 	
-	if Bearer_Times.has(screenname):	
-		var accumulated_time = Bearer_Times[screenname]
+	if Bearer_Times.has(local_name):	
+		var accumulated_time = Bearer_Times[local_name]
 		wig_ffa_hud.ProgressPercent = clampf(accumulated_time/Goal_Time, 0.0, 1.0)
 	
 	if not is_multiplayer_authority():
@@ -91,15 +95,15 @@ func _process(delta):
 			if not Bearer:
 				pass
 			
-			elif not Bearer_Times.has(screenname):
-				Bearer_Times[screenname] = delta
+			elif not Bearer_Times.has(bearer_name):
+				Bearer_Times[bearer_name] = delta
 				
-			elif Bearer_Times[screenname] >= Goal_Time:
+			elif Bearer_Times[bearer_name] >= Goal_Time:
 				rpc_finish.rpc()
-				session.Finished_Round(str(screenname))
+				session.Finished_Round(str(bearer_name))
 					
 			else:
-				Bearer_Times[screenname] += delta
+				Bearer_Times[bearer_name] += delta
 			
 		GameState.finished:	
 			
@@ -124,12 +128,13 @@ func update_music():
 		theme.seek(beas_mote_transition)
 
 
-func get_bearers_name():
+func get_bearers_screenname():
 	
 	if Bearer == null:
 		return ''	
 	elif session.Client_Screennames.has(int(str(Bearer.name))):
 		return session.Client_Screennames[int(str(Bearer.name))]
+		
 
 
 func bearer_is_local_player():
@@ -179,18 +184,17 @@ func dawn_wig(node):
 		
 func drop_wig():
 	
-	Wig.interactable.gained_interaction.connect(dawn_wig)
+	if is_multiplayer_authority():
+		Wig.interactable.gained_interaction.connect(dawn_wig)
+		
+	move_wig_remote_controller.rpc(session.get_path())
+	toggle_wig_mount.rpc(false)
+	var current_position = Wig.global_position	
+	Wig.global_position = current_position
 	
 	if Bearer:
 		Bearer.ragdolled.disconnect(drop_wig)
-	
-	var current_position = Wig.global_position
-	
-	move_wig_remote_controller.rpc(session.get_path())
-	toggle_wig_mount.rpc(false)
-	
-	Wig.global_position = current_position
-	Wig.linear_velocity = Bearer.linear_velocity * 1.5 + Vector3(0, 3, 0)
+		Wig.linear_velocity = Bearer.linear_velocity * 1.5 + Vector3(0, 3, 0)
 
 	set_wig_bearer.rpc(null)
 	
@@ -219,10 +223,13 @@ func move_wig_remote_controller(path_to_new_parent):
 func set_wig_bearer(path_to_new_bearer):
 	
 	if path_to_new_bearer == null:
-		session.HUD.modify_nameplate(Bearer.name, "theme_override_colors/font_color", Color.WHITE)
-		session.HUD.modify_nameplate(Bearer.name, "theme_override_font_sizes/font_size", 16)
+		
+		if Bearer:
+			session.HUD.modify_nameplate(Bearer.name, "theme_override_colors/font_color", Color.WHITE)
+			session.HUD.modify_nameplate(Bearer.name, "theme_override_font_sizes/font_size", 16)
+			Bearer = null
+			
 		wig_ffa_hud.find_child("Progress").visible = false
-		Bearer = null
 		wig_remote.remote_path = ""
 		Wig.toggle_strobing(true)
 		Wig.Drop.play()

@@ -42,7 +42,6 @@ func _ready():
 
 func _physics_process(delta):
 
-
 	if not is_multiplayer_authority():
 		return
 

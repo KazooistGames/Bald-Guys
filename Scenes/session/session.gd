@@ -230,6 +230,14 @@ func load_game(path):
 	Game = prefab.instantiate()
 	add_child(Game, true)
 	print("Game commissioned: ", Game)
+	
+	
+func local_screenname():
+	
+	var local_id = int(str(multiplayer.get_unique_id()))
+	
+	if Client_Screennames.has(local_id):
+		return Client_Screennames[local_id]
 			
 
 	
