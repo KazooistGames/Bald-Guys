@@ -125,7 +125,7 @@ func _process(_delta):
 
 func _integrate_forces(state):	
 	
-	if not floorcast.is_colliding():
+	if not is_on_floor():
 		pass		
 		
 	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
@@ -169,8 +169,6 @@ func _integrate_forces(state):
 				wall_jump.rpc(state.get_contact_impulse(index))
 				
 		index += 1			
-
-
 
 
 func _physics_process(delta):		
