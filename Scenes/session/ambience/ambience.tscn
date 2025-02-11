@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://4lgyaxekgwqy"]
 
-[ext_resource type="Script" path="res://Scenes/session/ambience.gd" id="1_cbk4e"]
+[ext_resource type="Script" path="res://Scenes/session/ambience/ambience.gd" id="1_cbk4e"]
 [ext_resource type="AudioStream" uid="uid://sa4hqspxce4s" path="res://audio/low-engine-hum-72529.mp3" id="2_nlbx5"]
 [ext_resource type="AudioStream" uid="uid://byljgo4xhofxy" path="res://audio/harmonic-hum-100812.mp3" id="3_2h1at"]
 

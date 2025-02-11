@@ -3,8 +3,8 @@
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://c635ib3vdy8sj" path="res://Scenes/levels/Hub_Level.tscn" id="2_k5prn"]
 [ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/levels/borealis/borealis.tscn" id="3_qtjjs"]
-[ext_resource type="PackedScene" uid="uid://bi27y02b7i065" path="res://Scenes/session/HUD.tscn" id="4_ik81w"]
-[ext_resource type="PackedScene" uid="uid://4lgyaxekgwqy" path="res://Scenes/session/ambience.tscn" id="5_opotq"]
+[ext_resource type="PackedScene" uid="uid://bi27y02b7i065" path="res://Scenes/session/hud/HUD.tscn" id="4_ik81w"]
+[ext_resource type="PackedScene" uid="uid://4lgyaxekgwqy" path="res://Scenes/session/ambience/ambience.tscn" id="5_opotq"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]
 properties/0/path = NodePath(".:State")
@@ -21,7 +21,7 @@ properties/2/replication_mode = 1
 script = ExtResource("1_yhshl")
 
 [node name="Hub" parent="." instance=ExtResource("2_k5prn")]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 50, 50, 0)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 50, 0)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_gpd36")

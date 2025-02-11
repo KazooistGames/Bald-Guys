@@ -10,6 +10,8 @@ const map_size = 50
 
 @onready var session = get_parent()
 
+@onready var raycast = $RayCast3D
+
 var reconfigure_period = 90.0
 var reconfigure_timer = -1.0
 
@@ -56,6 +58,20 @@ func _physics_process(delta):
 		
 	else:
 		reconfigure_timer += delta
+	
+	
+func node_is_in_bounds(node):
+	
+	raycast.global_position = node.global_position #move raycast to node position
+	raycast.target_position = Vector3.UP * map_size * 1.1 #shoot it up to the ceiling
+	raycast.force_raycast_update()	
+	var hit_the_ceiling = raycast.is_colliding()	
+	
+	raycast.target_position = Vector3.DOWN * map_size * 2.0 #shoot it to the floor
+	raycast.force_raycast_update()	
+	var hit_the_floor = raycast.is_colliding()
+
+	return hit_the_ceiling or hit_the_floor #node is considered inside level if it hits one
 	
 
 func stage_mesas():

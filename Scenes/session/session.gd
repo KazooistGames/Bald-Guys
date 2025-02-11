@@ -61,8 +61,11 @@ func _process(_delta):
 			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname)
-	
-
+			
+		if not Level.node_is_in_bounds(humanoid):
+			
+			spawn_player(Level, humanoid)
+				
 
 func _unhandled_key_input(event):
 	
@@ -101,15 +104,14 @@ func Finished_Round(winner):
 	Commission_Next_Round()
 
 
-func spawn_players(parent):
+func spawn_player(parent, humanoid):
 	
-	for humanoid in Humanoids:
-		humanoid.unragdoll.rpc()
-		humanoid.linear_velocity = Vector3.ZERO
-		var spawn_position = get_random_spawn(parent)
-		var rid = humanoid.get_rid()
-		var new_transform = Transform3D.IDENTITY.translated(spawn_position)
-		PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, new_transform)
+	humanoid.unragdoll.rpc()
+	humanoid.linear_velocity = Vector3.ZERO
+	var spawn_position = get_random_spawn(parent)
+	var rid = humanoid.get_rid()
+	var new_transform = Transform3D.IDENTITY.translated(spawn_position)
+	PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, new_transform)
 
 
 func get_random_spawn(parent):
@@ -166,15 +168,21 @@ func signal_to_handoff_player_humanoid(node):
 func rpc_move_to_hub():
 	
 	State = SessionState.Hub
-	spawn_players(Hub)		
-	Ended_Round.emit()
-
+	
+	for humanoid in Humanoids:
+		spawn_player(Hub, humanoid)	
+	
+	Ended_Round.emit()	
+	
 		
 @rpc("call_local", "authority", "reliable")
 func rpc_move_to_level():
 	
 	State = SessionState.Round
-	spawn_players(Level)
+	
+	for humanoid in Humanoids:
+		spawn_player(Level, humanoid)
+		
 	Started_Round.emit()
 
 
@@ -182,6 +190,7 @@ func rpc_move_to_level():
 func respawn_node(node_path, spawn_position):
 	
 	var node = get_node(node_path)
+	
 	if node != null:
 		node.position = spawn_position
 	
