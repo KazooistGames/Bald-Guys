@@ -27,6 +27,8 @@ const SessionState = {
 @onready var levelSpawner = $LevelSpawner
 @onready var gameSpawner = $GameSpawner
 
+@onready var raycast = $RayCast3D
+
 signal Created_Player_Humanoid
 
 signal Destroying_Player_Humanoid
@@ -62,7 +64,7 @@ func _process(_delta):
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname)
 			
-		if not Level.node_is_in_bounds(humanoid):
+		if not node_is_in_bounds(humanoid):
 			
 			spawn_player(Level, humanoid)
 				
@@ -80,6 +82,20 @@ func _unhandled_key_input(event):
 		elif State != SessionState.Round:
 			rpc_move_to_level.rpc()	
 
+
+func node_is_in_bounds(node):
+	
+	raycast.global_position = node.global_position #move raycast to node position
+	raycast.target_position = Vector3.UP * 100 #shoot it up to the ceiling
+	raycast.force_raycast_update()	
+	var hit_the_ceiling = raycast.is_colliding()	
+	
+	raycast.target_position = Vector3.DOWN * 100 #shoot it to the floor
+	raycast.force_raycast_update()	
+	var hit_the_floor = raycast.is_colliding()
+
+	return hit_the_ceiling or hit_the_floor #node is considered inside level if it hits one
+	
 
 func handle_new_level(new_level):
 	

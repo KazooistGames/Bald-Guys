@@ -10,13 +10,12 @@ const map_size = 50
 
 @onready var session = get_parent()
 
-@onready var raycast = $RayCast3D
-
 var reconfigure_period = 90.0
 var reconfigure_timer = -1.0
 
 var mesa_count = 25
-var ramp_freq = 0.5
+var ramp_floor_freq = 0.5
+var ramp_roof_freq = 0.5
 var limb_freq = 1.0/3.0
 		
 		
@@ -59,20 +58,6 @@ func _physics_process(delta):
 	else:
 		reconfigure_timer += delta
 	
-	
-func node_is_in_bounds(node):
-	
-	raycast.global_position = node.global_position #move raycast to node position
-	raycast.target_position = Vector3.UP * map_size * 1.1 #shoot it up to the ceiling
-	raycast.force_raycast_update()	
-	var hit_the_ceiling = raycast.is_colliding()	
-	
-	raycast.target_position = Vector3.DOWN * map_size * 2.0 #shoot it to the floor
-	raycast.force_raycast_update()	
-	var hit_the_floor = raycast.is_colliding()
-
-	return hit_the_ceiling or hit_the_floor #node is considered inside level if it hits one
-	
 
 func stage_mesas():
 	
@@ -87,11 +72,11 @@ func stage_ramps():
 	
 	for mesa in mesa_grower.mesas:
 			
-		if randf() <= ramp_freq: #roof
+		if randf() <= ramp_roof_freq: #roof
 			var y_offset = Vector3.DOWN * randi_range(0, 1) * 0.75
 			ramparter.spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false, randi_range(0, 3) * PI/2)
 			
-		if randf() <= ramp_freq: #floor
+		if randf() <= ramp_floor_freq: #floor
 			var y_rotation = randi_range(0, 3) * PI/2
 			var base_offset = Vector3(-cos(y_rotation), 0, sin(y_rotation)).normalized() * mesa.size
 			var ramp_position = mesa.position + base_offset

@@ -159,8 +159,7 @@ func join_lobby():
 	var error = enet_peer.create_client(hostIP, PORT)
 	
 	multiplayer.multiplayer_peer = enet_peer
-	
-	multiplayer.connected_to_server
+
 	multiplayer.server_disconnected.connect(func (): display_popup("Server connection lost.", null))
 	multiplayer.server_disconnected.connect(leave_session)
 	

@@ -20,8 +20,12 @@ properties/2/replication_mode = 1
 [node name="session" type="Node3D"]
 script = ExtResource("1_yhshl")
 
+[node name="Borealis" parent="." instance=ExtResource("3_qtjjs")]
+
+[node name="Ambience" parent="." instance=ExtResource("5_opotq")]
+
 [node name="Hub" parent="." instance=ExtResource("2_k5prn")]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 50, 0)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 100, 100)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_gpd36")
@@ -29,8 +33,6 @@ replication_config = SubResource("SceneReplicationConfig_gpd36")
 [node name="HumanoidSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn")
 spawn_path = NodePath("..")
-
-[node name="Borealis" parent="." instance=ExtResource("3_qtjjs")]
 
 [node name="LevelSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/levels/Procedural_Level.tscn")
@@ -42,4 +44,7 @@ spawn_path = NodePath("..")
 
 [node name="HUD" parent="." instance=ExtResource("4_ik81w")]
 
-[node name="Ambience" parent="." instance=ExtResource("5_opotq")]
+[node name="RayCast3D" type="RayCast3D" parent="."]
+enabled = false
+target_position = Vector3(0, 100, 0)
+hit_back_faces = false

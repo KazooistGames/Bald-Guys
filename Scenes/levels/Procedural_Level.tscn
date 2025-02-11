@@ -63,8 +63,3 @@ skeleton = NodePath("../..")
 [node name="Ramparter" parent="." index="6" instance=ExtResource("7_fnc5j")]
 
 [node name="Limb_Grower" parent="." index="7" instance=ExtResource("8_n5db1")]
-
-[node name="RayCast3D" type="RayCast3D" parent="." index="8"]
-enabled = false
-target_position = Vector3(0, 100, 0)
-hit_back_faces = false

@@ -165,16 +165,16 @@ func early_recovery():
 		character.unragdoll.rpc()
 	
 
-func lunge_at_target(targeted_object):
+func lunge_at_target(target):
 	
-	if targeted_object != null:
-		var disposition = targeted_object.global_position - character.global_position
+	if target != null:
+		var disposition = target.global_position - character.global_position
 		var distance = disposition.length()
 		
 		if distance > 3.5:
 			pass
 			
-		elif targeted_object.is_in_group("humanoids"):
+		elif target.is_in_group("humanoids"):
 			var lunge_velocity = disposition.normalized() * distance * 3.5
 			character.lunge.rpc(lunge_velocity)
 
