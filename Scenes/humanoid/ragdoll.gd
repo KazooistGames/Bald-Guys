@@ -35,10 +35,11 @@ var bone_modifiers = {
 @onready var slappy_foot_left = $"Physical Bone foot_l/SlappyFoot"
 @onready var slappy_foot_right = $"Physical Bone foot_r/SlappyFoot"
 
-
 const MAX_VELOCITY = 100
 const MAX_DISPLACEMENT = 1
 const MAX_ANGULAR_DISPLACEMENT = PI
+
+const perfect_match = true
 
 var correct_physical_bones_trigger
 
@@ -65,6 +66,12 @@ func animate_physical_bones(delta):
 		instantly_match_animated_bone(boneIndex)
 		
 	for physical_bone in physicalBones:	
+		
+		#if perfect_match:
+			#var boneIndex = physicalBones.find(physical_bone)
+			#instantly_match_animated_bone(boneIndex)
+			#continue
+			
 		var bone_modifier = bone_modifiers.get(physical_bone.bone_name, 1.0)
 		var physical_transform = get_physical_transform(physical_bone)
 		var animated_transform = get_animated_transform(physical_bone)	
@@ -93,11 +100,13 @@ func animate_physical_bones(delta):
 
 
 func process_slappy_feet(delta):
+	
 	var speed = $"Physical Bone lowerBody".linear_velocity.length()
 	slappy_foot_left.mod_db = speed 
 	slappy_foot_right.mod_db = speed
 	slappy_foot_left.process_slap(delta)
 	slappy_foot_right.process_slap(delta)
+
 
 func set_gravity(value):
 	

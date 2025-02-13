@@ -23,6 +23,22 @@ func _physics_process(delta):
 		ragdollSkeleton.animate_physical_bones(delta)
 
 
+func lunge_start():
+	
+	ragdollSkeleton.toggle_physical_bone_collider("upperLeg.r", false)
+	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.r", false)
+	ragdollSkeleton.toggle_physical_bone_collider("upperLeg.l", false)
+	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.l", false)
+	
+	
+func lunge_stop():
+	
+	ragdollSkeleton.toggle_physical_bone_collider("upperLeg.r", true)
+	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.r", true)
+	ragdollSkeleton.toggle_physical_bone_collider("upperLeg.l", true)
+	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.l", true)
+	
+
 func ragdoll_start():
 	
 	leftHand.stop()

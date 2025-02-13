@@ -175,7 +175,7 @@ func lunge_at_target(target):
 			pass
 			
 		elif target.is_in_group("humanoids"):
-			var lunge_velocity = disposition.normalized() * distance * 3.5
-			character.lunge.rpc(lunge_velocity)
+			#var lunge_velocity = disposition.normalized() * distance * 3.5
+			character.lunge.rpc(target.get_path())
 
 

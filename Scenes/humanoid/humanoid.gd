@@ -217,6 +217,7 @@ func _physics_process(delta):
 					
 	if RAGDOLLED:
 		skeleton.processRagdollOrientation(delta)
+		Lunging = false
 						
 	elif ON_FLOOR:
 		
@@ -262,17 +263,30 @@ func _physics_process(delta):
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
-	#var step = get_acceleration() * delta
-	var walk_target
-	
-	if ON_FLOOR or WALK_VECTOR:
-		walk_target = WALK_VECTOR.normalized() * TOPSPEED * TOPSPEED_MOD
-	else:
-		walk_target = linear_velocity - floor_velocity
+	if Lunging: 
+		var disposition = Lunge_Target.global_position - global_position
 		
-	var target_linear_velocity = walk_target + floor_velocity
-	target_linear_velocity.y = linear_velocity.y
-	linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
+		if disposition.length() <= Lunge_Deadband:
+			Lunging = false
+			linear_velocity = Vector3.ZERO
+			skeleton.lunge_stop()
+		else:
+			var deadband_next_frame_stepsize = (disposition.length() - Lunge_Deadband) / delta
+			if is_multiplayer_authority():
+				print(deadband_next_frame_stepsize)
+			linear_velocity = disposition.normalized() * min(Lunge_Speed, deadband_next_frame_stepsize * 1.1)
+			
+	else:	
+		var walk_target
+		
+		if ON_FLOOR or WALK_VECTOR:
+			walk_target = WALK_VECTOR.normalized() * TOPSPEED * TOPSPEED_MOD
+		else:
+			walk_target = linear_velocity - floor_velocity
+			
+		var target_linear_velocity = walk_target + floor_velocity
+		target_linear_velocity.y = linear_velocity.y
+		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
 	
 	#print(linear_velocity.length())
 	
@@ -299,7 +313,6 @@ func get_acceleration():
 	
 	if not ON_FLOOR:
 		return 10.0		
-		
 	else:	
 		var translationalSpeed = walk_velocity.length()
 		return 10 + translationalSpeed * 4
@@ -312,7 +325,6 @@ func getRandomSkinTone():
 	var redShift = rng.randf_range(20,30 ) / 255
 	var blueShift = rng.randf_range(0, redShift ) / 255
 	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift )
-
 
 
 func head_position():
@@ -375,9 +387,16 @@ func unragdoll():
 		head_collider.disabled = false
 		RAGDOLLED = false
 		freeze = false
+		
 
+const Lunge_Deadband = 1.0
+const Lunge_Speed = 12
+var Lunging = false
+var Lunge_Target : Node3D 
 @rpc("call_local", "reliable")
-func lunge(velocity_impulse):
+func lunge(target_node_path):
+	
+	var target_node = get_node(target_node_path)
 	
 	if ON_FLOOR:
 		ON_FLOOR = false
@@ -385,7 +404,10 @@ func lunge(velocity_impulse):
 		reverse_coyote_timer = 0.0
 		floorcast.enabled = false
 		
-	linear_velocity = velocity_impulse
+	Lunge_Target = target_node
+	Lunging = true
+	skeleton.lunge_start()
+	
 
 @rpc("call_local", "reliable")
 func bump(velocity_impulse):
