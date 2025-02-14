@@ -1,17 +1,14 @@
+
 extends StaticBody3D
 
-const debounce_period = 0.5 #limit rate that we re-generate a convex mesh
+const debounce_period = 0.25 #limit rate that we re-generate a convex mesh
 
-@export var height : float = 0.0
-@export var length : float= 0.0
-@export var thickness : float = 0.0
+@export var dimensions = Vector3(1.0, 1.0, 1.0)
 
 @onready var mesh = $MeshInstance3D
 @onready var collider = $CollisionShape3D
 
-var cached_height = 0.0
-var cached_length = 0.0
-var cached_thickness = 0.0
+var cached_dimensions = Vector3.ZERO
 
 var debounce_timer = 0.0
 
@@ -21,34 +18,55 @@ var slope = 0.0
 
 func _process(delta):
 
+	#mesh_manipulation(Vector3(3,3,4))
+
 	collider.position = Vector3.ZERO
 			
 	if mesh_has_changed():
 		need_new_collider = true
-		mesh.mesh.size.x = length
-		mesh.mesh.size.y = height
-		mesh.mesh.size.z = thickness
-		slope = height / length
-		mesh.position = Vector3.UP * height / 2.0
+		mesh.mesh.size.x = dimensions.x
+		mesh.mesh.size.y = dimensions.y
+		mesh.mesh.size.z = dimensions.z
+		slope = dimensions.y / dimensions.x
+		mesh.position = Vector3.UP * dimensions.y / 2.0
 		cache_mesh_size()
+		
 
+func _physics_process(delta):
+	
 	if not need_new_collider:
 		pass
 		
-	elif debounce_timer >= debounce_period:
+	elif debounce_timer <= debounce_period:
 		debounce_timer += delta
 		
 	elif need_new_collider:
 		debounce_timer = 0.0
-		collider.make_convex_from_siblings()
+		mesh_manipulation()
 		need_new_collider = false
+	
+	
+func mesh_manipulation():
+	
+	var modified_triangles = PackedVector3Array()
+	
+	for index in range(collider.shape.points.size()):
+		var point = collider.shape.points[index]
+		point.x = signf(point.x) * dimensions.x / 2.0
+		point.y = signf(point.y) * dimensions.y
+		point.z = signf(point.z) * dimensions.z / 2.0
+		collider.shape.points[index] = point
 		
 
 func mesh_has_changed():
-	return height != cached_height or length != cached_length or thickness != cached_thickness
+	
+	return cached_dimensions != dimensions
 
 
 func cache_mesh_size():
-	cached_length = length
-	cached_height = height
-	cached_thickness = thickness
+	
+	cached_dimensions = dimensions
+	
+	
+	
+	

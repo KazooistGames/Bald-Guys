@@ -51,9 +51,9 @@ func _physics_process(delta):
 		elif configuration == Configuration.collapsing:
 			step *= collapse_speed
 		
-		if ramp.height != target:
+		if ramp.dimensions.y != target:
 			in_position = false
-			ramp.height = move_toward(ramp.height, target, step)
+			ramp.dimensions.y = move_toward(ramp.dimensions.y, target, step)
 			
 	if not in_position:
 		pass
@@ -70,9 +70,9 @@ func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify
 	
 	var new_ramp = ramp_prefab.instantiate()
 	add_child(new_ramp, true)		
-	new_ramp.length = length
-	new_ramp.thickness = thickness
-	new_ramp.height = 0.0
+	new_ramp.dimensions.x = length
+	new_ramp.dimensions.z = thickness
+	new_ramp.dimensions.y = 0.0
 	new_ramp.position = coordinates
 	new_ramp.rotation.y = y_rotation
 	

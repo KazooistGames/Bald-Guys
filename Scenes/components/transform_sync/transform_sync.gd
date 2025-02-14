@@ -10,6 +10,8 @@ var origin_deadband = 0.1
 
 var parent
 
+var logging = false
+
 
 func _ready():
 	
@@ -66,7 +68,10 @@ func request_force_sync():
 		var calling_client = multiplayer.get_remote_sender_id()
 		var variables = get_net_vars()
 		force_sync.rpc_id(calling_client, variables)
-
+		
+		if logging:
+			print(calling_client, " requested sync of ", parent.name, " with vars: ", variables)
+			
 
 func get_net_vars():
 	

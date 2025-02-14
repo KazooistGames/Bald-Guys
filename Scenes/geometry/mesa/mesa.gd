@@ -104,7 +104,6 @@ func rerender():
 	collider.shape.size.z = size
 	
 		
-		
 func just_deeper(new_point):
 	
 	var new_trajectory = (new_point - global_position)
@@ -139,16 +138,6 @@ func net_sync(variables : Dictionary):
 		
 	rerender()
 	
-	#
-#@rpc("any_peer", "call_remote")
-#func request_network_sync():
-	#
-	#if is_multiplayer_authority():
-		#var calling_client = multiplayer.get_remote_sender_id()
-#
-		#print(calling_client, " requested sync of ", name)
-		#net_sync.rpc_id(calling_client, get_net_vars())
-#
 
 func get_net_vars():
 	var net_vars = {}

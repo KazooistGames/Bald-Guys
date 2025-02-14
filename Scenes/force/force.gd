@@ -47,7 +47,7 @@ var material;
 var target_position
 
 func _ready():
-	
+	$TransformSync.delta_interval = 0.0
 	rpc_reset()
 	monitoring = true
 

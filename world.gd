@@ -31,7 +31,6 @@ var session
 @export var LOCAL_PLAYER_INTERFACE : Node3D
 
 
-
 const ClientState = {
 	Lobby = 0,
 	Session = 1,
