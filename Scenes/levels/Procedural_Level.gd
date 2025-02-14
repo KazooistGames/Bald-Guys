@@ -50,7 +50,7 @@ func _physics_process(delta):
 		item_dropper.collect_items(0, Vector3.UP * 35)
 		item_dropper.collect_items(2, Vector3.UP * 35, 0.75)
 		
-	elif reconfigure_timer >= reconfigure_period:
+	elif reconfigure_timer >= reconfigure_period or Input.is_action_just_pressed("Toggle2"):
 		reconfigure_timer = -1
 		unstage_limbs()
 		print("reconfiguring map...")

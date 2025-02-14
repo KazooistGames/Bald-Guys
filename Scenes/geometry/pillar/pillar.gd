@@ -21,9 +21,21 @@ enum Preference{
 
 @export var reverse_growth_scale = 0.0
 
+signal altered
 
 func _ready():
-	rerender(Vector3.ZERO)
+	
+	rerender()
+	
+	$CustomSync.get_net_var_delegate = get_net_vars
+	
+	if not is_multiplayer_authority():
+		$CustomSync.synced.connect(rerender)
+		$CustomSync.request_network_sync.rpc_id(1)
+
+	else:
+		altered.connect($CustomSync.force_sync)
+
 
 func _process(_delta):
 	
@@ -31,7 +43,11 @@ func _process(_delta):
 		return
 		
 	elif not raycast.is_colliding():
-		bottom_position = raycast.target_position
+		
+		if bottom_position != raycast.target_position:	
+			bottom_position = raycast.target_position
+		else:
+			return
 		
 	elif raycast.get_collision_point() != bottom_position:
 		
@@ -44,7 +60,10 @@ func _process(_delta):
 		else:
 			bottom_position = new_point - global_position
 		
-	rerender(bottom_position)
+	rerender()
+	
+
+
 
 
 func get_top_position(bot_pos):
@@ -64,10 +83,13 @@ func get_mesh_height(bot_pos):
 	return top_position.distance_to(bot_pos) + bottom_drop
 	
 	
-func rerender(bottom):
-	
-	var mesh_position = get_mesh_position(bottom) * reverse_growth_scale
-	var mesh_height = get_mesh_height(bottom) * reverse_growth_scale
+func rerender():
+		
+	var mesh_position = get_mesh_position(bottom_position) * reverse_growth_scale
+	var mesh_height = get_mesh_height(bottom_position) * reverse_growth_scale
+		
+	if radius <= 0 or mesh_height <= 0:
+		return		
 		
 	mesh.global_position = mesh_position + global_position
 	mesh.mesh.height = mesh_height 
@@ -103,3 +125,13 @@ func just_shallower(new_point):
 		
 	else:
 		return false
+		
+		
+func get_net_vars():
+	var net_vars = {}
+	net_vars["preference"] = preference
+	net_vars["bottom_drop"] = bottom_drop
+	net_vars["top_height"] = top_height
+	net_vars["radius"] = radius
+	net_vars["reverse_growth_sale"] = reverse_growth_scale
+	return net_vars

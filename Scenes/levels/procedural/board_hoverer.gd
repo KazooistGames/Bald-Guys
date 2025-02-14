@@ -15,13 +15,19 @@ const map_size = 50
 @export var height_bounds = []
 
 
+func _ready():
+	
+	if not is_multiplayer_authority():
+		request_network_sync.rpc_id(1)
+
+
 func _physics_process(delta):
 	
 	boards = get_boards()
-	
+		
 	for index in range(board_speeds.size()): #move hover mesas	
 		
-		if index >= boards.size():
+		if index >= boards.size() or index >= height_bounds.size():
 			return
 			
 		var board = boards[index]
@@ -112,7 +118,7 @@ func spawn_boards(count, size, speed, height_limits):
 		var boundary = map_size / 2.0 - new_board.size / 2.0
 		new_board.bottom_drop = 0.0
 		new_board.preference = new_board.Preference.deep
-		new_board.raycast.target_position = Vector3.DOWN * board_thickness
+		new_board.raycast_target = Vector3.DOWN * board_thickness
 		new_board.position.x = randi_range(-boundary, boundary)
 		new_board.position.z = randi_range(-boundary, boundary)
 		new_board.position.y = board_thickness
@@ -121,6 +127,8 @@ func spawn_boards(count, size, speed, height_limits):
 		boards.append(new_board)
 		board_speeds.append(new_vector * speed)
 		height_bounds.append(height_limits)
+		
+	net_sync.rpc(get_net_vars())
 
 
 func get_boards():
@@ -136,3 +144,27 @@ func clear_boards():
 		board.queue_free()
 			
 	boards.clear()	
+
+
+@rpc("authority", "call_remote")
+func net_sync(variables : Dictionary):
+	
+	for key in variables.keys():
+		set(str(key), variables[key])
+	
+	
+@rpc("any_peer", "call_remote")
+func request_network_sync():
+	
+	if is_multiplayer_authority():
+		var calling_client = multiplayer.get_remote_sender_id()
+
+		print(calling_client, " requested sync of ", name)
+		net_sync.rpc_id(calling_client, get_net_vars())
+
+
+func get_net_vars():
+	var net_vars = {}
+	net_vars["board_speeds"] = board_speeds
+	net_vars["height_bounds"] = height_bounds
+	return net_vars

@@ -29,6 +29,8 @@ func lunge_start():
 	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.r", false)
 	ragdollSkeleton.toggle_physical_bone_collider("upperLeg.l", false)
 	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.l", false)
+	ragdollSkeleton.toggle_physical_bone_collider("head", false)
+	ragdollSkeleton.toggle_physical_bone_collider("lowerBody", false)
 	
 	
 func lunge_stop():
@@ -37,7 +39,8 @@ func lunge_stop():
 	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.r", true)
 	ragdollSkeleton.toggle_physical_bone_collider("upperLeg.l", true)
 	ragdollSkeleton.toggle_physical_bone_collider("lowerLeg.l", true)
-	
+	ragdollSkeleton.toggle_physical_bone_collider("head", true)
+	ragdollSkeleton.toggle_physical_bone_collider("lowerBody", true)
 
 func ragdoll_start():
 	

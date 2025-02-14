@@ -162,9 +162,8 @@ func _integrate_forces(state):
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 0.667
 			var forceful = impact > IMPACT_THRESHOLD/3.0
 			var upright = abs(normal.dot(floor_normal)) <= floor_dot_product
-			var looking_forward = abs(LOOK_VECTOR.normalized().dot(floor_normal)) <= floor_dot_product
 			var just_jumped = just_jumped_timer < just_jumped_period
-			
+
 			if glancing and forceful and upright and shape != 2 and just_jumped:
 				wall_jump.rpc(state.get_contact_impulse(index))
 				
@@ -231,7 +230,6 @@ func _physics_process(delta):
 			
 		else:
 			gravity_scale = 1.0
-			#apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
 			skeleton.processWalkOrientation(delta , LOOK_VECTOR, WALK_VECTOR )
 			
 		var scalar = 5.0 * delta
@@ -241,7 +239,6 @@ func _physics_process(delta):
 		
 	else:
 		gravity_scale = 1.0
-		#apply_central_force(WALK_VECTOR.normalized() * get_acceleration() * mass)
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)	
 		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 3.0) * delta)
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
@@ -264,18 +261,30 @@ func _physics_process(delta):
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
 	if Lunging: 
-		var disposition = Lunge_Target.global_position - global_position
 		
-		if disposition.length() <= Lunge_Deadband:
+		if Lunge_Target == null:
 			Lunging = false
 			linear_velocity = Vector3.ZERO
 			skeleton.lunge_stop()
+			
+		var disposition = Lunge_Target.global_position - global_position
+		lunge_total_traversal += linear_velocity.length() * delta
+		var in_range = disposition.length() <= Lunge_Deadband
+
+		var lunge_expired = lunge_total_traversal >= Lunge_max_traversal
+		
+		if  in_range or lunge_expired :
+			Lunging = false
+			linear_velocity = Vector3.ZERO
+			skeleton.lunge_stop()
+			
 		else:
 			var deadband_next_frame_stepsize = (disposition.length() - Lunge_Deadband) / delta
-			if is_multiplayer_authority():
-				print(deadband_next_frame_stepsize)
 			linear_velocity = disposition.normalized() * min(Lunge_Speed, deadband_next_frame_stepsize * 1.1)
-			
+			var extrapolated_target_velocity = Lunge_Target.global_position - lunge_target_last_position #account for target moving
+			extrapolated_target_velocity /= 2.0 #do this because we only have half-faith in this number
+			linear_velocity += extrapolated_target_velocity	
+			lunge_target_last_position = Lunge_Target.global_position
 	else:	
 		var walk_target
 		
@@ -315,7 +324,7 @@ func get_acceleration():
 		return 10.0		
 	else:	
 		var translationalSpeed = walk_velocity.length()
-		return 10 + translationalSpeed * 4
+		return 10 + translationalSpeed * 3
 		
 
 func getRandomSkinTone():
@@ -393,10 +402,17 @@ const Lunge_Deadband = 1.0
 const Lunge_Speed = 12
 var Lunging = false
 var Lunge_Target : Node3D 
+var lunge_target_last_position = Vector3.ZERO
+var lunge_total_traversal
+const Lunge_max_traversal = 5
 @rpc("call_local", "reliable")
 func lunge(target_node_path):
 	
 	var target_node = get_node(target_node_path)
+	
+	if target_node == null:
+		print("Null lunge target: " + target_node_path)
+		return
 	
 	if ON_FLOOR:
 		ON_FLOOR = false
@@ -405,6 +421,8 @@ func lunge(target_node_path):
 		floorcast.enabled = false
 		
 	Lunge_Target = target_node
+	lunge_target_last_position = Lunge_Target.global_position
+	lunge_total_traversal = 0
 	Lunging = true
 	skeleton.lunge_start()
 	
@@ -483,10 +501,18 @@ func land():
 	impactFX.volume_db = -27
 	impactFX.pitch_scale = 0.5
 	impactFX.play()
+	
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
-	var retardation_vector = -translational_velocity.normalized()
-	var retardation_magnitude = max(1.0, translational_velocity.length()/2.0)
-	var impulse = retardation_vector * retardation_magnitude * mass
-	apply_central_impulse(impulse)
+	
+	if translational_velocity.length() <= 1:
+		linear_velocity.x = 0
+		linear_velocity.z = 0
+	else:
+		linear_velocity.x /= 2.0
+		linear_velocity.z /= 2.0
+	#var retardation_vector = -translational_velocity.normalized()
+	#var retardation_magnitude = max(1.0, translational_velocity.length())
+	#var impulse = retardation_vector * retardation_magnitude * mass * 20
+	#apply_central_impulse(impulse)
 
 	

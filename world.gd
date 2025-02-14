@@ -127,7 +127,7 @@ func start_host_lobby():
 	var error_code = enet_peer.create_server(PORT, MAX_CONNECTIONS)
 	
 	if error_code:
-		display_popup("Cannot create server,\n ERROR CODE: " + str(error_code), null)
+		display_popup("Could not start server,\n ERROR CODE: " + str(error_code), null)
 		return error_code
 	
 	multiplayer.multiplayer_peer = enet_peer
@@ -156,7 +156,11 @@ func join_lobby():
 	main_menu.hide()
 	
 	var hostIP = "127.0.0.1" if address_entry.text == "" else address_entry.text
-	var error = enet_peer.create_client(hostIP, PORT)
+	var error_code = enet_peer.create_client(hostIP, PORT)
+	
+	if error_code:
+		display_popup("Could not join host,\n ERROR CODE: " + str(error_code), null)
+		return error_code
 	
 	multiplayer.multiplayer_peer = enet_peer
 

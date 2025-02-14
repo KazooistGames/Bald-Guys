@@ -3,8 +3,10 @@ extends MultiplayerSynchronizer
 @export var AUTHORITY_ORIGIN = Vector3.ZERO
 @export var AUTHORITY_BASIS = Basis.IDENTITY
 
-@export var lerp_val = 0.25
+var lerp_val = 0.25
 
+var deadbanded = false
+var origin_deadband = 0.1
 
 var parent
 
@@ -15,6 +17,10 @@ func _ready():
 	
 	if not parent_is_valid():
 		queue_free()
+		
+	elif not is_multiplayer_authority():
+		delta_synchronized.connect(reset_deadband)
+		request_force_sync.rpc_id(1)
 		
 
 func _physics_process(_delta):
@@ -32,10 +38,49 @@ func _physics_process(_delta):
 	else:
 		parent.transform.basis = AUTHORITY_BASIS
 		
-		if parent.position.distance_to(AUTHORITY_ORIGIN) > 1.0:
+		if deadbanded:
+			pass
+			
+		elif parent.position.distance_to(AUTHORITY_ORIGIN) > 1.0:
 			parent.transform.origin = AUTHORITY_ORIGIN	
-		else:
+			
+		elif parent.position.distance_to(AUTHORITY_ORIGIN) <= origin_deadband:
+			parent.transform.origin = AUTHORITY_ORIGIN	
+			deadbanded = true
+			
+		elif not deadbanded:
 			parent.transform.origin = parent.transform.origin.lerp(AUTHORITY_ORIGIN, lerp_val)
+
+
+@rpc("authority", "call_remote")
+func force_sync(variables : Dictionary):
+	
+	for key in variables.keys():
+		set(str(key), variables[key])
+	
+	
+@rpc("any_peer", "call_remote")
+func request_force_sync():
+	
+	if is_multiplayer_authority():
+		var calling_client = multiplayer.get_remote_sender_id()
+		var variables = get_net_vars()
+		force_sync.rpc_id(calling_client, variables)
+
+
+func get_net_vars():
+	
+	var net_vars = {}
+	net_vars["AUTHORITY_ORIGIN"] = AUTHORITY_ORIGIN
+	net_vars["AUTHORITY_BASIS"] = AUTHORITY_BASIS
+	parent.transform.origin = AUTHORITY_ORIGIN	
+	parent.transform.basis = AUTHORITY_BASIS
+	return net_vars
+
+
+func reset_deadband():
+	
+	deadbanded = false
 
 
 func parent_is_valid():

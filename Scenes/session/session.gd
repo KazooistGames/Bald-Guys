@@ -122,12 +122,13 @@ func Finished_Round(winner):
 
 func spawn_player(parent, humanoid):
 	
-	humanoid.unragdoll.rpc()
+	#humanoid.unragdoll()
 	humanoid.linear_velocity = Vector3.ZERO
 	var spawn_position = get_random_spawn(parent)
 	var rid = humanoid.get_rid()
 	var new_transform = Transform3D.IDENTITY.translated(spawn_position)
 	PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, new_transform)
+	humanoid.find_child("*lowerBody*").position = Vector3.UP
 
 
 func get_random_spawn(parent):

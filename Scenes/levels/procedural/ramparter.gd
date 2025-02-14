@@ -16,7 +16,7 @@ enum Configuration
 @export var configuration = Configuration.inert
 
 var ramps = []
-var heights = []
+@export var heights = []
 
 var lift_speed = 3.0
 var collapse_speed = 3.0
@@ -41,7 +41,10 @@ func _physics_process(delta):
 		var target = 0
 		var step = delta
 		
-		if configuration == Configuration.lifting:
+		if heights.size() <= 0:
+			pass
+			
+		elif configuration == Configuration.lifting:
 			target = heights[index]
 			step *= lift_speed 
 		
