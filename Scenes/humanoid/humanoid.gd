@@ -43,6 +43,8 @@ const floor_dot_product = 2.0 / 3.0
 @onready var impactFX = $ImpactAudio
 @onready var jumpFX = $JumpAudio
 
+var multiplayer_permissive = false
+
 var TOPSPEED = 0
 var TOPSPEED_MOD = 1
 
@@ -92,6 +94,13 @@ func _ready():
 		
 
 func _process(_delta):
+	
+	if not multiplayer.has_multiplayer_peer():
+		multiplayer_permissive = true
+	elif is_multiplayer_authority():
+		multiplayer_permissive = true
+	else:
+		multiplayer_permissive = false
 			
 	if not RAGDOLLED: #ragdoll cooldown
 		pass		
@@ -130,7 +139,7 @@ func _process(_delta):
 	skeleton.processReach(LOOK_VECTOR)
 	skeleton.Reaching = REACHING
 	
-
+	
 func _integrate_forces(state):	
 	
 	if not is_on_floor():
@@ -142,12 +151,6 @@ func _integrate_forces(state):
 	var contact_count = state.get_contact_count()
 	var index = 0
 	
-	var multiplayer_permissive = false
-	
-	if not multiplayer.has_multiplayer_peer():
-		multiplayer_permissive = true
-	elif is_multiplayer_authority():
-		multiplayer_permissive = true
 	
 	while index < contact_count and multiplayer_permissive:
 	

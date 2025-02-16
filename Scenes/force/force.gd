@@ -46,7 +46,7 @@ var material;
 
 var target_position
 
-var multiplayer_permissive = true
+var multiplayer_permissive = false
 
 func _ready():
 	$TransformSync.delta_interval = 0.0
@@ -60,6 +60,8 @@ func _process(delta):
 		multiplayer_permissive = true
 	elif is_multiplayer_authority():
 		multiplayer_permissive = true
+	else:
+		multiplayer_permissive = false
 		
 
 func _physics_process(delta):
