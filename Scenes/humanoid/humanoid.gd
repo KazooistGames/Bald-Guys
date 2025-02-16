@@ -67,6 +67,14 @@ var cached_floor_pos = Vector3.ZERO
 var just_jumped_timer = 0.0
 var just_jumped_period = 1.0/3.0
 
+const Lunge_Deadband = 1.0
+const Lunge_Speed = 12
+const Lunge_max_traversal = 5
+var Lunging = false
+var Lunge_Target : Node3D 
+var lunge_target_last_position = Vector3.ZERO
+var lunge_total_traversal
+
 
 func _enter_tree():
 	
@@ -134,7 +142,14 @@ func _integrate_forces(state):
 	var contact_count = state.get_contact_count()
 	var index = 0
 	
-	while index < contact_count and is_multiplayer_authority():
+	var multiplayer_permissive = false
+	
+	if not multiplayer.has_multiplayer_peer():
+		multiplayer_permissive = true
+	elif is_multiplayer_authority():
+		multiplayer_permissive = true
+	
+	while index < contact_count and multiplayer_permissive:
 	
 		var normal = state.get_contact_local_normal(index)
 		var impact = state.get_contact_impulse(index).length()
@@ -396,15 +411,8 @@ func unragdoll():
 		head_collider.disabled = false
 		RAGDOLLED = false
 		freeze = false
-		
 
-const Lunge_Deadband = 1.0
-const Lunge_Speed = 12
-var Lunging = false
-var Lunge_Target : Node3D 
-var lunge_target_last_position = Vector3.ZERO
-var lunge_total_traversal
-const Lunge_max_traversal = 5
+
 @rpc("call_local", "reliable")
 func lunge(target_node_path):
 	
@@ -437,7 +445,6 @@ func bump(velocity_impulse):
 		floorcast.enabled = false
 		
 	apply_central_impulse(velocity_impulse * mass)
-		
 
 
 @rpc("call_local", "reliable")

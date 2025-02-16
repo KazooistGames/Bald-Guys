@@ -13,6 +13,9 @@ func _ready():
 	
 	if parent == null:
 		queue_free()
+		
+	if not is_multiplayer_authority():
+		request_network_sync.rpc_id(get_multiplayer_authority())
 	
 	
 func force_sync():

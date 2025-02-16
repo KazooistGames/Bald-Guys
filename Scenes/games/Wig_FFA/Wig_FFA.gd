@@ -192,7 +192,9 @@ func drop_wig():
 	var current_position = Wig.global_position	
 	Wig.global_position = current_position
 	
-	if Bearer != null:
+	if Bearer == null:
+		pass
+	elif Bearer.ragdolled.is_connected(drop_wig):
 		Bearer.ragdolled.disconnect(drop_wig)
 		Wig.linear_velocity = Bearer.linear_velocity * 1.5 + Vector3(0, 3, 0)
 

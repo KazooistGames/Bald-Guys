@@ -1,19 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://bxvldmj0gbd3m"]
+[gd_scene load_steps=2 format=3 uid="uid://bxvldmj0gbd3m"]
 
 [ext_resource type="Script" path="res://Scenes/levels/procedural/ramparter.gd" id="1_1cb03"]
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_c6h2b"]
-properties/0/path = NodePath(".:heights")
-properties/0/spawn = true
-properties/0/replication_mode = 2
 
 [node name="Ramparter" type="Node3D"]
 script = ExtResource("1_1cb03")
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/geometry/ramp/ramp.tscn")
 spawn_path = NodePath("..")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-delta_interval = 1.0
-replication_config = SubResource("SceneReplicationConfig_c6h2b")

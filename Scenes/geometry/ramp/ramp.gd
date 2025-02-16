@@ -16,9 +16,18 @@ var need_new_collider = false
 
 var slope = 0.0
 
-func _process(delta):
+signal altered
 
-	#mesh_manipulation(Vector3(3,3,4))
+
+func _ready():
+	
+	$CustomSync.get_net_var_delegate = get_net_vars
+	
+	if is_multiplayer_authority():
+		altered.connect($CustomSync.force_sync)
+		
+
+func _process(delta):
 
 	collider.position = Vector3.ZERO
 			
@@ -44,11 +53,10 @@ func _physics_process(delta):
 		debounce_timer = 0.0
 		mesh_manipulation()
 		need_new_collider = false
-	
+		#altered.emit()
+		
 	
 func mesh_manipulation():
-	
-	var modified_triangles = PackedVector3Array()
 	
 	for index in range(collider.shape.points.size()):
 		var point = collider.shape.points[index]
@@ -68,5 +76,10 @@ func cache_mesh_size():
 	cached_dimensions = dimensions
 	
 	
+func get_net_vars():
+	
+	var net_vars = {}
+	net_vars["dimensions"] = dimensions
+	return net_vars
 	
 	

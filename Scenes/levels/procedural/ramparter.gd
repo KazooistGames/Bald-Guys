@@ -1,7 +1,7 @@
 extends Node3D
 
 
-const ramp_prefab = preload("res://Scenes/geometry/ramp/ramp.tscn")
+const prefab = preload("res://Scenes/geometry/ramp/ramp.tscn")
 
 const map_size = 50.0
 
@@ -15,8 +15,10 @@ enum Configuration
 }
 @export var configuration = Configuration.inert
 
+@onready var multiplayer_spawner = $MultiplayerSpawner
+
 var ramps = []
-@export var heights = []
+var heights = []
 
 var lift_speed = 3.0
 var collapse_speed = 3.0
@@ -26,6 +28,11 @@ var in_position = false
 signal finished_lifting
 signal finished_collapsing
 
+
+func _ready():
+	
+	multiplayer_spawner.spawn_function = spawn_ramp
+	
 
 func _physics_process(delta):
 	
@@ -39,7 +46,7 @@ func _physics_process(delta):
 	for index in range(ramps.size()): #move floor mesas
 		var ramp = ramps[index]
 		var target = 0
-		var step = delta
+		var step = delta	
 		
 		if heights.size() <= 0:
 			pass
@@ -53,35 +60,51 @@ func _physics_process(delta):
 		
 		if ramp.dimensions.y != target:
 			in_position = false
-			ramp.dimensions.y = move_toward(ramp.dimensions.y, target, step)
+			ramp.dimensions.y = move_toward(ramp.dimensions.y, target, step)	
 			
 	if not in_position:
 		pass
-		
+			
 	elif configuration == Configuration.lifting:
-		finished_lifting.emit()
-		
-	elif configuration == Configuration.collapsing:
-		
+		finished_lifting.emit()	
+			
+	elif configuration == Configuration.collapsing:	
 		finished_collapsing.emit()
 
 
-func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify_position = false, y_rotation = 0):
+func create_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify_position = false, y_rotation = 0):
 	
-	var new_ramp = ramp_prefab.instantiate()
-	add_child(new_ramp, true)		
-	new_ramp.dimensions.x = length
-	new_ramp.dimensions.z = thickness
-	new_ramp.dimensions.y = 0.0
-	new_ramp.position = coordinates
-	new_ramp.rotation.y = y_rotation
+	var data = {}
 	
 	if verify_position:			
-		new_ramp.position.y = height_at_coordinates(coordinates) + 0.5
-		
-	heights.append(height)
-	#print("pulling up ramp at ", new_ramp.position)
-		
+		coordinates.y = height_at_coordinates(coordinates) + 0.5
+	
+	var dimensions = Vector3.ZERO
+	dimensions.x = length
+	dimensions.z = thickness
+	dimensions.y = 0.0
+	
+	data["dimensions"] = dimensions
+	data["position"] = coordinates
+	data["rotation"] = Vector3.ZERO
+	data["rotation"].y = y_rotation
+	data["height"] = height
+	
+	multiplayer_spawner.spawn(data)
+
+
+func spawn_ramp(data : Dictionary):
+	
+	var new_ramp = prefab.instantiate()
+	
+	for key in data.keys():
+		new_ramp.set(key, data[key])
+
+	ramps.append(new_ramp)
+	heights.append(data["height"])
+	
+	return new_ramp
+	
 		
 func height_at_coordinates(coordinates):
 	

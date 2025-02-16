@@ -19,9 +19,16 @@ var ramp_roof_freq = 0.5
 var limb_freq = 1.0/3.0
 		
 		
+var multiplayer_permissive = false
+		
 func _ready():
 	
-	if not is_multiplayer_authority():
+	if not multiplayer.has_multiplayer_peer():
+		multiplayer_permissive = true
+	elif is_multiplayer_authority():
+		multiplayer_permissive = true
+	
+	if not multiplayer_permissive:
 		return
 	
 	#going up
@@ -43,7 +50,7 @@ func _ready():
 
 func _physics_process(delta):
 
-	if not is_multiplayer_authority():
+	if not multiplayer_permissive:
 		return
 
 	if reconfigure_timer < 0:
@@ -63,7 +70,7 @@ func stage_mesas():
 	
 	mesa_grower.clear_mesas()
 	mesa_grower.extend_mesas()
-	mesa_grower.spawn_mesas(mesa_count)	
+	mesa_grower.create_mesas(mesa_count)	
 
 
 func stage_ramps():
@@ -74,7 +81,7 @@ func stage_ramps():
 			
 		if randf() <= ramp_roof_freq: #roof
 			var y_offset = Vector3.DOWN * randi_range(0, 1) * 0.75
-			ramparter.spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false, randi_range(0, 3) * PI/2)
+			ramparter.create_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false, randi_range(0, 3) * PI/2)
 			
 		if randf() <= ramp_floor_freq: #floor
 			var y_rotation = randi_range(0, 3) * PI/2
@@ -90,7 +97,7 @@ func stage_ramps():
 			else:		
 				ramp_height = minf(mesa.position.y, mesa.size / 2.0)
 				
-			ramparter.spawn_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation)
+			ramparter.create_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation)
 			
 	ramparter.lift()
 	
@@ -106,7 +113,7 @@ func stage_limbs():
 		var limbs_on_mesa = 0
 
 		while randf() <= limb_freq and limbs_on_mesa < 4:
-			limb_grower.spawn_limb(orientation_to_use, mesa.global_position - Vector3.UP * 0.375)
+			limb_grower.create_limb(orientation_to_use, mesa.global_position - Vector3.UP * 0.375)
 			orientation_to_use += PI / 2.0
 			orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
 			

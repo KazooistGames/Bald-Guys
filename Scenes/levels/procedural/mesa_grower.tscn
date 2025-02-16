@@ -5,6 +5,5 @@
 [node name="Mesa_Grower" type="Node3D"]
 script = ExtResource("1_4cqld")
 
-[node name="Spawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/geometry/mesa/mesa.tscn")
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 spawn_path = NodePath("..")

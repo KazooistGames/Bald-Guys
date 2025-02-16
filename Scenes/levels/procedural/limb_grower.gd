@@ -15,12 +15,19 @@ enum Configuration
 }
 @export var configuration = Configuration.inert
 
+@onready var multiplayer_spawner = $MultiplayerSpawner
+
 var in_position = false
 
 var limbs = []
 
 signal finished_extending
 signal finished_retracting
+
+
+func _ready():
+	
+	multiplayer_spawner.spawn_function = spawn_limb
 
 
 func _process(delta):
@@ -60,19 +67,31 @@ func _process(delta):
 		finished_retracting.emit()
 
 
-func spawn_limb(orientation, location, radius = 0.25):
+func create_limb(orientation, location, radius = 0.25):
+	
+	var data = {}
+	data["top_height"] = 0.5
+	data["bottom_drop"] = 0.5
+	data["radius"] = radius
+	data["rotation"] = Vector3(PI/2.0, orientation, 0)
+	data["position"] = location
+	data["reverse_growth_scale"] = 0.0
+	
+	multiplayer_spawner.spawn(data)
+
+	
+
+func spawn_limb(data : Dictionary):
 	
 	var new_limb = prefab.instantiate()
-	add_child(new_limb, true)
-	new_limb.top_height = 0.5
-	new_limb.bottom_drop = 0.5
-	new_limb.radius = radius
-	new_limb.global_rotation = Vector3(PI/2.0, orientation, 0)
-	new_limb.global_position = location
 	new_limb.preference = new_limb.Preference.deep
-	new_limb.reverse_growth_scale = 0.0
+	
+	for key in data.keys():
+		new_limb.set(key, data[key])
+
 	limbs.append(new_limb)
 	
+	return new_limb
 	
 func clear_limbs():
 		

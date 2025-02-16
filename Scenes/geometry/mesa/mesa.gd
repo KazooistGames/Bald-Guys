@@ -32,8 +32,6 @@ func _ready():
 	
 	if not is_multiplayer_authority():
 		$CustomSync.synced.connect(rerender)
-		$CustomSync.request_network_sync.rpc_id(1)
-
 	else:
 		altered.connect($CustomSync.force_sync)
 	
@@ -140,6 +138,7 @@ func net_sync(variables : Dictionary):
 	
 
 func get_net_vars():
+	
 	var net_vars = {}
 	net_vars["preference"] = preference
 	net_vars["bottom_drop"] = bottom_drop

@@ -46,18 +46,26 @@ var material;
 
 var target_position
 
+var multiplayer_permissive = true
+
 func _ready():
 	$TransformSync.delta_interval = 0.0
 	rpc_reset()
 	monitoring = true
 
 
+func _process(delta):
+	
+	if not multiplayer.has_multiplayer_peer():
+		multiplayer_permissive = true
+	elif is_multiplayer_authority():
+		multiplayer_permissive = true
+		
+
 func _physics_process(delta):
 
-	material = mesh.get_surface_override_material(0)
-	
+	material = mesh.get_surface_override_material(0)	
 	capture_bodies()
-
 
 	if action == Action.holding:
 		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
@@ -74,7 +82,7 @@ func _physics_process(delta):
 		hum.volume_db = lerp(-27.0, -21.0, progress)
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
-		if not is_multiplayer_authority():
+		if not multiplayer_permissive:
 			pass	
 		elif progress >= 1.0:
 			rpc_trigger.rpc()

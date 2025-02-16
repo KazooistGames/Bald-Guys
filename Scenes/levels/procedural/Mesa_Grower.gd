@@ -5,11 +5,6 @@ const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
 const map_size = 50
 const gap = 2.0
 
-@export var height_step = 0.5
-
-var extend_speed = 0.5
-var retract_speed = 2.0
-
 enum Configuration 
 {
 	inert = 0,
@@ -18,6 +13,13 @@ enum Configuration
 }
 @export var configuration = Configuration.inert
 
+@export var height_step = 0.5
+
+@onready var multiplayer_spawner = $MultiplayerSpawner
+
+var extend_speed = 0.5
+var retract_speed = 2.0
+
 var in_position = false
 var mesas = []
 
@@ -25,10 +27,14 @@ signal finished_extending
 signal finished_retracting
 
 
+func _ready():
+	
+	multiplayer_spawner.spawn_function = spawn_mesa
+	
+
 func _physics_process(delta):
 	
 	mesas = get_mesas()
-	
 	in_position = true
 	
 	if configuration == Configuration.inert or mesas.size() == 0:
@@ -61,14 +67,12 @@ func _physics_process(delta):
 		finished_retracting.emit()
 
 
-
 func extend_mesas():
 	
 	if configuration == Configuration.extending:
 		return
 	else:
 		configuration = Configuration.extending
-
 		
 		
 func retract_mesas():
@@ -78,8 +82,7 @@ func retract_mesas():
 	else:
 		configuration = Configuration.retracting
 	
-		
-		
+			
 func stop_mesas():
 	
 	mesas = get_mesas()
@@ -94,26 +97,41 @@ func stop_mesas():
 			mesa.altered.emit()
 
 
-func spawn_mesas(count):
+func create_mesas(count):
 	
 	if not is_multiplayer_authority():
 		return
 
 	for index in range(count):
-		var new_mesa = prefab.instantiate()
-		new_mesa.size = randi_range(4, 10) * 0.5
-		new_mesa.top_height = 0.0
-		new_mesa.bottom_drop = 1.0
-		new_mesa.preference = new_mesa.Preference.none 
-		add_child(new_mesa, true)	
-		var boundary = map_size/2.0 - new_mesa.size/2.0
-		boundary /= gap
-		new_mesa.position.x = randi_range(-boundary, boundary) * gap
-		new_mesa.position.z = randi_range(-boundary, boundary) * gap
-		new_mesa.position.y = -1
-		new_mesa.rotation.y = randi_range(0, 3) * PI/2
-		mesas.append(new_mesa)
 		
+		var data = {}	
+		var random_size = randi_range(4, 10) * 0.5	
+		var boundary = map_size/2.0 - random_size/2.0
+		boundary /= gap
+		var random_pos : Vector3
+		random_pos.x = randi_range(-boundary, boundary) * gap
+		random_pos.y = -1
+		random_pos.z = randi_range(-boundary, boundary) * gap
+		data["position"] = random_pos	
+		data["rotation"] = Vector3(0, randi_range(0, 3) * PI/2, 0)
+		data["size"] = random_size
+		data["top_height"] = 0
+		data["bottom_drop"] = 1		
+		multiplayer_spawner.spawn(data)
+		
+
+func spawn_mesa(data : Dictionary):
+	
+	var new_mesa = prefab.instantiate()
+	new_mesa.preference = new_mesa.Preference.none 
+	
+	for key in data.keys():
+		new_mesa.set(key, data[key])
+
+	mesas.append(new_mesa)
+	
+	return new_mesa
+
 
 func clear_mesas():
 	
@@ -128,3 +146,6 @@ func clear_mesas():
 func get_mesas():
 	
 	return find_children("*", "AnimatableBody3D", true, false)
+	
+	
+	

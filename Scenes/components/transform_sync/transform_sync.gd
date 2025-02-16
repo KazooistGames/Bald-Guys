@@ -21,8 +21,8 @@ func _ready():
 		queue_free()
 		
 	elif not is_multiplayer_authority():
-		delta_synchronized.connect(reset_deadband)
-		request_force_sync.rpc_id(1)
+		delta_synchronized.connect(reset_deadband)	
+		request_sync.rpc_id(get_multiplayer_authority())
 		
 
 func _physics_process(_delta):
@@ -62,7 +62,7 @@ func force_sync(variables : Dictionary):
 	
 	
 @rpc("any_peer", "call_remote")
-func request_force_sync():
+func request_sync():
 	
 	if is_multiplayer_authority():
 		var calling_client = multiplayer.get_remote_sender_id()
