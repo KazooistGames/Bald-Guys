@@ -111,7 +111,7 @@ func clear_limbs():
 
 @rpc("call_local", "reliable")		
 func extend_limbs():
-	
+	unlagger.reset()
 	if configuration == Configuration.extending:
 		return
 	else:
@@ -121,7 +121,7 @@ func extend_limbs():
 		
 @rpc("call_local", "reliable")	
 func retract_limbs():
-	
+	unlagger.reset()
 	if configuration == Configuration.retracting:
 		return
 	else:

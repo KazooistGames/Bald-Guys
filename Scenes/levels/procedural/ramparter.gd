@@ -159,6 +159,7 @@ func stop():
 @rpc("call_local", "reliable")	
 func lift():
 	
+	unlagger.reset()
 	if configuration == Configuration.lifting:
 		return
 	else:
@@ -168,6 +169,7 @@ func lift():
 @rpc("call_local", "reliable")	
 func collapse():
 	
+	unlagger.reset()
 	if configuration == Configuration.collapsing:
 		return
 	else:

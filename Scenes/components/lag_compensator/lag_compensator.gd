@@ -31,7 +31,7 @@ func compensated_delta(delta):
 	return return_val
 
 
-func reset_rectification():
+func reset():
 	
 	remaining_time_to_being_rectified = GLOBAL_PING / 1000.0
 

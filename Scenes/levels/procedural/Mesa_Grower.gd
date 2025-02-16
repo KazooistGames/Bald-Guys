@@ -69,7 +69,7 @@ func _physics_process(delta):
 
 @rpc("call_local", "reliable")
 func extend_mesas():
-	unlagger.reset_rectification()
+	unlagger.reset()
 	if configuration == Configuration.extending:
 		return
 	else:
@@ -78,7 +78,7 @@ func extend_mesas():
 		
 @rpc("call_local", "reliable")
 func retract_mesas():
-	unlagger.reset_rectification()
+	unlagger.reset()
 	if configuration == Configuration.retracting:
 		return
 	else:
