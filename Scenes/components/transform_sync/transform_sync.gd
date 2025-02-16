@@ -3,10 +3,10 @@ extends MultiplayerSynchronizer
 @export var AUTHORITY_ORIGIN = Vector3.ZERO
 @export var AUTHORITY_BASIS = Basis.IDENTITY
 
-var lerp_val = 0.25
+var lerp_val = 0.5
 
 var deadbanded = false
-var origin_deadband = 0.1
+var origin_deadband = 0.2
 
 var parent
 

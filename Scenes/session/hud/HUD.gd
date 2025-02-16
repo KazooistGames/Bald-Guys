@@ -4,7 +4,8 @@ extends CanvasLayer
 
 @onready var nameplates = $Nameplates
 
-@onready var PSA = $PSA/Label
+@onready var PSA = $MarginContainer/PSA
+@onready var ping = $MarginContainer/ping
 
 var psaTTL = 1
 
@@ -77,3 +78,19 @@ func modify_nameplate(key, variable, value):
 	if nameplate != null:
 		nameplate.set(variable, value)
 	
+	
+func set_ping_indicator(value):
+
+	var ping_color_grade = Color.WHITE_SMOKE
+	
+	if value <= 50:
+		ping_color_grade = Color.LIME_GREEN
+	elif value <= 150:
+		ping_color_grade = Color.YELLOW
+	elif value <= 500:
+		ping_color_grade = Color.RED
+	else:
+		ping_color_grade = Color.DARK_RED
+		
+	ping.add_theme_color_override("font_color", ping_color_grade)
+	ping.text = str(value) + " ms"

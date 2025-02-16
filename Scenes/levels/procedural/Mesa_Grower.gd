@@ -108,7 +108,7 @@ func create_mesas(count):
 		var random_size = randi_range(4, 10) * 0.5	
 		var boundary = map_size/2.0 - random_size/2.0
 		boundary /= gap
-		var random_pos : Vector3
+		var random_pos = Vector3.ZERO
 		random_pos.x = randi_range(-boundary, boundary) * gap
 		random_pos.y = -1
 		random_pos.z = randi_range(-boundary, boundary) * gap

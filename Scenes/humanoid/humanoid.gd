@@ -69,9 +69,9 @@ var cached_floor_pos = Vector3.ZERO
 var just_jumped_timer = 0.0
 var just_jumped_period = 1.0/3.0
 
-const Lunge_Deadband = 1.0
-const Lunge_Speed = 12
-const Lunge_max_traversal = 5
+const Lunge_Deadband = 0.75
+const Lunge_Speed = 15
+const Lunge_max_traversal = 6
 var Lunging = false
 var Lunge_Target : Node3D 
 var lunge_target_last_position = Vector3.ZERO

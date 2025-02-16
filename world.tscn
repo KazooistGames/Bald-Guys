@@ -106,6 +106,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.196078)
+
 [node name="margin" type="MarginContainer" parent="CanvasLayer/PauseMenu"]
 layout_mode = 1
 anchors_preset = 15
@@ -120,7 +129,6 @@ theme_override_constants/margin_bottom = 15
 
 [node name="vbox" type="VBoxContainer" parent="CanvasLayer/PauseMenu/margin"]
 layout_mode = 2
-size_flags_horizontal = 4
 size_flags_vertical = 8
 theme_override_constants/separation = 15
 
@@ -141,18 +149,11 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer/Popup"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
+layout_mode = 0
 offset_left = -275.0
 offset_top = -150.0
 offset_right = 275.0
 offset_bottom = 150.0
-grow_horizontal = 2
-grow_vertical = 2
 color = Color(0.392157, 0.392157, 0.392157, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Popup"]

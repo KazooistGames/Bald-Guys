@@ -54,7 +54,7 @@ func _ready():
 	monitoring = true
 
 
-func _process(delta):
+func _process(_delta):
 	
 	if not multiplayer.has_multiplayer_peer():
 		multiplayer_permissive = true

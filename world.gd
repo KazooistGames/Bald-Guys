@@ -10,7 +10,13 @@ const PORT = 9999
 
 const MAX_CONNECTIONS = 8
 
-var session
+const ClientState = {
+	Menus = 0,
+	Session = 1,
+}
+
+@export var State = ClientState.Menus
+@export var LOCAL_PLAYER_INTERFACE : Node3D
 
 @onready var viewPort = $SubViewportContainer/SubViewport
 
@@ -28,16 +34,7 @@ var session
 
 @onready var music = $Music
 
-@export var LOCAL_PLAYER_INTERFACE : Node3D
-
-
-const ClientState = {
-	Lobby = 0,
-	Session = 1,
-}
-
-@export var State = ClientState.Lobby
-
+var session
 
 func _ready():
 	
@@ -64,7 +61,7 @@ func _unhandled_input(_event):
 
 func _process(delta):
 	
-	if State == ClientState.Lobby:
+	if State == ClientState.Menus:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		music.volume_db = move_toward(music.volume_db, -24, delta * 6)
 		
@@ -79,7 +76,7 @@ func _process(delta):
 	if music.volume_db <= -72:
 		music.stop()
 		
-	main_menu.visible = State == ClientState.Lobby
+	main_menu.visible = State == ClientState.Menus
 
 	if not multiplayer.has_multiplayer_peer():
 		return
@@ -100,7 +97,7 @@ func _process(delta):
 
 	elif not session:
 		session = viewPort.get_node_or_null("session")
-		State = ClientState.Lobby
+		State = ClientState.Menus
 
 	elif State != ClientState.Session:
 		State = ClientState.Session
@@ -220,7 +217,7 @@ func leave_session():
 	if session != null:
 		session.queue_free()
 		
-	State = ClientState.Lobby
+	State = ClientState.Menus
 	music.play()
 	
 		
@@ -265,7 +262,6 @@ func acknowledge_popup():
 			popup_acknowledge.pressed.disconnect(callback)
 		
 	
-		
 @rpc("call_local", "reliable")
 func rpc_handoff_object(path, auth_id):
 	
@@ -282,3 +278,6 @@ func rpc_set_client_screenname(player_name):
 	var id = multiplayer.get_remote_sender_id()
 	session.Client_Screennames[id] = player_name
 
+
+
+	

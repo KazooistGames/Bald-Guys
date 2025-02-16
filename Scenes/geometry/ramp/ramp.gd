@@ -16,18 +16,8 @@ var need_new_collider = false
 
 var slope = 0.0
 
-signal altered
 
-
-func _ready():
-	
-	$CustomSync.get_net_var_delegate = get_net_vars
-	
-	if is_multiplayer_authority():
-		altered.connect($CustomSync.force_sync)
-		
-
-func _process(delta):
+func _process(_delta):
 
 	collider.position = Vector3.ZERO
 			
@@ -75,11 +65,5 @@ func cache_mesh_size():
 	
 	cached_dimensions = dimensions
 	
-	
-func get_net_vars():
-	
-	var net_vars = {}
-	net_vars["dimensions"] = dimensions
-	return net_vars
 	
 	

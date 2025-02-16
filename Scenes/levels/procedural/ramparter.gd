@@ -35,8 +35,8 @@ func _ready():
 	
 
 func _physics_process(delta):
-	
-	ramps = get_ramps()
+	#
+	#ramps = get_ramps()
 	
 	in_position = true
 	
@@ -45,6 +45,10 @@ func _physics_process(delta):
 
 	for index in range(ramps.size()): #move floor mesas
 		var ramp = ramps[index]
+		
+		if ramp == null:
+			return
+			
 		var target = 0
 		var step = delta	
 		
@@ -116,7 +120,8 @@ func height_at_coordinates(coordinates):
 	var collision = get_world_3d().direct_space_state.intersect_ray(query)
 	return collision["position"].y
 	
-		
+	
+@rpc("call_local")	
 func clear_ramps():
 	
 	ramps = get_ramps()

@@ -142,7 +142,7 @@ func unstage_ramps():
 func unstage_mesas():
 	
 	ramparter.stop()
-	ramparter.clear_ramps()
+	ramparter.clear_ramps.rpc()
 	mesa_grower.retract_mesas()
 	
 	

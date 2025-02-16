@@ -3,13 +3,13 @@ extends Node3D
 const Humanoid_Prefab = preload("res://Scenes/humanoid/humanoid.tscn")
 
 const SessionState = {
-	Hub = 0,
+	Lobby = 0,
 	Round = 1,
 }
 
 @export var Client_Screennames = {}
 
-@export var State = SessionState.Hub
+@export var State = SessionState.Lobby
 
 @export var Commissioned = false
 
@@ -21,7 +21,7 @@ const SessionState = {
 
 @onready var HUD = $HUD
 
-@onready var Hub = $Hub
+@onready var Lobby = $Lobby
 
 @onready var humanoidSpawner = $HumanoidSpawner
 @onready var levelSpawner = $LevelSpawner
@@ -37,8 +37,12 @@ signal Started_Round
 
 signal Ended_Round
 
+var local_ping_ms = 0.0
+		
 
 func _ready():
+		
+	$PingTimer.timeout.connect(ping_clients)
 	
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(str(node.name)))
@@ -47,7 +51,7 @@ func _ready():
 	
 	if is_multiplayer_authority():
 		Commission_Next_Round()
-		rpc_move_to_hub.rpc()
+		rpc_move_to_Lobby.rpc()
 		create_player_humanoid(1)
 		Commissioned = true
 
@@ -76,8 +80,8 @@ func _unhandled_key_input(event):
 			
 	elif event.is_action_pressed("Toggle"):
 			
-		if State != SessionState.Hub:
-			rpc_move_to_hub.rpc()
+		if State != SessionState.Lobby:
+			rpc_move_to_Lobby.rpc()
 			
 		elif State != SessionState.Round:
 			rpc_move_to_level.rpc()	
@@ -116,7 +120,7 @@ func handle_new_game(new_game):
 func Finished_Round(winner):
 	
 	HUD.set_psa.rpc("Winner: " + winner, -1)
-	rpc_move_to_hub.rpc()
+	rpc_move_to_Lobby.rpc()
 	Commission_Next_Round()
 
 
@@ -155,7 +159,7 @@ func create_player_humanoid(peer_id):
 	
 	add_child(new_peer_humanoid)
 	
-	var random_spawn_position = get_random_spawn(Hub)
+	var random_spawn_position = get_random_spawn(Lobby)
 	respawn_node.rpc(new_peer_humanoid.get_path(), random_spawn_position)
 	
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
@@ -182,12 +186,12 @@ func signal_to_handoff_player_humanoid(node):
 	
 
 @rpc("call_local", "authority", "reliable")
-func rpc_move_to_hub():
+func rpc_move_to_Lobby():
 	
-	State = SessionState.Hub
+	State = SessionState.Lobby
 	
 	for humanoid in Humanoids:
-		spawn_player(Hub, humanoid)	
+		spawn_player(Lobby, humanoid)	
 	
 	Ended_Round.emit()	
 	
@@ -265,5 +269,20 @@ func local_screenname():
 	if Client_Screennames.has(local_id):
 		return Client_Screennames[local_id]
 			
-
+	
+@rpc("authority", "call_remote")
+func ping(server_time : float):  
+	
+	if is_multiplayer_authority():
+		pass
+	else:
+		local_ping_ms = (Time.get_unix_time_from_system() - server_time) * 1000.0
+		HUD.set_ping_indicator(local_ping_ms)
+		
+	  
+func ping_clients():
+	
+	if is_multiplayer_authority():
+		var local_server_time = Time.get_unix_time_from_system()
+		ping.rpc(local_server_time)
 	

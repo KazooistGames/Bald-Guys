@@ -6,7 +6,7 @@
 layer = -1
 script = ExtResource("1_jgg12")
 
-[node name="PSA" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -20,7 +20,7 @@ theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="Label" type="Label" parent="PSA"]
+[node name="PSA" type="Label" parent="MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -29,6 +29,18 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 75
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ping" type="Label" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+text = "0.0 ms"
+horizontal_alignment = 2
+visible_characters = 4
+visible_ratio = 0.666667
 
 [node name="Nameplates" type="Control" parent="."]
 layout_mode = 3
