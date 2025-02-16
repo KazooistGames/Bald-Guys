@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://dnyf0qu40f6qt"]
+[gd_scene load_steps=5 format=3 uid="uid://dnyf0qu40f6qt"]
 
 [ext_resource type="Script" path="res://Scenes/geometry/ramp/ramp.gd" id="1_1aw7e"]
 [ext_resource type="Material" uid="uid://svosidjb5wsa" path="res://Materials/geometry.tres" id="2_d6no5"]
-[ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="3_357y2"]
 
 [sub_resource type="PrismMesh" id="PrismMesh_3as30"]
 resource_local_to_scene = true
@@ -12,11 +11,6 @@ size = Vector3(2, 1, 2)
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_kn64b"]
 resource_local_to_scene = true
 points = PackedVector3Array(1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1, -1, 0, -1, 1, 1, 1, 1, 1, -1, 1, 1, -1, 1, 1, 1, 1, 0, 1, -1, 0, -1, 1, 0, -1, -1, 0, 1, -1, 0, 1, 1, 0, 1, -1, 0, -1, 1, 0, -1)
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_o88tp"]
-properties/0/path = NodePath(".:dimensions")
-properties/0/spawn = true
-properties/0/replication_mode = 2
 
 [node name="Ramp" type="AnimatableBody3D"]
 sync_to_physics = false
@@ -30,8 +24,3 @@ surface_material_override/0 = ExtResource("2_d6no5")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("ConvexPolygonShape3D_kn64b")
-
-[node name="TransformSync" parent="." instance=ExtResource("3_357y2")]
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_o88tp")

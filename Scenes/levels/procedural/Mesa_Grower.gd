@@ -15,7 +15,9 @@ enum Configuration
 
 @export var height_step = 0.5
 
-@onready var multiplayer_spawner = $MultiplayerSpawner
+@onready var rng = RandomNumberGenerator.new()
+
+@onready var unlagger = $LagCompensator
 
 var extend_speed = 0.5
 var retract_speed = 2.0
@@ -23,18 +25,16 @@ var retract_speed = 2.0
 var in_position = false
 var mesas = []
 
+var count = 25
+
 signal finished_extending
 signal finished_retracting
 
 
-func _ready():
-	
-	multiplayer_spawner.spawn_function = spawn_mesa
-	
-
 func _physics_process(delta):
 	
-	mesas = get_mesas()
+	delta *= unlagger.delta_scalar(delta)
+	
 	in_position = true
 	
 	if configuration == Configuration.inert or mesas.size() == 0:
@@ -67,26 +67,27 @@ func _physics_process(delta):
 		finished_retracting.emit()
 
 
+@rpc("call_local", "reliable")
 func extend_mesas():
-	
+	unlagger.reset_rectification()
 	if configuration == Configuration.extending:
 		return
 	else:
 		configuration = Configuration.extending
 		
 		
+@rpc("call_local", "reliable")
 func retract_mesas():
-	
+	unlagger.reset_rectification()
 	if configuration == Configuration.retracting:
 		return
 	else:
 		configuration = Configuration.retracting
 	
-			
-func stop_mesas():
 	
-	mesas = get_mesas()
-	
+@rpc("call_local", "reliable")		
+func stop():
+
 	if configuration == Configuration.inert:
 		return
 	else:
@@ -94,45 +95,32 @@ func stop_mesas():
 		
 		for mesa in mesas:
 			mesa.preference = mesa.Preference.locked 
-			mesa.altered.emit()
 
 
-func create_mesas(count):
+@rpc("call_local", "reliable")
+func create_mesas(seed):
 	
-	if not is_multiplayer_authority():
-		return
-
+	rng.seed = seed
+	
 	for index in range(count):
 		
 		var data = {}	
-		var random_size = randi_range(4, 10) * 0.5	
+		var random_size = rng.randi_range(4, 10) * 0.5	
 		var boundary = map_size/2.0 - random_size/2.0
 		boundary /= gap
-		var random_pos = Vector3.ZERO
-		random_pos.x = randi_range(-boundary, boundary) * gap
-		random_pos.y = -1
-		random_pos.z = randi_range(-boundary, boundary) * gap
-		data["position"] = random_pos	
-		data["rotation"] = Vector3(0, randi_range(0, 3) * PI/2, 0)
-		data["size"] = random_size
-		data["top_height"] = 0
-		data["bottom_drop"] = 1		
-		multiplayer_spawner.spawn(data)
-		
 
-func spawn_mesa(data : Dictionary):
-	
-	var new_mesa = prefab.instantiate()
-	new_mesa.preference = new_mesa.Preference.none 
-	
-	for key in data.keys():
-		new_mesa.set(key, data[key])
-
-	mesas.append(new_mesa)
-	
-	return new_mesa
+		var new_mesa = prefab.instantiate()
+		add_child(new_mesa)
+		new_mesa.position.x = rng.randi_range(-boundary, boundary) * gap
+		new_mesa.position.y = -1
+		new_mesa.position.z = rng.randi_range(-boundary, boundary) * gap
+		new_mesa.rotation.y = rng.randi_range(0, 3) * PI/2
+		new_mesa.preference = new_mesa.Preference.none 
+		new_mesa.size = random_size
+		mesas.append(new_mesa)
 
 
+@rpc("call_local", "reliable")
 func clear_mesas():
 	
 	mesas = get_mesas()

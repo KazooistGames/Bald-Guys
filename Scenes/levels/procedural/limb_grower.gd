@@ -15,7 +15,9 @@ enum Configuration
 }
 @export var configuration = Configuration.inert
 
-@onready var multiplayer_spawner = $MultiplayerSpawner
+@onready var rng = RandomNumberGenerator.new()
+
+@onready var unlagger = $LagCompensator
 
 var in_position = false
 
@@ -25,14 +27,12 @@ signal finished_extending
 signal finished_retracting
 
 
-func _ready():
-	
-	multiplayer_spawner.spawn_function = spawn_limb
+var limb_freq = 1.0/3.0
 
 
-func _process(delta):
+func _physics_process(delta):
 	
-	limbs = get_limbs()
+	delta *= unlagger.delta_scalar(delta)
 	
 	in_position = true
 	
@@ -67,32 +67,40 @@ func _process(delta):
 		finished_retracting.emit()
 
 
-func create_limb(orientation, location, radius = 0.25):
+@rpc("call_local", "reliable")
+func create_limbs(new_seed):
 	
-	var data = {}
-	data["top_height"] = 0.5
-	data["bottom_drop"] = 0.5
-	data["radius"] = radius
-	data["rotation"] = Vector3(PI/2.0, orientation, 0)
-	data["position"] = location
-	data["reverse_growth_scale"] = 0.0
+	rng.seed = new_seed
+	var orientation_to_use = 0
 	
-	multiplayer_spawner.spawn(data)
+	for mesa in $"../Mesa_Grower".mesas:
+		
+		var limbs_on_mesa = 0
+
+		while rng.randf() <= limb_freq and limbs_on_mesa < 4:
+			var limb_position = mesa.global_position - Vector3.UP * 0.375
+			spawn_limb(orientation_to_use, limb_position)
+			orientation_to_use += PI / 2.0
+			orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
 
 
-func spawn_limb(data : Dictionary):
+@rpc("call_local", "reliable")
+func spawn_limb(orientation, location, radius = 0.25):
 	
 	var new_limb = prefab.instantiate()
 	new_limb.preference = new_limb.Preference.deep
-	
-	for key in data.keys():
-		new_limb.set(key, data[key])
-
+	new_limb.top_height = 0.5
+	new_limb.bottom_drop = 0.5
+	new_limb.radius = radius
+	new_limb.rotation = Vector3(PI/2.0, orientation, 0)
+	new_limb.position = location
+	new_limb.reverse_growth_scale = 0.0
+	new_limb.preference = new_limb.Preference.deep
+	add_child(new_limb)
 	limbs.append(new_limb)
 	
-	return new_limb
 	
-	
+@rpc("call_local", "reliable")
 func clear_limbs():
 		
 	for limb in limbs:
@@ -100,7 +108,8 @@ func clear_limbs():
 			
 	limbs.clear()	
 
-		
+
+@rpc("call_local", "reliable")		
 func extend_limbs():
 	
 	if configuration == Configuration.extending:
@@ -110,6 +119,7 @@ func extend_limbs():
 		in_position = false
 		
 		
+@rpc("call_local", "reliable")	
 func retract_limbs():
 	
 	if configuration == Configuration.retracting:
@@ -119,7 +129,8 @@ func retract_limbs():
 		in_position = false
 		
 		
-func stop_limbs():
+@rpc("call_local", "reliable")
+func stop():
 	
 	if configuration == Configuration.inert:
 		return

@@ -15,7 +15,9 @@ enum Configuration
 }
 @export var configuration = Configuration.inert
 
-@onready var multiplayer_spawner = $MultiplayerSpawner
+@onready var rng = RandomNumberGenerator.new()
+
+@onready var unlagger = $LagCompensator
 
 var ramps = []
 var heights = []
@@ -25,19 +27,15 @@ var collapse_speed = 3.0
 
 var in_position = false
 
+var ramp_floor_freq = 0.5
+var ramp_roof_freq = 0.5
+
 signal finished_lifting
 signal finished_collapsing
 
 
-func _ready():
-	
-	multiplayer_spawner.spawn_function = spawn_ramp
-	
-
 func _physics_process(delta):
-	#
-	#ramps = get_ramps()
-	
+
 	in_position = true
 	
 	if configuration == Configuration.inert or ramps.size() == 0:
@@ -76,38 +74,54 @@ func _physics_process(delta):
 		finished_collapsing.emit()
 
 
-func create_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify_position = false, y_rotation = 0):
+@rpc("call_local", "reliable")	
+func create_ramps(new_seed):
 	
-	var data = {}
+	rng.seed = new_seed
+	
+	for mesa in $"../Mesa_Grower".mesas:
+			
+		if rng.randf() <= ramp_roof_freq: #roof
+			var y_offset = Vector3.DOWN * rng.randi_range(0, 1) * 0.75
+			spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false, rng.randi_range(0, 3) * PI/2)
+			
+		if rng.randf() <= ramp_floor_freq: #floor
+			var y_rotation = rng.randi_range(0, 3) * PI/2
+			var base_offset = Vector3(-cos(y_rotation), 0, sin(y_rotation)).normalized() * mesa.size
+			var ramp_position = mesa.position + base_offset
+			ramp_position.y = 0
+			var ramp_height
+			
+			if mesa.position.y >= mesa.size * 2.0:
+				ramp_height = mesa.size * 2.0
+			elif mesa.position.y >= mesa.size:
+				ramp_height = mesa.size
+			else:		
+				ramp_height = minf(mesa.position.y, mesa.size / 2.0)
+				
+			spawn_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation)
+			
+	pass
+	
+
+@rpc("call_local", "reliable")	
+func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify_position = false, y_rotation = 0):
 	
 	if verify_position:			
 		coordinates.y = height_at_coordinates(coordinates) + 0.5
 	
+	var new_ramp = prefab.instantiate()
 	var dimensions = Vector3.ZERO
 	dimensions.x = length
 	dimensions.z = thickness
 	dimensions.y = 0.0
-	
-	data["dimensions"] = dimensions
-	data["position"] = coordinates
-	data["rotation"] = Vector3.ZERO
-	data["rotation"].y = y_rotation
-	data["height"] = height
-	
-	multiplayer_spawner.spawn(data)
-
-
-func spawn_ramp(data : Dictionary):
-	
-	var new_ramp = prefab.instantiate()
-	
-	for key in data.keys():
-		new_ramp.set(key, data[key])
-
+	new_ramp.dimensions = dimensions
+	new_ramp.position = coordinates
+	new_ramp.rotation = Vector3.ZERO
+	new_ramp.rotation.y = y_rotation
+	add_child(new_ramp)
 	ramps.append(new_ramp)
-	heights.append(data["height"])
-	
-	return new_ramp
+	heights.append(height)
 	
 		
 func height_at_coordinates(coordinates):
@@ -121,7 +135,7 @@ func height_at_coordinates(coordinates):
 	return collision["position"].y
 	
 	
-@rpc("call_local")	
+@rpc("call_local", "reliable")	
 func clear_ramps():
 	
 	ramps = get_ramps()
@@ -133,6 +147,7 @@ func clear_ramps():
 	heights.clear()
 	
 	
+@rpc("call_local", "reliable")	
 func stop():
 	
 	if configuration == Configuration.inert:
@@ -140,7 +155,8 @@ func stop():
 	else:
 		configuration = Configuration.inert
 		
-
+		
+@rpc("call_local", "reliable")	
 func lift():
 	
 	if configuration == Configuration.lifting:
@@ -149,6 +165,7 @@ func lift():
 		configuration = Configuration.lifting
 	
 	
+@rpc("call_local", "reliable")	
 func collapse():
 	
 	if configuration == Configuration.collapsing:

@@ -21,23 +21,13 @@ enum Preference{
 
 @export var reverse_growth_scale = 0.0
 
-signal altered
 
 func _ready():
 	
 	rerender()
 	
-	$CustomSync.get_net_var_delegate = get_net_vars
-	
-	if not is_multiplayer_authority():
-		$CustomSync.synced.connect(rerender)
-		$CustomSync.request_network_sync.rpc_id(1)
 
-	else:
-		altered.connect($CustomSync.force_sync)
-
-
-func _process(_delta):
+func _physics_process(_delta):
 	
 	if preference == Preference.locked:
 		return
@@ -118,11 +108,9 @@ func just_shallower(new_point):
 	var new_trajectory = (new_point - global_position)
 	
 	if bottom_position.normalized() != new_trajectory.normalized():
-		return false
-		
+		return false	
 	elif new_trajectory.length() < bottom_position.length():
-		return true
-		
+		return true	
 	else:
 		return false
 		

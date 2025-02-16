@@ -51,6 +51,7 @@ target_position = Vector3(0, 100, 0)
 hit_back_faces = false
 
 [node name="PingTimer" type="Timer" parent="."]
+wait_time = 0.5
 autostart = true
 
 [node name="LagCompensator" parent="." instance=ExtResource("6_qr0l4")]

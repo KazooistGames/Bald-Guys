@@ -1,9 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://c3nyb0ufrrici"]
+[gd_scene load_steps=5 format=3 uid="uid://c3nyb0ufrrici"]
 
 [ext_resource type="Script" path="res://Scenes/geometry/mesa/mesa.gd" id="1_syifw"]
 [ext_resource type="Material" uid="uid://svosidjb5wsa" path="res://Materials/geometry.tres" id="2_iojno"]
-[ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="3_oxcs1"]
-[ext_resource type="PackedScene" uid="uid://bli473c2dcgmy" path="res://Scenes/components/custom_sync/custom_sync.tscn" id="4_itnay"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_e2jge"]
 resource_local_to_scene = true
@@ -31,7 +29,3 @@ shape = SubResource("BoxShape3D_1h6v4")
 target_position = Vector3(0, -100, 0)
 hit_back_faces = false
 debug_shape_thickness = 5
-
-[node name="TransformSync" parent="." instance=ExtResource("3_oxcs1")]
-
-[node name="CustomSync" parent="." instance=ExtResource("4_itnay")]

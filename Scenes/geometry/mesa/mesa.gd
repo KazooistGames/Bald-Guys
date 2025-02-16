@@ -22,22 +22,14 @@ var raycast_target = Vector3.DOWN * 100
 
 var bottom_position = Vector3.ZERO
 
-signal altered
 
 func _ready():
 		
 	rerender()
 	
-	$CustomSync.get_net_var_delegate = get_net_vars
-	
-	if not is_multiplayer_authority():
-		$CustomSync.synced.connect(rerender)
-	else:
-		altered.connect($CustomSync.force_sync)
-	
 	
 
-func _process(_delta):
+func _physics_process(_delta):
 	
 	raycast.target_position = raycast_target
 	

@@ -1,9 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://16j7ru0475kt"]
+[gd_scene load_steps=5 format=3 uid="uid://16j7ru0475kt"]
 
 [ext_resource type="Script" path="res://Scenes/geometry/pillar/pillar.gd" id="1_bs8dr"]
 [ext_resource type="Material" uid="uid://svosidjb5wsa" path="res://Materials/geometry.tres" id="2_2oj6u"]
-[ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="3_lxuhk"]
-[ext_resource type="PackedScene" uid="uid://bli473c2dcgmy" path="res://Scenes/components/custom_sync/custom_sync.tscn" id="4_myuxu"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_7xvkk"]
 resource_local_to_scene = true
@@ -29,7 +27,3 @@ shape = SubResource("CylinderShape3D_qhxnc")
 target_position = Vector3(0, -100, 0)
 hit_back_faces = false
 debug_shape_thickness = 5
-
-[node name="TransformSync" parent="." instance=ExtResource("3_lxuhk")]
-
-[node name="CustomSync" parent="." instance=ExtResource("4_myuxu")]
