@@ -29,6 +29,9 @@ const SessionState = {
 
 @onready var raycast = $RayCast3D
 
+@onready var pinger = $PingTimer
+@onready var unlagger = $LagCompensator
+
 signal Created_Player_Humanoid
 
 signal Destroying_Player_Humanoid
@@ -42,7 +45,8 @@ var local_ping_ms = 0.0
 
 func _ready():
 		
-	$PingTimer.timeout.connect(ping_clients)
+	pinger.timeout.connect(ping_clients)
+	pinger.timeout.connect(fix_out_of_bounds)
 	
 	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(str(node.name)))
@@ -56,7 +60,9 @@ func _ready():
 		Commissioned = true
 
 
-func _process(_delta):
+func _process(delta):
+	
+	unlagger.compensated_delta(delta)
 	
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	
@@ -67,10 +73,6 @@ func _process(_delta):
 			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname)
-			
-		if not node_is_in_bounds(humanoid):
-			
-			spawn_player(Level, humanoid)
 				
 
 func _unhandled_key_input(event):
@@ -86,6 +88,14 @@ func _unhandled_key_input(event):
 		elif State != SessionState.Round:
 			rpc_move_to_level.rpc()	
 
+
+func fix_out_of_bounds():
+	
+	for humanoid in Humanoids:
+		
+		if not node_is_in_bounds(humanoid):		
+			spawn_player(Level, humanoid)
+			
 
 func node_is_in_bounds(node):
 	
@@ -277,6 +287,8 @@ func ping(server_time : float):
 		pass
 	else:
 		local_ping_ms = (Time.get_unix_time_from_system() - server_time) * 1000.0
+		unlagger.GLOBAL_PING = local_ping_ms
+		unlagger.reset_rectification()
 		HUD.set_ping_indicator(local_ping_ms)
 		
 	  

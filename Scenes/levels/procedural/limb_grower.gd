@@ -79,7 +79,6 @@ func create_limb(orientation, location, radius = 0.25):
 	
 	multiplayer_spawner.spawn(data)
 
-	
 
 func spawn_limb(data : Dictionary):
 	
@@ -92,6 +91,7 @@ func spawn_limb(data : Dictionary):
 	limbs.append(new_limb)
 	
 	return new_limb
+	
 	
 func clear_limbs():
 		

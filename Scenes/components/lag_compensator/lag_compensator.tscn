@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqxg301a2m50j"]
+
+[ext_resource type="Script" path="res://Scenes/components/lag_compensator/lag_compensator.gd" id="1_5uwk7"]
+
+[node name="LagCompensator" type="Node3D"]
+script = ExtResource("1_5uwk7")
