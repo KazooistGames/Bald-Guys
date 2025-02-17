@@ -83,7 +83,7 @@ func create_ramps(new_seed):
 			
 		if rng.randf() <= ramp_roof_freq: #roof
 			var y_offset = Vector3.DOWN * rng.randi_range(0, 1) * 0.75
-			spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false, rng.randi_range(0, 3) * PI/2)
+			spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false,  PI/2.0 * rng.randi_range(0, 3))
 			
 		if rng.randf() <= ramp_floor_freq: #floor
 			var y_rotation = rng.randi_range(0, 3) * PI/2

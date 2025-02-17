@@ -36,6 +36,7 @@ const ClientState = {
 
 var session
 
+
 func _ready():
 	
 	music.play()
@@ -279,5 +280,3 @@ func rpc_set_client_screenname(player_name):
 	session.Client_Screennames[id] = player_name
 
 
-
-	

@@ -80,6 +80,8 @@ func modify_nameplate(key, variable, value):
 	
 	
 func set_ping_indicator(value):
+	
+	value = (roundf(value * 10.0)) / 10.0
 
 	var ping_color_grade = Color.WHITE_SMOKE
 	

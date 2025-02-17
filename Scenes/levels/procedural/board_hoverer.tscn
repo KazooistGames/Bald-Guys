@@ -1,10 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://bfj6oao2wp4ge"]
+[gd_scene load_steps=3 format=3 uid="uid://bfj6oao2wp4ge"]
 
 [ext_resource type="Script" path="res://Scenes/levels/procedural/board_hoverer.gd" id="1_vg5lr"]
+[ext_resource type="PackedScene" uid="uid://bli473c2dcgmy" path="res://Scenes/components/custom_sync/custom_sync.tscn" id="2_wofe0"]
 
 [node name="Bouncing_Geometry" type="Node3D"]
 script = ExtResource("1_vg5lr")
 
-[node name="Spawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/geometry/mesa/mesa.tscn")
-spawn_path = NodePath("..")
+[node name="CustomSync" parent="." instance=ExtResource("2_wofe0")]

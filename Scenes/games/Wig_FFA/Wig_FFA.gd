@@ -261,7 +261,8 @@ func rpc_start():
 func rpc_reset():
 	
 	session.HUD.remove_nameplate("WIG")
-
+	theme.seek(beas_mote_transition)
+	
 	if is_multiplayer_authority(): 	
 		wig_ffa_hud.find_child("Progress").visible = false
 		

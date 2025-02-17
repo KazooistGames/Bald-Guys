@@ -69,28 +69,26 @@ func _physics_process(delta):
 
 @rpc("call_local", "reliable")
 func extend_mesas():
+	
 	unlagger.reset()
-	if configuration == Configuration.extending:
-		return
-	else:
+	
+	if configuration != Configuration.extending:
 		configuration = Configuration.extending
 		
 		
 @rpc("call_local", "reliable")
 func retract_mesas():
+	
 	unlagger.reset()
-	if configuration == Configuration.retracting:
-		return
-	else:
+	
+	if configuration != Configuration.retracting:
 		configuration = Configuration.retracting
 	
 	
 @rpc("call_local", "reliable")		
 func stop():
 
-	if configuration == Configuration.inert:
-		return
-	else:
+	if configuration != Configuration.inert:
 		configuration = Configuration.inert
 		
 		for mesa in mesas:
@@ -98,13 +96,12 @@ func stop():
 
 
 @rpc("call_local", "reliable")
-func create_mesas(seed):
+func create_mesas(new_seed):
 	
-	rng.seed = seed
+	rng.seed = new_seed
 	
 	for index in range(count):
-		
-		var data = {}	
+			
 		var random_size = rng.randi_range(4, 10) * 0.5	
 		var boundary = map_size/2.0 - random_size/2.0
 		boundary /= gap

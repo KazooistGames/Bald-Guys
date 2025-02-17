@@ -39,8 +39,6 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 text = "0.0 ms"
 horizontal_alignment = 2
-visible_characters = 4
-visible_ratio = 0.666667
 
 [node name="Nameplates" type="Control" parent="."]
 layout_mode = 3

@@ -6,41 +6,38 @@ const board_thickness = 0.5
 
 const map_size = 50
 
-#const upper_limits = Vector3(25, 15, 25)
-#
-#const lower_limits = Vector3(-25, 0, -25)
-
 @export var boards = []
-@export var board_speeds = []
+@export var board_trajectories = []
 @export var height_bounds = []
+
+@onready var sync = $CustomSync
+
+@onready var rng = RandomNumberGenerator.new()
 
 
 func _ready():
 	
-	if not is_multiplayer_authority():
-		request_network_sync.rpc_id(1)
+	if is_multiplayer_authority():
+		sync.get_net_var_delegate = get_net_vars
 
 
 func _physics_process(delta):
 	
-	boards = get_boards()
-		
-	for index in range(board_speeds.size()): #move hover mesas	
+	for index in range(board_trajectories.size()): #move hover mesas	
 		
 		if index >= boards.size() or index >= height_bounds.size():
 			return
 			
 		var board = boards[index]
 		var height_lims = height_bounds[index]
-		var trajectory = bounce_geometry(board, board_speeds[index])
-		trajectory = constrain_geometry(board, trajectory, height_lims)	
-		board.position += trajectory * delta
-		board_speeds[index] = trajectory
+		board.position += board_trajectories[index] * delta
+		var trajectory = bounce_geometry(board, board_trajectories[index])
+		board_trajectories[index] = constrain_geometry(board, trajectory, height_lims)	
 	
 		
 func bounce_geometry(geometry, trajectory):
 	
-	var intersections = get_collider_intersections(geometry)
+	var intersections = get_collider_intersections(geometry, trajectory)
 	
 	if intersections == null:
 		pass
@@ -49,14 +46,14 @@ func bounce_geometry(geometry, trajectory):
 		var penetration = intersections[0] - intersections[1] 
 		geometry.position -= penetration
 		
-		if abs(penetration.y) >= abs(penetration.x) and abs(penetration.y) >= abs(penetration.z):		
-			trajectory.y *= -1
-
+		if abs(penetration.y) >= abs(penetration.x) and abs(penetration.y) >= abs(penetration.z):	
+			trajectory.y *= -1.0		
+						
 		elif abs(penetration.x) >= abs(penetration.z):
-			trajectory.x *= -1
-
+			trajectory.x *= -1.0
+			
 		else:
-			trajectory.z *= -1		
+			trajectory.z *= -1.0	
 	
 	return trajectory
 	
@@ -64,43 +61,44 @@ func bounce_geometry(geometry, trajectory):
 func constrain_geometry(geometry, trajectory, height_limits):
 	
 	var xz_boundaries = map_size / 2.0
+	var girth = board_thickness
 	#	X
 	if geometry.position.x > xz_boundaries:
-		trajectory.x = -trajectory.x
+		trajectory.x *= -1.0	
 		geometry.position.x = xz_boundaries
 		
 	elif geometry.position.x < -xz_boundaries:
-		trajectory.x = -trajectory.x
+		trajectory.x *= -1.0	
 		geometry.position.x = -xz_boundaries
 		
 	#	Y
-	if geometry.position.y > height_limits.y:
-		trajectory.y = -trajectory.y
+	if geometry.position.y >= height_limits.y:
+		trajectory.y *= -1.0	
 		geometry.position.y = height_limits.y
 			
-	elif geometry.position.y < height_limits.x:
-		trajectory.y = -trajectory.y
-		geometry.position.y = height_limits.x
+	elif geometry.position.y <= height_limits.x + girth:
+		trajectory.y *= -1.0		
+		geometry.position.y = height_limits.x + girth
 		
 	#	Z
 	if geometry.position.z > xz_boundaries:
-		trajectory.z = -trajectory.z
+		trajectory.z *= -1.0
 		geometry.position.z = xz_boundaries
 		
 	elif geometry.position.z < -xz_boundaries:
-		trajectory.z = -trajectory.z
+		trajectory.z *= -1.0	
 		geometry.position.z = -xz_boundaries
 	
 	return trajectory
 		
 		
-func get_collider_intersections(body):
+func get_collider_intersections(body, trajectory):
 	
 	var physics_state = get_world_3d().direct_space_state
 	var query = PhysicsShapeQueryParameters3D.new()
 	query.shape = body.collider.shape
 	query.transform = body.collider.global_transform
-	query.motion = body.constant_linear_velocity
+	query.motion = trajectory
 	query.exclude = [body.get_rid(), self.get_parent_node_3d()]
 	query.collision_mask = 0b0001
 	var result = physics_state.collide_shape(query)
@@ -109,62 +107,58 @@ func get_collider_intersections(body):
 		return result 
 		
 		
-func spawn_boards(count, size, speed, height_limits):
+@rpc("call_local", "reliable")
+func create_boards(count, size, speed, height_limits, new_seed):
+	
+	if new_seed != null:
+		rng.seed = new_seed
 	
 	for index in range(count): #create hovering platforms
-		var new_board = prefab.instantiate()
-		add_child(new_board, true)		
-		new_board.size = size
-		var boundary = map_size / 2.0 - new_board.size / 2.0
-		new_board.bottom_drop = 0.0
-		new_board.preference = new_board.Preference.deep
-		new_board.raycast_target = Vector3.DOWN * board_thickness
-		new_board.position.x = randi_range(-boundary, boundary)
-		new_board.position.z = randi_range(-boundary, boundary)
-		new_board.position.y = board_thickness
-		
-		var new_vector = Vector3(randf_range(-1.0, 1.0), randf_range(0.05, 0.25), randf_range(-1.0, 1.0)).normalized()
-		boards.append(new_board)
-		board_speeds.append(new_vector * speed)
+		var initial_vector = spawn_board(size)
+		board_trajectories.append(initial_vector * speed)
 		height_bounds.append(height_limits)
-		
-	net_sync.rpc(get_net_vars())
+
+
+func spawn_board(size):
+
+	var new_board = prefab.instantiate()
+	add_child(new_board, true)		
+	new_board.size = size
+	var boundary = map_size / 2.0 - new_board.size / 2.0
+	new_board.bottom_drop = 0.0
+	new_board.preference = new_board.Preference.deep
+	new_board.raycast_target = Vector3.DOWN * board_thickness
+	new_board.position.x = rng.randi_range(-boundary, boundary)
+	new_board.position.z = rng.randi_range(-boundary, boundary)
+	new_board.position.y = board_thickness
+	var new_vector = Vector3.ZERO
+	new_vector.x = rng.randf_range(-1.0, 1.0)
+	new_vector.y = rng.randf_range(0.05, 0.25)
+	new_vector.z = rng.randf_range(-1.0, 1.0)
+	boards.append(new_board)
+	
+	return new_vector.normalized()
 
 
 func get_boards():
 	
 	return find_children("*", "AnimatableBody3D", true, false)
 	
-
-func clear_boards():
 	
-	boards = get_boards()
+@rpc("call_local", "reliable")
+func clear_boards():
 	
 	for board in boards:
 		board.queue_free()
 			
 	boards.clear()	
-
-
-@rpc("authority", "call_remote")
-func net_sync(variables : Dictionary):
-	
-	for key in variables.keys():
-		set(str(key), variables[key])
-	
-	
-@rpc("any_peer", "call_remote")
-func request_network_sync():
-	
-	if is_multiplayer_authority():
-		var calling_client = multiplayer.get_remote_sender_id()
-
-		print(calling_client, " requested sync of ", name)
-		net_sync.rpc_id(calling_client, get_net_vars())
+	board_trajectories.clear()
+	height_bounds.clear()
 
 
 func get_net_vars():
+	
 	var net_vars = {}
-	net_vars["board_speeds"] = board_speeds
+	net_vars["board_trajectories"] = board_trajectories
 	net_vars["height_bounds"] = height_bounds
 	return net_vars

@@ -8,11 +8,8 @@ const SessionState = {
 }
 
 @export var Client_Screennames = {}
-
 @export var State = SessionState.Lobby
-
 @export var Commissioned = false
-
 @export var Humanoids = []
 
 @export var Level : Node3D = null
@@ -135,8 +132,8 @@ func Finished_Round(winner):
 
 
 func spawn_player(parent, humanoid):
-	
-	#humanoid.unragdoll()
+		
+	humanoid.unragdoll(false)
 	humanoid.linear_velocity = Vector3.ZERO
 	var spawn_position = get_random_spawn(parent)
 	var rid = humanoid.get_rid()
@@ -174,18 +171,19 @@ func create_player_humanoid(peer_id):
 	
 	signal_to_handoff_player_humanoid(new_peer_humanoid)
 	new_peer_humanoid.set_multiplayer_authority(peer_id)
-	
+	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
 	return new_peer_humanoid
 
 
 func destroy_player_humanoid(peer_id):
 	
-	var playerHumanoid = get_node_or_null(str(peer_id))
-	Destroying_Player_Humanoid.emit(playerHumanoid)
+	var player_Humanoid = get_node_or_null(str(peer_id))
+	Destroying_Player_Humanoid.emit(player_Humanoid)
 	
-	if playerHumanoid:
-		Humanoids.erase(playerHumanoid)
-		playerHumanoid.queue_free()		
+	if player_Humanoid:
+		Humanoids.erase(player_Humanoid)
+		player_Humanoid.ragdoll_change.disconnect(update_nameplate_for_ragdoll)
+		player_Humanoid.queue_free()		
 		HUD.remove_nameplate(str(peer_id))
 
 
@@ -193,7 +191,9 @@ func signal_to_handoff_player_humanoid(node):
 	
 	Created_Player_Humanoid.emit(node)
 	HUD.add_nameplate(str(node.name), str(node.name))
-	
+
+
+
 
 @rpc("call_local", "authority", "reliable")
 func rpc_move_to_Lobby():
@@ -288,7 +288,7 @@ func ping(server_time : float):
 	else:
 		local_ping_ms = (Time.get_unix_time_from_system() - server_time) * 1000.0
 		unlagger.GLOBAL_PING = local_ping_ms
-		unlagger.reset_rectification()
+		unlagger.reset()
 		HUD.set_ping_indicator(local_ping_ms)
 		
 	  
@@ -298,3 +298,15 @@ func ping_clients():
 		var local_server_time = Time.get_unix_time_from_system()
 		ping.rpc(local_server_time)
 	
+	
+func update_nameplate_for_ragdoll(new_value, node):
+	
+	if not node.is_in_group("humanoids"):
+		pass
+		
+	elif new_value:
+		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.GRAY)
+		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 12)
+	else:
+		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.WHITE)
+		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 16)

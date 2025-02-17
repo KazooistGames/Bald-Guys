@@ -115,9 +115,9 @@ func unstage_mesas():
 func start_map():
 	
 	reconfigure_timer = -1
-	board_hoverer.spawn_boards(5, 3, 4, Vector2(0, 15))
-	board_hoverer.spawn_boards(3, 6, 2, Vector2(15, 20))
-	board_hoverer.spawn_boards(1, 12, 1, Vector2(20, 25))
+	board_hoverer.create_boards.rpc(5, 3, 4, Vector2(0, 15), hash(randi()))
+	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(15, 20), hash(randi()))
+	board_hoverer.create_boards.rpc(1, 12, 1, Vector2(20, 25), hash(randi()))
 	item_dropper.spawn_field(0, 5, 5, 10, Vector3.UP * 25)
 	item_dropper.spawn_field(2, 3, 3, 10, Vector3.UP * 25)
 	stage_mesas()

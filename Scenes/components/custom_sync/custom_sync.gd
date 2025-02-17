@@ -4,7 +4,7 @@ extends Node3D
 
 var get_net_var_delegate : Callable
 
-var logging = false
+var logging = true
 
 signal synced
 
@@ -15,15 +15,16 @@ func _ready():
 		queue_free()
 		
 	if not is_multiplayer_authority():
-		request_network_sync.rpc_id(get_multiplayer_authority())
+		request_sync.rpc_id(get_multiplayer_authority())
 	
 	
 func force_sync():
-
-	net_sync.rpc(get_net_vars())
+	
+	if is_multiplayer_authority():
+		net_sync.rpc(get_net_vars())
 	
 	
-@rpc("authority", "call_remote")
+@rpc("authority", "call_remote", "reliable")
 func net_sync(variables : Dictionary):
 	
 	for key in variables.keys():
@@ -32,8 +33,8 @@ func net_sync(variables : Dictionary):
 	synced.emit()
 	
 	
-@rpc("any_peer", "call_remote")
-func request_network_sync():
+@rpc("any_peer", "call_remote", "reliable")
+func request_sync():
 	
 	if is_multiplayer_authority():
 		var calling_client = multiplayer.get_remote_sender_id()

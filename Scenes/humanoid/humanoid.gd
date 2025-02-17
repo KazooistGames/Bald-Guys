@@ -77,6 +77,7 @@ var Lunge_Target : Node3D
 var lunge_target_last_position = Vector3.ZERO
 var lunge_total_traversal
 
+signal ragdoll_change(new_state)
 
 func _enter_tree():
 	
@@ -303,6 +304,7 @@ func _physics_process(delta):
 			extrapolated_target_velocity /= 2.0 #do this because we only have half-faith in this number
 			linear_velocity += extrapolated_target_velocity	
 			lunge_target_last_position = Lunge_Target.global_position
+			
 	else:	
 		var walk_target
 		
@@ -391,7 +393,6 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		RUNNING = true
 		ragdolled.emit()
 		skeleton.ragdoll_start()
-		#ragdoll_recovery_timer_seconds = 0
 		ragdoll_recovery_progress = 0.0
 		animation.active = false
 		leg_collider.disabled = true
@@ -399,14 +400,18 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		chest_collider.disabled = true
 		RAGDOLLED = true
 		freeze = true
+		ragdoll_change.emit(RAGDOLLED, self)
 		
 		
 @rpc("call_local", "reliable")
-func unragdoll():
+func unragdoll(use_skeleton_position : bool = true):
 	
 	if RAGDOLLED:
 		ragdoll_cooldown_timer_seconds = 0
-		position = skeleton.ragdoll_position()
+		
+		if use_skeleton_position:
+			position = skeleton.ragdoll_position()
+			
 		skeleton.ragdoll_stop()
 		animation.active = true
 		leg_collider.disabled = false
@@ -414,7 +419,8 @@ func unragdoll():
 		head_collider.disabled = false
 		RAGDOLLED = false
 		freeze = false
-
+		ragdoll_change.emit(RAGDOLLED, self)
+		
 
 @rpc("call_local", "reliable")
 func lunge(target_node_path):
@@ -520,9 +526,5 @@ func land():
 	else:
 		linear_velocity.x /= 2.0
 		linear_velocity.z /= 2.0
-	#var retardation_vector = -translational_velocity.normalized()
-	#var retardation_magnitude = max(1.0, translational_velocity.length())
-	#var impulse = retardation_vector * retardation_magnitude * mass * 20
-	#apply_central_impulse(impulse)
 
 	

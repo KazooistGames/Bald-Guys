@@ -147,16 +147,7 @@ func instantly_match_animated_bone(boneIndex):
 	if mockBoneIndices.has(boneIndex):
 		set_bone_pose_position(boneIndex, Animated_Skeleton.get_bone_pose_position(boneIndex))
 		set_bone_pose_rotation(boneIndex, Animated_Skeleton.get_bone_pose_rotation(boneIndex))
-	
-	#else:
-		#
-		#for physical_bone in physicalBones:
-			#
-			#if(find_bone(physical_bone.bone_name) == boneIndex):
-				#var animated_transform = get_animated_transform(physical_bone)
-				#physical_bone.position = animated_transform.origin
-				#physical_bone.rotation = animated_transform.basis.get_euler()
-
+		
 			
 func reset_skeleton():
 	correct_physical_bones_trigger = true
