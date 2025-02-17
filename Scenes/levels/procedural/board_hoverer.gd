@@ -14,6 +14,7 @@ const map_size = 50
 
 @onready var rng = RandomNumberGenerator.new()
 
+@onready var unlagger = $LagCompensator
 
 func _ready():
 	
@@ -22,6 +23,8 @@ func _ready():
 
 
 func _physics_process(delta):
+	
+	delta *= unlagger.delta_scalar(delta)
 	
 	for index in range(board_trajectories.size()): #move hover mesas	
 		
@@ -153,9 +156,35 @@ func clear_boards():
 			
 	boards.clear()	
 	board_trajectories.clear()
-	height_bounds.clear()
+	height_bounds.clear()	
+	
 
-
+func synchronize_all_peers():
+	
+	if is_multiplayer_authority():
+		var board_positions : PackedVector3Array = []
+		board_positions.resize(boards.size())
+		
+		var trajectories : PackedVector3Array = []
+		trajectories.resize(boards.size())
+		
+		for index in range(boards.size()):
+			board_positions[index] = boards[index].position
+			trajectories[index] = board_trajectories[index]
+		
+		sync_board_positions.rpc(board_positions, trajectories)
+		
+		
+@rpc("call_remote", "authority", "reliable")	
+func sync_board_positions(server_positions : PackedVector3Array, server_trajectories : PackedVector3Array):
+	
+	for index in range(boards.size()):
+		boards[index].position = server_positions[index]
+		board_trajectories[index] = server_trajectories[index]
+		
+	unlagger.reset()
+		
+		
 func get_net_vars():
 	
 	var net_vars = {}

@@ -1,9 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://bfj6oao2wp4ge"]
+[gd_scene load_steps=4 format=3 uid="uid://bfj6oao2wp4ge"]
 
 [ext_resource type="Script" path="res://Scenes/levels/procedural/board_hoverer.gd" id="1_vg5lr"]
 [ext_resource type="PackedScene" uid="uid://bli473c2dcgmy" path="res://Scenes/components/custom_sync/custom_sync.tscn" id="2_wofe0"]
+[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="3_1gkej"]
 
 [node name="Bouncing_Geometry" type="Node3D"]
 script = ExtResource("1_vg5lr")
 
 [node name="CustomSync" parent="." instance=ExtResource("2_wofe0")]
+
+[node name="LagCompensator" parent="." instance=ExtResource("3_1gkej")]

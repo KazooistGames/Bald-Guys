@@ -83,7 +83,7 @@ func stage_limbs():
 	ramparter.stop.rpc()	
 	limb_grower.create_limbs.rpc(hash(randi()))		
 	limb_grower.extend_limbs.rpc()
-			
+	board_hoverer.synchronize_all_peers()
 			
 func start_reconfigure_timer(preset = 0):
 	
