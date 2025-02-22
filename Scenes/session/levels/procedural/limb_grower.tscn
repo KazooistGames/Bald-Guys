@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bmsru2apinfke"]
 
-[ext_resource type="Script" path="res://Scenes/levels/procedural/limb_grower.gd" id="1_15j2d"]
+[ext_resource type="Script" path="res://Scenes/session/levels/procedural/limb_grower.gd" id="1_15j2d"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="2_kfof0"]
 
 [node name="Limb_Grower" type="Node3D"]

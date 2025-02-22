@@ -1,9 +1,5 @@
 extends Node3D
 
-const player_interface_prefab = preload("res://Scenes/player/player_interface.tscn")
-
-const force_prefab = preload("res://Scenes/force/force.tscn")
-
 const session_Prefab = preload("res://Scenes/session/session.tscn")
 
 const PORT = 9999
@@ -14,9 +10,9 @@ const ClientState = {
 	Menus = 0,
 	Session = 1,
 }
-
 @export var State = ClientState.Menus
-@export var LOCAL_PLAYER_INTERFACE : Node3D
+
+#@onready var LOCAL_PLAYER_INTERFACE = $SubViewportContainer/SubViewport/player_interface
 
 @onready var viewPort = $SubViewportContainer/SubViewport
 
@@ -30,7 +26,7 @@ const ClientState = {
 @onready var address_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/AddressEntry
 @onready var screenname_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry
 
-@onready var sessionSpawner = $MultiplayerSpawner
+@onready var sessionSpawner = $SessionSpawner
 
 @onready var music = $Music
 
@@ -41,12 +37,9 @@ func _ready():
 	
 	music.play()
 	
-	LOCAL_PLAYER_INTERFACE = player_interface_prefab.instantiate()
-	viewPort.add_child(LOCAL_PLAYER_INTERFACE)
-
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
-	sessionSpawner.spawned.connect(handle_new_session_spawn)
+	#sessionSpawner.spawned.connect(handle_new_session_spawn)
 	multiplayer.connected_to_server.connect(introduce_myself_to_server)
 	multiplayer.connected_to_server.connect(acknowledge_popup)
 	
@@ -115,7 +108,7 @@ func _notification(what):
 
 func start_host_lobby():
 	
-	if get_screenname() == '':
+	if get_screenname_entry() == '':
 		display_popup("Enter a screen name first!", null)
 		return
 	
@@ -130,18 +123,16 @@ func start_host_lobby():
 	multiplayer.multiplayer_peer = enet_peer
 	
 	session = session_Prefab.instantiate()
-	session.Created_Player_Humanoid.connect(give_humanoid_to_client)
-	session.Client_Screennames[1] = get_screenname()
 	viewPort.add_child(session)
 	
 	multiplayer.peer_connected.connect(add_player_to_session)
 	multiplayer.peer_disconnected.connect(remove_player_from_session)
-	session.Client_Screennames[1] = get_screenname()
+	session.Client_Screennames[1] = get_screenname_entry()
 
 
 func join_lobby():
 	
-	if get_screenname() == '':
+	if get_screenname_entry() == '':
 		display_popup("Choose a screen name first!", null)
 		return
 		
@@ -179,24 +170,17 @@ func remove_player_from_session(peer_id):
 	session.destroy_player_humanoid(peer_id)
 
 		
-func give_humanoid_to_client(humanoid):
-	
-	var peer_id = str(humanoid.name).to_int()
-	humanoid.set_multiplayer_authority(peer_id)
-	
-	var force = force_prefab.instantiate()
-	force.set_multiplayer_authority(peer_id)
-	force.wielder = humanoid
-	humanoid.add_child(force)
-	
-	if multiplayer.get_unique_id() == peer_id:
-		LOCAL_PLAYER_INTERFACE.character = humanoid
-		LOCAL_PLAYER_INTERFACE.force = force
+#func give_humanoid_to_client(humanoid):
+	#
+	#var peer_id = str(humanoid.name).to_int()
+	#
+	#if multiplayer.get_unique_id() == peer_id:
+		#LOCAL_PLAYER_INTERFACE.character = humanoid
 
-
-func handle_new_session_spawn(new_session):
-	
-	new_session.Created_Player_Humanoid.connect(give_humanoid_to_client)
+#
+#func handle_new_session_spawn(new_session):
+	#
+	#new_session.Created_Player_Humanoid.connect(give_humanoid_to_client)
 
 
 func leave_session():
@@ -229,11 +213,11 @@ func quit():
 	
 func introduce_myself_to_server():
 	
-	var player_name = get_screenname()
+	var player_name = get_screenname_entry()
 	rpc_set_client_screenname.rpc(player_name)
 	
 	
-func get_screenname():
+func get_screenname_entry():
 	
 	return screenname_entry.text
 	

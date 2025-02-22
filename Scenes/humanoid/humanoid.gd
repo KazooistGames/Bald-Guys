@@ -43,6 +43,8 @@ const floor_dot_product = 2.0 / 3.0
 @onready var impactFX = $ImpactAudio
 @onready var jumpFX = $JumpAudio
 
+@onready var force = $Force
+
 var multiplayer_permissive = false
 
 var TOPSPEED = 0
@@ -78,6 +80,7 @@ var lunge_target_last_position = Vector3.ZERO
 var lunge_total_traversal
 
 signal ragdoll_change(new_state)
+
 
 func _enter_tree():
 	
@@ -140,8 +143,17 @@ func _process(_delta):
 	skeleton.processReach(LOOK_VECTOR)
 	skeleton.Reaching = REACHING
 	
+	if force.action == force.Action.charging:
+		RUNNING = false
+		WALK_VECTOR = Vector3.ZERO
+		
+	if force.action == force.Action.cooldown:
+		RUNNING = false
+	
 	
 func _integrate_forces(state):	
+	
+	force.external_velocity = linear_velocity
 	
 	if not is_on_floor():
 		pass		
@@ -401,6 +413,7 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		RAGDOLLED = true
 		freeze = true
 		ragdoll_change.emit(RAGDOLLED, self)
+		force.rpc_reset().rpc()
 		
 		
 @rpc("call_local", "reliable")

@@ -36,10 +36,10 @@ func _ready():
 	
 	session.Started_Round.connect(start)
 	session.Ended_Round.connect(reset)
-	session.Destroying_Player_Humanoid.connect(func (node): if node == Bearer: drop_wig())
-	session.humanoidSpawner.despawned.connect( func (node): if node == Bearer: 
-		move_wig_remote_controller(session.get_path())
-		toggle_wig_mount(false))
+	session.Destroying_Player_Humanoid.connect(
+		func (node): 
+			if node == Bearer: 
+				drop_wig())
 	
 	whispers.stream_paused = false
 	theme.stream_paused = true

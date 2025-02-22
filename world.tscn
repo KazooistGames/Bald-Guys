@@ -194,7 +194,7 @@ size_flags_vertical = 8
 theme_override_font_sizes/font_size = 32
 text = "OK"
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+[node name="SessionSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/session/session.tscn")
 spawn_path = NodePath("../SubViewportContainer/SubViewport")
 

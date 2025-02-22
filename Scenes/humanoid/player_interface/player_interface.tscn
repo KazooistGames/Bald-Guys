@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://jdvdhg8sqgv1"]
 
-[ext_resource type="Script" path="res://Scenes/player/player_interface.gd" id="1_oa8mi"]
+[ext_resource type="Script" path="res://Scenes/humanoid/player_interface/player_interface.gd" id="1_cqm6g"]
 
-[node name="player_character" type="Node3D"]
-script = ExtResource("1_oa8mi")
+[node name="player_interface" type="Node3D"]
+script = ExtResource("1_cqm6g")
 
 [node name="Recovery" type="Control" parent="."]
 layout_mode = 3

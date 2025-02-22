@@ -30,11 +30,9 @@ const SessionState = {
 @onready var unlagger = $LagCompensator
 
 signal Created_Player_Humanoid
-
 signal Destroying_Player_Humanoid
 
 signal Started_Round
-
 signal Ended_Round
 
 var local_ping_ms = 0.0
@@ -45,8 +43,8 @@ func _ready():
 	pinger.timeout.connect(ping_clients)
 	pinger.timeout.connect(fix_out_of_bounds)
 	
-	humanoidSpawner.spawned.connect(signal_to_handoff_player_humanoid)
-	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(str(node.name)))
+	humanoidSpawner.spawned.connect(func(node): HUD.add_nameplate(node.name, node.name))
+	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
 	gameSpawner.spawned.connect(handle_new_game)
 	levelSpawner.spawned.connect(handle_new_level)
 	
@@ -64,7 +62,7 @@ func _process(delta):
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	
 	for humanoid in Humanoids:
-		var peer_id = humanoid.get_multiplayer_authority()
+		var peer_id = int(str(humanoid.name))
 		
 		if Client_Screennames.has(peer_id):
 			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
@@ -163,36 +161,28 @@ func create_player_humanoid(peer_id):
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
 	Humanoids.append(new_peer_humanoid)
-	
 	add_child(new_peer_humanoid)
 	
 	var random_spawn_position = get_random_spawn(Lobby)
 	respawn_node.rpc(new_peer_humanoid.get_path(), random_spawn_position)
-	
-	signal_to_handoff_player_humanoid(new_peer_humanoid)
-	new_peer_humanoid.set_multiplayer_authority(peer_id)
+
+	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name)
 	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
+	Created_Player_Humanoid.emit(new_peer_humanoid)
+	
 	return new_peer_humanoid
 
 
 func destroy_player_humanoid(peer_id):
 	
 	var player_Humanoid = get_node_or_null(str(peer_id))
-	Destroying_Player_Humanoid.emit(player_Humanoid)
 	
 	if player_Humanoid:
+		Destroying_Player_Humanoid.emit(player_Humanoid)
 		Humanoids.erase(player_Humanoid)
+		HUD.remove_nameplate(str(peer_id))
 		player_Humanoid.ragdoll_change.disconnect(update_nameplate_for_ragdoll)
 		player_Humanoid.queue_free()		
-		HUD.remove_nameplate(str(peer_id))
-
-
-func signal_to_handoff_player_humanoid(node):
-	
-	Created_Player_Humanoid.emit(node)
-	HUD.add_nameplate(str(node.name), str(node.name))
-
-
 
 
 @rpc("call_local", "authority", "reliable")
@@ -234,8 +224,8 @@ func Commission_Next_Round():
 	
 	match unique_round_id:
 		0:
-			level_prefab_path = "res://Scenes/levels/Procedural_Level.tscn"
-			game_prefab_path = "res://Scenes/games/Wig_FFA/Wig_FFA.tscn"
+			level_prefab_path = "res://Scenes/session/levels/Procedural_Level.tscn"
+			game_prefab_path = "res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn"
 	
 	if level_prefab_path != ""	and game_prefab_path != "":
 		load_level(level_prefab_path)

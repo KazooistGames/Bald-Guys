@@ -1,13 +1,13 @@
 [gd_scene load_steps=9 format=3 uid="uid://b5fc4lv4wybum"]
 
-[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Empty_Level.tscn" id="1_halqj"]
-[ext_resource type="Script" path="res://Scenes/levels/Procedural_Level.gd" id="2_lukeg"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="3_kq3gr"]
-[ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/levels/procedural/board_hoverer.tscn" id="4_0mrgq"]
-[ext_resource type="PackedScene" uid="uid://bihhmgl2g08o3" path="res://Scenes/levels/procedural/mesa_grower.tscn" id="5_aojpy"]
-[ext_resource type="PackedScene" uid="uid://drujlef4qyslo" path="res://Scenes/levels/procedural/item_dropper.tscn" id="6_nuajx"]
-[ext_resource type="PackedScene" uid="uid://bxvldmj0gbd3m" path="res://Scenes/levels/procedural/ramparter.tscn" id="7_fnc5j"]
-[ext_resource type="PackedScene" uid="uid://bmsru2apinfke" path="res://Scenes/levels/procedural/limb_grower.tscn" id="8_n5db1"]
+[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/session/levels/Empty_Level.tscn" id="1_halqj"]
+[ext_resource type="Script" path="res://Scenes/session/levels/Procedural_Level.gd" id="2_lukeg"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/session/levels/Spawn/spawn.tscn" id="3_kq3gr"]
+[ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/session/levels/procedural/board_hoverer.tscn" id="4_0mrgq"]
+[ext_resource type="PackedScene" uid="uid://bihhmgl2g08o3" path="res://Scenes/session/levels/procedural/mesa_grower.tscn" id="5_aojpy"]
+[ext_resource type="PackedScene" uid="uid://drujlef4qyslo" path="res://Scenes/session/levels/procedural/item_dropper.tscn" id="6_nuajx"]
+[ext_resource type="PackedScene" uid="uid://bxvldmj0gbd3m" path="res://Scenes/session/levels/procedural/ramparter.tscn" id="7_fnc5j"]
+[ext_resource type="PackedScene" uid="uid://bmsru2apinfke" path="res://Scenes/session/levels/procedural/limb_grower.tscn" id="8_n5db1"]
 
 [node name="Procedural_Level" instance=ExtResource("1_halqj")]
 script = ExtResource("2_lukeg")

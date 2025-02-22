@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://drujlef4qyslo"]
 
-[ext_resource type="Script" path="res://Scenes/levels/procedural/item_dropper.gd" id="1_xv6po"]
+[ext_resource type="Script" path="res://Scenes/session/levels/procedural/item_dropper.gd" id="1_xv6po"]
 
 [node name="Item_Dropper" type="Node3D"]
 script = ExtResource("1_xv6po")
