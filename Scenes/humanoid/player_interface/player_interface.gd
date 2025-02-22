@@ -151,7 +151,7 @@ func rpc_send_aim_input(aim_delta):
 	var offset_to_zero = 1.0 - abs(humanoid.LOOK_VECTOR.normalized().dot(Vector3.UP))
 	force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
 	force.rotation = camera.rotation 
-	
+		
 	
 @rpc("any_peer", "call_local")
 func rpc_send_movement_input(inputs):
@@ -164,7 +164,7 @@ func rpc_send_movement_input(inputs):
 		
 	humanoid.WALK_VECTOR = inputs['direction']
 	humanoid.RUNNING = inputs['run']
-		
+	cache_new_inputs(inputs)
 		
 
 @rpc("any_peer", "call_local", "reliable")
@@ -201,7 +201,8 @@ func rpc_send_ability_input(inputs):
 			lunge_at_target(targeted_object)
 		
 	humanoid.REACHING = force.action
-		
+	cache_new_inputs(inputs)
+
 
 func just_released(action_key, new_inputs):
 	
@@ -214,7 +215,6 @@ func just_released(action_key, new_inputs):
 	elif not new_inputs[action_key]:
 		return_val =  true
 		
-	cached_inputs[action_key] = new_inputs[action_key]
 	return return_val
 	
 	
@@ -229,5 +229,10 @@ func just_pressed(action_key, new_inputs):
 	elif new_inputs[action_key]:
 		return_val =  true
 		
-	cached_inputs[action_key] = new_inputs[action_key]
 	return return_val
+	
+	
+func cache_new_inputs(new_inputs):
+	
+	for key in new_inputs.keys():
+		cached_inputs[key] = new_inputs[key]

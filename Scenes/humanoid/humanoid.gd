@@ -413,7 +413,7 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		RAGDOLLED = true
 		freeze = true
 		ragdoll_change.emit(RAGDOLLED, self)
-		force.rpc_reset().rpc()
+		force.rpc_reset.rpc()
 		
 		
 @rpc("call_local", "reliable")
