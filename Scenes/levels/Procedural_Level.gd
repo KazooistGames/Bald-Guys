@@ -51,8 +51,8 @@ func _physics_process(delta):
 		pass
 
 	elif reconfigure_timer < 0:
-		item_dropper.collect_items(0, Vector3.UP * 35.0)
-		item_dropper.collect_items(2, Vector3.UP * 35.0, 0.75)
+		item_dropper.collect_items.rpc(0, Vector3.UP * 35.0)
+		item_dropper.collect_items.rpc(2, Vector3.UP * 35.0, 0.75)
 		
 	elif reconfigure_timer >= reconfigure_period or Input.is_action_just_pressed("Toggle2"):
 		reconfigure_timer = -1
@@ -85,10 +85,11 @@ func stage_limbs():
 	limb_grower.extend_limbs.rpc()
 	board_hoverer.synchronize_all_peers()
 			
+			
 func start_reconfigure_timer(preset = 0):
 	
-	item_dropper.disperse_items(0)
-	item_dropper.disperse_items(2, 6.0)
+	item_dropper.disperse_items.rpc(0)
+	item_dropper.disperse_items.rpc(2, 6.0)
 	limb_grower.stop.rpc()
 	reconfigure_timer = preset			
 	
@@ -126,10 +127,10 @@ func start_map():
 func stop_map():
 	
 	item_dropper.clear_all_items()
-	limb_grower.clear_limbs()
-	ramparter.clear_ramps()
-	mesa_grower.clear_mesas()
-	board_hoverer.clear_boards()
+	limb_grower.clear_limbs.rpc()
+	ramparter.clear_ramps.rpc()
+	mesa_grower.clear_mesas.rpc()
+	board_hoverer.clear_boards.rpc()
 	
 
 	

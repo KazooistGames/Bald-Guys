@@ -178,7 +178,7 @@ func synchronize_all_peers():
 @rpc("call_remote", "authority", "reliable")	
 func sync_board_positions(server_positions : PackedVector3Array, server_trajectories : PackedVector3Array):
 	
-	for index in range(boards.size()):
+	for index in range(boards.size()-1):
 		boards[index].position = server_positions[index]
 		board_trajectories[index] = server_trajectories[index]
 		

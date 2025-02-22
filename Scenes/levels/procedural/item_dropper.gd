@@ -66,6 +66,7 @@ func get_items(item_index):
 		return [] 
 			
 
+@rpc("authority", "call_local")
 func collect_items(item_index, collection_point, speed = 2.0):
 	
 	var items = get_items(item_index)
@@ -76,6 +77,7 @@ func collect_items(item_index, collection_point, speed = 2.0):
 		item.apply_central_force(disposition.normalized() * speed * item.mass)
 		
 		
+@rpc("authority", "call_local")
 func disperse_items(item_index, magnitude = 12.0):
 	
 	var items = get_items(item_index)
@@ -85,7 +87,8 @@ func disperse_items(item_index, magnitude = 12.0):
 		var random_direction = Vector3(randf() - 0.5, randf() - 0.5, randf() - 0.5).normalized()
 		item.apply_central_impulse(random_direction * magnitude * item.mass)
 		
-			
+		
+#@rpc("authority", "call_local")		
 func clear_items(item_index):
 	
 	var items = get_items(item_index)
@@ -96,7 +99,7 @@ func clear_items(item_index):
 	all_items[item_paths[item_index]].clear()
 	
 	
-
+#@rpc("authority", "call_local")
 func clear_all_items():
 	
 	for items in all_items.values():
