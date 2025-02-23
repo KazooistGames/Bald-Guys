@@ -23,6 +23,7 @@ func _physics_process(delta):
 		previous_transforms.pop_front()
 		previous_velocities.pop_front()
 		previous_state_ages.pop_front()
+		
 			
 
 func parent_state(state_enum):
@@ -49,6 +50,8 @@ func rollback_transform(time_to_rollback):
 	PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, target_transform)
 	invalidate_cache_array(target_index)
 	
+	return target_transform
+	
 
 func rollback_velocity(time_to_rollback):
 	
@@ -63,15 +66,17 @@ func rollback_velocity(time_to_rollback):
 		target_index += 1 
 		
 	var rid = get_parent().get_rid()
-	var target_transform = previous_transforms[target_index]
+	var target_velocity = previous_velocities[target_index]
 	
-	PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, target_transform)
+	PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, target_velocity)
 	invalidate_cache_array(target_index)
+
+	return target_velocity
 
 	
 func invalidate_cache_array(start_index):
 	
 	previous_state_ages = previous_state_ages.slice(start_index)
 	previous_transforms = previous_transforms.slice(start_index)
-	previous_velocities
+	previous_velocities = previous_velocities.slice(start_index)
 
