@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://Scenes/components/lag_compensator/lag_compensator.gd" id="1_5uwk7"]
 
-[node name="LagCompensator" type="Node3D"]
+[node name="LagCompensator" type="Node"]
 script = ExtResource("1_5uwk7")

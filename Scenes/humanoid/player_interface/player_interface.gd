@@ -5,46 +5,52 @@ extends Node
 @export var force : Node3D
 @export var targeted_object : Node3D
 
-@onready var recovery_bar = $Recovery
-@onready var recovery_fill = $Recovery/Fill
-@onready var recovery_backdrop = $Recovery/BackDrop
-@onready var recovery_target = $Recovery/Target
-@onready var recovery_lever = $Recovery/Lever
+@onready var recovery_minigame = $RecoveryMinigame
+var WASD = Vector2.ZERO
 
-var recovery_lever_phase = 0.0
-var early_recovery_locked = false
 var is_local_interface = false
 
 var cached_inputs = {} #used to determine delta across the network
 	
 	
 func _ready():
-	
-	recovery_bar.visible = false
+
 	add_to_group("interfaces")
 	humanoid = get_parent()
 	force = humanoid.find_child("Force")
 	camera = humanoid.find_child("Camera*")
+	humanoid.ragdolled.connect(react_to_ragdoll)
+	humanoid.unragdolled.connect(react_to_ragdoll_recovery)
+	recovery_minigame.succeeded.connect(react_early_recovery)
+	
+
+func _process(delta):
+			
+	var ragdoll_speed = humanoid.find_child("*lowerBody", true, false).linear_velocity.length()
+	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
+	recovery_minigame.progress = humanoid.ragdoll_recovery_progress
 	
 	
-func _process(delta):	
+func _physics_process(_delta):	
+	
+	#if is_multiplayer_authority():
+	var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
+	humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
 	
 	is_local_interface = str(multiplayer.get_unique_id()) == humanoid.name
-	
+
 	if camera.shapecast.is_colliding():
 		targeted_object = camera.shapecast.get_collider(0)
-	
-	if is_local_interface:	
-		hmi(delta)
-		
-		var movement_inputs = {}
-		var input_dir = Input.get_vector("left", "right", "forward", "backward")
-		var direction = (Basis.IDENTITY * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-		movement_inputs['direction'] = direction.rotated(Vector3.UP, camera.rotation.y)
-		movement_inputs['run'] = Input.is_action_pressed("run")
-		rpc_send_Continuous_input.rpc_id(get_multiplayer_authority(), movement_inputs)
-		
+
+	if is_local_interface:		
+		var continuous_inputs = {}
+		continuous_inputs['direction'] = Input.get_vector("left", "right", "forward", "backward")
+		WASD = continuous_inputs['direction']
+		continuous_inputs['run'] = Input.is_action_pressed("run")
+		humanoid.RUNNING = continuous_inputs['run']
+		rpc_send_Continuous_input.rpc_id(get_multiplayer_authority(), continuous_inputs)
 			
+	
 func _input(event):
 	
 	if not is_local_interface:
@@ -55,56 +61,29 @@ func _input(event):
 		rpc_send_aim_input.rpc_id(get_multiplayer_authority(), event.relative)
 				
 	else:
-		var ability_inputs = {}
-		ability_inputs['jump'] = Input.is_action_pressed("jump")
-		ability_inputs["recover"] = Input.is_action_pressed("recover")
-		ability_inputs["primary"] = Input.is_action_pressed("primary")
-		ability_inputs["secondary"] = Input.is_action_pressed("secondary")
-		rpc_send_Discrete_input.rpc_id(get_multiplayer_authority(), ability_inputs)	
+		var discrete_inputs = {}
+		discrete_inputs['jump'] = Input.is_action_pressed("jump")
+		discrete_inputs["recover"] = Input.is_action_pressed("recover")
+		discrete_inputs["primary"] = Input.is_action_pressed("primary")
+		discrete_inputs["secondary"] = Input.is_action_pressed("secondary")
+		rpc_send_Discrete_input.rpc_id(get_multiplayer_authority(), discrete_inputs)	
 		
-
-func hmi(delta):
 	
-	recovery_bar.visible = humanoid.RAGDOLLED
-	recovery_lever.visible = not early_recovery_locked
-	recovery_target.visible = not early_recovery_locked
+func react_to_ragdoll():
 	
-	if not humanoid.RAGDOLLED:
-		early_recovery_locked = false
+	if is_local_interface:
+		recovery_minigame.start()
 	
-	var total_length = recovery_backdrop.size.x
-	var total_position = recovery_backdrop.position.x
-	recovery_fill.size.x = total_length * humanoid.ragdoll_recovery_progress
-	recovery_fill.position.x = total_position * humanoid.ragdoll_recovery_progress
+func react_to_ragdoll_recovery():
 	
-	var ragdoll_speed = humanoid.find_child("*lowerBody", true, false).linear_velocity.length()
-	recovery_lever_phase += delta * pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
+	if is_local_interface:
+		recovery_minigame.visible = false
+		
+func react_early_recovery():
 	
-	recovery_lever.position.x = sin(recovery_lever_phase) * total_length / 2.0
-	
-	if recovery_lever_on_target():
-		recovery_target.color = Color('ffc354')
-	else:
-		recovery_target.color = Color('b98457')
-
-			
-func recovery_lever_on_target():
-	
-	return abs(recovery_lever.position.x) <= recovery_target.size.x / 2.0
-	
-
-func lockout_early_recovery():
-	
-	recovery_target.visible = false
-	recovery_lever.visible = false
-	early_recovery_locked = true
-	
-	
-func early_recovery():
-	
-	if humanoid.RAGDOLLED:
+	if is_multiplayer_authority() and humanoid.RAGDOLLED:
 		humanoid.unragdoll.rpc()
-	
+
 
 func lunge_at_target(target):
 	
@@ -116,28 +95,8 @@ func lunge_at_target(target):
 			pass
 			
 		elif target.is_in_group("humanoids"):
-			#var lunge_velocity = disposition.normalized() * distance * 3.5
 			humanoid.lunge.rpc(target.get_path())
-
-
-func get_local_humanoid():
-	
-	if get_parent().is_in_group("humanoids"): #preferred method is just childing this node to humanoid
-		return get_parent()
-	else:
-		return null
-
-
-func get_local_camera():
-	
-	var cameras = get_tree().get_nodes_in_group("cameras")
-	var local_cameras = cameras.filter(func(node): return node.name == str(multiplayer.get_unique_id()))
-	
-	if local_cameras.size() > 0:
-		return local_cameras[0]
-	else:
-		return null
-		
+			
 		
 @rpc("any_peer", "call_local")
 func rpc_send_aim_input(aim_delta):
@@ -161,8 +120,9 @@ func rpc_send_Continuous_input(inputs):
 	
 	if humanoid.RAGDOLLED:
 		return
-				
-	humanoid.WALK_VECTOR = inputs['direction']
+		
+	WASD = inputs['direction']
+		
 	humanoid.RUNNING = inputs['run']
 	
 	for key in inputs.keys():
@@ -189,11 +149,7 @@ func rpc_send_Discrete_input(inputs):
 			humanoid.double_jump.rpc()
 		
 	if just_pressed('recover', inputs): 
-
-		if recovery_lever_on_target():
-			early_recovery()
-		else:
-			lockout_early_recovery()
+		recovery_minigame.attempt_early_recovery()
 			
 	if just_pressed('secondary', inputs):
 		force.rpc_secondary.rpc()	
@@ -248,3 +204,23 @@ func cache_new_inputs(new_inputs):
 	
 	for key in new_inputs.keys():
 		cached_inputs[key] = new_inputs[key]
+		
+		
+func get_local_humanoid():
+	
+	if get_parent().is_in_group("humanoids"): #preferred method is just childing this node to humanoid
+		return get_parent()
+	else:
+		return null
+
+
+func get_local_camera():
+	
+	var cameras = get_tree().get_nodes_in_group("cameras")
+	var local_cameras = cameras.filter(func(node): return node.name == str(multiplayer.get_unique_id()))
+	
+	if local_cameras.size() > 0:
+		return local_cameras[0]
+	else:
+		return null
+

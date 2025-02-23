@@ -1,7 +1,7 @@
 extends Node
 
 static var SERVER_PING = 0.0 
-static var CLIENT_PINGS = {}
+static var CLIENT_PINGS = { 1 : 0}
 
 var remaining_time_to_being_rectified = 0.0
 var max_rectification_scalar = 1.1

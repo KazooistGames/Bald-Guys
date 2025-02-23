@@ -23,6 +23,7 @@ func _ready():
 
 
 func _process(_delta):
+	
 	debug_box.visible = DEBUG
 	debug_sphere.visible = DEBUG
 	collider.shape.radius = radius

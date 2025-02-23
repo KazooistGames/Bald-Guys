@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://Scenes/components/custom_sync/custom_sync.gd" id="1_cfck1"]
 
-[node name="CustomSync" type="Node3D"]
+[node name="CustomSync" type="Node"]
 script = ExtResource("1_cfck1")

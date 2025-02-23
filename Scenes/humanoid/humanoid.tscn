@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=50 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="2_jteu5"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://yaefhdh5sdlv" path="res://Scenes/humanoid/cameras/FPS_Camera.tscn" id="14_jolxv"]
 [ext_resource type="PackedScene" uid="uid://jdvdhg8sqgv1" path="res://Scenes/humanoid/player_interface/player_interface.tscn" id="15_vslm3"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="16_kptge"]
+[ext_resource type="PackedScene" uid="uid://yduju68nnoqu" path="res://Scenes/components/state_rectifier/state_rectifier.tscn" id="16_vrifw"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vc0al"]
 resource_local_to_scene = true
@@ -3693,16 +3694,16 @@ properties/0/spawn = true
 properties/0/replication_mode = 1
 properties/1/path = NodePath(".:WALK_VECTOR")
 properties/1/spawn = true
-properties/1/replication_mode = 2
+properties/1/replication_mode = 1
 properties/2/path = NodePath(".:RUNNING")
 properties/2/spawn = true
 properties/2/replication_mode = 2
 properties/3/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:linear_velocity")
 properties/3/spawn = true
-properties/3/replication_mode = 1
+properties/3/replication_mode = 2
 properties/4/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:angular_velocity")
 properties/4/spawn = true
-properties/4/replication_mode = 1
+properties/4/replication_mode = 2
 properties/5/path = NodePath(".:SKIN_COLOR")
 properties/5/spawn = true
 properties/5/replication_mode = 2
@@ -3711,8 +3712,8 @@ properties/6/spawn = true
 properties/6/replication_mode = 2
 properties/7/path = NodePath(".:ON_FLOOR")
 properties/7/spawn = true
-properties/7/replication_mode = 2
-properties/8/path = NodePath(".:floor_velocity")
+properties/7/replication_mode = 0
+properties/8/path = NodePath(".:constant_force")
 properties/8/spawn = true
 properties/8/replication_mode = 2
 
@@ -5719,5 +5720,7 @@ hit_back_faces = false
 [node name="Camera3D" parent="." instance=ExtResource("14_jolxv")]
 
 [node name="player_interface" parent="." instance=ExtResource("15_vslm3")]
+
+[node name="StateRectifier" parent="." instance=ExtResource("16_vrifw")]
 
 [node name="LagCompensator" parent="." instance=ExtResource("16_kptge")]

@@ -87,6 +87,7 @@ signal ragdoll_change(new_state)
 signal ragdolled
 signal unragdolled
 
+
 func _enter_tree():
 	
 	add_to_group("humanoids")
@@ -438,6 +439,7 @@ func unragdoll(use_skeleton_position : bool = true):
 		RAGDOLLED = false
 		freeze = false
 		ragdoll_change.emit(RAGDOLLED, self)
+		unragdolled.emit()
 		
 
 @rpc("call_local", "reliable")
