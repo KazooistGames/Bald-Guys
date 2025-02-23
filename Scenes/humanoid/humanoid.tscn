@@ -3697,7 +3697,7 @@ properties/1/spawn = true
 properties/1/replication_mode = 1
 properties/2/path = NodePath(".:RUNNING")
 properties/2/spawn = true
-properties/2/replication_mode = 2
+properties/2/replication_mode = 1
 properties/3/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:linear_velocity")
 properties/3/spawn = true
 properties/3/replication_mode = 2
@@ -4807,12 +4807,12 @@ transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 
 shape = SubResource("CapsuleShape3D_usxk3")
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.999951, -3.29018e-05, -2.13087e-05, 0.000124604, 0.998602, 1.0848e-05, 2.81334e-05, -6.82473e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
+transform = Transform3D(0.999951, -3.14415e-05, -2.13087e-05, 0.000124604, 0.998595, 1.0848e-05, 2.81334e-05, -6.87838e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
 joint_offset = Transform3D(0.999998, 0, 0, 0, 0.999998, 0, 0, 0, 1, 0, 0, 0)
-body_offset = Transform3D(0.691722, -0.4626, -0.553873, -0.561436, -0.826347, -0.0090333, -0.454107, 0.316795, -0.832538, 0, 0, 0)
+body_offset = Transform3D(0.691722, -0.462595, -0.553873, -0.561436, -0.826341, -0.0090333, -0.454107, 0.316792, -0.832538, 0, 0, 0)
 mass = 5.0
 bounce = 0.2
 bone_name = "upperArm.r"

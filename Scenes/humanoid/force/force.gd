@@ -264,7 +264,7 @@ func rpc_push_object(node_path):
 		
 	else:
 		var disposition = (node.global_position - get_parent().global_position).normalized()
-		var direction = launch_trajectory().lerp(disposition.normalized(), 0.5)
+		var direction = launch_trajectory().lerp(disposition.normalized(), 0.25)
 		var magnitude = push_force * sqrt(node.mass)
 		node.apply_central_impulse(magnitude * direction)
 				

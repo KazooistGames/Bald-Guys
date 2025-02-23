@@ -36,18 +36,28 @@ func _physics_process(_delta):
 	#if is_multiplayer_authority():
 	var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
 	humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
+	humanoid.REACHING = force.action
+	humanoid.LOOK_VECTOR = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
+	force.Aim = (humanoid.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
+	var offset_to_zero = 1.0 - abs(humanoid.LOOK_VECTOR.normalized().dot(Vector3.UP))
+	force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
+	force.rotation = camera.rotation 
 	
-	is_local_interface = str(multiplayer.get_unique_id()) == humanoid.name
-
 	if camera.shapecast.is_colliding():
 		targeted_object = camera.shapecast.get_collider(0)
+		
+	if not multiplayer.has_multiplayer_peer():
+		return
+		
+	is_local_interface = str(multiplayer.get_unique_id()) == humanoid.name
 
-	if is_local_interface:		
+	if is_local_interface:	
+		camera.current = true	
 		var continuous_inputs = {}
 		continuous_inputs['direction'] = Input.get_vector("left", "right", "forward", "backward")
 		WASD = continuous_inputs['direction']
 		continuous_inputs['run'] = Input.is_action_pressed("run")
-		humanoid.RUNNING = continuous_inputs['run']
+		#humanoid.RUNNING = continuous_inputs['run']
 		rpc_send_Continuous_input.rpc_id(get_multiplayer_authority(), continuous_inputs)
 			
 	
@@ -105,12 +115,7 @@ func rpc_send_aim_input(aim_delta):
 		return
 		
 	camera.rotate_by_relative_delta(aim_delta)
-	humanoid.LOOK_VECTOR = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
-	force.Aim = (humanoid.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
-	var offset_to_zero = 1.0 - abs(humanoid.LOOK_VECTOR.normalized().dot(Vector3.UP))
-	force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
-	force.rotation = camera.rotation 
-		
+			
 	
 @rpc("any_peer", "call_local")
 func rpc_send_Continuous_input(inputs):
@@ -152,23 +157,28 @@ func rpc_send_Discrete_input(inputs):
 		recovery_minigame.attempt_early_recovery()
 			
 	if just_pressed('secondary', inputs):
-		force.rpc_secondary.rpc()	
+		
+		if not humanoid.RAGDOLLED:
+			force.rpc_secondary.rpc()	
+			
 	elif just_released('secondary', inputs):
 		force.rpc_reset.rpc()
 		
 	if just_pressed('primary', inputs):
 		
-		if force.action == force.Action.holding:
+		if humanoid.RAGDOLLED:
+			pass	
+			
+		elif force.action == force.Action.holding:
 			force.rpc_trigger.rpc()
-	
+			
 		elif force.action == force.Action.cooldown:
-			pass
-		
+			pass	
+			
 		else:
 			force.rpc_primary.rpc()
 			lunge_at_target(targeted_object)
 		
-	humanoid.REACHING = force.action
 	cache_new_inputs(inputs)
 
 

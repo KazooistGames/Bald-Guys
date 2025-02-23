@@ -121,6 +121,8 @@ func _process(_delta):
 	if WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
 		RUNNING = false	
 	elif WALK_VECTOR == Vector3.ZERO:
+		if name == "1" and not is_multiplayer_authority():
+			print("gotcha")
 		RUNNING = false	
 
 	animation.walkAnimBlendScalar = TOPSPEED
@@ -408,7 +410,6 @@ func ragdoll(velocity_override = Vector3.ZERO):
 			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = linear_velocity
 			
-		RUNNING = true
 		ragdolled.emit()
 		skeleton.ragdoll_start()
 		ragdoll_recovery_progress = 0.0
