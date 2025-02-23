@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://yduju68nnoqu"]
+
+[ext_resource type="Script" path="res://Scenes/components/state_rectifier/state_rectifier.gd" id="1_fsbjt"]
+
+[node name="StateRectifier" type="Node"]
+script = ExtResource("1_fsbjt")

@@ -110,7 +110,7 @@ func _physics_process(delta):
 		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
 		
-		if not is_multiplayer_authority():
+		if not multiplayer_permissive:
 			pass	
 		elif cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
@@ -253,6 +253,7 @@ func rpc_push_object(node_path):
 	
 		var disposition = node.global_position - get_parent().global_position
 		var direction = disposition.normalized().lerp(Vector3.UP, 0.15)
+		direction = direction.lerp(Aim, 0.5)
 		var magnitude = push_force / 8.0 / max(0.75, disposition.length())
 		var impulse = direction * magnitude
 		

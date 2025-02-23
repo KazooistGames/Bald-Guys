@@ -1,23 +1,21 @@
-extends Node3D
+extends Node
 
-static var GLOBAL_PING = 0.0 # this clients ping ms set by top of hierarchy
+static var SERVER_PING = 0.0 
+static var CLIENT_PINGS = {}
 
 var remaining_time_to_being_rectified = 0.0
 var max_rectification_scalar = 1.1
 
 var current_delta_scalar = 1.0
 var current_compensated_delta = 0.0
-	
 
-func delta_scalar(delta):
+
+func delta_scalar(delta): #use per-frame, auto decays 
 	
 	var instant_fix_scalar = 1.0 + remaining_time_to_being_rectified / delta
 	var return_val = minf(instant_fix_scalar, max_rectification_scalar)
 	current_delta_scalar = return_val
 	remaining_time_to_being_rectified -= (current_delta_scalar - 1.0) * delta
-	
-	#if not is_multiplayer_authority():
-		#print(remaining_time_to_being_rectified, "	", return_val)
 	
 	return return_val	
 		
@@ -31,9 +29,18 @@ func compensated_delta(delta):
 	return return_val
 
 
-func reset():
+func reset(client_id = 1):
 	
-	remaining_time_to_being_rectified = GLOBAL_PING / 1000.0
+	if is_multiplayer_authority():
+		if CLIENT_PINGS.has(client_id):
+			remaining_time_to_being_rectified = CLIENT_PINGS[client_id] / 1000.0
+	else:
+		remaining_time_to_being_rectified = SERVER_PING / 1000.0
+		
 
+func parent_state():
+	var rid = get_parent().get_rid()
+	var transform_state = PhysicsServer3D.body_get_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM)
+	return transform_state
 
 

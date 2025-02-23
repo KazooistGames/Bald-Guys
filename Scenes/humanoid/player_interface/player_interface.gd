@@ -1,4 +1,4 @@
-extends Node3D
+extends Node
 
 @export var humanoid : Node3D
 @export var camera : Node3D
@@ -13,12 +13,10 @@ extends Node3D
 
 var recovery_lever_phase = 0.0
 var early_recovery_locked = false
-
-var raw_inputs = {}
-	
 var is_local_interface = false
 
 var cached_inputs = {} #used to determine delta across the network
+	
 	
 func _ready():
 	
@@ -31,37 +29,39 @@ func _ready():
 	
 func _process(delta):	
 	
+	is_local_interface = str(multiplayer.get_unique_id()) == humanoid.name
+	
 	if camera.shapecast.is_colliding():
 		targeted_object = camera.shapecast.get_collider(0)
-	
-	is_local_interface = str(multiplayer.get_unique_id()) == humanoid.name
 	
 	if is_local_interface:	
 		hmi(delta)
 		
 		var movement_inputs = {}
 		var input_dir = Input.get_vector("left", "right", "forward", "backward")
-		var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var direction = (Basis.IDENTITY * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 		movement_inputs['direction'] = direction.rotated(Vector3.UP, camera.rotation.y)
 		movement_inputs['run'] = Input.is_action_pressed("run")
-		rpc_send_movement_input.rpc(movement_inputs)
+		rpc_send_Continuous_input.rpc_id(get_multiplayer_authority(), movement_inputs)
 		
-		var ability_inputs = {}
-		ability_inputs['jump'] = Input.is_action_pressed("jump")
-		ability_inputs["recover"] = Input.is_action_pressed("recover")
-		ability_inputs["primary"] = Input.is_action_pressed("primary")
-		ability_inputs["secondary"] = Input.is_action_pressed("secondary")
-		rpc_send_ability_input.rpc(ability_inputs)
-		
-	
+			
 func _input(event):
 	
 	if not is_local_interface:
 		return
 	
 	elif event is InputEventMouseMotion:
-		rpc_send_aim_input.rpc(event.relative)
+		camera.rotate_by_relative_delta(event.relative)
+		rpc_send_aim_input.rpc_id(get_multiplayer_authority(), event.relative)
 				
+	else:
+		var ability_inputs = {}
+		ability_inputs['jump'] = Input.is_action_pressed("jump")
+		ability_inputs["recover"] = Input.is_action_pressed("recover")
+		ability_inputs["primary"] = Input.is_action_pressed("primary")
+		ability_inputs["secondary"] = Input.is_action_pressed("secondary")
+		rpc_send_Discrete_input.rpc_id(get_multiplayer_authority(), ability_inputs)	
+		
 
 func hmi(delta):
 	
@@ -154,34 +154,46 @@ func rpc_send_aim_input(aim_delta):
 		
 	
 @rpc("any_peer", "call_local")
-func rpc_send_movement_input(inputs):
+func rpc_send_Continuous_input(inputs):
 	
 	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
 		return
 	
 	if humanoid.RAGDOLLED:
 		return
-		
+				
 	humanoid.WALK_VECTOR = inputs['direction']
 	humanoid.RUNNING = inputs['run']
+	
+	for key in inputs.keys():
+		
+		if not cached_inputs.has(key):
+			pass
+		elif inputs[key] != cached_inputs[key]:
+			humanoid.unlagger.reset(multiplayer.get_remote_sender_id())
+			
 	cache_new_inputs(inputs)
 		
 
 @rpc("any_peer", "call_local", "reliable")
-func rpc_send_ability_input(inputs):
+func rpc_send_Discrete_input(inputs):
 	
 	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
 		return
 		
 	if just_pressed('jump', inputs):
-		humanoid.jump.rpc()
 		
-	if not just_pressed('recover', inputs):
-		pass
-	elif recovery_lever_on_target():
-		early_recovery()
-	else:
-		lockout_early_recovery()
+		if humanoid.ON_FLOOR:
+			humanoid.jump.rpc()
+		elif humanoid.DOUBLE_JUMP_CHARGES > 0:
+			humanoid.double_jump.rpc()
+		
+	if just_pressed('recover', inputs): 
+
+		if recovery_lever_on_target():
+			early_recovery()
+		else:
+			lockout_early_recovery()
 			
 	if just_pressed('secondary', inputs):
 		force.rpc_secondary.rpc()	

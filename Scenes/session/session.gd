@@ -50,7 +50,7 @@ func _ready():
 	
 	if is_multiplayer_authority():
 		Commission_Next_Round()
-		rpc_move_to_Lobby.rpc()
+		move_to_Lobby()
 		create_player_humanoid(1)
 		Commissioned = true
 
@@ -78,10 +78,10 @@ func _unhandled_key_input(event):
 	elif event.is_action_pressed("Toggle"):
 			
 		if State != SessionState.Lobby:
-			rpc_move_to_Lobby.rpc()
+			move_to_Lobby()
 			
 		elif State != SessionState.Round:
-			rpc_move_to_level.rpc()	
+			move_to_level()	
 
 
 func fix_out_of_bounds():
@@ -89,7 +89,8 @@ func fix_out_of_bounds():
 	for humanoid in Humanoids:
 		
 		if not node_is_in_bounds(humanoid):		
-			spawn_player(Level, humanoid)
+			var parent = Level if State == SessionState.Round else Lobby
+			spawn_player.rpc(parent.get_path(), humanoid.get_path())
 			
 
 func node_is_in_bounds(node):
@@ -125,11 +126,15 @@ func handle_new_game(new_game):
 func Finished_Round(winner):
 	
 	HUD.set_psa.rpc("Winner: " + winner, -1)
-	rpc_move_to_Lobby.rpc()
+	move_to_Lobby()
 	Commission_Next_Round()
 
 
-func spawn_player(parent, humanoid):
+@rpc("authority", "call_local")
+func spawn_player(parent_path, humanoid_path):
+		
+	var parent = get_node(parent_path)
+	var humanoid = get_node(humanoid_path)	
 		
 	humanoid.unragdoll(false)
 	humanoid.linear_velocity = Vector3.ZERO
@@ -185,24 +190,24 @@ func destroy_player_humanoid(peer_id):
 		player_Humanoid.queue_free()		
 
 
-@rpc("call_local", "authority", "reliable")
-func rpc_move_to_Lobby():
+#@rpc("call_local", "authority", "reliable")
+func move_to_Lobby():
 	
 	State = SessionState.Lobby
 	
 	for humanoid in Humanoids:
-		spawn_player(Lobby, humanoid)	
+		spawn_player(Lobby.get_path(), humanoid.get_path())	
 	
 	Ended_Round.emit()	
 	
 		
-@rpc("call_local", "authority", "reliable")
-func rpc_move_to_level():
+#@rpc("call_local", "authority", "reliable")
+func move_to_level():
 	
 	State = SessionState.Round
 	
 	for humanoid in Humanoids:
-		spawn_player(Level, humanoid)
+		spawn_player.rpc(Level.get_path(), humanoid.get_path())
 		
 	Started_Round.emit()
 
@@ -268,18 +273,6 @@ func local_screenname():
 	
 	if Client_Screennames.has(local_id):
 		return Client_Screennames[local_id]
-			
-	
-@rpc("authority", "call_remote")
-func ping(server_time : float):  
-	
-	if is_multiplayer_authority():
-		pass
-	else:
-		local_ping_ms = (Time.get_unix_time_from_system() - server_time) * 1000.0
-		unlagger.GLOBAL_PING = local_ping_ms
-		unlagger.reset()
-		HUD.set_ping_indicator(local_ping_ms)
 		
 	  
 func ping_clients():
@@ -287,7 +280,30 @@ func ping_clients():
 	if is_multiplayer_authority():
 		var local_server_time = Time.get_unix_time_from_system()
 		ping.rpc(local_server_time)
+				
 	
+@rpc("authority", "call_remote")
+func ping(server_time : float):  
+	
+	if is_multiplayer_authority():
+		pass
+	else:
+		var local_time = Time.get_unix_time_from_system()
+		var ping_ms = (local_time - server_time) * 1000.0
+		unlagger.SERVER_PING = ping_ms
+		unlagger.reset()
+		HUD.set_ping_indicator(ping_ms)
+		pong.rpc_id(get_multiplayer_authority(), local_time)
+		
+		
+@rpc("any_peer", "call_remote")
+func pong(client_time : float):
+	
+	if is_multiplayer_authority():
+		var local_time = Time.get_unix_time_from_system()
+		var ping_ms = (local_time - client_time) * 1000.0
+		unlagger.CLIENT_PINGS[multiplayer.get_remote_sender_id()] = ping_ms
+		
 	
 func update_nameplate_for_ragdoll(new_value, node):
 	

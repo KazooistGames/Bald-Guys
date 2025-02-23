@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=49 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="2_jteu5"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/humanoid/force/force.tscn" id="13_uhqou"]
 [ext_resource type="PackedScene" uid="uid://yaefhdh5sdlv" path="res://Scenes/humanoid/cameras/FPS_Camera.tscn" id="14_jolxv"]
 [ext_resource type="PackedScene" uid="uid://jdvdhg8sqgv1" path="res://Scenes/humanoid/player_interface/player_interface.tscn" id="15_vslm3"]
+[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="16_kptge"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vc0al"]
 resource_local_to_scene = true
@@ -3692,10 +3693,10 @@ properties/0/spawn = true
 properties/0/replication_mode = 1
 properties/1/path = NodePath(".:WALK_VECTOR")
 properties/1/spawn = true
-properties/1/replication_mode = 1
+properties/1/replication_mode = 2
 properties/2/path = NodePath(".:RUNNING")
 properties/2/spawn = true
-properties/2/replication_mode = 1
+properties/2/replication_mode = 2
 properties/3/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:linear_velocity")
 properties/3/spawn = true
 properties/3/replication_mode = 1
@@ -3707,10 +3708,10 @@ properties/5/spawn = true
 properties/5/replication_mode = 2
 properties/6/path = NodePath(".:REACHING")
 properties/6/spawn = true
-properties/6/replication_mode = 1
+properties/6/replication_mode = 2
 properties/7/path = NodePath(".:ON_FLOOR")
 properties/7/spawn = true
-properties/7/replication_mode = 1
+properties/7/replication_mode = 2
 properties/8/path = NodePath(".:floor_velocity")
 properties/8/spawn = true
 properties/8/replication_mode = 2
@@ -4805,12 +4806,12 @@ transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 
 shape = SubResource("CapsuleShape3D_usxk3")
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.999951, -4.22001e-05, -2.13087e-05, 0.000124604, 0.998807, 1.0848e-05, 2.81334e-05, -5.83231e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
+transform = Transform3D(0.999951, -3.29018e-05, -2.13087e-05, 0.000124604, 0.998602, 1.0848e-05, 2.81334e-05, -6.82473e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
 joint_offset = Transform3D(0.999998, 0, 0, 0, 0.999998, 0, 0, 0, 1, 0, 0, 0)
-body_offset = Transform3D(0.691722, -0.462707, -0.553873, -0.561436, -0.826511, -0.0090333, -0.454107, 0.316856, -0.832538, 0, 0, 0)
+body_offset = Transform3D(0.691722, -0.4626, -0.553873, -0.561436, -0.826347, -0.0090333, -0.454107, 0.316795, -0.832538, 0, 0, 0)
 mass = 5.0
 bounce = 0.2
 bone_name = "upperArm.r"
@@ -5718,3 +5719,5 @@ hit_back_faces = false
 [node name="Camera3D" parent="." instance=ExtResource("14_jolxv")]
 
 [node name="player_interface" parent="." instance=ExtResource("15_vslm3")]
+
+[node name="LagCompensator" parent="." instance=ExtResource("16_kptge")]

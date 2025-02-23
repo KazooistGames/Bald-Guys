@@ -3,6 +3,10 @@ extends RigidBody3D
 const floor_normal = Vector3(0, 1, 0)
 const floor_dot_product = 2.0 / 3.0
 
+const Lunge_Deadband = 0.75
+const Lunge_Speed = 15
+const Lunge_max_traversal = 6
+
 @export var SKIN_COLOR : Color:
 	
 	get:
@@ -21,6 +25,7 @@ const floor_dot_product = 2.0 / 3.0
 
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
+	
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.5, 7.0)
 @export var JUMP_SPEED = 5.0
@@ -45,6 +50,8 @@ const floor_dot_product = 2.0 / 3.0
 
 @onready var force = $Force
 
+@onready var unlagger = $LagCompensator
+
 var multiplayer_permissive = false
 
 var TOPSPEED = 0
@@ -58,8 +65,6 @@ var ragdoll_recovery_progress = 0.0
 var ragdoll_recovery_default_duration = 3.0
 var ragdoll_recovery_default_boost = 0.1
 
-signal ragdolled
-
 var coyote_timer = 0.0
 var coyote_duration = 0.15
 var reverse_coyote_timer = 0.0
@@ -71,16 +76,16 @@ var cached_floor_pos = Vector3.ZERO
 var just_jumped_timer = 0.0
 var just_jumped_period = 1.0/3.0
 
-const Lunge_Deadband = 0.75
-const Lunge_Speed = 15
-const Lunge_max_traversal = 6
 var Lunging = false
 var Lunge_Target : Node3D 
 var lunge_target_last_position = Vector3.ZERO
 var lunge_total_traversal
 
-signal ragdoll_change(new_state)
+var instant_corrective
 
+signal ragdoll_change(new_state)
+signal ragdolled
+signal unragdolled
 
 func _enter_tree():
 	
@@ -95,6 +100,7 @@ func _ready():
 	
 	if is_multiplayer_authority(): 
 		getRandomSkinTone()
+		unlagger.max_rectification_scalar = 1.2
 		
 
 func _process(_delta):
@@ -201,7 +207,7 @@ func _integrate_forces(state):
 		index += 1			
 
 
-func _physics_process(delta):		
+func _physics_process(delta):	
 			
 	floor_object = floorcast.get_collider()
 	
@@ -328,8 +334,7 @@ func _physics_process(delta):
 		var target_linear_velocity = walk_target + floor_velocity
 		target_linear_velocity.y = linear_velocity.y
 		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
-	
-	#print(linear_velocity.length())
+
 	
 func is_on_floor():
 	
@@ -412,8 +417,8 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		chest_collider.disabled = true
 		RAGDOLLED = true
 		freeze = true
-		ragdoll_change.emit(RAGDOLLED, self)
-		force.rpc_reset.rpc()
+		ragdoll_change.emit(RAGDOLLED, self)	
+		force.rpc_reset()
 		
 		
 @rpc("call_local", "reliable")
@@ -471,20 +476,16 @@ func bump(velocity_impulse):
 
 @rpc("call_local", "reliable")
 func jump():
-	
-	if ON_FLOOR:
-		just_jumped_timer = 0.0
-		ON_FLOOR = false
-		coyote_timer = coyote_duration
-		reverse_coyote_timer = 0.0
-		floorcast.enabled = false
-		jumpFX.play()
-		jumpFX.pitch_scale = 0.75
-		var offset = max(0.0, linear_velocity.y)
-		set_axis_velocity(Vector3.UP * (JUMP_SPEED + offset))
-				
-	elif DOUBLE_JUMP_CHARGES > 0:
-		double_jump()
+
+	just_jumped_timer = 0.0
+	ON_FLOOR = false
+	coyote_timer = coyote_duration
+	reverse_coyote_timer = 0.0
+	floorcast.enabled = false
+	jumpFX.play()
+	jumpFX.pitch_scale = 0.75
+	var offset = max(0.0, linear_velocity.y)
+	set_axis_velocity(Vector3.UP * (JUMP_SPEED + offset))
 		
 
 @rpc("call_local", "reliable")
@@ -504,15 +505,11 @@ func wall_jump(impulse):
 @rpc("call_local", "reliable")
 func double_jump():
 	
-	if ON_FLOOR:
-		pass	
-		
-	elif DOUBLE_JUMP_CHARGES > 0:
-		just_jumped_timer = 0.0
-		jumpFX.pitch_scale = 1.25
-		jumpFX.play()	
-		DOUBLE_JUMP_CHARGES -= 1
-		set_axis_velocity(Vector3.UP * JUMP_SPEED)
+	just_jumped_timer = 0.0
+	jumpFX.pitch_scale = 1.25
+	jumpFX.play()	
+	DOUBLE_JUMP_CHARGES -= 1
+	set_axis_velocity(Vector3.UP * JUMP_SPEED)
 		
 
 @rpc("call_local", "reliable")
@@ -532,10 +529,16 @@ func land():
 	impactFX.play()
 	
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
+	var deadstop_point = 2.0
 	
-	if translational_velocity.length() <= 1:
+	if translational_velocity.length() <= deadstop_point:
 		linear_velocity.x = 0
 		linear_velocity.z = 0
+		
+	elif translational_velocity.length() <= deadstop_point * 2.0:
+		linear_velocity.x = move_toward(linear_velocity.x, 0.0, 1.5)
+		linear_velocity.z = move_toward(linear_velocity.z, 0.0, 1.5)
+		
 	else:
 		linear_velocity.x /= 2.0
 		linear_velocity.z /= 2.0
