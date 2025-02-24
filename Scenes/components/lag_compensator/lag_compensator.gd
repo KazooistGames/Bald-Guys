@@ -1,6 +1,11 @@
 extends Node
 
-static var SERVER_PING = 0.0 
+static var SERVER_PING = 0.0 :
+	get:
+		return SERVER_PING
+	set(value):
+		SERVER_PING = lerpf(SERVER_PING, value, 0.5)
+		
 static var CLIENT_PINGS = { 1 : 0}
 
 var remaining_time_to_being_rectified = 0.0

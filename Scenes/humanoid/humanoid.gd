@@ -42,7 +42,6 @@ const Lunge_max_traversal = 6
 @onready var chest_collider = $CollisionShapeChest
 @onready var head_collider = $CollisionShapeHead
 
-@onready var synchronizer = $MultiplayerSynchronizer
 @onready var floorcast = $FloorCast3D
 
 @onready var impactFX = $ImpactAudio
@@ -50,7 +49,9 @@ const Lunge_max_traversal = 6
 
 @onready var force = $Force
 
+@onready var synchronizer = $MultiplayerSynchronizer
 @onready var unlagger = $LagCompensator
+@onready var rectifier = $StateRectifier
 
 var multiplayer_permissive = false
 
@@ -494,7 +495,7 @@ func bump(velocity_impulse):
 
 
 @rpc("call_local", "reliable")
-func jump():
+func jump(calling_client_id = 1):
 
 	just_jumped_timer = 0.0
 	ON_FLOOR = false
@@ -504,7 +505,12 @@ func jump():
 	jumpFX.play()
 	jumpFX.pitch_scale = 0.75
 	var offset = max(0.0, linear_velocity.y)
-	set_axis_velocity(Vector3.UP * (JUMP_SPEED + offset))
+	var new_y_speed = Vector3.UP * (JUMP_SPEED + offset)
+	#set_axis_velocity(new_y_speed)
+
+	if is_multiplayer_authority():
+		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	
+		rectifier.apply_rollback_velocity(rollback_lag, new_y_speed, Vector3(1, 0, 1))
 		
 
 @rpc("call_local", "reliable")

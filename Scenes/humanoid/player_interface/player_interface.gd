@@ -115,9 +115,6 @@ func rpc_send_Continuous_input(inputs):
 	
 	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
 		return
-	
-	if humanoid.RAGDOLLED:
-		return
 		
 	look = inputs['look']	
 	WASD = inputs['wasd']
@@ -142,7 +139,8 @@ func rpc_send_Discrete_input(inputs):
 	if just_pressed('jump', inputs):
 		
 		if humanoid.ON_FLOOR:
-			humanoid.jump.rpc()
+			humanoid.jump.rpc(multiplayer.get_remote_sender_id())
+			#humanoid.rectifier.apply_rollback_velocity(Vector3.UP * humanoid.JUMP_SPEED)
 		elif humanoid.DOUBLE_JUMP_CHARGES > 0:
 			humanoid.double_jump.rpc()
 		

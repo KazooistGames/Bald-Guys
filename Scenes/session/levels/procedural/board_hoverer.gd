@@ -16,6 +16,7 @@ const map_size = 50
 
 @onready var unlagger = $LagCompensator
 
+
 func _ready():
 	
 	if is_multiplayer_authority():
