@@ -40,8 +40,9 @@ var local_ping_ms = 0.0
 
 func _ready():
 		
-	pinger.timeout.connect(ping_clients)
-	pinger.timeout.connect(fix_out_of_bounds)
+	if is_multiplayer_authority():
+		pinger.timeout.connect(ping_clients)
+		pinger.timeout.connect(fix_out_of_bounds)
 	
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
@@ -283,9 +284,8 @@ func local_screenname():
 	  
 func ping_clients():
 	
-	if is_multiplayer_authority():
-		var local_server_time = Time.get_unix_time_from_system()
-		ping.rpc(local_server_time)
+	var local_server_time = Time.get_unix_time_from_system()
+	ping.rpc(local_server_time)
 				
 	
 @rpc("authority", "call_remote")

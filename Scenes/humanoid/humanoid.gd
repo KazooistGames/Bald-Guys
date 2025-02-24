@@ -290,10 +290,12 @@ func _physics_process(delta):
 	
 	if Lunging: 
 		
-		if Lunge_Target == null:
-			Lunging = false
-			linear_velocity = Vector3.ZERO
-			skeleton.lunge_stop()
+		if Lunge_Target == null:	
+				
+			if multiplayer_permissive:
+				unlunge.rpc()
+				
+			return
 			
 		var disposition = Lunge_Target.global_position - global_position
 		lunge_total_traversal += linear_velocity.length() * delta
@@ -301,10 +303,10 @@ func _physics_process(delta):
 
 		var lunge_expired = lunge_total_traversal >= Lunge_max_traversal
 		
-		if  in_range or lunge_expired :
-			Lunging = false
-			linear_velocity = Vector3.ZERO
-			skeleton.lunge_stop()
+		if in_range or lunge_expired:
+			
+			if multiplayer_permissive:
+				unlunge.rpc()
 			
 		else:
 			var deadband_next_frame_stepsize = (disposition.length() - Lunge_Deadband) / delta
@@ -445,7 +447,7 @@ func unragdoll(use_skeleton_position : bool = true):
 		freeze = false
 		ragdoll_change.emit(RAGDOLLED, self)
 		unragdolled.emit()
-		
+
 
 @rpc("call_local", "reliable")
 func lunge(target_node_path):
@@ -461,13 +463,23 @@ func lunge(target_node_path):
 		coyote_timer = coyote_duration
 		reverse_coyote_timer = 0.0
 		floorcast.enabled = false
-		
+	
+	leg_collider.disabled = true
 	Lunge_Target = target_node
 	lunge_target_last_position = Lunge_Target.global_position
 	lunge_total_traversal = 0
 	Lunging = true
 	skeleton.lunge_start()
 	
+	
+@rpc("call_local", "reliable")
+func unlunge():	
+	
+	leg_collider.disabled = false
+	Lunging = false
+	linear_velocity = Vector3.ZERO
+	skeleton.lunge_stop()
+
 
 @rpc("call_local", "reliable")
 func bump(velocity_impulse):

@@ -12,8 +12,9 @@ var progress = 0.0
 var difficulty = 1.0
 
 var lever_phase = 0.0
-
 var locked = false
+
+var lever_phase_lag_offset = 0.0
 
 signal succeeded 
 signal failed
@@ -24,7 +25,7 @@ func _ready():
 	visible = false
 	net_sync.get_net_var_delegate = get_net_vars
 	net_sync.synced.connect(unlagger.reset)
-	
+	unlagger.max_rectification_scalar = 1.2
 
 func _process(delta):
 	
@@ -57,12 +58,14 @@ func start():
 			
 			
 func lever_on_target(phase):
-	
+	phase += lever_phase_lag_offset
 	var simulated_position = sin(phase) * backdrop.size.x / 2.0
 	return abs(simulated_position) <= target.size.x / 2.0
 	
 	
-func attempt_early_recovery():
+func attempt_early_recovery(client_id):
+	
+	lever_phase_lag_offset = -unlagger.CLIENT_PINGS[client_id] / 1000.0
 	
 	if not is_multiplayer_authority():
 		return

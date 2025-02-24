@@ -33,8 +33,7 @@ func _process(delta):
 	
 	
 func _physics_process(_delta):	
-	
-	#if is_multiplayer_authority():
+
 	var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
 	humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
 	humanoid.REACHING = force.action
@@ -148,7 +147,7 @@ func rpc_send_Discrete_input(inputs):
 			humanoid.double_jump.rpc()
 		
 	if just_pressed('recover', inputs): 
-		recovery_minigame.attempt_early_recovery()
+		recovery_minigame.attempt_early_recovery(multiplayer.get_remote_sender_id())
 			
 	if just_pressed('secondary', inputs):
 		

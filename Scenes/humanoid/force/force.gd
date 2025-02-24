@@ -92,7 +92,7 @@ func _physics_process(delta):
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
 		if not multiplayer_permissive:
-			print(scalar)	
+			pass	
 		elif progress >= 1.0:
 			rpc_trigger.rpc()
 		
@@ -115,7 +115,7 @@ func _physics_process(delta):
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
 		
 		if not multiplayer_permissive:
-			print(scalar)		
+			pass	
 		elif cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		

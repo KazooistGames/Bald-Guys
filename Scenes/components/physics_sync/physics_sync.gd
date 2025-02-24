@@ -3,11 +3,12 @@ extends MultiplayerSynchronizer
 
 @export var AUTHORITY_ORIGIN = Vector3.ZERO
 @export var AUTHORITY_BASIS = Basis.IDENTITY
-
 @export var Authority_Angular_Velocity = Vector3.ZERO
 @export var Authority_Linear_Velocity = Vector3.ZERO
 
 @export var lerp_val = 0.25
+
+@onready var unlagger = $LagCompensator
 
 var parent
 
@@ -18,6 +19,8 @@ func _ready():
 	
 	if not parent_is_valid():
 		queue_free()
+		
+	synchronized.connect(predictive_correction)
 		
 
 func _physics_process(_delta):
@@ -46,8 +49,14 @@ func _physics_process(_delta):
 		if parent.linear_velocity.distance_to(Authority_Linear_Velocity) > 1.0:
 			parent.linear_velocity = Authority_Linear_Velocity
 		else:
-			parent.linear_velocity = parent.linear_velocity.lerp(Authority_Linear_Velocity, lerp_val)
+			parent.linear_velocity = parent.linear_velocity
 
+
+func predictive_correction():
+	
+	var step_size = unlagger.SERVER_PING / 2000.0
+	AUTHORITY_ORIGIN += Authority_Linear_Velocity * step_size
+	
 
 func parent_is_valid():
 	

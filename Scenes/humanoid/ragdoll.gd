@@ -36,7 +36,7 @@ var bone_modifiers = {
 @onready var slappy_foot_right = $"Physical Bone foot_r/SlappyFoot"
 
 const MAX_VELOCITY = 100
-const MAX_DISPLACEMENT = 1.5
+const MAX_DISPLACEMENT = 2.0
 const MAX_ANGULAR_DISPLACEMENT = PI
 
 const perfect_match = true
