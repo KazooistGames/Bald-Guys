@@ -1,15 +1,16 @@
 extends Node
 
-@export var humanoid : Node3D
-@export var camera : Node3D
-@export var force : Node3D
-@export var targeted_object : Node3D
+@export var WASD = Vector2.ZERO
+@export var look = Vector3.ZERO
 
 @onready var recovery_minigame = $RecoveryMinigame
-var WASD = Vector2.ZERO
 
-var is_local_interface = false
+var humanoid : Node3D
+var camera : Node3D
+var force : Node3D
+var targeted_object : Node3D
 
+var is_local_interface = false #input hardware is connected to this node
 var cached_inputs = {} #used to determine delta across the network
 	
 	
@@ -54,11 +55,14 @@ func _physics_process(_delta):
 	if is_local_interface:	
 		camera.current = true	
 		var continuous_inputs = {}
-		continuous_inputs['direction'] = Input.get_vector("left", "right", "forward", "backward")
-		WASD = continuous_inputs['direction']
+		continuous_inputs['look'] = look
+		continuous_inputs['wasd'] = Input.get_vector("left", "right", "forward", "backward")
+		WASD = continuous_inputs['wasd']
 		continuous_inputs['run'] = Input.is_action_pressed("run")
 		#humanoid.RUNNING = continuous_inputs['run']
 		rpc_send_Continuous_input.rpc_id(get_multiplayer_authority(), continuous_inputs)
+	else:
+		camera.rotation = look
 			
 	
 func _input(event):
@@ -67,9 +71,8 @@ func _input(event):
 		return
 	
 	elif event is InputEventMouseMotion:
-		camera.rotate_by_relative_delta(event.relative)
-		rpc_send_aim_input.rpc_id(get_multiplayer_authority(), event.relative)
-				
+		look = camera.rotate_by_relative_delta(event.relative)
+			
 	else:
 		var discrete_inputs = {}
 		discrete_inputs['jump'] = Input.is_action_pressed("jump")
@@ -107,16 +110,7 @@ func lunge_at_target(target):
 		elif target.is_in_group("humanoids"):
 			humanoid.lunge.rpc(target.get_path())
 			
-		
-@rpc("any_peer", "call_local")
-func rpc_send_aim_input(aim_delta):
-	
-	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
-		return
-		
-	camera.rotate_by_relative_delta(aim_delta)
 			
-	
 @rpc("any_peer", "call_local")
 func rpc_send_Continuous_input(inputs):
 	
@@ -126,8 +120,8 @@ func rpc_send_Continuous_input(inputs):
 	if humanoid.RAGDOLLED:
 		return
 		
-	WASD = inputs['direction']
-		
+	look = inputs['look']	
+	WASD = inputs['wasd']
 	humanoid.RUNNING = inputs['run']
 	
 	for key in inputs.keys():

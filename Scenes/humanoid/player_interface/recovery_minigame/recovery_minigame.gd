@@ -83,6 +83,7 @@ func early_succeed():
 	locked = false
 	succeeded.emit()
 	
+	
 @rpc("authority", "call_local")
 func early_fail():
 	

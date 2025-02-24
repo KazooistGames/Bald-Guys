@@ -57,6 +57,7 @@ func add_nameplate(key, label):
 	new_nameplate.name = key
 	new_nameplate.text = label
 	new_nameplate.add_theme_color_override("font_shadow_color", Color.BLACK)
+	new_nameplate.add_theme_font_size_override("font_size", 20)
 	new_nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	new_nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	nameplates.add_child(new_nameplate)

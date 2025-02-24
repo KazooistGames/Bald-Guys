@@ -81,8 +81,6 @@ var Lunge_Target : Node3D
 var lunge_target_last_position = Vector3.ZERO
 var lunge_total_traversal
 
-var instant_corrective
-
 signal ragdoll_change(new_state)
 signal ragdolled
 signal unragdolled
@@ -118,19 +116,14 @@ func _process(_delta):
 	elif get_ragdoll_recovered() and is_multiplayer_authority(): 
 		unragdoll.rpc()
 		
-	if WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
-		RUNNING = false	
-	elif WALK_VECTOR == Vector3.ZERO:
-		if name == "1" and not is_multiplayer_authority():
-			print("gotcha")
-		RUNNING = false	
-
+	var allow_run = run_permissive()
+	
 	animation.walkAnimBlendScalar = TOPSPEED
-	animation.walkAnimPlaybackScalar = 1.5 if RUNNING else 1.8
-	animation.WALK_STATE = animation.WalkState.RUNNING if RUNNING else animation.WalkState.WALKING
+	animation.walkAnimPlaybackScalar = 1.5 if allow_run else 1.8
+	animation.WALK_STATE = animation.WalkState.RUNNING if allow_run else animation.WalkState.WALKING
 	
 	IMPACT_THRESHOLD = 6.0 * mass
-	TOPSPEED = SPEED_GEARS.y if RUNNING else SPEED_GEARS.x
+	TOPSPEED = SPEED_GEARS.y if allow_run else SPEED_GEARS.x
 	
 	if RAGDOLLED:
 		pass
@@ -152,12 +145,7 @@ func _process(_delta):
 	skeleton.processReach(LOOK_VECTOR)
 	skeleton.Reaching = REACHING
 	
-	if force.action == force.Action.charging:
-		RUNNING = false
-		WALK_VECTOR = Vector3.ZERO
-		
-	if force.action == force.Action.cooldown:
-		RUNNING = false
+
 	
 	
 func _integrate_forces(state):	
@@ -339,6 +327,22 @@ func _physics_process(delta):
 		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
 
 	
+	
+func run_permissive():
+	
+	if not RUNNING:
+		return false
+	elif force.action == force.Action.charging:
+		return false
+	elif force.action == force.Action.cooldown:
+		return false
+	elif WALK_VECTOR.normalized().dot(LOOK_VECTOR.normalized()) > 0.1:
+		return false		
+	elif WALK_VECTOR == Vector3.ZERO:
+		return false
+	else:
+		return true
+		
 func is_on_floor():
 	
 	if not floorcast.enabled:

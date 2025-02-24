@@ -2,20 +2,20 @@ extends Camera3D
 
 const MAX_ANGLE = PI/2.3
 
-@export var VERTICAL_SENSATIVITY = 0.005
-@export var HORIZONTAL_SENSITIVITY = 0.005
 @export var Locked = false
 
 @onready var reticle = $reticle
 @onready var raycast = $RayCast3D
 @onready var shapecast = $ShapeCast3D
-
 @onready var postprocessing = $postprocessing
+
 @onready var humanoid = get_parent()
 @onready var force = humanoid.find_child("Force")
 
-var is_local_camera = false
+var VERTICAL_SENSATIVITY = 0.005
+var HORIZONTAL_SENSITIVITY = 0.005
 
+var is_local_camera = false
 
 func _ready():
 
@@ -57,21 +57,8 @@ func rotate_by_relative_delta(relative_delta):
 		rotation.x = clamp(rotation.x, -MAX_ANGLE, MAX_ANGLE)
 		rotation.y = fmod(rotation.y, 2 * PI)
 		rotation.z = 0
-		#
-	#
-#func _input(event):
-	#
-	#set_current(true)
-	#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	#
-	#if Locked:
-		#pass
-	#elif event is InputEventMouseMotion:
-		#rotate_y(-event.relative.x * HORIZONTAL_SENSITIVITY )
-		#rotate_object_local(Vector3(1,0,0), -event.relative.y * VERTICAL_SENSATIVITY)
-		#rotation.x = clamp(rotation.x, -MAX_ANGLE, MAX_ANGLE)
-		#rotation.y = fmod(rotation.y, 2 * PI)
-		#rotation.z = 0
+		
+	return rotation
 
 
 func get_center_of_screen():

@@ -43,7 +43,7 @@ func _ready():
 	pinger.timeout.connect(ping_clients)
 	pinger.timeout.connect(fix_out_of_bounds)
 	
-	humanoidSpawner.spawned.connect(func(node): HUD.add_nameplate(node.name, node.name))
+	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
 	gameSpawner.spawned.connect(handle_new_game)
 	levelSpawner.spawned.connect(handle_new_level)
@@ -177,6 +177,12 @@ func create_player_humanoid(peer_id):
 	
 	return new_peer_humanoid
 
+
+func handle_new_humanoid(new_humanoid):
+	
+	new_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
+	HUD.add_nameplate(new_humanoid.name, new_humanoid.name)
+	
 
 func destroy_player_humanoid(peer_id):
 	
@@ -312,7 +318,7 @@ func update_nameplate_for_ragdoll(new_value, node):
 		
 	elif new_value:
 		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.GRAY)
-		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 12)
+		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 16)
 	else:
 		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.WHITE)
-		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 16)
+		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 20)
