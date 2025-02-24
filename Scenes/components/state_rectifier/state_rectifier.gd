@@ -31,7 +31,7 @@ func apply_rollback_velocity(time_to_rollback, velocity_delta_to_apply, velocity
 	var predictive_rollback_transform = previous_transforms[index]
 	
 	#print(previous_state_ages)
-	print("Rolled back ", time_to_rollback, " from " ,get_parent().transform.origin ," to ", predictive_rollback_transform.origin, " at index ", index)
+	#print("Rolled back ", time_to_rollback, " from " ,get_parent().transform.origin ," to ", predictive_rollback_transform.origin, " at index ", index)
 	var starting_velocity =  previous_velocities[previous_velocities.size()-1]
 	while index < previous_velocities.size() - 1:
 		var time_delta = previous_state_ages[index] - previous_state_ages[index + 1]
@@ -39,6 +39,7 @@ func apply_rollback_velocity(time_to_rollback, velocity_delta_to_apply, velocity
 		predictive_rollback_transform.origin += reapplied_velocity
 		
 		index += 1
+		
 	predictive_rollback_transform.origin += velocity_delta_to_apply * time_to_rollback
 	predictive_rollback_transform.origin -= Vector3.UP * 4.9 * pow(time_to_rollback, 2.0)
 		
@@ -46,7 +47,7 @@ func apply_rollback_velocity(time_to_rollback, velocity_delta_to_apply, velocity
 	velocity_delta_to_apply += starting_velocity
 	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, predictive_rollback_transform)
 	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, velocity_delta_to_apply)
-	print("wound up at ", predictive_rollback_transform.origin, " and set velocity to ", velocity_delta_to_apply)
+	#print("wound up at ", predictive_rollback_transform.origin, " and set velocity to ", velocity_delta_to_apply)
 	invalidate_cache_array(index)
 	
 
