@@ -1,5 +1,11 @@
 extends Area3D
 
+
+const hold_force = 8000.0	
+const throw_force = 750.0
+const push_force = 200.0
+const ragdoll_radius = 2.0
+
 enum Action {
 	inert = 0,
 	holding = 1,
@@ -8,43 +14,30 @@ enum Action {
 }
 
 @export var action = Action.inert
-
 @export var base_position = Vector3.ZERO
-
 @export var Aim = Vector3.ZERO
-
 @export var Max_kg = 100
-
 @export var wielder : Node3D = null
-
 @export var external_velocity = Vector3.ZERO
 
 @onready var collider = $CollisionShape3D
-
 @onready var mesh = $MeshInstance3D
-
 @onready var hum = $hum
-
 @onready var raycast = $RayCast3D
+@onready var unlagger = $LagCompensator
 
-const hold_force = 8000.0	
-const throw_force = 750.0
-const push_force = 200.0
-const ragdoll_radius = 2.0
+var contained_bodies = []
 
 var charge_period = 0.25
 var charge_timer = 0.0
-
-var contained_bodies = []
 
 var cooldown_period = 0.75
 var cooldown_timer = 0.0
 
 var offset = 1.25
+var target_position
 
 var material;
-
-var target_position
 
 var multiplayer_permissive = false
 
@@ -71,15 +64,26 @@ func _physics_process(delta):
 
 	material = mesh.get_surface_override_material(0)	
 	capture_bodies()
-
+	hum.stream_paused = action == Action.inert
+	
+	var scalar = unlagger.delta_scalar(delta)
+	delta *= scalar
+	
 	if action == Action.holding:
 		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
 		collider.shape.height = move_toward(collider.shape.height, 2.0, 5.0 * delta)
 		
-		for node in contained_bodies:			
-			rpc_hold_object(node.get_path())
+		for body in contained_bodies:			
+
+			if can_be_held(body):
+				var disposition = global_position - body.global_position	
+				var direction = disposition.normalized()
+				var magnitude = hold_force * pow(disposition.length(), 2.0)
+				body.apply_central_force(direction * magnitude)
+				body.apply_central_force(external_velocity * body.mass)
 			
 	elif action == Action.charging:
+
 		charge_timer += delta
 		var progress = pow(clamp(charge_timer/charge_period, 0.0, 1.0), 3.0)
 		collider.shape.radius = lerp(0.0, 1.0, progress)
@@ -88,7 +92,7 @@ func _physics_process(delta):
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
 		if not multiplayer_permissive:
-			pass	
+			print(scalar)	
 		elif progress >= 1.0:
 			rpc_trigger.rpc()
 		
@@ -111,7 +115,7 @@ func _physics_process(delta):
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
 		
 		if not multiplayer_permissive:
-			pass	
+			print(scalar)		
 		elif cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		
@@ -138,6 +142,7 @@ func rpc_primary():
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	hum.play()
 	charge_timer = 0	
+	unlagger.reset()
 	material.set_shader_parameter("glow_freq", 0.0)
 	material.set_shader_parameter("base_freq", 0.0)
 	material.set_shader_parameter("transparency", 0.05)
@@ -150,7 +155,7 @@ func rpc_secondary():
 	
 	if action != Action.inert:
 		return	
-		
+	unlagger.reset()
 	mesh.visible = true
 	collision_mask = 12
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
@@ -176,8 +181,8 @@ func rpc_reset():
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-	hum.bus = "phaser"
 	hum.stop()
+	hum.bus = "phaser"
 	charge_timer = 0	
 	cooldown_timer = 0.0
 	action = Action.inert
@@ -186,14 +191,12 @@ func rpc_reset():
 @rpc("call_local", "reliable")
 func rpc_trigger():
 	
-	collision_mask = 0
-	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
-	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-	
 	if not is_multiplayer_authority():
 		pass
-	
+		
+	elif action == Action.inert:
+		return
+		
 	elif action == Action.holding:
 		
 		for node in contained_bodies:
@@ -207,25 +210,17 @@ func rpc_trigger():
 		for node in contained_bodies:
 			rpc_push_object.rpc(node.get_path())
 			
+	collision_mask = 0
+	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
+	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	unlagger.reset()	
 	hum.bus = "beef"		
 	hum.play()
 	hum.volume_db = -27
 	cooldown_timer = 0.0
 	action = Action.cooldown
-		
-		
-@rpc("call_local")		
-func rpc_hold_object(node_path):
 	
-	var node = get_node(node_path)
-	
-	if can_be_held(node):
-		var disposition = global_position - node.global_position	
-		var direction = disposition.normalized()
-		var magnitude = hold_force * pow(disposition.length(), 2.0)
-		node.apply_central_force(direction * magnitude)
-		node.apply_central_force(external_velocity * node.mass)
-
 
 @rpc("call_local", "reliable")
 func rpc_throw_object(node_path):

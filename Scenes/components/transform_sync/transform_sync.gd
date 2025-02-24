@@ -4,7 +4,6 @@ extends MultiplayerSynchronizer
 @export var AUTHORITY_BASIS = Basis.IDENTITY
 
 var lerp_val = 0.5
-
 var deadbanded = false
 var origin_deadband = 0.2
 

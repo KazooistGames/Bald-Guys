@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://bg13x1s1aib1u"]
+[gd_scene load_steps=9 format=3 uid="uid://bg13x1s1aib1u"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/force/force.gd" id="1_8ejgp"]
 [ext_resource type="AudioStream" uid="uid://dhgcmldg3e6k7" path="res://audio/energy-hum-29083.mp3" id="2_41484"]
 [ext_resource type="Material" uid="uid://hugun5vavy75" path="res://Materials/force.tres" id="2_xehpu"]
 [ext_resource type="PackedScene" uid="uid://dxut4ye0r2lbe" path="res://Scenes/components/transform_sync/transform_sync.tscn" id="4_rwylc"]
+[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="5_yc2q0"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_yifoa"]
 resource_local_to_scene = true
@@ -68,3 +69,5 @@ bus = &"distortion"
 target_position = Vector3(0, 0, -100)
 
 [node name="TransformSync" parent="." instance=ExtResource("4_rwylc")]
+
+[node name="LagCompensator" parent="." instance=ExtResource("5_yc2q0")]
