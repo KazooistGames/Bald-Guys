@@ -42,6 +42,15 @@ func reset(client_id = 1):
 	else:
 		remaining_time_to_being_rectified = SERVER_PING / 1000.0
 		
+		
+func reset_full_duplex(client_id = 1):
+	
+	if is_multiplayer_authority():
+		if CLIENT_PINGS.has(client_id):
+			remaining_time_to_being_rectified = CLIENT_PINGS[client_id] / 500.0
+	else:
+		remaining_time_to_being_rectified = SERVER_PING / 500.0
+
 
 func parent_state():
 	var rid = get_parent().get_rid()

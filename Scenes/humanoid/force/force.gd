@@ -142,7 +142,7 @@ func rpc_primary():
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	hum.play()
 	charge_timer = 0	
-	unlagger.reset()
+	unlagger.reset_full_duplex()
 	material.set_shader_parameter("glow_freq", 0.0)
 	material.set_shader_parameter("base_freq", 0.0)
 	material.set_shader_parameter("transparency", 0.05)
@@ -155,12 +155,13 @@ func rpc_secondary():
 	
 	if action != Action.inert:
 		return	
-	unlagger.reset()
+		
 	mesh.visible = true
 	collision_mask = 12
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
+	unlagger.reset_full_duplex()
 	hum.play()
 	hum.volume_db = -27.0
 	hum.pitch_scale = 1.0
@@ -214,7 +215,7 @@ func rpc_trigger():
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-	unlagger.reset()	
+	unlagger.reset_full_duplex()	
 	hum.bus = "beef"		
 	hum.play()
 	hum.volume_db = -27

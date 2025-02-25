@@ -97,7 +97,7 @@ func react_early_recovery():
 		humanoid.unragdoll.rpc()
 
 
-func lunge_at_target(target):
+func attempt_lunge_at_target(target):
 	
 	if target != null:
 		var disposition = target.global_position - humanoid.global_position
@@ -133,24 +133,27 @@ func rpc_send_Continuous_input(inputs):
 @rpc("any_peer", "call_local", "reliable")
 func rpc_send_Discrete_input(inputs):
 	
-	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
+	var sender_id = multiplayer.get_remote_sender_id()
+	
+	if str(sender_id) != humanoid.name:
 		return
 		
 	if just_pressed('jump', inputs):
 		
 		if humanoid.ON_FLOOR:
-			humanoid.jump.rpc(multiplayer.get_remote_sender_id())
-			#humanoid.rectifier.apply_rollback_velocity(Vector3.UP * humanoid.JUMP_SPEED)
+			humanoid.jump.rpc(sender_id)
+
 		elif humanoid.DOUBLE_JUMP_CHARGES > 0:
-			humanoid.double_jump.rpc(multiplayer.get_remote_sender_id())
+			humanoid.double_jump.rpc(sender_id)
 		
 	if just_pressed('recover', inputs): 
-		recovery_minigame.attempt_early_recovery(multiplayer.get_remote_sender_id())
+		recovery_minigame.attempt_early_recovery(sender_id)
 			
 	if just_pressed('secondary', inputs):
 		
 		if not humanoid.RAGDOLLED:
 			force.rpc_secondary.rpc()	
+			force.unlagger.reset(sender_id)
 			
 	elif just_released('secondary', inputs):
 		force.rpc_reset.rpc()
@@ -162,13 +165,15 @@ func rpc_send_Discrete_input(inputs):
 			
 		elif force.action == force.Action.holding:
 			force.rpc_trigger.rpc()
+			force.unlagger.reset(sender_id)
 			
 		elif force.action == force.Action.cooldown:
 			pass	
 			
 		else:
 			force.rpc_primary.rpc()
-			lunge_at_target(targeted_object)
+			force.unlagger.reset(sender_id)
+			attempt_lunge_at_target(targeted_object)
 		
 	cache_new_inputs(inputs)
 
