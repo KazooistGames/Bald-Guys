@@ -5,29 +5,33 @@ enum Preference{
 	locked = -1,
 	shallow = 0,
 	deep = 1,
-	none = 2
+	none = 2,
 }
-@export var preference = Preference.deep
 
+@export var preference = Preference.deep
+	
 @onready var mesh = $MeshInstance3D
 @onready var collider = $CollisionShape3D
 @onready var raycast = $RayCast3D
 
-@export var bottom_drop = 0.0
-@export var top_height = 0.0
+@export var top_height : float = 0.0		
+@export var bottom_drop  : float = 0.25
 @export var radius = 0.0
 
+@export var reverse_growth_scale = 0.0
 @export var bottom_position = Vector3.ZERO
 
-@export var reverse_growth_scale = 0.0
+var raycast_target = Vector3.DOWN * 100
 
 
 func _ready():
-	
+		
 	rerender()
 	
 
 func _physics_process(_delta):
+	
+	raycast.target_position = raycast_target
 	
 	if preference == Preference.locked:
 		return
@@ -51,9 +55,6 @@ func _physics_process(_delta):
 			bottom_position = new_point - global_position
 		
 	rerender()
-	
-
-
 
 
 func get_top_position(bot_pos):
@@ -70,7 +71,7 @@ func get_mesh_position(bot_pos):
 func get_mesh_height(bot_pos):
 	
 	var top_position = get_top_position(bot_pos)
-	return top_position.distance_to(bot_pos) + bottom_drop
+	return top_position.distance_to(bot_pos) 
 	
 	
 func rerender():
@@ -90,7 +91,7 @@ func rerender():
 	collider.shape.height = mesh_height
 	collider.shape.radius = radius
 	
-
+		
 func just_deeper(new_point):
 	
 	var new_trajectory = (new_point - global_position)
@@ -108,18 +109,21 @@ func just_shallower(new_point):
 	var new_trajectory = (new_point - global_position)
 	
 	if bottom_position.normalized() != new_trajectory.normalized():
-		return false	
+		return false
+		
 	elif new_trajectory.length() < bottom_position.length():
-		return true	
+		return true
+		
 	else:
 		return false
 		
-		
-func get_net_vars():
-	var net_vars = {}
-	net_vars["preference"] = preference
-	net_vars["bottom_drop"] = bottom_drop
-	net_vars["top_height"] = top_height
-	net_vars["radius"] = radius
-	net_vars["reverse_growth_sale"] = reverse_growth_scale
-	return net_vars
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

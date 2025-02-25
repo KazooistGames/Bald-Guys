@@ -27,7 +27,6 @@ func _ready():
 		
 	rerender()
 	
-	
 
 func _physics_process(_delta):
 	
@@ -119,25 +118,8 @@ func just_shallower(new_point):
 	else:
 		return false
 		
-		
-@rpc("authority", "call_remote")
-func net_sync(variables : Dictionary):
 	
-	for key in variables.keys():
-		set(str(key), variables[key])
-		
-	rerender()
 	
-
-func get_net_vars():
-	
-	var net_vars = {}
-	net_vars["preference"] = preference
-	net_vars["bottom_drop"] = bottom_drop
-	net_vars["top_height"] = top_height
-	net_vars["size"] = size
-	net_vars["raycast_target"] = raycast_target
-	return net_vars
 	
 	
 	

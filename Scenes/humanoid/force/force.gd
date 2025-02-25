@@ -44,8 +44,8 @@ var multiplayer_permissive = false
 
 func _ready():
 	
+	$TransformSync.replication_interval = 0.0
 	wielder = get_parent()
-	$TransformSync.delta_interval = 0.0
 	rpc_reset()
 	monitoring = true
 

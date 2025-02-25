@@ -20,7 +20,7 @@ func _ready():
 		queue_free()
 		
 	elif not is_multiplayer_authority():
-		delta_synchronized.connect(reset_deadband)	
+		synchronized.connect(reset_deadband)	
 		request_sync.rpc_id(get_multiplayer_authority())
 		
 

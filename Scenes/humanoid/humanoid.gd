@@ -146,8 +146,6 @@ func _process(_delta):
 	skeleton.processReach(LOOK_VECTOR)
 	skeleton.Reaching = REACHING
 	
-
-	
 	
 func _integrate_forces(state):	
 	
@@ -528,13 +526,18 @@ func wall_jump(impulse):
 	
 
 @rpc("call_local", "reliable")
-func double_jump():
+func double_jump(calling_client_id = 1):
 	
 	just_jumped_timer = 0.0
 	jumpFX.pitch_scale = 1.25
 	jumpFX.play()	
 	DOUBLE_JUMP_CHARGES -= 1
-	set_axis_velocity(Vector3.UP * JUMP_SPEED)
+	#set_axis_velocity(Vector3.UP * JUMP_SPEED)
+	var new_y_speed = Vector3.UP * JUMP_SPEED
+	
+	if is_multiplayer_authority():
+		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	
+		rectifier.apply_rollback_velocity(rollback_lag, new_y_speed, Vector3(1, 0, 1))
 		
 
 @rpc("call_local", "reliable")
@@ -555,6 +558,7 @@ func land():
 	
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 	var deadstop_point = 2.0
+	
 	
 	if translational_velocity.length() <= deadstop_point:
 		linear_velocity.x = 0

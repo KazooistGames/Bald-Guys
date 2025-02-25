@@ -25,7 +25,7 @@ func _ready():
 	recovery_minigame.succeeded.connect(react_early_recovery)
 	
 
-func _process(delta):
+func _process(_delta):
 			
 	var ragdoll_speed = humanoid.find_child("*lowerBody", true, false).linear_velocity.length()
 	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
@@ -142,7 +142,7 @@ func rpc_send_Discrete_input(inputs):
 			humanoid.jump.rpc(multiplayer.get_remote_sender_id())
 			#humanoid.rectifier.apply_rollback_velocity(Vector3.UP * humanoid.JUMP_SPEED)
 		elif humanoid.DOUBLE_JUMP_CHARGES > 0:
-			humanoid.double_jump.rpc()
+			humanoid.double_jump.rpc(multiplayer.get_remote_sender_id())
 		
 	if just_pressed('recover', inputs): 
 		recovery_minigame.attempt_early_recovery(multiplayer.get_remote_sender_id())
