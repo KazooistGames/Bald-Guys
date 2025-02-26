@@ -58,7 +58,6 @@ func _physics_process(_delta):
 		continuous_inputs['wasd'] = Input.get_vector("left", "right", "forward", "backward")
 		WASD = continuous_inputs['wasd']
 		continuous_inputs['run'] = Input.is_action_pressed("run")
-		#humanoid.RUNNING = continuous_inputs['run']
 		rpc_send_Continuous_input.rpc_id(get_multiplayer_authority(), continuous_inputs)
 	else:
 		camera.rotation = look
@@ -94,7 +93,7 @@ func react_to_ragdoll_recovery():
 func react_early_recovery():
 	
 	if is_multiplayer_authority() and humanoid.RAGDOLLED:
-		humanoid.unragdoll.rpc()
+		humanoid.ragdoll_recovery_progress = 1.0
 
 
 func attempt_lunge_at_target(target):
@@ -120,12 +119,12 @@ func rpc_send_Continuous_input(inputs):
 	WASD = inputs['wasd']
 	humanoid.RUNNING = inputs['run']
 	
-	for key in inputs.keys():
-		
-		if not cached_inputs.has(key):
-			pass
-		elif inputs[key] != cached_inputs[key]:
-			humanoid.unlagger.reset(multiplayer.get_remote_sender_id())
+	#for key in inputs.keys():
+		#
+		#if not cached_inputs.has(key):
+			#pass
+		#elif inputs[key] != cached_inputs[key]:
+			#humanoid.unlagger.reset(multiplayer.get_remote_sender_id())
 			
 	cache_new_inputs(inputs)
 		

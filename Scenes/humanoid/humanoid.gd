@@ -151,7 +151,7 @@ func _integrate_forces(state):
 	
 	force.external_velocity = linear_velocity
 	
-	if not is_on_floor():
+	if not is_on_floor() or RAGDOLLED:
 		pass		
 		
 	elif state.transform.origin.distance_to(floorcast.get_collision_point()) <= floorcast.target_position.length():
@@ -350,7 +350,7 @@ func is_on_floor():
 		return false
 	elif not floorcast.is_colliding():
 		return false
-	elif abs(linear_velocity.y) >= JUMP_SPEED:
+	elif abs(linear_velocity.y) >= JUMP_SPEED * 1.5:
 		return false
 	elif floorcast.get_collision_normal().dot(Vector3.UP) > floor_dot_product:
 		return true 

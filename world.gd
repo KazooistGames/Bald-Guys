@@ -12,8 +12,6 @@ const ClientState = {
 }
 @export var State = ClientState.Menus
 
-#@onready var LOCAL_PLAYER_INTERFACE = $SubViewportContainer/SubViewport/player_interface
-
 @onready var viewPort = $SubViewportContainer/SubViewport
 
 @onready var main_menu = $CanvasLayer/MainMenu
