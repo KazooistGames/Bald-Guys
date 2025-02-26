@@ -112,10 +112,8 @@ func clear_limbs():
 @rpc("call_local", "reliable")		
 func extend_limbs():
 	
-	unlagger.reset()
-	if configuration == Configuration.extending:
-		return
-	else:
+	if configuration != Configuration.extending:
+		unlagger.reset()
 		configuration = Configuration.extending
 		in_position = false
 		
@@ -123,25 +121,23 @@ func extend_limbs():
 @rpc("call_local", "reliable")	
 func retract_limbs():
 	
-	unlagger.reset()
-	if configuration == Configuration.retracting:
-		return
-	else:
+	if configuration != Configuration.retracting:
 		configuration = Configuration.retracting
 		in_position = false
+		unlagger.reset()
 		
+		for limb in limbs:
+			limb.preference = limb.Preference.deep 
 		
 @rpc("call_local", "reliable")
 func stop():
 	
-	if configuration == Configuration.inert:
-		return
-	else:
+	if configuration != Configuration.inert:
 		configuration = Configuration.inert
 		in_position = true
 		
 		for limb in limbs:
-			limb.preference = limb.Preference.deep 
+			limb.preference = limb.Preference.locked 
 
 	
 func get_limbs():

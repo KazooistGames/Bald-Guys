@@ -1,9 +1,9 @@
 extends Node3D
 
 const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
+const sync_prefab = preload("res://Scenes/components/transform_sync/transform_sync.tscn")
 
 const board_thickness = 0.5
-
 const map_size = 50
 
 @export var boards = []
@@ -16,14 +16,25 @@ const map_size = 50
 
 @onready var unlagger = $LagCompensator
 
+var sync_cooldown_progress = 0.0
+var sync_cooldown_rate = 1.0
+
+signal bounced(node)
+signal constrained(node)
+
 
 func _ready():
 	
 	if is_multiplayer_authority():
 		sync.get_net_var_delegate = get_net_vars
-
+	
 
 func _physics_process(delta):
+	
+	sync_cooldown_progress += delta * sync_cooldown_rate
+	
+	if is_multiplayer_authority() and sync_cooldown_progress >= 1.0:
+		synchronize_all_peers()
 	
 	delta *= unlagger.delta_scalar(delta)
 	
@@ -41,6 +52,7 @@ func _physics_process(delta):
 		
 func bounce_geometry(geometry, trajectory):
 	
+	var starting_trajectory = trajectory
 	var intersections = get_collider_intersections(geometry, trajectory)
 	
 	if intersections == null:
@@ -59,11 +71,15 @@ func bounce_geometry(geometry, trajectory):
 		else:
 			trajectory.z *= -1.0	
 	
+	if starting_trajectory != trajectory:
+		bounced.emit(geometry)
+	
 	return trajectory
 	
 
 func constrain_geometry(geometry, trajectory, height_limits):
 	
+	var starting_trajectory = trajectory
 	var xz_boundaries = map_size / 2.0
 	var girth = board_thickness
 	#	X
@@ -92,7 +108,10 @@ func constrain_geometry(geometry, trajectory, height_limits):
 	elif geometry.position.z < -xz_boundaries:
 		trajectory.z *= -1.0	
 		geometry.position.z = -xz_boundaries
-	
+		
+	if starting_trajectory != trajectory:
+		constrained.emit(geometry)
+		
 	return trajectory
 		
 		
@@ -161,7 +180,7 @@ func clear_boards():
 	
 
 func synchronize_all_peers():
-	
+
 	if is_multiplayer_authority():
 		var board_positions : PackedVector3Array = []
 		board_positions.resize(boards.size())
@@ -174,6 +193,7 @@ func synchronize_all_peers():
 			trajectories[index] = board_trajectories[index]
 		
 		sync_board_positions.rpc(board_positions, trajectories)
+		sync_cooldown_progress = 0.0
 		
 		
 @rpc("call_remote", "authority", "reliable")	
@@ -184,7 +204,7 @@ func sync_board_positions(server_positions : PackedVector3Array, server_trajecto
 		board_trajectories[index] = server_trajectories[index]
 		
 	unlagger.reset()
-		
+
 		
 func get_net_vars():
 	

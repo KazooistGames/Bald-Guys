@@ -7,7 +7,7 @@ const SessionState = {
 	Round = 1,
 }
 
-@export var Client_Screennames = {}
+@export var Client_Screennames : Dictionary = {}
 @export var State = SessionState.Lobby
 @export var Commissioned = false
 @export var Humanoids = []

@@ -25,26 +25,26 @@ func _physics_process(delta):
 		previous_state_ages.pop_front()
 	
 
-func apply_rollback_velocity(time_to_rollback, velocity_delta_to_apply, velocity_mask = Vector3.ONE):
+func apply_retroactive_impulse(time_to_rollback, impulse, velocity_modifier : Callable = Callable(), use_gravity = true):
 	
 	var index = get_rollback_index(time_to_rollback)
-	var predictive_rollback_transform = previous_transforms[index]
-	var starting_velocity =  previous_velocities[previous_velocities.size()-1]
-	#print("Rolled back ", time_to_rollback, " from " ,get_parent().transform.origin ," to ", predictive_rollback_transform.origin, " at index ", index)
+	var base_velocity =  previous_velocities[previous_velocities.size()-1]
 	
-	while index < previous_velocities.size() - 1:
-		var time_delta = previous_state_ages[index] - previous_state_ages[index + 1]
-		var reapplied_velocity = previous_velocities[index] * time_delta * velocity_mask
-		predictive_rollback_transform.origin += reapplied_velocity	
-		index += 1
+	if velocity_modifier.is_valid():
+		base_velocity = velocity_modifier.call(base_velocity)
 		
-	predictive_rollback_transform.origin += velocity_delta_to_apply * time_to_rollback 
-	predictive_rollback_transform.origin -= Vector3.UP * 4.9 * pow(time_to_rollback, 2.0)	
-	velocity_delta_to_apply -= Vector3.UP * 9.8 * time_to_rollback
-	velocity_delta_to_apply += starting_velocity * velocity_mask
-	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, predictive_rollback_transform)
-	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, velocity_delta_to_apply)
-	#print("wound up at ", predictive_rollback_transform.origin, " and set velocity to ", velocity_delta_to_apply)
+	var predicted_velocity = base_velocity + impulse
+	var predicted_transform = previous_transforms[index]
+	predicted_transform.origin += predicted_velocity * time_to_rollback 
+	print("Rolled back ", time_to_rollback, " from " ,get_parent().transform.origin ," moving ", base_velocity, " at index ", index)
+	
+	if use_gravity:
+		predicted_transform.origin -= Vector3.UP * 4.9 * pow(time_to_rollback, 2.0)		
+		predicted_velocity -= Vector3.UP * 9.8 * time_to_rollback
+		
+	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, predicted_transform)
+	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, predicted_velocity)
+	print("wound up at ", predicted_transform.origin, " and set velocity to ", predicted_velocity)
 	invalidate_cache_array(index)
 	
 
@@ -52,14 +52,26 @@ func get_rollback_index(time_to_rollback):
 	
 	var target_index = round(previous_state_ages.size() / 2.0)
 	var newest_index = previous_state_ages.size() - 1
-
+	
+	while(target_index > 0 and previous_state_ages[target_index] < time_to_rollback): 
+		target_index -= 1 	#give preference to more recent states		
 	while(target_index <= newest_index and previous_state_ages[target_index] > time_to_rollback):
 		target_index += 1
-	while(target_index > 0 and previous_state_ages[target_index] < time_to_rollback): 
-		target_index -= 1 	#give preference to more recent states			
-		
+	
 	return target_index
 
+
+func get_rollback_velocity(time_to_rollback):
+	
+	var index = get_rollback_index(time_to_rollback)
+	return previous_velocities[index]
+
+
+func get_rollback_transfrom(time_to_rollback):
+	
+	var index = get_rollback_index(time_to_rollback)
+	return previous_transforms[index]
+	
 
 func get_cumulative_transform_change(start_index):
 	

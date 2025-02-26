@@ -95,9 +95,6 @@ func _process(delta):
 			if not Bearer:
 				pass
 			
-			elif not Bearer_Times.has(bearer_name):
-				Bearer_Times[bearer_name] = delta
-				
 			elif Bearer_Times[bearer_name] >= Goal_Time:
 				rpc_finish.rpc()
 				session.Finished_Round(str(bearer_name))
@@ -132,11 +129,11 @@ func get_bearers_screenname():
 	
 	if Bearer == null:
 		return ''	
+		
 	elif session.Client_Screennames.has(int(str(Bearer.name))):
 		return session.Client_Screennames[int(str(Bearer.name))]
 		
-
-
+		
 func bearer_is_local_player():
 	
 	if Bearer == null:
@@ -274,7 +271,9 @@ func rpc_reset():
 			Wig.queue_free()
 			Wig = null
 		
-		Bearer_Times = {}
+		for value in session.Client_Screennames.values():
+			Bearer_Times[value] = 0
+			
 		State = GameState.reset
 
 	
@@ -286,7 +285,10 @@ func rpc_play():
 	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
 	
 	if is_multiplayer_authority(): 
-		Bearer_Times = {}
+		
+		for value in session.Client_Screennames.values():
+			Bearer_Times[value] = 0
+			
 		Wig = wig_prefab.instantiate()
 		add_child(Wig)
 		Wig.global_position = Vector3(0, 20, 0)

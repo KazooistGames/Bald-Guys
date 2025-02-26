@@ -14,6 +14,8 @@ var max_rectification_scalar = 1.1
 var current_delta_scalar = 1.0
 var current_compensated_delta = 0.0
 
+signal triggered(ping)
+
 
 func delta_scalar(delta): #use per-frame, auto decays 
 	
@@ -58,3 +60,6 @@ func parent_state():
 	return transform_state
 
 
+func trigger(manual_ping):
+	
+	triggered.emit(manual_ping)

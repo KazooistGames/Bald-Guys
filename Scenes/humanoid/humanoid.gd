@@ -160,7 +160,6 @@ func _integrate_forces(state):
 	var contact_count = state.get_contact_count()
 	var index = 0
 	
-	
 	while index < contact_count and multiplayer_permissive:
 	
 		var normal = state.get_contact_local_normal(index)
@@ -350,7 +349,7 @@ func is_on_floor():
 		return false
 	elif not floorcast.is_colliding():
 		return false
-	elif abs(linear_velocity.y) >= JUMP_SPEED * 1.5:
+	elif abs(linear_velocity.y) >= JUMP_SPEED:
 		return false
 	elif floorcast.get_collision_normal().dot(Vector3.UP) > floor_dot_product:
 		return true 
@@ -502,13 +501,21 @@ func jump(calling_client_id = 1):
 	floorcast.enabled = false
 	jumpFX.play()
 	jumpFX.pitch_scale = 0.75
-	var offset = max(0.0, linear_velocity.y)
-	var new_y_speed = Vector3.UP * (JUMP_SPEED + offset)
-	#set_axis_velocity(new_y_speed)
 
 	if is_multiplayer_authority():
 		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	
-		rectifier.apply_rollback_velocity(rollback_lag, new_y_speed, Vector3(1, 0, 1))
+		var jump_impulse = Vector3.UP * JUMP_SPEED
+		
+		var modifier : Callable = func(velocity): 
+			velocity.y = max(0, velocity.y)
+			return velocity
+			
+		rectifier.apply_retroactive_impulse(rollback_lag, jump_impulse, modifier)
+		
+	else:
+		var offset = max(0.0, linear_velocity.y)
+		var new_y_speed = Vector3.UP * (JUMP_SPEED + offset)
+		set_axis_velocity(new_y_speed)
 		
 
 @rpc("call_local", "reliable")
@@ -532,12 +539,16 @@ func double_jump(calling_client_id = 1):
 	jumpFX.pitch_scale = 1.25
 	jumpFX.play()	
 	DOUBLE_JUMP_CHARGES -= 1
-	#set_axis_velocity(Vector3.UP * JUMP_SPEED)
 	var new_y_speed = Vector3.UP * JUMP_SPEED
 	
 	if is_multiplayer_authority():
 		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	
-		rectifier.apply_rollback_velocity(rollback_lag, new_y_speed, Vector3(1, 0, 1))
+		var modifier : Callable = func(velocity):
+			velocity.y = max(0, velocity.y - JUMP_SPEED)
+			return velocity
+		rectifier.apply_retroactive_impulse(rollback_lag, Vector3.UP * JUMP_SPEED, modifier)
+	else:
+		set_axis_velocity(Vector3.UP * JUMP_SPEED)
 		
 
 @rpc("call_local", "reliable")

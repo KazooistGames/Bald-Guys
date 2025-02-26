@@ -56,9 +56,9 @@ func _physics_process(_delta):
 		var continuous_inputs = {}
 		continuous_inputs['look'] = look
 		continuous_inputs['wasd'] = Input.get_vector("left", "right", "forward", "backward")
-		WASD = continuous_inputs['wasd']
 		continuous_inputs['run'] = Input.is_action_pressed("run")
-		rpc_send_Continuous_input.rpc_id(get_multiplayer_authority(), continuous_inputs)
+		rpc_update_Continuous_inputs.rpc_id(get_multiplayer_authority(), continuous_inputs)
+		WASD = continuous_inputs['wasd']
 	else:
 		camera.rotation = look
 			
@@ -77,7 +77,7 @@ func _input(event):
 		discrete_inputs["recover"] = Input.is_action_pressed("recover")
 		discrete_inputs["primary"] = Input.is_action_pressed("primary")
 		discrete_inputs["secondary"] = Input.is_action_pressed("secondary")
-		rpc_send_Discrete_input.rpc_id(get_multiplayer_authority(), discrete_inputs)	
+		rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs)	
 		
 	
 func react_to_ragdoll():
@@ -85,11 +85,13 @@ func react_to_ragdoll():
 	if is_local_interface:
 		recovery_minigame.start()
 	
+	
 func react_to_ragdoll_recovery():
 	
 	if is_local_interface:
 		recovery_minigame.visible = false
-		
+
+
 func react_early_recovery():
 	
 	if is_multiplayer_authority() and humanoid.RAGDOLLED:
@@ -109,8 +111,8 @@ func attempt_lunge_at_target(target):
 			humanoid.lunge.rpc(target.get_path())
 			
 			
-@rpc("any_peer", "call_local")
-func rpc_send_Continuous_input(inputs):
+@rpc("any_peer", "call_local", "unreliable_ordered")
+func rpc_update_Continuous_inputs(inputs):
 	
 	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
 		return
@@ -118,19 +120,11 @@ func rpc_send_Continuous_input(inputs):
 	look = inputs['look']	
 	WASD = inputs['wasd']
 	humanoid.RUNNING = inputs['run']
-	
-	#for key in inputs.keys():
-		#
-		#if not cached_inputs.has(key):
-			#pass
-		#elif inputs[key] != cached_inputs[key]:
-			#humanoid.unlagger.reset(multiplayer.get_remote_sender_id())
-			
 	cache_new_inputs(inputs)
 		
 
 @rpc("any_peer", "call_local", "reliable")
-func rpc_send_Discrete_input(inputs):
+func rpc_update_Discrete_inputs(inputs):
 	
 	var sender_id = multiplayer.get_remote_sender_id()
 	
