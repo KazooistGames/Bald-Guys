@@ -3,7 +3,7 @@ extends Node
 static var SERVER_PING = 0.0 
 static var CLIENT_PINGS = {}
 
-const max_state_age = 0.5
+const max_state_age = 1.0
 
 var previous_transforms : Array = []
 var previous_velocities : Array = []

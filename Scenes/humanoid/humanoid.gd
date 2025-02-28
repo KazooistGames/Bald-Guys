@@ -120,7 +120,7 @@ func _process(_delta):
 	var allow_run = run_permissive()
 	
 	animation.walkAnimBlendScalar = TOPSPEED
-	animation.walkAnimPlaybackScalar = 1.5 if allow_run else 1.8
+	animation.walkAnimPlaybackScalar = 1.5 if allow_run else 1.9
 	animation.WALK_STATE = animation.WalkState.RUNNING if allow_run else animation.WalkState.WALKING
 	
 	IMPACT_THRESHOLD = 6.0 * mass
