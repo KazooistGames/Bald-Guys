@@ -4,6 +4,7 @@ static var SERVER_PING = 0.0
 static var CLIENT_PINGS = {}
 
 const max_state_age = 1.0
+const debug = false
 
 var previous_transforms : Array = []
 var previous_velocities : Array = []
@@ -25,18 +26,24 @@ func _physics_process(delta):
 		previous_state_ages.pop_front()
 	
 
-func apply_retroactive_impulse(time_to_rollback, impulse, velocity_modifier : Callable = Callable(), use_gravity = true):
+func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callable = Callable(), delta_modifer: Callable = Callable(), use_gravity = true):
 	
 	var index = get_rollback_index(time_to_rollback)
-	var base_velocity =  previous_velocities[previous_velocities.size()-1]
+	var base_velocity =  previous_velocities[index]
+	var delta_velocity = previous_velocities[previous_velocities.size()-1] - base_velocity
 	
-	if velocity_modifier.is_valid():
-		base_velocity = velocity_modifier.call(base_velocity)
+	if base_modifier.is_valid():
+		base_velocity = base_modifier.call(base_velocity)
 		
-	var predicted_velocity = base_velocity + impulse
+	if delta_modifer.is_valid():
+		delta_velocity = delta_modifer.call(delta_velocity)
+		
+	var predicted_velocity = base_velocity + delta_velocity + impulse
 	var predicted_transform = previous_transforms[index]
 	predicted_transform.origin += predicted_velocity * time_to_rollback 
-	print("Rolled back ", time_to_rollback, " from " ,get_parent().transform.origin ," moving ", base_velocity, " at index ", index)
+	
+	if debug:
+		print("Rolled back ", time_to_rollback, " from " ,get_parent().transform.origin ," moving ", base_velocity, " at index ", index)
 	
 	if use_gravity:
 		predicted_transform.origin -= Vector3.UP * 4.9 * pow(time_to_rollback, 2.0)		
@@ -44,8 +51,10 @@ func apply_retroactive_impulse(time_to_rollback, impulse, velocity_modifier : Ca
 		
 	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, predicted_transform)
 	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, predicted_velocity)
-	print("wound up at ", predicted_transform.origin, " and set velocity to ", predicted_velocity)
 	invalidate_cache_array(index)
+	
+	if debug:
+		print("wound up at ", predicted_transform.origin, " and set velocity to ", predicted_velocity)
 	
 
 func get_rollback_index(time_to_rollback):

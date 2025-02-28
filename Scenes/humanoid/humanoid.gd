@@ -506,11 +506,14 @@ func jump(calling_client_id = 1):
 		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	
 		var jump_impulse = Vector3.UP * JUMP_SPEED
 		
-		var modifier : Callable = func(velocity): 
+		var base_modifier : Callable = func(velocity): 
 			velocity.y = max(0, velocity.y)
 			return velocity
 			
-		rectifier.apply_retroactive_impulse(rollback_lag, jump_impulse, modifier)
+		var delta_modifier : Callable = func(velocity):
+			return velocity * Vector3(1.0, 0, 1.0)
+			
+		rectifier.apply_retroactive_impulse(rollback_lag, jump_impulse, base_modifier, delta_modifier)
 		
 	else:
 		var offset = max(0.0, linear_velocity.y)

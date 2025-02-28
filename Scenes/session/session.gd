@@ -126,7 +126,7 @@ func handle_new_game(new_game):
 
 func Finished_Round(winner):
 	
-	HUD.set_psa.rpc("Winner: " + winner, -1)
+	HUD.set_psa.rpc("Winner:\n\n" + winner, -1)
 	move_to_Lobby()
 	Commission_Next_Round()
 
