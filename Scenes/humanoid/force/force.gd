@@ -6,6 +6,10 @@ const throw_force = 750.0
 const push_force = 200.0
 const ragdoll_radius = 2.0
 
+const grow_radius = 1.0
+const grow_height = 2.0
+const render_scale = 0.75
+
 enum Action {
 	inert = 0,
 	holding = 1,
@@ -50,7 +54,7 @@ func _ready():
 	monitoring = true
 
 
-func _process(_delta):
+func _process(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
 		multiplayer_permissive = true
@@ -58,6 +62,12 @@ func _process(_delta):
 		multiplayer_permissive = true
 	else:
 		multiplayer_permissive = false
+		
+	mesh.mesh.radius = collider.shape.radius * render_scale
+	mesh.mesh.height = collider.shape.height * render_scale
+	mesh.rotate(Vector3.UP, delta * 0.9)
+	mesh.rotate(Vector3.FORWARD, delta)
+	mesh.rotate(Vector3.RIGHT, delta * 1.1)
 		
 
 func _physics_process(delta):
@@ -70,8 +80,10 @@ func _physics_process(delta):
 	delta *= scalar
 	
 	if action == Action.holding:
-		collider.shape.radius = move_toward(collider.shape.radius, 1.0, 2.0 * delta)
-		collider.shape.height = move_toward(collider.shape.height, 2.0, 5.0 * delta)
+		
+		if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
+			collider.shape.radius = move_toward(collider.shape.radius, grow_radius, 2.0 * delta)
+			collider.shape.height = move_toward(collider.shape.height, grow_height, 5.0 * delta)
 		
 		for body in contained_bodies:			
 
@@ -86,8 +98,11 @@ func _physics_process(delta):
 
 		charge_timer += delta
 		var progress = pow(clamp(charge_timer/charge_period, 0.0, 1.0), 3.0)
-		collider.shape.radius = lerp(0.0, 1.0, progress)
-		collider.shape.height = lerp(0.0, 2.0, progress)
+		
+		if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
+			collider.shape.radius = lerp(0.0, 1.0, progress)
+			collider.shape.height = lerp(0.0, 2.0, progress)
+			
 		hum.volume_db = lerp(-27.0, -21.0, progress)
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
@@ -97,21 +112,34 @@ func _physics_process(delta):
 			rpc_trigger.rpc()
 		
 	elif action == Action.inert:	
-		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
-		collider.shape.height = move_toward(collider.shape.height, 0, 12.0 * delta)
 		
-		if collider.shape.radius == 0:
+		if not mesh.visible:
+			pass
+			
+		elif collider.shape.radius == 0 or collider.shape.height == 0:
 			mesh.visible = false	
-		
+			collider.shape.radius = 0
+			collider.shape.height = 0
+			
+		elif collider.shape.radius != 0:
+			collider.shape.radius = move_toward(collider.shape.radius, 0, 10.0 * delta)
+			collider.shape.height = move_toward(collider.shape.height, 0, 10.0 * delta)
+	
 	elif action == Action.cooldown:
-		collider.shape.radius = move_toward(collider.shape.radius, 0, 8.0 * delta)
-		collider.shape.height = move_toward(collider.shape.height, 0, 12.0 * delta)
 			
 		if collider.shape.radius == 0:
 			mesh.visible = false	
 			
 		cooldown_timer += delta
 		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
+		var collider_shrinkage = clamp(progress * 3.0, 0.0, 1.0)
+		
+		if collider.shape.radius <= 0 or collider.shape.height <= 0:
+			mesh.visible = false	
+		else:
+			collider.shape.radius = lerp(grow_radius, 0.0, collider_shrinkage)
+			collider.shape.height = lerp(grow_height, 0.0, collider_shrinkage)
+			
 		hum.pitch_scale = lerp(1.5, 0.5, progress)
 		
 		if not multiplayer_permissive:
@@ -119,12 +147,7 @@ func _physics_process(delta):
 		elif cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		
-	mesh.mesh.radius = collider.shape.radius * 0.8
-	mesh.mesh.height = collider.shape.height* 0.8
-	mesh.rotate(Vector3.UP, delta * 0.9)
-	mesh.rotate(Vector3.FORWARD, delta)
-	mesh.rotate(Vector3.RIGHT, delta * 1.1)
-	mesh.set_surface_override_material(0, material)
+	#mesh.set_surface_override_material(0, material)
 	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
 	position = position.move_toward(target_position, delta * 5.0)
 	

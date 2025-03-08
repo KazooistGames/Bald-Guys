@@ -315,14 +315,18 @@ func _physics_process(delta):
 			lunge_target_last_position = Lunge_Target.global_position
 			
 	else:	
-		var walk_target
+		var transversal_walk_target
 		
 		if ON_FLOOR or WALK_VECTOR:
-			walk_target = WALK_VECTOR.normalized() * TOPSPEED * TOPSPEED_MOD
-		else:
-			walk_target = linear_velocity - floor_velocity
+			transversal_walk_target = WALK_VECTOR.normalized() * TOPSPEED * TOPSPEED_MOD
+			transversal_walk_target.y = linear_velocity.y
+			transversal_walk_target = transversal_walk_target.normalized() * TOPSPEED * TOPSPEED_MOD	
 			
-		var target_linear_velocity = walk_target + floor_velocity
+		else:
+			transversal_walk_target = linear_velocity - floor_velocity
+			
+		var target_linear_velocity = transversal_walk_target + floor_velocity
+		var magnitude_limit = target_linear_velocity.length()
 		target_linear_velocity.y = linear_velocity.y
 		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
 
@@ -374,8 +378,8 @@ func get_acceleration():
 func getRandomSkinTone():
 	
 	var rng = RandomNumberGenerator.new()
-	var colorBase = rng.randf_range(40.0, 220.0 ) / 255
-	var redShift = rng.randf_range(20,30 ) / 255
+	var colorBase = rng.randf_range(20.0, 240.0 ) / 255
+	var redShift = rng.randf_range(20,45 ) / 255
 	var blueShift = rng.randf_range(0, redShift ) / 255
 	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift )
 

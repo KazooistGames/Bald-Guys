@@ -81,12 +81,6 @@ func get_rollback_transfrom(time_to_rollback):
 	var index = get_rollback_index(time_to_rollback)
 	return previous_transforms[index]
 	
-
-func get_cumulative_transform_change(start_index):
-	
-	for index in range(start_index, 0):
-		pass
-	
 	
 func invalidate_cache_array(start_index):
 	

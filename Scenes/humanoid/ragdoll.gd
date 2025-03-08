@@ -102,8 +102,9 @@ func animate_physical_bones(delta):
 func process_slappy_feet(delta):
 	
 	var speed = $"Physical Bone lowerBody".linear_velocity.length()
-	slappy_foot_left.mod_db = speed 
-	slappy_foot_right.mod_db = speed
+	var speed_scaled = pow(speed, 1.25)
+	slappy_foot_left.mod_db = speed_scaled
+	slappy_foot_right.mod_db = speed_scaled
 	slappy_foot_left.process_slap(delta)
 	slappy_foot_right.process_slap(delta)
 

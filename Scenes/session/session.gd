@@ -288,7 +288,7 @@ func ping_clients():
 	ping.rpc(local_server_time)
 				
 	
-@rpc("authority", "call_remote")
+@rpc("any_peer", "call_remote")
 func ping(passthrough_time : float):  
 
 	var sender_id = multiplayer.get_remote_sender_id()
@@ -310,9 +310,10 @@ func pong(ping_timestamp : float): #responding RPC call that passes back initial
 		
 	else:
 		unlagger.SERVER_PING = ping_ms
+		HUD.set_ping_indicator(ping_ms)
 		
 	unlagger.reset()
-	HUD.set_ping_indicator(ping_ms)
+
 	
 	
 	
