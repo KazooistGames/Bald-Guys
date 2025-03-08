@@ -83,7 +83,7 @@ func _input(event):
 func react_to_ragdoll():
 	
 	if is_local_interface:
-		recovery_minigame.start()
+		recovery_minigame.start_game()
 	
 	
 func react_to_ragdoll_recovery():

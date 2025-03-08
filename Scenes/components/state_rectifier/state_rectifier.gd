@@ -64,7 +64,7 @@ func get_rollback_index(time_to_rollback):
 	
 	while(target_index > 0 and previous_state_ages[target_index] < time_to_rollback): 
 		target_index -= 1 	#give preference to more recent states		
-	while(target_index <= newest_index and previous_state_ages[target_index] > time_to_rollback):
+	while(target_index < newest_index and previous_state_ages[target_index] > time_to_rollback):
 		target_index += 1
 	
 	return target_index

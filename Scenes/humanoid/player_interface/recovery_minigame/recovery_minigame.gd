@@ -26,6 +26,10 @@ func _ready():
 	net_sync.get_net_var_delegate = get_net_vars
 	net_sync.synced.connect(unlagger.reset)
 	unlagger.max_rectification_scalar = 1.2
+	
+	if is_multiplayer_authority():
+		net_sync.force_sync()
+
 
 func _process(delta):
 	
@@ -51,13 +55,14 @@ func _process(delta):
 		target.color = Color('b98457')
 
 
-func start():
+func start_game():
 	
 	visible = true
 	locked = false
 			
 			
 func lever_on_target(phase):
+	
 	phase += lever_phase_lag_offset
 	var simulated_position = sin(phase) * backdrop.size.x / 2.0
 	return abs(simulated_position) <= target.size.x / 2.0

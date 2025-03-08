@@ -289,26 +289,23 @@ func ping_clients():
 				
 	
 @rpc("authority", "call_remote")
-func ping(server_time : float):  
-	
-	if is_multiplayer_authority():
-		pass
-	else:
-		var local_time = Time.get_unix_time_from_system()
-		var ping_ms = (local_time - server_time) * 1000.0
-		unlagger.SERVER_PING = ping_ms
-		unlagger.reset()
-		HUD.set_ping_indicator(ping_ms)
-		pong.rpc_id(get_multiplayer_authority(), local_time)
+func ping(remote_time : float):  
+
+	#var local_time = Time.get_unix_time_from_system()
+	#var ping_ms = (local_time - server_time) * 1000.0
+	#unlagger.SERVER_PING = ping_ms
+	#unlagger.reset()
+	#HUD.set_ping_indicator(ping_ms)
+	var sender_id = multiplayer.get_remote_sender_id()
+	pong.rpc_id(sender_id, remote_time)
 		
 		
 @rpc("any_peer", "call_remote")
-func pong(client_time : float):
-	
-	if is_multiplayer_authority():
-		var local_time = Time.get_unix_time_from_system()
-		var ping_ms = (local_time - client_time) * 1000.0
-		unlagger.CLIENT_PINGS[multiplayer.get_remote_sender_id()] = ping_ms
+func pong(ping_time : float):
+
+	var local_time = Time.get_unix_time_from_system()
+	var ping_ms = (local_time - ping_time) * 1000.0 / 2.0
+	unlagger.CLIENT_PINGS[multiplayer.get_remote_sender_id()] = ping_ms
 		
 	
 func update_nameplate_for_ragdoll(new_value, node):
