@@ -58,8 +58,6 @@ func _ready():
 
 func _process(delta):
 	
-	unlagger.compensated_delta(delta)
-	
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	
 	for humanoid in Humanoids:
@@ -310,9 +308,8 @@ func pong(ping_timestamp : float): #responding RPC call that passes back initial
 		
 	else:
 		unlagger.SERVER_PING = ping_ms
-		HUD.set_ping_indicator(ping_ms)
-		
-	unlagger.reset()
+		HUD.set_ping_indicator(ping_ms)	
+		unlagger.reset()
 
 	
 	
