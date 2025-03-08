@@ -10,7 +10,7 @@ const map_size = 50
 
 @onready var session = get_parent()
 
-var reconfigure_period = 90.0
+var reconfigure_period = 120.0
 var reconfigure_timer = -1.0
 			
 var multiplayer_permissive = false

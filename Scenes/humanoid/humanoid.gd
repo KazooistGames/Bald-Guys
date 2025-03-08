@@ -319,8 +319,10 @@ func _physics_process(delta):
 		
 		if ON_FLOOR or WALK_VECTOR:
 			transversal_walk_target = WALK_VECTOR.normalized() * TOPSPEED * TOPSPEED_MOD
-			transversal_walk_target.y = linear_velocity.y
-			transversal_walk_target = transversal_walk_target.normalized() * TOPSPEED * TOPSPEED_MOD	
+			
+			if ON_FLOOR:
+				transversal_walk_target.y = linear_velocity.y
+				transversal_walk_target = transversal_walk_target.normalized() * TOPSPEED * TOPSPEED_MOD	
 			
 		else:
 			transversal_walk_target = linear_velocity - floor_velocity
@@ -382,7 +384,6 @@ func getRandomSkinTone():
 	var redShift = rng.randf_range(20,45 ) / 255
 	var blueShift = rng.randf_range(0, redShift ) / 255
 	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift )
-
 
 func head_position():
 	

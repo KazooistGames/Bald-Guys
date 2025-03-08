@@ -15,13 +15,18 @@ func _ready():
 		queue_free()
 		
 	if not is_multiplayer_authority():
-		request_sync.rpc_id(get_multiplayer_authority())
+		request_force_sync()
 	
 	
 func force_sync():
 	
 	if is_multiplayer_authority():
 		net_sync.rpc(get_net_vars())
+		
+func request_force_sync():
+	
+	if not is_multiplayer_authority():
+		request_sync.rpc_id(get_multiplayer_authority())
 	
 	
 @rpc("authority", "call_remote", "reliable")

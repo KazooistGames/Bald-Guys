@@ -73,6 +73,8 @@ func get_mesh_height(bot_pos):
 	return top_position.distance_to(bot_pos) 
 	
 	
+var cached_mesh_position = Vector3.ZERO
+var cached_bottom_position = Vector3.ZERO
 func rerender():
 		
 	bottom_position += bottom_position.normalized() * bottom_drop
@@ -81,6 +83,13 @@ func rerender():
 		
 	if size <= 0 or mesh_height <= 0:
 		return	
+		
+	elif cached_mesh_position == mesh_position and cached_bottom_position == bottom_position:
+		return
+		
+	else:
+		cached_mesh_position = mesh_position
+		cached_bottom_position = bottom_position
 		
 	mesh.global_position = mesh_position + global_position
 	mesh.mesh.size.x = size

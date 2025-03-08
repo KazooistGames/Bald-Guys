@@ -26,9 +26,6 @@ func _ready():
 	net_sync.get_net_var_delegate = get_net_vars
 	net_sync.synced.connect(unlagger.reset)
 	unlagger.max_rectification_scalar = 1.2
-	
-	if is_multiplayer_authority():
-		net_sync.force_sync()
 
 
 func _process(delta):
@@ -70,13 +67,13 @@ func lever_on_target(phase):
 	
 func attempt_early_recovery(client_id):
 	
-	lever_phase_lag_offset = -unlagger.CLIENT_PINGS[client_id] / 1000.0
+	var lever_phase_lag_offset = unlagger.CLIENT_PINGS[client_id] / 1000.0
 	
 	if not is_multiplayer_authority():
 		return
 	elif locked: 
 		early_fail.rpc()	
-	elif lever_on_target(lever_phase):
+	elif lever_on_target(lever_phase - lever_phase_lag_offset):
 		early_succeed.rpc()		
 	else:
 		early_fail.rpc()

@@ -74,13 +74,23 @@ func get_mesh_height(bot_pos):
 	return top_position.distance_to(bot_pos) 
 	
 	
+	
+var cached_mesh_position = Vector3.ZERO
+var cached_bottom_position = Vector3.ZERO
 func rerender():
 		
 	var mesh_position = get_mesh_position(bottom_position) * reverse_growth_scale
 	var mesh_height = get_mesh_height(bottom_position) * reverse_growth_scale
 		
 	if radius <= 0 or mesh_height <= 0:
-		return		
+		return	
+		
+	elif cached_mesh_position == mesh_position and cached_bottom_position == bottom_position:
+		return
+		
+	else:
+		cached_mesh_position = mesh_position
+		cached_bottom_position = bottom_position
 		
 	mesh.global_position = mesh_position + global_position
 	mesh.mesh.height = mesh_height 
