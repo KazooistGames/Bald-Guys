@@ -118,7 +118,16 @@ func rpc_update_Continuous_inputs(inputs):
 		return
 		
 	look = inputs['look']	
-	WASD = inputs['wasd']
+	
+	if WASD != inputs['wasd']:
+		WASD = inputs['wasd']
+		var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
+		humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
+		var sender_id = multiplayer.get_remote_sender_id()
+		var rollback_lag = humanoid.unlagger.CLIENT_PINGS[sender_id] / 1000.0
+		humanoid.rectifier.perform_rollback(rollback_lag)
+		humanoid.step_movement(rollback_lag)
+		
 	humanoid.RUNNING = inputs['run']
 	cache_new_inputs(inputs)
 		

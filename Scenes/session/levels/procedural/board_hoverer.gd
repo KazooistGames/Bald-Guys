@@ -33,7 +33,9 @@ func _physics_process(delta):
 	
 	sync_cooldown_progress += delta * sync_cooldown_rate
 	
-	if is_multiplayer_authority() and sync_cooldown_progress >= 1.0:
+	if not multiplayer.has_multiplayer_peer():
+		pass
+	elif is_multiplayer_authority() and sync_cooldown_progress >= 1.0:
 		synchronize_all_peers()
 	
 	delta *= unlagger.delta_scalar(delta)

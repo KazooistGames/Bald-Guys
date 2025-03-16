@@ -5,23 +5,21 @@ const Humanoid_Prefab = preload("res://Scenes/humanoid/humanoid.tscn")
 const SessionState = {
 	Lobby = 0,
 	Round = 1,
+	Intermission = 2,
 }
 
 @export var Client_Screennames : Dictionary = {}
 @export var State = SessionState.Lobby
 @export var Commissioned = false
 @export var Humanoids = []
-
-@export var Level : Node3D = null
-
 @export var Game : Node3D = null
 
+@onready var Level : Node3D = $Procedural_Level
 @onready var HUD = $HUD
-
-@onready var Lobby = $Lobby
+#@onready var Lobby = $Lobby
 
 @onready var humanoidSpawner = $HumanoidSpawner
-@onready var levelSpawner = $LevelSpawner
+#@onready var levelSpawner = $LevelSpawner
 @onready var gameSpawner = $GameSpawner
 
 @onready var raycast = $RayCast3D
@@ -47,16 +45,16 @@ func _ready():
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
 	gameSpawner.spawned.connect(handle_new_game)
-	levelSpawner.spawned.connect(handle_new_level)
+	#levelSpawner.spawned.connect(handle_new_level)
 	
 	if is_multiplayer_authority():
 		Commission_Next_Round()
-		move_to_Lobby()
+		#move_to_Lobby()
 		create_player_humanoid(1)
 		Commissioned = true
 
 
-func _process(delta):
+func _process(_delta):
 	
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	
@@ -76,11 +74,13 @@ func _unhandled_key_input(event):
 			
 	elif event.is_action_pressed("Toggle"):
 			
-		if State != SessionState.Lobby:
-			move_to_Lobby()
+		if State != SessionState.Round:
+			State = SessionState.Round			
+			Started_Round.emit()
 			
-		elif State != SessionState.Round:
-			move_to_level()	
+		else:	
+			State = SessionState.Intermission			
+			Ended_Round.emit()
 
 
 func fix_out_of_bounds():
@@ -88,8 +88,8 @@ func fix_out_of_bounds():
 	for humanoid in Humanoids:
 		
 		if not node_is_in_bounds(humanoid):		
-			var parent = Level if State == SessionState.Round else Lobby
-			spawn_player.rpc(parent.get_path(), humanoid.get_path())
+			#var parent = Level if State == SessionState.Round else Lobby
+			spawn_player.rpc(Level.get_path(), humanoid.get_path())
 			
 
 func node_is_in_bounds(node):
@@ -125,7 +125,8 @@ func handle_new_game(new_game):
 func Finished_Round(winner):
 	
 	HUD.set_psa.rpc("Winner:\n\n" + winner, -1)
-	move_to_Lobby()
+	#move_to_Lobby()
+	Ended_Round.emit()	
 	Commission_Next_Round()
 
 
@@ -162,12 +163,14 @@ func get_random_spawn(parent):
 
 func create_player_humanoid(peer_id):
 	
+	unlagger.CLIENT_PINGS[peer_id] = 0
+	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
 	Humanoids.append(new_peer_humanoid)
 	add_child(new_peer_humanoid)
 	
-	var random_spawn_position = get_random_spawn(Lobby)
+	var random_spawn_position = get_random_spawn(Level)
 	respawn_node.rpc(new_peer_humanoid.get_path(), random_spawn_position)
 
 	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name)
@@ -196,14 +199,14 @@ func destroy_player_humanoid(peer_id):
 
 
 #@rpc("call_local", "authority", "reliable")
-func move_to_Lobby():
-	
-	State = SessionState.Lobby
-	
-	for humanoid in Humanoids:
-		spawn_player(Lobby.get_path(), humanoid.get_path())	
-	
-	Ended_Round.emit()	
+#func move_to_Lobby():
+	#
+	#State = SessionState.Lobby
+	#
+	#for humanoid in Humanoids:
+		#spawn_player(Lobby.get_path(), humanoid.get_path())	
+	#
+	#Ended_Round.emit()	
 	
 		
 #@rpc("call_local", "authority", "reliable")
@@ -229,32 +232,33 @@ func respawn_node(node_path, spawn_position):
 func Commission_Next_Round():
 	
 	var unique_round_id = randi_range(0, 0)
-	var level_prefab_path = ""
+	#var level_prefab_path = ""
 	var game_prefab_path = ""
 	
 	match unique_round_id:
 		0:
-			level_prefab_path = "res://Scenes/session/levels/Procedural_Level.tscn"
+			#level_prefab_path = "res://Scenes/session/levels/Procedural_Level.tscn"
 			game_prefab_path = "res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn"
 	
-	if level_prefab_path != ""	and game_prefab_path != "":
-		load_level(level_prefab_path)
+	#if level_prefab_path != ""	and game_prefab_path != "":
+	if game_prefab_path != "":
+		#load_level(level_prefab_path)
 		load_game(game_prefab_path)
 	
 
-func load_level(path):
-	
-	var prefab = load(path)
-	
-	if prefab == null:
-		return
-		
-	if Level != null:
-		Level.queue_free()
-		
-	Level = prefab.instantiate()
-	add_child(Level, true)
-	print("Level commissioned: ", Level)
+#func load_level(path):
+	#
+	#var prefab = load(path)
+	#
+	#if prefab == null:
+		#return
+		#
+	#if Level != null:
+		#Level.queue_free()
+		#
+	#Level = prefab.instantiate()
+	#add_child(Level, true)
+	#print("Level commissioned: ", Level)
 	
 
 func load_game(path):
@@ -269,7 +273,7 @@ func load_game(path):
 		
 	Game = prefab.instantiate()
 	add_child(Game, true)
-	print("Game commissioned: ", Game)
+	print("Commissioned a round of ", Game)
 	
 	
 func local_screenname():
@@ -310,8 +314,6 @@ func pong(ping_timestamp : float): #responding RPC call that passes back initial
 		unlagger.SERVER_PING = ping_ms
 		HUD.set_ping_indicator(ping_ms)	
 		unlagger.reset()
-
-	
 	
 	
 func update_nameplate_for_ragdoll(new_value, node):

@@ -8,6 +8,8 @@ extends Skeleton3D
 @export var ANGULAR_STIFFNESS = 800.0
 @export var ANGULAR_DAMPING = 80.0
 
+@export var head_displacement = 0.0
+
 var bone_modifiers = {
 	"head":1.0,
 	"upperBody":0.75,
@@ -79,6 +81,9 @@ func animate_physical_bones(delta):
 		var angular_displacement = animated_transform.basis * physical_transform.basis.inverse()
 		var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
 		var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
+		
+		if physical_bone.bone_name == "head":
+			head_displacement = linear_displacement.length()
 
 		if tooFast or tooFar:
 			correct_physical_bones_trigger = true
@@ -91,12 +96,20 @@ func animate_physical_bones(delta):
 			correct_physical_bones_trigger = false
 			
 		else:
-			var linear_force = get_hookes_law_force(LINEAR_STIFFNESS * bone_modifier, linear_displacement, LINEAR_DAMPING * bone_modifier, physical_bone.linear_velocity)
+			var lin_stiff = LINEAR_STIFFNESS * bone_modifier
+			var lin_damp = LINEAR_DAMPING * bone_modifier
+			var linear_force = hookes_law(lin_stiff, linear_displacement, lin_damp, physical_bone.linear_velocity)
 			physical_bone.linear_velocity += linear_force * delta
-			var angular_torque = get_hookes_law_force(ANGULAR_STIFFNESS * bone_modifier, angular_displacement.get_euler(), ANGULAR_DAMPING * bone_modifier, physical_bone.angular_velocity)
-			physical_bone.angular_velocity += angular_torque * delta
+			
+			var ang_stiff = ANGULAR_STIFFNESS * bone_modifier
+			var ang_damp = ANGULAR_DAMPING * bone_modifier
+			var ang_vel = physical_bone.angular_velocity
+			var angular_torq = hookes_law(ang_stiff, angular_displacement.get_euler(), ang_damp, ang_vel)
+			physical_bone.angular_velocity += angular_torq * delta
 			
 	process_slappy_feet(delta)
+	
+
 
 
 func process_slappy_feet(delta):
@@ -115,7 +128,7 @@ func set_gravity(value):
 		bone.gravity_scale = value
 
 
-func get_hookes_law_force(stiffness, displacement, damping, velocity):
+func hookes_law(stiffness, displacement, damping, velocity):
 	
 	return (stiffness * displacement) - (damping * velocity)
 
