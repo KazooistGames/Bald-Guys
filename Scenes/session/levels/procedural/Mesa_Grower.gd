@@ -75,6 +75,12 @@ func extend_mesas():
 	if configuration != Configuration.extending:
 		configuration = Configuration.extending
 		
+		if mesas.size() == 0:
+			finished_extending.emit()	
+			
+	else:
+		finished_extending.emit()
+		
 		
 @rpc("call_local", "reliable")
 func retract_mesas():
@@ -83,6 +89,12 @@ func retract_mesas():
 	
 	if configuration != Configuration.retracting:
 		configuration = Configuration.retracting
+		
+		if mesas.size() == 0:
+			finished_retracting.emit()	
+		
+	else:
+		finished_retracting.emit()
 	
 	
 @rpc("call_local", "reliable")		

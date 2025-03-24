@@ -1,22 +1,23 @@
-[gd_scene load_steps=8 format=3 uid="uid://by3wuudn8soe"]
+[gd_scene load_steps=9 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/session/levels/borealis/borealis.tscn" id="2_ywwqv"]
 [ext_resource type="PackedScene" uid="uid://c635ib3vdy8sj" path="res://Scenes/session/levels/Hub_Level.tscn" id="4_haqbc"]
 [ext_resource type="PackedScene" uid="uid://bi27y02b7i065" path="res://Scenes/session/hud/HUD.tscn" id="4_ik81w"]
 [ext_resource type="PackedScene" uid="uid://4lgyaxekgwqy" path="res://Scenes/session/ambience/ambience.tscn" id="5_opotq"]
+[ext_resource type="PackedScene" uid="uid://b5fc4lv4wybum" path="res://Scenes/session/levels/Procedural_Level.tscn" id="5_xlqqg"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="6_qr0l4"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]
 properties/0/path = NodePath(".:State")
 properties/0/spawn = true
-properties/0/replication_mode = 1
+properties/0/replication_mode = 2
 properties/1/path = NodePath(".:Commissioned")
 properties/1/spawn = true
 properties/1/replication_mode = 2
 properties/2/path = NodePath(".:Client_Screennames")
 properties/2/spawn = true
-properties/2/replication_mode = 1
+properties/2/replication_mode = 2
 
 [node name="session" type="Node3D"]
 script = ExtResource("1_yhshl")
@@ -28,15 +29,13 @@ script = ExtResource("1_yhshl")
 [node name="Lobby" parent="." instance=ExtResource("4_haqbc")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 100, 100)
 
+[node name="Procedural_Level" parent="." instance=ExtResource("5_xlqqg")]
+
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_gpd36")
 
 [node name="HumanoidSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn")
-spawn_path = NodePath("..")
-
-[node name="LevelSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/session/levels/Procedural_Level.tscn")
 spawn_path = NodePath("..")
 
 [node name="GameSpawner" type="MultiplayerSpawner" parent="."]

@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="2_vwch7"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_xydkg"]
-bounce = 0.15
+bounce = 0.2
 
 [sub_resource type="SphereMesh" id="SphereMesh_vla70"]
 radius = 0.75

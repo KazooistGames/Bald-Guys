@@ -67,7 +67,7 @@ func lever_on_target(phase):
 	
 func attempt_early_recovery(client_id):
 	
-	var lever_phase_lag_offset = unlagger.CLIENT_PINGS[client_id] / 1000.0
+	lever_phase_lag_offset = unlagger.CLIENT_PINGS[client_id] / 1000.0
 	
 	if not is_multiplayer_authority():
 		return

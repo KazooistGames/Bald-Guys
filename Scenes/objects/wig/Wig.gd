@@ -9,7 +9,7 @@ extends RigidBody3D
 	set(value):
 		HAIR_COLOR = value
 		if not mesh: return
-		var material = mesh.get_surface_override_material(0)
+		material = mesh.get_surface_override_material(0)
 		material.albedo_color = value
 		material.emission = value
 		mesh.set_surface_override_material(0, material)
@@ -17,7 +17,8 @@ extends RigidBody3D
 @export var AUTHORITY_POSITION = Vector3.ZERO
 
 @export var radius = 0.25
-
+var cached_radius
+	
 @onready var Dawn = $Dawn
 @onready var Drop = $Drop
 
@@ -26,6 +27,7 @@ extends RigidBody3D
 @onready var collider = $CollisionShape3D
 @onready var interactable = $Interactable
 @onready var synchronizer = $MultiplayerSynchronizer
+@onready var material = mesh.get_surface_override_material(0)
 
 var strobing_enabled = false
 var strobing_phase = 0
@@ -48,10 +50,11 @@ func _ready():
 
 func _process(delta):
 	
-	mesh.mesh.radius = radius
-	mesh.mesh.height = radius * 2
-	collider.shape.radius = radius
-	var material = mesh.get_surface_override_material(0)
+	if cached_radius != radius:
+		cached_radius = radius
+		mesh.mesh.radius = radius
+		mesh.mesh.height = radius * 2
+		collider.shape.radius = radius
 	
 	if strobing_enabled:
 		material.emission_energy_multiplier = 1 * abs(sin(strobing_phase))

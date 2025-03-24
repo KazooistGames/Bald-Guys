@@ -83,7 +83,8 @@ func create_ramps(new_seed):
 			
 		if rng.randf() <= ramp_roof_freq: #roof
 			var y_offset = Vector3.DOWN * rng.randi_range(0, 1) * 0.75
-			spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false,  PI/2.0 * rng.randi_range(0, 3))
+			var rand_rotation = PI/2.0 * float(rng.randi_range(0, 3))
+			spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false,  rand_rotation)
 			
 		if rng.randf() <= ramp_floor_freq: #floor
 			var y_rotation = rng.randi_range(0, 3) * PI/2
@@ -160,21 +161,31 @@ func stop():
 func lift():
 	
 	unlagger.reset()
+	
 	if configuration == Configuration.lifting:
-		return
+		finished_lifting.emit()
+	
 	else:
 		configuration = Configuration.lifting
+		
+		if ramps.size() == 0:
+			finished_lifting.emit()
 	
 	
 @rpc("call_local", "reliable")	
 func collapse():
 	
 	unlagger.reset()
+	
 	if configuration == Configuration.collapsing:
-		return
+		finished_collapsing.emit()
+		
 	else:
 		configuration = Configuration.collapsing
-	
+		
+		if ramps.size() == 0:
+			finished_collapsing.emit()
+			
 
 func get_ramps():
 	

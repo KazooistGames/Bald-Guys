@@ -120,7 +120,7 @@ func _process(_delta):
 	var allow_run = run_permissive()
 	
 	animation.walkAnimBlendScalar = TOPSPEED
-	animation.walkAnimPlaybackScalar = 1.5 if allow_run else 1.9
+	animation.walkAnimPlaybackScalar = 1.5 if allow_run else 2.0
 	animation.WALK_STATE = animation.WalkState.RUNNING if allow_run else animation.WalkState.WALKING
 	
 	IMPACT_THRESHOLD = 6.0 * mass
@@ -286,6 +286,11 @@ func _physics_process(delta):
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
+	step_movement(delta)
+	
+	
+func step_movement(delta):
+	
 	if Lunging: 
 		
 		if Lunge_Target == null:	
@@ -295,24 +300,23 @@ func _physics_process(delta):
 				
 			return
 			
-		var disposition = Lunge_Target.global_position - global_position
 		lunge_total_traversal += linear_velocity.length() * delta
-		var in_range = disposition.length() <= Lunge_Deadband
-
 		var lunge_expired = lunge_total_traversal >= Lunge_max_traversal
 		
-		if in_range or lunge_expired:
+		if lunge_expired and multiplayer_permissive:
+			unlunge.rpc()
 			
-			if multiplayer_permissive:
-				unlunge.rpc()
+		var disposition = Lunge_Target.global_position - global_position
+		var in_range = disposition.length() <= Lunge_Deadband
+		
+		if in_range and multiplayer_permissive:
+			unlunge.rpc()
 			
 		else:
 			var deadband_next_frame_stepsize = (disposition.length() - Lunge_Deadband) / delta
-			linear_velocity = disposition.normalized() * min(Lunge_Speed, deadband_next_frame_stepsize * 1.1)
-			var extrapolated_target_velocity = Lunge_Target.global_position - lunge_target_last_position #account for target moving
-			extrapolated_target_velocity /= 2.0 #do this because we only have half-faith in this number
-			linear_velocity += extrapolated_target_velocity	
-			lunge_target_last_position = Lunge_Target.global_position
+			var intercept_position = Lunge_Target.global_position + Lunge_Target.linear_velocity * delta
+			var intercept_route = (intercept_position - global_position).normalized()
+			linear_velocity = intercept_route * min(Lunge_Speed, deadband_next_frame_stepsize * 1.1)
 			
 	else:	
 		var transversal_walk_target
@@ -328,11 +332,9 @@ func _physics_process(delta):
 			transversal_walk_target = linear_velocity - floor_velocity
 			
 		var target_linear_velocity = transversal_walk_target + floor_velocity
-		var magnitude_limit = target_linear_velocity.length()
 		target_linear_velocity.y = linear_velocity.y
 		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
-
-	
+		
 	
 func run_permissive():
 	
@@ -348,6 +350,7 @@ func run_permissive():
 		return false
 	else:
 		return true
+		
 		
 func is_on_floor():
 	
@@ -385,6 +388,7 @@ func getRandomSkinTone():
 	var blueShift = rng.randf_range(0, redShift ) / 255
 	SKIN_COLOR = Color(colorBase + redShift, colorBase, colorBase-blueShift )
 
+
 func head_position():
 	
 	var headPosition = skeleton.bone_position("chin")
@@ -399,7 +403,6 @@ func get_ragdoll_ready():
 	
 func get_ragdoll_recovered():
 	
-	#return ragdoll_recovery_timer_seconds > ragdoll_recovery_period_seconds
 	return ragdoll_recovery_progress >= 1.0
 	
 
@@ -547,7 +550,6 @@ func double_jump(calling_client_id = 1):
 	jumpFX.pitch_scale = 1.25
 	jumpFX.play()	
 	DOUBLE_JUMP_CHARGES -= 1
-	var new_y_speed = Vector3.UP * JUMP_SPEED
 	
 	if is_multiplayer_authority():
 		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	

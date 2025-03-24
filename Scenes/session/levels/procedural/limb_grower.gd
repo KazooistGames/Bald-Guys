@@ -117,6 +117,12 @@ func extend_limbs():
 		configuration = Configuration.extending
 		in_position = false
 		
+		if limbs.size() == 0:
+			finished_extending.emit()	
+			
+	else:
+		finished_extending.emit()
+		
 		
 @rpc("call_local", "reliable")	
 func retract_limbs():
@@ -128,6 +134,13 @@ func retract_limbs():
 		
 		for limb in limbs:
 			limb.preference = limb.Preference.deep 
+			
+		if limbs.size() == 0:
+			finished_retracting.emit()	
+			
+	else:
+		finished_retracting.emit()
+		
 		
 @rpc("call_local", "reliable")
 func stop():
