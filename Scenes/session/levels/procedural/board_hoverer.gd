@@ -6,6 +6,15 @@ const sync_prefab = preload("res://Scenes/components/transform_sync/transform_sy
 const board_thickness = 0.5
 const map_size = 50
 
+enum Configuration 
+{
+	inert = 0,
+	introducing = 1,
+	retreating = 2,
+	bouncing = 3
+}
+@export var configuration = Configuration.introducing
+
 @export var boards = []
 @export var board_trajectories = []
 @export var height_bounds = []
@@ -19,8 +28,19 @@ const map_size = 50
 var sync_cooldown_progress = 0.0
 var sync_cooldown_rate = 1.0
 
-signal bounced(node)
-signal constrained(node)
+var in_position = false
+
+var introduction_height = 10.0
+var introduction_speed = 10.0
+var retreat_speed = 5.0
+
+var trajectory_scale = 0.0
+
+signal finished_introducing()
+signal finished_retreating()
+
+signal bounced(board : Node3D)
+signal constrained(board : Node3D)
 
 
 func _ready():
@@ -38,17 +58,55 @@ func _physics_process(delta):
 	
 	delta *= unlagger.delta_scalar(delta)
 	
+	if configuration == Configuration.inert:
+		return
+	
+	in_position = true
+	
 	for index in range(board_trajectories.size()): #move hover mesas	
-		
+
 		if index >= boards.size() or index >= height_bounds.size():
 			return
-			
+		
 		var board = boards[index]
 		var height_lims = height_bounds[index]
-		board.position += board_trajectories[index] * delta
-		var trajectory = bounce_geometry(board, board_trajectories[index])
-		board_trajectories[index] = constrain_geometry(board, trajectory, height_lims)	
-	
+		
+		match configuration:
+			
+			Configuration.introducing:
+				
+				var clamped_target = clampf(introduction_height, height_lims.x + board_thickness, height_lims.y - board_thickness)
+				
+				if board.position.y != clamped_target:
+					in_position = false
+					board.position.y = move_toward(board.position.y, clamped_target, introduction_speed * delta)
+				
+			Configuration.retreating:
+				
+				if board.position.y != -1.0:
+					in_position = false
+					board.position.y = move_toward(board.position.y, -1.0, retreat_speed * delta)
+				
+			Configuration.bouncing:
+				
+				if trajectory_scale != 1.0:
+					trajectory_scale = move_toward(trajectory_scale, 1.0, delta / 10.0)
+				
+				board.position += board_trajectories[index] * delta * pow(trajectory_scale, 1.5)
+				var trajectory = board_trajectories[index]
+				trajectory = bounce_geometry(board, trajectory) 
+				board_trajectories[index] = constrain_geometry(board, trajectory, height_lims)	
+			
+		if not in_position:
+			pass
+			
+		elif configuration == Configuration.introducing:
+			finished_introducing.emit()
+			#configuration = Configuration.inert
+			
+		elif configuration == Configuration.retreating:
+			finished_retreating.emit()
+			#configuration = Configuration.inert
 		
 func bounce_geometry(geometry, trajectory):
 	
@@ -90,7 +148,6 @@ func constrain_geometry(geometry, trajectory, height_limits):
 	elif geometry.position.x < -xz_boundaries:
 		trajectory.x *= -1.0	
 		geometry.position.x = -xz_boundaries
-		
 	#	Y
 	if geometry.position.y >= height_limits.y:
 		trajectory.y *= -1.0	
@@ -99,7 +156,6 @@ func constrain_geometry(geometry, trajectory, height_limits):
 	elif geometry.position.y <= height_limits.x + girth:
 		trajectory.y *= -1.0		
 		geometry.position.y = height_limits.x + girth
-		
 	#	Z
 	if geometry.position.z > xz_boundaries:
 		trajectory.z *= -1.0
@@ -153,7 +209,7 @@ func spawn_board(size):
 	new_board.raycast_target = Vector3.DOWN * board_thickness
 	new_board.position.x = rng.randi_range(-boundary, boundary)
 	new_board.position.z = rng.randi_range(-boundary, boundary)
-	new_board.position.y = board_thickness
+	new_board.position.y = map_size + randi_range(1, 5)
 	var new_vector = Vector3.ZERO
 	new_vector.x = rng.randf_range(-1.0, 1.0)
 	new_vector.y = rng.randf_range(0.05, 0.25)
@@ -162,6 +218,34 @@ func spawn_board(size):
 	
 	return new_vector.normalized()
 
+
+@rpc("call_local", "reliable")
+func introduce_boards(stop_height = 10.0):
+	
+	if configuration != Configuration.introducing:
+		introduction_height = stop_height
+		configuration = Configuration.introducing
+		in_position = false
+		unlagger.reset()
+		
+		
+@rpc("call_local", "reliable")	
+func retreat_boards():
+	
+	if configuration != Configuration.retreating:
+		configuration = Configuration.retreating
+		in_position = false
+		unlagger.reset()
+		
+		
+@rpc("call_local", "reliable")	
+func bounce_boards():
+	
+	if configuration != Configuration.bouncing:
+		configuration = Configuration.bouncing
+		trajectory_scale = 0.0
+		unlagger.reset()	
+		
 
 func get_boards():
 	

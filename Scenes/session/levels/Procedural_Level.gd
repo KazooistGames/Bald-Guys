@@ -29,16 +29,18 @@ func _ready():
 		return
 	
 	#going up
+	board_hoverer.finished_introducing.connect(stage_mesas)
 	mesa_grower.finished_extending.connect(stage_ramps)
 	ramparter.finished_lifting.connect(stage_limbs)
 	limb_grower.finished_extending.connect(start_reconfigure_timer)
-		
+	
 	#going down
 	limb_grower.finished_retracting.connect(unstage_ramps) #unstage the limbs to kick everything off
 	ramparter.finished_collapsing.connect(unstage_mesas)
+	mesa_grower.finished_retracting.connect(unstage_boards) 
 	
 	#loops here!
-	mesa_grower.finished_retracting.connect(stage_mesas) 
+	board_hoverer.finished_retreating.connect(stage_boards)
 	
 	#hook into session framework
 	session.Started_Round.connect(start_map)
@@ -61,10 +63,20 @@ func _physics_process(delta):
 		
 	else:
 		reconfigure_timer += delta
+		
 	
+func stage_boards():
+	
+	board_hoverer.clear_boards.rpc()
+	board_hoverer.introduce_boards.rpc()
+	board_hoverer.create_boards.rpc(5, 3, 4, Vector2(0, 15), hash(randi()))
+	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(15, 20), hash(randi()))
+	board_hoverer.create_boards.rpc(1, 12, 1, Vector2(20, 25), hash(randi()))
+
 
 func stage_mesas():
 	
+	board_hoverer.bounce_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
 	mesa_grower.extend_mesas.rpc()
 	mesa_grower.create_mesas.rpc(hash(randi()))	
@@ -108,20 +120,24 @@ func unstage_ramps():
 	
 func unstage_mesas():
 	
-	ramparter.stop()
+	ramparter.stop.rpc()
 	ramparter.clear_ramps.rpc()
 	mesa_grower.retract_mesas.rpc()
+	
+	
+func unstage_boards():
+	
+	mesa_grower.stop.rpc()
+	mesa_grower.clear_mesas.rpc()
+	board_hoverer.retreat_boards.rpc()
 	
 	
 func start_map():
 	
 	reconfigure_timer = -1
-	board_hoverer.create_boards.rpc(5, 3, 4, Vector2(0, 15), hash(randi()))
-	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(15, 20), hash(randi()))
-	board_hoverer.create_boards.rpc(1, 12, 1, Vector2(20, 25), hash(randi()))
 	item_dropper.spawn_field(0, 5, 5, 10, Vector3.UP * 25)
 	item_dropper.spawn_field(2, 3, 3, 10, Vector3.UP * 25)
-	stage_mesas()
+	stage_boards()
 	
 
 func stop_map():
