@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://by3wuudn8soe"]
+[gd_scene load_steps=8 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/session/levels/borealis/borealis.tscn" id="2_ywwqv"]
-[ext_resource type="PackedScene" uid="uid://c635ib3vdy8sj" path="res://Scenes/session/levels/Hub_Level.tscn" id="4_haqbc"]
 [ext_resource type="PackedScene" uid="uid://bi27y02b7i065" path="res://Scenes/session/hud/HUD.tscn" id="4_ik81w"]
 [ext_resource type="PackedScene" uid="uid://4lgyaxekgwqy" path="res://Scenes/session/ambience/ambience.tscn" id="5_opotq"]
 [ext_resource type="PackedScene" uid="uid://b5fc4lv4wybum" path="res://Scenes/session/levels/Procedural_Level.tscn" id="5_xlqqg"]
@@ -25,9 +24,6 @@ script = ExtResource("1_yhshl")
 [node name="Borealis" parent="." instance=ExtResource("2_ywwqv")]
 
 [node name="Ambience" parent="." instance=ExtResource("5_opotq")]
-
-[node name="Lobby" parent="." instance=ExtResource("4_haqbc")]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 100, 100)
 
 [node name="Procedural_Level" parent="." instance=ExtResource("5_xlqqg")]
 

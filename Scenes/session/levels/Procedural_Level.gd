@@ -82,20 +82,17 @@ func stage_boards():
 func stage_mesas():
 
 	board_hoverer.bounce_boards.rpc()
-	print("staging mesas")
 	mesa_grower.clear_mesas.rpc()
 	mesa_grower.create_mesas.rpc(hash(randi()))	
 	mesa_grower.extend_mesas.rpc()
 
 func stage_ramps():
-	print("staging ramps")
 	mesa_grower.stop.rpc()
 	ramparter.create_ramps.rpc(hash(randi()))
 	ramparter.lift.rpc()
 	
 	
 func stage_limbs():
-	print("staging limbs")
 	mesa_grower.stop.rpc()
 	ramparter.stop.rpc()	
 	limb_grower.create_limbs.rpc(hash(randi()))		
@@ -112,12 +109,10 @@ func start_reconfigure_timer(preset = 0):
 	
 			
 func unstage_limbs():
-	print("unstaging limbs")
 	limb_grower.retract_limbs.rpc()
 		
 	
 func unstage_ramps():
-	print("unstaging ramps")
 	limb_grower.stop.rpc()
 	limb_grower.clear_limbs.rpc()
 	ramparter.collapse.rpc()
@@ -126,7 +121,6 @@ func unstage_ramps():
 func unstage_mesas():
 
 	ramparter.stop.rpc()
-	print("unstaging mesas")
 	ramparter.clear_ramps.rpc()
 	mesa_grower.retract_mesas.rpc()
 	
@@ -155,10 +149,6 @@ func stop_map():
 	
 	item_dropper.clear_all_items()
 	limb_grower.retract_limbs()
-	#limb_grower.clear_limbs.rpc()
-	#ramparter.clear_ramps.rpc()
-	#mesa_grower.clear_mesas.rpc()
-	board_hoverer.clear_boards.rpc()
 	mesa_grower.finished_retracting.disconnect(stage_mesas) 
 
 	
