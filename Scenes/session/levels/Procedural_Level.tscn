@@ -1,57 +1,24 @@
-[gd_scene load_steps=9 format=3 uid="uid://b5fc4lv4wybum"]
+[gd_scene load_steps=8 format=3 uid="uid://b5fc4lv4wybum"]
 
-[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/session/levels/Empty_Level.tscn" id="1_halqj"]
+[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/session/levels/room.tscn" id="1_halqj"]
 [ext_resource type="Script" path="res://Scenes/session/levels/Procedural_Level.gd" id="2_lukeg"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/session/levels/Spawn/spawn.tscn" id="3_kq3gr"]
 [ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/session/levels/procedural/board_hoverer.tscn" id="4_0mrgq"]
 [ext_resource type="PackedScene" uid="uid://bihhmgl2g08o3" path="res://Scenes/session/levels/procedural/mesa_grower.tscn" id="5_aojpy"]
 [ext_resource type="PackedScene" uid="uid://drujlef4qyslo" path="res://Scenes/session/levels/procedural/item_dropper.tscn" id="6_nuajx"]
 [ext_resource type="PackedScene" uid="uid://bxvldmj0gbd3m" path="res://Scenes/session/levels/procedural/ramparter.tscn" id="7_fnc5j"]
 [ext_resource type="PackedScene" uid="uid://bmsru2apinfke" path="res://Scenes/session/levels/procedural/limb_grower.tscn" id="8_n5db1"]
 
-[node name="Procedural_Level" instance=ExtResource("1_halqj")]
+[node name="Procedural_Level" type="Node3D"]
 script = ExtResource("2_lukeg")
 
-[node name="spawns" type="Node3D" parent="." index="1"]
+[node name="room" parent="." instance=ExtResource("1_halqj")]
 
-[node name="spawn1" parent="spawns" index="0" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 20)
-skeleton = NodePath("../..")
+[node name="Board_Hoverer" parent="." instance=ExtResource("4_0mrgq")]
 
-[node name="spawn2" parent="spawns" index="1" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -20)
-skeleton = NodePath("../..")
+[node name="Mesa_Grower" parent="." instance=ExtResource("5_aojpy")]
 
-[node name="spawn3" parent="spawns" index="2" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 10, 18)
-skeleton = NodePath("../..")
+[node name="Item_Dropper" parent="." instance=ExtResource("6_nuajx")]
 
-[node name="spawn4" parent="spawns" index="3" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 10, -18)
-skeleton = NodePath("../..")
+[node name="Ramparter" parent="." instance=ExtResource("7_fnc5j")]
 
-[node name="spawn5" parent="spawns" index="4" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, 18)
-skeleton = NodePath("../..")
-
-[node name="spawn6" parent="spawns" index="5" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, -18)
-skeleton = NodePath("../..")
-
-[node name="spawn7" parent="spawns" index="6" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 10, 0)
-skeleton = NodePath("../..")
-
-[node name="spawn8" parent="spawns" index="7" instance=ExtResource("3_kq3gr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 10, 0)
-skeleton = NodePath("../..")
-
-[node name="Board_Hoverer" parent="." index="2" instance=ExtResource("4_0mrgq")]
-
-[node name="Mesa_Grower" parent="." index="3" instance=ExtResource("5_aojpy")]
-
-[node name="Item_Dropper" parent="." index="4" instance=ExtResource("6_nuajx")]
-
-[node name="Ramparter" parent="." index="5" instance=ExtResource("7_fnc5j")]
-
-[node name="Limb_Grower" parent="." index="6" instance=ExtResource("8_n5db1")]
+[node name="Limb_Grower" parent="." instance=ExtResource("8_n5db1")]

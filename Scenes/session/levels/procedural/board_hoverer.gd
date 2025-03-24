@@ -4,7 +4,7 @@ const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
 const sync_prefab = preload("res://Scenes/components/transform_sync/transform_sync.tscn")
 
 const board_thickness = 0.5
-const map_size = 50
+@export var map_size = 50
 
 enum Configuration 
 {
@@ -19,10 +19,8 @@ enum Configuration
 @export var board_trajectories = []
 @export var height_bounds = []
 
-@onready var sync = $CustomSync
-
 @onready var rng = RandomNumberGenerator.new()
-
+@onready var sync = $CustomSync
 @onready var unlagger = $LagCompensator
 
 var sync_cooldown_progress = 0.0
@@ -85,9 +83,9 @@ func _physics_process(delta):
 				
 			Configuration.retreating:
 				
-				if board.position.y != -1.0:
+				if board.position.y != -board_thickness:
 					in_position = false
-					board.position.y = move_toward(board.position.y, -1.0, retreat_speed * delta)
+					board.position.y = move_toward(board.position.y, -board_thickness, retreat_speed * delta)
 				
 			Configuration.bouncing:
 				
@@ -100,15 +98,12 @@ func _physics_process(delta):
 				board_trajectories[index] = constrain_geometry(board, trajectory, height_lims)	
 			
 		if not in_position:
-			pass
-			
+			pass	
 		elif configuration == Configuration.introducing:
-			finished_introducing.emit()
-			#configuration = Configuration.inert
-			
+			finished_introducing.emit()		
 		elif configuration == Configuration.retreating:
 			finished_retreating.emit()
-			#configuration = Configuration.inert
+
 		
 func bounce_geometry(geometry, trajectory):
 	

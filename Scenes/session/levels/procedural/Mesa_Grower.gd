@@ -2,8 +2,9 @@ extends Node3D
 
 const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
 
-const map_size = 50
 const gap = 2.0
+
+@export var map_size = 50
 
 enum Configuration 
 {

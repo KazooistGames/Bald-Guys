@@ -1,9 +1,6 @@
 extends Node3D
 
-
 const prefab = preload("res://Scenes/geometry/ramp/ramp.tscn")
-
-const map_size = 50.0
 
 const slope = 0.5
 
@@ -13,6 +10,9 @@ enum Configuration
 	lifting = 1,
 	collapsing = 2
 }
+
+@export var map_size = 50
+
 @export var configuration = Configuration.inert
 
 @onready var rng = RandomNumberGenerator.new()

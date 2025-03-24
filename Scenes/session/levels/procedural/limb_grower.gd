@@ -2,7 +2,7 @@ extends Node3D
 
 const prefab = preload("res://Scenes/geometry/pillar/pillar.tscn")
 
-const map_size = 50
+@export var map_size = 50
 
 const extend_period = 2.0
 const retract_period = 2.0

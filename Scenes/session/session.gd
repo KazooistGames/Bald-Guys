@@ -16,10 +16,8 @@ const SessionState = {
 
 @onready var Level : Node3D = $Procedural_Level
 @onready var HUD = $HUD
-#@onready var Lobby = $Lobby
 
 @onready var humanoidSpawner = $HumanoidSpawner
-#@onready var levelSpawner = $LevelSpawner
 @onready var gameSpawner = $GameSpawner
 
 @onready var raycast = $RayCast3D
@@ -45,11 +43,9 @@ func _ready():
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
 	gameSpawner.spawned.connect(handle_new_game)
-	#levelSpawner.spawned.connect(handle_new_level)
 	
 	if is_multiplayer_authority():
 		Commission_Next_Round()
-		#move_to_Lobby()
 		create_player_humanoid(1)
 		Commissioned = true
 
@@ -88,7 +84,6 @@ func fix_out_of_bounds():
 	for humanoid in Humanoids:
 		
 		if not node_is_in_bounds(humanoid):		
-			#var parent = Level if State == SessionState.Round else Lobby
 			spawn_player.rpc(Level.get_path(), humanoid.get_path())
 			
 
@@ -125,7 +120,6 @@ func handle_new_game(new_game):
 func Finished_Round(winner):
 	
 	HUD.set_psa.rpc("Winner:\n\n" + winner, -1)
-	#move_to_Lobby()
 	Ended_Round.emit()	
 	Commission_Next_Round()
 
@@ -198,18 +192,6 @@ func destroy_player_humanoid(peer_id):
 		player_Humanoid.queue_free()		
 
 
-#@rpc("call_local", "authority", "reliable")
-#func move_to_Lobby():
-	#
-	#State = SessionState.Lobby
-	#
-	#for humanoid in Humanoids:
-		#spawn_player(Lobby.get_path(), humanoid.get_path())	
-	#
-	#Ended_Round.emit()	
-	
-		
-#@rpc("call_local", "authority", "reliable")
 func move_to_level():
 	
 	State = SessionState.Round
@@ -232,33 +214,14 @@ func respawn_node(node_path, spawn_position):
 func Commission_Next_Round():
 	
 	var unique_round_id = randi_range(0, 0)
-	#var level_prefab_path = ""
 	var game_prefab_path = ""
 	
 	match unique_round_id:
 		0:
-			#level_prefab_path = "res://Scenes/session/levels/Procedural_Level.tscn"
 			game_prefab_path = "res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn"
 	
-	#if level_prefab_path != ""	and game_prefab_path != "":
 	if game_prefab_path != "":
-		#load_level(level_prefab_path)
 		load_game(game_prefab_path)
-	
-
-#func load_level(path):
-	#
-	#var prefab = load(path)
-	#
-	#if prefab == null:
-		#return
-		#
-	#if Level != null:
-		#Level.queue_free()
-		#
-	#Level = prefab.instantiate()
-	#add_child(Level, true)
-	#print("Level commissioned: ", Level)
 	
 
 func load_game(path):
