@@ -10,53 +10,53 @@ script = ExtResource("1_jnaim")
 [node name="floor" parent="." instance=ExtResource("3_siirb")]
 
 [node name="ceiling" parent="." instance=ExtResource("3_siirb")]
-transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 50, 0)
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 25, 0)
 
 [node name="wall" parent="." instance=ExtResource("3_siirb")]
-transform = Transform3D(4.37114e-08, 1, -8.74228e-08, 1, -4.37114e-08, 0, -3.82137e-15, -8.74228e-08, -1, -25, 25, 0)
+transform = Transform3D(4.37114e-08, 1, -8.74228e-08, 1, -4.37114e-08, 0, -3.82137e-15, -8.74228e-08, -1, -12.5, 12.5, 0)
 skeleton = NodePath("../..")
 
 [node name="wall2" parent="." instance=ExtResource("3_siirb")]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 25, 25, 0)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 12.5, 12.5, 0)
 skeleton = NodePath("../..")
 
 [node name="wall3" parent="." instance=ExtResource("3_siirb")]
-transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0, 25, -25)
+transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0, 12.5, -12.5)
 skeleton = NodePath("../..")
 
 [node name="wall4" parent="." instance=ExtResource("3_siirb")]
-transform = Transform3D(1.91069e-15, 4.37114e-08, -1, 1, -4.37114e-08, 0, -4.37114e-08, -1, -4.37114e-08, 0, 25, 25)
+transform = Transform3D(1.91069e-15, 4.37114e-08, -1, 1, -4.37114e-08, 0, -4.37114e-08, -1, -4.37114e-08, 0, 12.5, 12.5)
 
 [node name="spawns" type="Node3D" parent="."]
 
 [node name="spawn1" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 10)
 skeleton = NodePath("../..")
 
 [node name="spawn2" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -20)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -10)
 skeleton = NodePath("../..")
 
 [node name="spawn3" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 10, 18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 10, 9)
 skeleton = NodePath("../..")
 
 [node name="spawn4" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 10, -18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 10, -9)
 skeleton = NodePath("../..")
 
 [node name="spawn5" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, 18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 10, 9)
 skeleton = NodePath("../..")
 
 [node name="spawn6" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 10, -18)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 10, -9)
 skeleton = NodePath("../..")
 
 [node name="spawn7" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 10, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 10, 0)
 skeleton = NodePath("../..")
 
 [node name="spawn8" parent="spawns" instance=ExtResource("3_m4ih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 10, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 10, 0)
 skeleton = NodePath("../..")

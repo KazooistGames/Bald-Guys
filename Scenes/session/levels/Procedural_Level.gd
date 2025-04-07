@@ -5,7 +5,7 @@ extends Node3D
 		return map_size
 	set(value):
 		map_size = value
-		room.Next_Size = value
+		room.request_new_size(value)
 		board_hoverer.map_size = value
 		mesa_grower.map_size = value
 		ramparter.map_size = value
@@ -39,6 +39,8 @@ func _ready() -> void:
 	
 	if not multiplayer_permissive:
 		return
+		
+	map_size = 25
 	
 	#going up
 	board_hoverer.finished_introducing.connect(stage_mesas)
