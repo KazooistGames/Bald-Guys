@@ -56,8 +56,8 @@ func _ready() -> void:
 	board_hoverer.finished_retreating.connect(func(): map_size = 25)
 	
 	#hook into session framework
-	session.Started_Round.connect(start_map)
-	session.Ended_Round.connect(stop_map)
+	session.Started_Round.connect(trigger_map_generation_cycle)
+	session.Ended_Round.connect(trigger_map_clear_cycle)
 
 
 func _physics_process(delta) -> void:
@@ -81,7 +81,14 @@ func _physics_process(delta) -> void:
 		autocycle_timer += delta
 		
 		
-func start_map() -> void:
+func trigger_map_generation_cycle() -> void:
+	
+	map_size = 50
+	autocycle_timer = -1
+	room.finished_resizing.connect(start_staging)
+
+		
+func start_staging() -> void:
 	
 	map_size = 50
 	autocycle_timer = -1
@@ -91,11 +98,12 @@ func start_map() -> void:
 	mesa_grower.finished_retracting.connect(stage_mesas) 
 	
 
-func stop_map() -> void:
+func trigger_map_clear_cycle() -> void:
 	
 	item_dropper.clear_all_items()
 	limb_grower.retract_limbs()
 	mesa_grower.finished_retracting.disconnect(stage_mesas) 
+	room.finished_resizing.disconnect(start_staging)
 	
 	
 func stage_boards() -> void:
