@@ -1,8 +1,9 @@
 extends Node3D
 
+@export var Max_Size : float = 100.0
+@export var Current_Size : float = 25.0
 @export var Next_Size : float = 25.0
 @export var Last_Size : float = 25.0
-@export var Current_Size : float = 25.0
 @export var Resizing : bool = false
 
 @onready var floor : Node3D = $floor
@@ -14,18 +15,18 @@ extends Node3D
 
 @onready var spawns : Array[Node] = $spawns.get_children()
 
-@onready var wall_mesh = preload("res://Scenes/geometry_static/Wall/wall_mesh.tres")
-@onready var wall_collider = preload("res://Scenes/geometry_static/Wall/wall_collider.tres")
+@onready var wall_mesh : PlaneMesh = preload("res://Scenes/geometry_static/Wall/wall_mesh.tres")
+@onready var wall_collider : BoxShape3D = preload("res://Scenes/geometry_static/Wall/wall_collider.tres")
 
-var resize_tween : Tween
+@onready var resize_tween : Tween =  create_tween()
 var resize_period : float = 3.0
 var resize_timer : float = 0.0
 
 
 func _ready() -> void:
 	
-	resize_tween = create_tween()
-	adjust_room_to_size(Next_Size)
+	adjust_room_to_size(Next_Size)	
+	wall_collider.size = Vector3(Max_Size, 1.0, Max_Size)
 	
 
 func _process(delta:float) -> void:
@@ -44,10 +45,18 @@ func _process(delta:float) -> void:
 	
 func request_new_size(new_size : float) -> void:
 	
-	if new_size > 0 and new_size != Next_Size:
-		Resizing = true
-		Next_Size = new_size
-		print("resizing room to ", Next_Size)
+	if new_size <= 0:
+		return
+		
+	elif new_size == Next_Size:
+		return
+		
+	elif new_size > Max_Size:
+		new_size = Max_Size
+	
+	Resizing = true
+	Next_Size = new_size
+	print("resizing room to ", Next_Size)
 		
 		
 func adjust_room_to_size(desired_size : float) -> void:
@@ -58,7 +67,6 @@ func adjust_room_to_size(desired_size : float) -> void:
 	wall3.position = Vector3(0.0, desired_size/2.0, -desired_size/2.0)
 	wall4.position = Vector3(0.0, desired_size/2.0, desired_size/2.0)
 	wall_mesh.size = Vector2.ONE * desired_size
-	wall_collider.size = Vector3(desired_size, 1.0, desired_size)
 	
 	for index in range(spawns.size()):
 		var spawn : Node3D = spawns[index]

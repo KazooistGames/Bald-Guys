@@ -11,6 +11,7 @@ extends Node3D
 		ramparter.map_size = value
 		limb_grower.map_size = value
 		
+		
 @export var autocycle : bool= true
 
 @onready var room : Node3D = $room
@@ -57,7 +58,7 @@ func _ready() -> void:
 	#hook into session framework
 	session.Started_Round.connect(start_map)
 	session.Ended_Round.connect(stop_map)
-	
+
 
 func _physics_process(delta) -> void:
 
@@ -84,8 +85,8 @@ func start_map() -> void:
 	
 	map_size = 50
 	autocycle_timer = -1
-	item_dropper.spawn_field(0, 5, 5, 10, Vector3.UP * map_size / 2.0)
-	item_dropper.spawn_field(2, 3, 3, 10, Vector3.UP * map_size / 2.0)
+	item_dropper.spawn_field(0, 5, 5, 5, Vector3.UP * map_size / 2.0)
+	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * map_size / 2.0)
 	stage_boards()
 	mesa_grower.finished_retracting.connect(stage_mesas) 
 	

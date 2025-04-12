@@ -4,7 +4,7 @@ const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
 
 const gap = 2.0
 
-@export var map_size = 50
+@export var map_size : int = 50
 
 enum Configuration 
 {

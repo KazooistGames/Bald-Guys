@@ -182,6 +182,8 @@ func _integrate_forces(state):
 			impact *= 1.5
 				
 		if impact >= IMPACT_THRESHOLD: 
+			var impacter = state.get_contact_collider_object(index)
+			print(name, " knocked down by ", impacter)
 			ragdoll.rpc()
 			
 		elif not ON_FLOOR:	
