@@ -45,6 +45,7 @@ const Lunge_max_traversal = 6
 @onready var floorcast = $FloorCast3D
 
 @onready var impactFX = $ImpactAudio
+@onready var static_impactFX = $StaticImpactAudio
 @onready var jumpFX = $JumpAudio
 
 @onready var force = $Force
@@ -160,12 +161,13 @@ func _integrate_forces(state):
 	var contact_count = state.get_contact_count()
 	var index = 0
 	
-	while index < contact_count and multiplayer_permissive:
+	while index < contact_count and multiplayer_permissive: # loop through all objects we collided with this frame
 	
 		var normal = state.get_contact_local_normal(index)
 		var impact = state.get_contact_impulse(index).length()
 		
-		if state.get_contact_collider_object(index) is RigidBody3D:		
+		#perform object-type specific logic
+		if state.get_contact_collider_object(index) is RigidBody3D: #other "loose" items		 
 			var their_velocity = state.get_contact_collider_velocity_at_position(index)
 			var my_velocity = state.get_contact_local_velocity_at_position(index)
 			var relative_velocity = their_velocity - my_velocity
@@ -173,7 +175,10 @@ func _integrate_forces(state):
 			if my_velocity.length() < relative_velocity.length():	
 				var kinetic_impulse = pow(relative_velocity.length(), 0.75)
 				impact *= kinetic_impulse
-		
+				
+		else: #unstoppable/immovable objects
+			pass
+
 		var shape = state.get_contact_local_shape(index)
 		
 		if shape == 0:
@@ -186,15 +191,27 @@ func _integrate_forces(state):
 			print(name, " knocked down by ", impacter)
 			ragdoll.rpc()
 			
-		elif not ON_FLOOR:	
+		elif impact < IMPACT_THRESHOLD/3.0:
+			pass
+			
+		elif abs(normal.dot(floor_normal)) > floor_dot_product:
+			pass
+				
+		elif is_on_floor():	
+			print(impact)
+			audio_impact(-35, 0.6)
+			apply_central_impulse(state.get_contact_impulse(index)/1.5)
+			
+		else:
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 0.667
-			var forceful = impact > IMPACT_THRESHOLD/3.0
-			var upright = abs(normal.dot(floor_normal)) <= floor_dot_product
 			var just_jumped = just_jumped_timer < just_jumped_period
 
-			if glancing and forceful and upright and shape != 2 and just_jumped:
+			if glancing and shape != 2 and just_jumped:
 				wall_jump.rpc(state.get_contact_impulse(index))
-				
+			else:
+				audio_impact(-35, 0.8)
+				apply_central_impulse(state.get_contact_impulse(index)/1.5)
+		
 		index += 1			
 
 
@@ -529,7 +546,7 @@ func jump(calling_client_id = 1):
 		var offset = max(0.0, linear_velocity.y)
 		var new_y_speed = Vector3.UP * (JUMP_SPEED + offset)
 		set_axis_velocity(new_y_speed)
-		
+
 
 @rpc("call_local", "reliable")
 func wall_jump(impulse):
@@ -539,10 +556,7 @@ func wall_jump(impulse):
 	reset_double_jump()
 	var speed_boost = impulse.normalized() * JUMP_SPEED / 2.0
 	floor_velocity += speed_boost
-	impactFX.bus = "beef"
-	impactFX.volume_db = -18
-	impactFX.pitch_scale = 1.0
-	impactFX.play()
+	audio_impact(-18, 1.0)
 	
 
 @rpc("call_local", "reliable")
@@ -574,10 +588,7 @@ func land():
 	
 	reset_double_jump()
 	coyote_timer = 0
-	impactFX.bus = "beef"
-	impactFX.volume_db = -27
-	impactFX.pitch_scale = 0.5
-	impactFX.play()
+	audio_impact(-30, 0.5)
 	
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 	var deadstop_point = 2.0
@@ -594,5 +605,11 @@ func land():
 	else:
 		linear_velocity.x /= 2.0
 		linear_velocity.z /= 2.0
+	
 
+func audio_impact(db, pitch):
+	impactFX.bus = "beef"
+	impactFX.volume_db = db
+	impactFX.pitch_scale = pitch
+	impactFX.play()	
 	

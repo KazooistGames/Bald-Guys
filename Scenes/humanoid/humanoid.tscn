@@ -4805,12 +4805,12 @@ transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 
 shape = SubResource("CapsuleShape3D_usxk3")
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.999951, -2.44528e-05, -2.13087e-05, 0.000124604, 0.998379, 1.0848e-05, 2.81334e-05, -7.74562e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
+transform = Transform3D(0.999951, -1.86116e-05, -2.13087e-05, 0.000124604, 0.998292, 1.0848e-05, 2.81334e-05, -8.15988e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
 joint_offset = Transform3D(0.999998, 0, 0, 0, 0.999998, 0, 0, 0, 1, 0, 0, 0)
-body_offset = Transform3D(0.691722, -0.462485, -0.553873, -0.561436, -0.826167, -0.0090333, -0.454107, 0.316728, -0.832538, 0, 0, 0)
+body_offset = Transform3D(0.691722, -0.462439, -0.553873, -0.561436, -0.826098, -0.0090333, -0.454107, 0.316701, -0.832538, 0, 0, 0)
 mass = 5.0
 bounce = 0.2
 bone_name = "upperArm.r"
@@ -5671,6 +5671,9 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_l8k7m")
+}
 tree_root = ExtResource("3_1nlf8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Add2/add_amount = 1.0
@@ -5690,6 +5693,22 @@ parameters/velocity/blend_amount = 0.0
 script = ExtResource("5_6swf7")
 
 [node name="ImpactAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("11_neikv")
+volume_db = -18.0
+unit_size = 40.0
+pitch_scale = 0.75
+max_polyphony = 3
+bus = &"beef"
+
+[node name="StaticImpactAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("11_neikv")
+volume_db = -18.0
+unit_size = 40.0
+pitch_scale = 0.75
+max_polyphony = 3
+bus = &"beef"
+
+[node name="DynamicImpactAudio" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("11_neikv")
 volume_db = -18.0
 unit_size = 40.0
