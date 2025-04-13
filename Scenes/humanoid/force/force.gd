@@ -10,6 +10,8 @@ const grow_radius = 1.0
 const grow_height = 2.0
 const render_scale = 0.75
 
+const LOW_VOLUME = -30.0
+
 enum Action {
 	inert = 0,
 	holding = 1,
@@ -103,7 +105,7 @@ func _physics_process(delta):
 			collider.shape.radius = lerp(0.0, 1.0, progress)
 			collider.shape.height = lerp(0.0, 2.0, progress)
 			
-		hum.volume_db = lerp(-27.0, -21.0, progress)
+		hum.volume_db = lerp(LOW_VOLUME, LOW_VOLUME / 1.5, progress)
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
 		if not multiplayer_permissive:
@@ -186,7 +188,7 @@ func rpc_secondary():
 	gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	unlagger.reset_full_duplex()
 	hum.play()
-	hum.volume_db = -27.0
+	hum.volume_db = LOW_VOLUME
 	hum.pitch_scale = 1.0
 	material.set_shader_parameter("glow_freq", PI)
 	material.set_shader_parameter("base_freq", 1.0 + 1.0/PI)
@@ -241,7 +243,7 @@ func rpc_trigger():
 	unlagger.reset_full_duplex()	
 	hum.bus = "beef"		
 	hum.play()
-	hum.volume_db = -27
+	hum.volume_db = LOW_VOLUME
 	cooldown_timer = 0.0
 	action = Action.cooldown
 	

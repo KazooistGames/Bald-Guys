@@ -89,16 +89,20 @@ func fix_out_of_bounds():
 
 func node_is_in_bounds(node):
 	
-	raycast.global_position = node.global_position #move raycast to node position
-	raycast.target_position = Vector3.UP * 100 #shoot it up to the ceiling
+	if not Level:
+		return true
+	
+	raycast.global_position = node.global_position + Vector3.DOWN #move raycast to node position
+	raycast.target_position = Vector3.UP * Level.map_size * 2 #shoot it up to the ceiling
 	raycast.force_raycast_update()	
 	var hit_the_ceiling = raycast.is_colliding()	
 	
-	raycast.target_position = Vector3.DOWN * 100 #shoot it to the floor
+	raycast.global_position = node.global_position + Vector3.UP
+	raycast.target_position = Vector3.DOWN * Level.map_size * 2 #shoot it to the floor
 	raycast.force_raycast_update()	
 	var hit_the_floor = raycast.is_colliding()
 
-	return hit_the_ceiling or hit_the_floor #node is considered inside level if it hits one
+	return hit_the_ceiling and hit_the_floor #node is considered inside level if it hits one
 	
 
 func handle_new_level(new_level):
