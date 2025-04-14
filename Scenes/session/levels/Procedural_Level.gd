@@ -33,6 +33,10 @@ var rng : RandomNumberGenerator = RandomNumberGenerator.new()
 		
 func _ready() -> void:
 	
+	#hook into session framework
+	session.Started_Round.connect(trigger_map_generation_cycle)
+	session.Ended_Round.connect(trigger_map_clear_cycle)
+	
 	if not multiplayer.has_multiplayer_peer():
 		multiplayer_permissive = true
 	elif is_multiplayer_authority():
@@ -43,22 +47,18 @@ func _ready() -> void:
 		
 	map_size = 25
 	
-	#going up
+	#arena going up
 	board_hoverer.finished_introducing.connect(stage_mesas)
 	mesa_grower.finished_extending.connect(stage_ramps)
 	ramparter.finished_lifting.connect(stage_limbs)
 	limb_grower.finished_extending.connect(start_reconfigure_timer)
 	
-	#going down
+	#arena going down
 	limb_grower.finished_retracting.connect(unstage_ramps) #unstage the limbs to kick everything off
 	ramparter.finished_collapsing.connect(unstage_mesas)
 	mesa_grower.finished_retracting.connect(unstage_boards) 
-	board_hoverer.finished_retreating.connect(func(): map_size = 25)
+	board_hoverer.finished_retreating.connect(resize_to_lobby)
 	
-	#hook into session framework
-	session.Started_Round.connect(trigger_map_generation_cycle)
-	session.Ended_Round.connect(trigger_map_clear_cycle)
-
 
 func _physics_process(delta) -> void:
 
@@ -79,6 +79,15 @@ func _physics_process(delta) -> void:
 		
 	else:
 		autocycle_timer += delta
+	
+	
+func resize_to_lobby() -> void:
+	
+	board_hoverer.clear_boards.rpc()
+	mesa_grower.clear_mesas.rpc()
+	ramparter.clear_ramps.rpc()
+	limb_grower.clear_limbs.rpc()
+	map_size = 25
 		
 		
 func trigger_map_generation_cycle() -> void:
@@ -110,9 +119,9 @@ func stage_boards() -> void:
 	
 	board_hoverer.clear_boards.rpc()
 	board_hoverer.introduce_boards.rpc()
-	board_hoverer.create_boards.rpc(5, 3, 4, Vector2(0, 15), hash(randi()))
-	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(15, 20), hash(randi()))
 	board_hoverer.create_boards.rpc(1, 12, 1, Vector2(20, 25), hash(randi()))
+	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(15, 20), hash(randi()))
+	board_hoverer.create_boards.rpc(5, 3, 4, Vector2(0, 15), hash(randi()))
 
 
 func stage_mesas() -> void:

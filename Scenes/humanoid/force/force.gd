@@ -73,6 +73,9 @@ func _process(delta):
 		
 
 func _physics_process(delta):
+	
+	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
+	position = position.move_toward(target_position, delta * 5.0)
 
 	material = mesh.get_surface_override_material(0)	
 	capture_bodies()
@@ -115,6 +118,8 @@ func _physics_process(delta):
 		
 	elif action == Action.inert:	
 		
+		position = target_position
+		
 		if not mesh.visible:
 			pass
 			
@@ -150,8 +155,6 @@ func _physics_process(delta):
 			rpc_reset.rpc()
 		
 	#mesh.set_surface_override_material(0, material)
-	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
-	position = position.move_toward(target_position, delta * 5.0)
 	
 	
 @rpc("call_local", "reliable")

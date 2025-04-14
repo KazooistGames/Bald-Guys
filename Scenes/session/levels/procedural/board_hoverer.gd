@@ -15,9 +15,9 @@ enum Configuration
 }
 @export var configuration = Configuration.introducing
 
-@export var boards = []
-@export var board_trajectories = []
-@export var height_bounds = []
+@export var boards : Array = []
+@export var board_trajectories : Array= []
+@export var height_bounds : Array = []
 
 @onready var rng = RandomNumberGenerator.new()
 @onready var sync = $CustomSync
@@ -50,15 +50,15 @@ func _ready():
 func _physics_process(delta):
 	
 	sync_cooldown_progress += delta * sync_cooldown_rate
+	delta *= unlagger.delta_scalar(delta)
 	
 	if not multiplayer.has_multiplayer_peer():
 		pass
+		
 	elif is_multiplayer_authority() and sync_cooldown_progress >= 1.0:
 		synchronize_all_peers()
 	
-	delta *= unlagger.delta_scalar(delta)
-	
-	if configuration == Configuration.inert:
+	if configuration == Configuration.inert or boards.size() == 0:
 		return
 	
 	in_position = true
@@ -68,7 +68,7 @@ func _physics_process(delta):
 		if index >= boards.size() or index >= height_bounds.size():
 			return
 		
-		var board = boards[index]
+		var board : Node3D = boards[index]
 		var height_lims = height_bounds[index]
 		
 		match configuration:
@@ -91,7 +91,7 @@ func _physics_process(delta):
 				
 				if trajectory_scale != 1.0:
 					trajectory_scale = move_toward(trajectory_scale, 1.0, delta / 10.0)
-				
+				#print(board.position)
 				board.position += board_trajectories[index] * delta * pow(trajectory_scale, 1.5)
 				var trajectory = board_trajectories[index]
 				trajectory = bounce_geometry(board, trajectory) 
@@ -99,8 +99,10 @@ func _physics_process(delta):
 			
 		if not in_position:
 			pass	
+			
 		elif configuration == Configuration.introducing:
 			finished_introducing.emit()		
+			
 		elif configuration == Configuration.retreating:
 			finished_retreating.emit()
 
@@ -194,6 +196,8 @@ func create_boards(count, size, speed, height_limits, new_seed):
 		board_trajectories.append(initial_vector * speed)
 		height_bounds.append(height_limits)
 
+	#boards = get_boards()
+	
 
 func spawn_board(size):
 
@@ -251,6 +255,8 @@ func get_boards():
 	
 @rpc("call_local", "reliable")
 func clear_boards():
+	
+	boards = get_boards()
 	
 	for board in boards:
 		board.queue_free()

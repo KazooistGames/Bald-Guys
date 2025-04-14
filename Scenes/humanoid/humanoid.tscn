@@ -5428,6 +5428,7 @@ shape = SubResource("BoxShape3D_lx52y")
 disabled = true
 
 [node name="SlappyFoot" parent="Skeleton3D/Ragdoll/Physical Bone foot_l" instance=ExtResource("8_g1pbr")]
+transform = Transform3D(0.951057, 0.309017, 0, -0.309017, 0.951057, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Physical Bone foot_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
 transform = Transform3D(1.00001, -3.57628e-07, 2.5332e-07, -2.83122e-07, 0.999999, 1.49012e-07, -2.23517e-07, -1.19209e-07, 1, -0.181907, 0.0658084, -0.0681532)
@@ -5508,6 +5509,7 @@ shape = SubResource("BoxShape3D_33x7b")
 disabled = true
 
 [node name="SlappyFoot" parent="Skeleton3D/Ragdoll/Physical Bone foot_r" instance=ExtResource("8_g1pbr")]
+transform = Transform3D(0.950823, -0.309711, -7.77142e-08, 0.309714, 0.950831, 3.35625e-08, 2.59305e-08, -7.50875e-08, 0.999999, 0, 0, 0)
 
 [node name="Physical Bone toes_l" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
 transform = Transform3D(0.999805, 0.00848581, -0.0179153, -0.00035505, 0.911263, 0.411833, 0.0198199, -0.411744, 0.911082, 0.187014, 0.0122994, 0.0757172)
