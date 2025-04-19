@@ -45,8 +45,6 @@ signal constrained()
 
 func _ready():
 	
-	depenetrate_geometry()
-	
 	query = PhysicsShapeQueryParameters3D.new()	
 	query.shape = collider.shape
 	query.collision_mask = 0b0001		
@@ -57,6 +55,8 @@ func _ready():
 	collider.shape.size.x = size
 	collider.shape.size.y = girth
 	collider.shape.size.z = size
+	
+	depenetrate_geometry()
 
 
 func _physics_process(delta):
