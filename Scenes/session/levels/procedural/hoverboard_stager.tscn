@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bfj6oao2wp4ge"]
+
+[ext_resource type="Script" path="res://Scenes/session/levels/procedural/hoverboard_stager.gd" id="1_3otwl"]
+[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="3_fcy4a"]
+
+[node name="Hoverboard_Stager" type="Node3D"]
+script = ExtResource("1_3otwl")
+
+[node name="LagCompensator" parent="." instance=ExtResource("3_fcy4a")]

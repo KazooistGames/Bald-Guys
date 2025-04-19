@@ -14,6 +14,9 @@ script = ExtResource("2_lukeg")
 [node name="room" parent="." instance=ExtResource("1_halqj")]
 
 [node name="Hoverboard_Stager" parent="." instance=ExtResource("3_3d4pj")]
+map_size = null
+configuration = null
+boards = null
 
 [node name="Mesa_Grower" parent="." instance=ExtResource("5_aojpy")]
 

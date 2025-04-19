@@ -1,7 +1,7 @@
 extends RigidBody3D
 
 const floor_normal = Vector3(0, 1, 0)
-const floor_dot_product = 2.0 / 3.0
+const floor_dot_product = 1.0 / 2.0
 
 const Lunge_Deadband = 0.75
 const Lunge_Speed = 15
@@ -59,7 +59,7 @@ var multiplayer_permissive = false
 var TOPSPEED = 0
 var TOPSPEED_MOD = 1
 
-var IMPACT_THRESHOLD =  6.5
+var RAGDOLL_THRESHOLD =  6.5
 var ragdoll_cooldown_period_seconds = 0.5
 var ragdoll_cooldown_timer_seconds = 0
 
@@ -76,7 +76,7 @@ var cached_floor_obj = null
 var cached_floor_pos = Vector3.ZERO
 
 var just_jumped_timer = 0.0
-var just_jumped_period = 1.0/4.0
+var just_jumped_period = 1.0/3.0
 
 var Lunging = false
 var Lunge_Target : Node3D 
@@ -124,7 +124,7 @@ func _process(_delta):
 	animation.walkAnimPlaybackScalar = 1.5 if allow_run else 2.0
 	animation.WALK_STATE = animation.WalkState.RUNNING if allow_run else animation.WalkState.WALKING
 	
-	IMPACT_THRESHOLD = 6.0 * mass
+	RAGDOLL_THRESHOLD = 6.0 * mass
 	TOPSPEED = SPEED_GEARS.y if allow_run else SPEED_GEARS.x
 	
 	if RAGDOLLED:
@@ -185,33 +185,36 @@ func _integrate_forces(state):
 			impact *= pow((1.0 - normal.dot(Vector3.UP)/2.0), 1.25)		
 		elif shape == 2:
 			impact *= 1.5
+			
+		var wall_jumped = false
+		var bumped = true
 		
-		if impact < IMPACT_THRESHOLD/3.0:
-			pass	
+		if impact < RAGDOLL_THRESHOLD/3.0: # too small of impact, ignore
+			bumped = false
+					
+		elif abs(normal.dot(floor_normal)) > floor_dot_product: #hitting the floor, ignore
+			bumped = false
 				
-		elif impact >= IMPACT_THRESHOLD: 
+		elif is_on_floor():	# not aerial, ignore
+			pass
+			
+		else: #calculate timing and angle to know if wall jump succeeds
+			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0
+			var just_jumped = just_jumped_timer < just_jumped_period
+			wall_jumped = glancing and just_jumped
+		
+		if wall_jumped: #wall jump success overrides ragdoll
+			wall_jump.rpc(state.get_contact_impulse(index))
+			
+		elif impact >= RAGDOLL_THRESHOLD:
 			var impacter = state.get_contact_collider_object(index)
 			print(name, " knocked down by ", impacter)
 			ragdoll.rpc()
 			
-		elif abs(normal.dot(floor_normal)) > floor_dot_product:
-			pass
-				
-		elif is_on_floor():	
-			print(impact)
+		elif bumped:
 			audio_impact(-36, 0.60)
-			apply_central_impulse(state.get_contact_impulse(index)/1.5)
+			bump(state.get_contact_impulse(index)/1.5/mass)
 			
-		else:
-			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0
-			var just_jumped = just_jumped_timer < just_jumped_period
-
-			if glancing and shape != 2 and just_jumped:
-				wall_jump.rpc(state.get_contact_impulse(index))
-			else:
-				audio_impact(-36, 0.60)
-				apply_central_impulse(state.get_contact_impulse(index)/2.0)
-		
 		index += 1			
 
 
@@ -503,14 +506,13 @@ func unlunge():
 	skeleton.lunge_stop()
 
 
-@rpc("call_local", "reliable")
+#@rpc("call_local", "reliable")
 func bump(velocity_impulse):
 	
-	if ON_FLOOR:
-		ON_FLOOR = false
-		coyote_timer = coyote_duration
-		reverse_coyote_timer = 0.0
-		floorcast.enabled = false
+	ON_FLOOR = false
+	coyote_timer = coyote_duration
+	reverse_coyote_timer = 0.0
+	floorcast.enabled = false
 		
 	apply_central_impulse(velocity_impulse * mass)
 
@@ -600,8 +602,8 @@ func land():
 		linear_velocity.z = move_toward(linear_velocity.z, 0.0, 1.5)
 		
 	else:
-		linear_velocity.x /= 2.0
-		linear_velocity.z /= 2.0
+		linear_velocity.x /= 3.0
+		linear_velocity.z /= 3.0
 	
 
 func audio_boof(db, pitch):

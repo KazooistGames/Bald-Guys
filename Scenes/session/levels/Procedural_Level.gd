@@ -11,11 +11,10 @@ extends Node3D
 		ramparter.map_size = value
 		limb_grower.map_size = value
 		
-		
 @export var autocycle : bool= true
 
 @onready var room : Node3D = $room
-@onready var board_hoverer : Node3D = $Board_Hoverer
+@onready var board_hoverer : Node3D = $Hoverboard_Stager
 @onready var mesa_grower : Node3D = $Mesa_Grower
 @onready var item_dropper : Node3D = $Item_Dropper
 @onready var ramparter : Node3D = $Ramparter
@@ -41,6 +40,8 @@ func _ready() -> void:
 		multiplayer_permissive = true
 	elif is_multiplayer_authority():
 		multiplayer_permissive = true
+	else:
+		multiplayer_permissive = false
 	
 	if not multiplayer_permissive:
 		return
@@ -61,6 +62,13 @@ func _ready() -> void:
 	
 
 func _physics_process(delta) -> void:
+	
+	if not multiplayer.has_multiplayer_peer():
+		multiplayer_permissive = true
+	elif is_multiplayer_authority():
+		multiplayer_permissive = true
+	else:
+		multiplayer_permissive = false
 
 	if not multiplayer_permissive:
 		pass
@@ -111,6 +119,7 @@ func trigger_map_clear_cycle() -> void:
 	
 	item_dropper.clear_all_items()
 	limb_grower.retract_limbs()
+	board_hoverer.stop_boards.rpc()
 	mesa_grower.finished_retracting.disconnect(stage_mesas) 
 	room.finished_resizing.disconnect(start_staging)
 	
@@ -118,10 +127,10 @@ func trigger_map_clear_cycle() -> void:
 func stage_boards() -> void:
 	
 	board_hoverer.clear_boards.rpc()
-	board_hoverer.introduce_boards.rpc()
 	board_hoverer.create_boards.rpc(1, 12, 1, Vector2(20, 25), hash(randi()))
 	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(15, 20), hash(randi()))
 	board_hoverer.create_boards.rpc(5, 3, 4, Vector2(0, 15), hash(randi()))
+	board_hoverer.introduce_boards.rpc()
 
 
 func stage_mesas() -> void:
