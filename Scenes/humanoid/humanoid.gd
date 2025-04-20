@@ -76,7 +76,7 @@ var cached_floor_obj = null
 var cached_floor_pos = Vector3.ZERO
 
 var just_jumped_timer = 0.0
-var just_jumped_period = 1.0/3.0
+var just_jumped_period = 1.0/4.0
 
 var Lunging = false
 var Lunge_Target : Node3D 

@@ -63,12 +63,14 @@ func _physics_process(delta):
 	
 	if status == HoverStatus.idle:
 		target_speed = 0.0
+		
 	elif status == HoverStatus.flying:
 		target_speed = speed
+		
 	elif status == HoverStatus.manual:
 		target_speed = external_speed
 		
-	var acceleration = max(0.5, throttle * 2.0)
+	var acceleration = max(0.5, throttle * 3.0)
 	throttle = move_toward(throttle, target_speed, acceleration * delta)
 	position += trajectory * throttle * delta
 	
@@ -123,30 +125,32 @@ func bounce_geometry(penetration : Vector3):
 func constrain_geometry():
 	
 	var starting_trajectory = trajectory
+	var xy_extents = size / 2.1
+	var y_extents = girth / 2.1
 	#	X
-	if position.x > upper_limits.x:
+	if position.x > upper_limits.x - xy_extents:
 		trajectory.x *= -1.0	
-		position.x = upper_limits.x
+		position.x = upper_limits.x - xy_extents
 		
-	elif position.x < lower_limits.x:
+	elif position.x < lower_limits.x + xy_extents:
 		trajectory.x *= -1.0	
-		position.x = lower_limits.x
+		position.x = lower_limits.x + xy_extents
 	#	Y
-	if position.y >= upper_limits.y:
+	if position.y >= upper_limits.y - y_extents:
 		trajectory.y *= -1.0	
-		position.y = upper_limits.y
+		position.y = upper_limits.y - y_extents
 			
-	elif position.y <= lower_limits.y + girth:
+	elif position.y <= lower_limits.y + y_extents:
 		trajectory.y *= -1.0		
-		position.y = lower_limits.y + girth
+		position.y = lower_limits.y + y_extents
 	#	Z
-	if position.z > upper_limits.z:
+	if position.z > upper_limits.z - xy_extents:
 		trajectory.z *= -1.0
-		position.z = upper_limits.z
+		position.z = upper_limits.z - xy_extents
 		
-	elif position.z < lower_limits.z:
+	elif position.z < lower_limits.z + xy_extents:
 		trajectory.z *= -1.0	
-		position.z = lower_limits.z
+		position.z = lower_limits.z + xy_extents
 		
 	if starting_trajectory != trajectory:
 		constrained.emit()
