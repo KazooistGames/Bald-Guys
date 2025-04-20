@@ -452,6 +452,7 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		freeze = true
 		ragdoll_change.emit(RAGDOLLED, self)	
 		force.rpc_reset()
+		floor_velocity = Vector3.ZERO
 		
 		
 @rpc("call_local", "reliable")
@@ -472,6 +473,7 @@ func unragdoll(use_skeleton_position : bool = true):
 		freeze = false
 		ragdoll_change.emit(RAGDOLLED, self)
 		unragdolled.emit()
+		floor_velocity = Vector3.ZERO
 
 
 @rpc("call_local", "reliable")

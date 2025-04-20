@@ -189,6 +189,7 @@ func bounce_boards():
 			board.status = 1
 			board.disable_bounce = false
 			board.disable_constrain = false
+			board.disable_depenetration = false
 
 @rpc("call_local", "reliable")	
 func stop_boards():
