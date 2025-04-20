@@ -3,7 +3,7 @@ extends Node3D
 const prefab = preload("res://Scenes/geometry/hoverboard/hoverboard.tscn")
 
 const board_thickness = 0.5
-const INTRODUCTION_SPEED = 8.0
+const INTRODUCTION_SPEED = 6.0
 const RETREAT_SPEED = 8.0
 
 enum Configuration 
@@ -52,7 +52,7 @@ func _physics_process(delta):
 		if configuration == Configuration.introducing:
 			var lower_lim = board.lower_limits.y - board.girth
 			var upper_lim = board.upper_limits.y + board.girth
-			var clamped_target = clampf(map_size/2.0, lower_lim, upper_lim)
+			var clamped_target = upper_lim #clampf(map_size/2.0, lower_lim, upper_lim)
 			
 			if board.position.y > clamped_target:
 				all_boards_in_position = false
