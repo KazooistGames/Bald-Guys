@@ -35,7 +35,7 @@ _spawnable_scenes = PackedStringArray("res://Scenes/humanoid/humanoid.tscn")
 spawn_path = NodePath("..")
 
 [node name="GameSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn")
+_spawnable_scenes = PackedStringArray("res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn", "res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn")
 spawn_path = NodePath("..")
 
 [node name="HUD" parent="." instance=ExtResource("4_ik81w")]

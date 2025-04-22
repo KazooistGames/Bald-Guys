@@ -1,16 +1,35 @@
 extends CanvasLayer
 
-@export var TableValues = {}
+const progress_bar_length = 1000
+const progress_bar_width = 75
+
+@export var Scores : Dictionary = {}
+@export var Goal : float = 0.0
+@export var ProgressPercent = 0
+
+@onready var scoreboard = $Scoreboard
+@onready var names_text = $Scoreboard/Names/Rows/Values
+@onready var scores_text = $Scoreboard/Scores/Rows/Values
+@onready var progress_fill = $Progress/Fill
+@onready var progress_backdrop = $Progress/BackDrop
 
 @onready var nameplates = $Nameplates
-
 @onready var PSA = $MarginContainer/PSA
 @onready var ping = $MarginContainer/ping
 
-var psaTTL = 1
+@onready var session = get_parent()
 
+var psaTTL = 1
+	
+
+func _ready():
+	
+	progress_backdrop.custom_minimum_size = Vector2(progress_bar_length, progress_bar_width)
+	
 	
 func _process(delta):
+	
+	update_scoreboard(delta)
 
 	if psaTTL > 0:
 		psaTTL -= min(delta, psaTTL)
@@ -20,6 +39,26 @@ func _process(delta):
 		
 	else:
 		PSA.text = ""
+		
+		
+func update_scoreboard(delta) -> void:
+	
+	scoreboard.visible = Input.is_action_pressed("tab")
+	progress_fill.custom_minimum_size.x = progress_bar_length * clampf(ProgressPercent, 0.0, 1.0)
+
+	names_text.text = ""
+	scores_text.text = ""
+	
+	for key in Scores:
+		names_text.text += "\n" + str(key)
+	
+	for value in Scores.values():
+		scores_text.text += "\n" + "%3.2f" % value
+		
+	var local_name = session.local_screenname()
+	if Scores.has(local_name):
+		var local_score = Scores[local_name]
+		ProgressPercent = clampf(local_score/Goal, 0.0, 1.0)
 		
 		
 @rpc("call_local", "reliable")
@@ -97,3 +136,10 @@ func set_ping_indicator(value):
 		
 	ping.add_theme_color_override("font_color", ping_color_grade)
 	ping.text = str(value) + " ms"
+	
+	
+func set_player_score(player_id : int) -> void:
+	pass
+	
+func get_player_score(player_id : int) -> float:
+	return 0.0

@@ -60,6 +60,11 @@ func _ready() -> void:
 	mesa_grower.finished_retracting.connect(unstage_boards) 
 	board_hoverer.finished_retreating.connect(resize_to_lobby)
 	
+	
+func _process(delta) -> void:
+	
+	session.map_size = map_size
+	
 
 func _physics_process(delta) -> void:
 	

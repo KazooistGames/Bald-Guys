@@ -108,8 +108,10 @@ func just_deeper(new_point):
 	
 	if (bottom_position.normalized() - new_trajectory.normalized()).length() >= 0.25:
 		return false
+		
 	elif new_trajectory.length() > bottom_position.length():
 		return true
+		
 	else:
 		return false
 		

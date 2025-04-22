@@ -14,6 +14,8 @@ const SessionState = {
 @export var Humanoids = []
 @export var Game : Node3D = null
 
+@export var map_size = 0
+
 @onready var Level : Node3D = $Procedural_Level
 @onready var HUD = $HUD
 
@@ -33,6 +35,9 @@ signal Ended_Round
 
 var local_ping_ms = 0.0
 		
+var countDown_timer = 0
+var countDown_value = 0
+
 
 func _ready():
 		
@@ -50,8 +55,8 @@ func _ready():
 		Commissioned = true
 
 
-func _process(_delta):
-	
+func _process(delta):
+		
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	
 	for humanoid in Humanoids:
@@ -62,6 +67,27 @@ func _process(_delta):
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname)
 				
+	if Game == null:
+		pass
+		
+	else:
+		
+		HUD.Scores = Game.Scores
+		HUD.Goal = Game.Goal
+		
+		if Game.State == Game.GameState.starting:	
+				
+			if countDown_value <= 0:
+				Game.rpc_play.rpc()
+			
+			elif countDown_timer > 1:
+				countDown_timer = 0
+				countDown_value -= 1
+				HUD.set_psa.rpc(str(countDown_value))
+			
+			else:
+				countDown_timer += delta
+		
 
 func _unhandled_key_input(event):
 	
@@ -71,7 +97,9 @@ func _unhandled_key_input(event):
 	elif event.is_action_pressed("Toggle"):
 			
 		if State != SessionState.Round:
-			State = SessionState.Round			
+			State = SessionState.Round	
+			countDown_value = 20
+			HUD.set_psa.rpc(str(countDown_value))		
 			Started_Round.emit()
 			
 		else:	
@@ -217,13 +245,15 @@ func respawn_node(node_path, spawn_position):
 
 func Commission_Next_Round():
 	
-	var unique_round_id = randi_range(0, 0)
+	var unique_round_id = randi_range(1, 1)
 	var game_prefab_path = ""
 	
 	match unique_round_id:
 		0:
 			game_prefab_path = "res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn"
-	
+		1:
+			game_prefab_path = "res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn"
+			
 	if game_prefab_path != "":
 		load_game(game_prefab_path)
 	
