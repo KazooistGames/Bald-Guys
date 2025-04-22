@@ -1,13 +1,11 @@
 [gd_scene load_steps=5 format=3 uid="uid://cwp67bx2skp2m"]
 
 [ext_resource type="Script" path="res://Scenes/session/games/Wig_KOTH/Wig_KOTH.gd" id="1_kxid3"]
+[ext_resource type="Material" uid="uid://hugun5vavy75" path="res://Materials/force.tres" id="2_emmef"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_bks3f"]
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_pes15"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_hgrqc"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_houqa"]
-albedo_color = Color(1, 0, 0, 0.0980392)
+[sub_resource type="CylinderMesh" id="CylinderMesh_20icd"]
 
 [node name="WigKoth" type="Node3D"]
 script = ExtResource("1_kxid3")
@@ -17,10 +15,12 @@ target_position = Vector3(0, -100, 0)
 hit_back_faces = false
 
 [node name="Hill" type="Area3D" parent="."]
+collision_layer = 128
+collision_mask = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hill"]
-shape = SubResource("BoxShape3D_bks3f")
+shape = SubResource("CylinderShape3D_pes15")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Hill"]
-mesh = SubResource("BoxMesh_hgrqc")
-surface_material_override/0 = SubResource("StandardMaterial3D_houqa")
+mesh = SubResource("CylinderMesh_20icd")
+surface_material_override/0 = ExtResource("2_emmef")

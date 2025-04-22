@@ -4805,7 +4805,7 @@ transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 
 shape = SubResource("CapsuleShape3D_usxk3")
 
 [node name="Physical Bone upperArm_r" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
-transform = Transform3D(0.999951, -1.86116e-05, -2.13087e-05, 0.000124604, 0.998292, 1.0848e-05, 2.81334e-05, -8.15988e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
+transform = Transform3D(0.999951, -1.85817e-05, -2.13087e-05, 0.000124604, 0.998292, 1.0848e-05, 2.81334e-05, -8.15988e-05, 0.999988, -0.208618, 1.54967, -0.0231976)
 collision_layer = 4
 collision_mask = 13
 joint_type = 5
@@ -5673,9 +5673,6 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_l8k7m")
-}
 tree_root = ExtResource("3_1nlf8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Add2/add_amount = 1.0

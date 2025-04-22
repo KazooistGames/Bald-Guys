@@ -280,6 +280,18 @@ func local_screenname():
 	if Client_Screennames.has(local_id):
 		return Client_Screennames[local_id]
 		
+
+func get_humanoids_screenname(humanoid : Node3D) -> String:
+	
+	if humanoid == null:
+		return ''	
+		
+	elif Client_Screennames.has(int(str(humanoid.name))):
+		return Client_Screennames[int(str(humanoid.name))]
+		
+	else:
+		return ''
+		
 	  
 func ping_clients():
 	

@@ -12,9 +12,9 @@ enum GameState {
 }
 
 @export var State = GameState.reset
-@export var Goal_Time = 107.34
+@export var Goal = 107.34
 
-@export var Bearer_Times = {}
+@export var Scores = {}
 
 @onready var wig_remote = $RemoteTransform3D
 #@onready var wig_ffa_hud = $HUD
@@ -31,8 +31,8 @@ var Bearer : Node3D
 
 func _ready():
 	
-	session.Started_Round.connect(start)
-	session.Ended_Round.connect(reset)
+	session.Started_Round.connect(start_game)
+	session.Ended_Round.connect(reset_game)
 	session.Destroying_Player_Humanoid.connect(
 		func (node): 
 			if node == Bearer: 
@@ -55,7 +55,7 @@ func _process(delta):
 	else:
 		session.HUD.update_nameplate("WIG", Wig.global_position, "WIG")		
 		
-	var bearer_name = get_bearers_screenname()
+	var bearer_name = session.get_humanoids_screenname(Bearer)
 	
 	if not is_multiplayer_authority():
 		return
@@ -73,12 +73,12 @@ func _process(delta):
 			if not Bearer:
 				pass
 			
-			elif Bearer_Times[bearer_name] >= Goal_Time:
+			elif Scores[bearer_name] >= Goal:
 				rpc_finish.rpc()
 				session.Finished_Round(str(bearer_name))
 					
 			else:
-				Bearer_Times[bearer_name] += delta
+				Scores[bearer_name] += delta
 			
 		GameState.finished:			
 			pass
@@ -120,13 +120,13 @@ func bearer_is_local_player():
 		return local_player_id == Bearer.name
 
 
-func start():
+func start_game():
 	
 	if is_multiplayer_authority(): 
 		rpc_start.rpc()
 	
 	
-func reset():
+func reset_game():
 	
 	if is_multiplayer_authority(): 
 		rpc_reset.rpc()	
@@ -149,10 +149,8 @@ func dawn_wig(node):
 	else:
 		Wig.interactable.gained_interaction.disconnect(dawn_wig)
 		node.ragdolled.connect(drop_wig)
-		
 		move_wig_remote_controller.rpc(node.find_child("*head").get_path())
 		toggle_wig_mount.rpc(true)
-		
 		set_wig_bearer.rpc(node.get_path())
 
 		
@@ -168,6 +166,7 @@ func drop_wig():
 	
 	if Bearer == null:
 		pass
+		
 	elif Bearer.ragdolled.is_connected(drop_wig):
 		Bearer.ragdolled.disconnect(drop_wig)
 		Wig.linear_velocity = Bearer.linear_velocity * 1.5 + Vector3(0, 3, 0)
@@ -247,7 +246,7 @@ func rpc_reset():
 			Wig = null
 		
 		for value in session.Client_Screennames.values():
-			Bearer_Times[value] = 0
+			Scores[value] = 0
 			
 		State = GameState.reset
 
@@ -262,7 +261,7 @@ func rpc_play():
 	if is_multiplayer_authority(): 
 		
 		for value in session.Client_Screennames.values():
-			Bearer_Times[value] = 0
+			Scores[value] = 0
 			
 		Wig = wig_prefab.instantiate()
 		add_child(Wig)
@@ -270,6 +269,7 @@ func rpc_play():
 		Wig.interactable.gained_interaction.connect(dawn_wig)
 		Wig.toggle_strobing(true)
 		State = GameState.playing
+		
 	
 	
 @rpc("call_local", "reliable")
