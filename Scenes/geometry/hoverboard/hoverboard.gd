@@ -39,6 +39,8 @@ enum HoverStatus {
 var target_speed : float
 var query : PhysicsShapeQueryParameters3D
 
+var delay_collider_by_one_frame_latch : bool = true
+
 signal bounced()
 signal constrained()
 
@@ -57,9 +59,17 @@ func _ready():
 	collider.shape.size.z = size
 	
 	depenetrate_geometry()
+	collider.disabled = true
+	delay_collider_by_one_frame_latch = true
 
 
 func _physics_process(delta):
+	
+	if delay_collider_by_one_frame_latch:
+		delay_collider_by_one_frame_latch = false
+		collider.disabled = true
+	elif collider.disabled:
+		collider.disabled = false
 	
 	if status == HoverStatus.idle:
 		target_speed = 0.0
@@ -125,31 +135,31 @@ func bounce_geometry(penetration : Vector3):
 func constrain_geometry():
 	
 	var starting_trajectory = trajectory
-	var xy_extents = size / 2.1
-	var y_extents = girth / 2.1
+	var xy_extents = size / 2.0
+	var y_extents = girth / 2.0
 	#	X
-	if position.x > upper_limits.x - xy_extents:
-		trajectory.x *= -1.0	
+	if position.x >= upper_limits.x - xy_extents:
+		trajectory.x = -abs(trajectory.x)	
 		position.x = upper_limits.x - xy_extents
 		
-	elif position.x < lower_limits.x + xy_extents:
-		trajectory.x *= -1.0	
+	elif position.x <= lower_limits.x + xy_extents:
+		trajectory.x = abs(trajectory.x)
 		position.x = lower_limits.x + xy_extents
 	#	Y
-	if position.y >= upper_limits.y - y_extents:
-		trajectory.y *= -1.0	
-		position.y = upper_limits.y - y_extents
+	if position.y >= upper_limits.y:
+		trajectory.y = -abs(trajectory.y)	
+		position.y = upper_limits.y
 			
-	elif position.y <= lower_limits.y + y_extents:
-		trajectory.y *= -1.0		
-		position.y = lower_limits.y + y_extents
+	elif position.y <= lower_limits.y:
+		trajectory.y = abs(trajectory.y)		
+		position.y = lower_limits.y
 	#	Z
-	if position.z > upper_limits.z - xy_extents:
-		trajectory.z *= -1.0
+	if position.z >= upper_limits.z - xy_extents:
+		trajectory.z = -abs(trajectory.z)
 		position.z = upper_limits.z - xy_extents
 		
-	elif position.z < lower_limits.z + xy_extents:
-		trajectory.z *= -1.0	
+	elif position.z <= lower_limits.z + xy_extents:
+		trajectory.z = abs(trajectory.z)	
 		position.z = lower_limits.z + xy_extents
 		
 	if starting_trajectory != trajectory:
