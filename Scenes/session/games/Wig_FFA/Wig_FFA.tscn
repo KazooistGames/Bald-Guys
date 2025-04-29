@@ -4,12 +4,15 @@
 [ext_resource type="AudioStream" uid="uid://do2svkh5yqq6a" path="res://audio/Beas Mote2.wav" id="3_j0k30"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ryau5"]
-properties/0/path = NodePath(".:Bearer_Times")
+properties/0/path = NodePath(".:State")
 properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:State")
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:Scores")
 properties/1/spawn = true
-properties/1/replication_mode = 2
+properties/1/replication_mode = 1
+properties/2/path = NodePath(".:Goal")
+properties/2/spawn = true
+properties/2/replication_mode = 2
 
 [node name="Wig_FFA" type="Node3D"]
 script = ExtResource("1_2sjt2")

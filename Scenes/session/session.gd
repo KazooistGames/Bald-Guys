@@ -98,7 +98,7 @@ func _unhandled_key_input(event):
 			
 		if State != SessionState.Round:
 			State = SessionState.Round	
-			countDown_value = 20
+			countDown_value = 10
 			HUD.set_psa.rpc(str(countDown_value))		
 			Started_Round.emit()
 			

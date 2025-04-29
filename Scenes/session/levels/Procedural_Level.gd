@@ -5,7 +5,7 @@ extends Node3D
 		return map_size
 	set(value):
 		map_size = value
-		room.request_new_size(value)
+		room.request_new_size.rpc(value)
 		board_hoverer.map_size = value
 		mesa_grower.map_size = value
 		ramparter.map_size = value

@@ -49,6 +49,7 @@ func _process(delta:float) -> void:
 		adjust_room_to_size(desired_size)
 	
 	
+@rpc("call_local", "reliable")
 func request_new_size(new_size : float) -> void:
 	
 	if new_size <= 0:
