@@ -141,5 +141,11 @@ func set_ping_indicator(value):
 func set_player_score(player_id : int) -> void:
 	pass
 	
+	
 func get_player_score(player_id : int) -> float:
 	return 0.0
+
+
+func set_progress_label(label : String) -> void:
+	
+	$Progress/Label.text = label

@@ -26,7 +26,7 @@ var retract_speed = 2.0
 var in_position = false
 var mesas = []
 
-var count = 25
+var count = 30
 
 signal finished_extending
 signal finished_retracting

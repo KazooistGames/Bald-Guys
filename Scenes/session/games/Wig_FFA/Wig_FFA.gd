@@ -40,7 +40,7 @@ func _ready():
 	
 	whispers.stream_paused = false
 	theme.stream_paused = true
-	
+	session.HUD.set_progress_lable("Installing Wig...")
 	
 func _process(delta):
 	

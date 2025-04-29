@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cwp67bx2skp2m"]
+[gd_scene load_steps=9 format=3 uid="uid://cwp67bx2skp2m"]
 
 [ext_resource type="Script" path="res://Scenes/session/games/Wig_KOTH/Wig_KOTH.gd" id="1_kxid3"]
 [ext_resource type="Shader" path="res://shaders/perlin.gdshader" id="2_wuqr4"]
@@ -6,6 +6,7 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_s6hjp"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_j3au8"]
+resource_local_to_scene = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qcnxh"]
 resource_local_to_scene = true
@@ -16,16 +17,27 @@ shader_parameter/cell_period = Vector2(10, 10)
 shader_parameter/cell_size = 0.5
 shader_parameter/waviness = 0.05
 shader_parameter/glow = 0.5
-shader_parameter/transparency = 0.1
+shader_parameter/transparency = 0.125
+shader_parameter/base_freq = 1.3
+shader_parameter/glow_freq = 3.1
+shader_parameter/color = Vector3(1, 1, 0)
+shader_parameter/emission_magnitude = 5.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_oyomd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u6ynh"]
+render_priority = 0
+shader = ExtResource("2_wuqr4")
+shader_parameter/cell_amount = 10
+shader_parameter/cell_period = Vector2(10, 10)
+shader_parameter/cell_size = 0.5
+shader_parameter/waviness = 0.025
+shader_parameter/glow = 0.5
+shader_parameter/transparency = 0.05
 shader_parameter/base_freq = 1.3
 shader_parameter/glow_freq = 3.1
 shader_parameter/color = Vector3(1, 1, 0)
 shader_parameter/emission_magnitude = 3.0
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_df2ne"]
-top_radius = 0.025
-bottom_radius = 0.025
-height = 8.0
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_23hxh"]
 properties/0/path = NodePath(".:State")
@@ -44,6 +56,10 @@ script = ExtResource("1_kxid3")
 [node name="Hill" type="Area3D" parent="."]
 collision_layer = 128
 collision_mask = 2
+gravity_space_override = 3
+gravity = 4.9
+linear_damp_space_override = 3
+linear_damp = 1.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hill"]
 shape = SubResource("SphereShape3D_s6hjp")
@@ -52,23 +68,19 @@ shape = SubResource("SphereShape3D_s6hjp")
 mesh = SubResource("SphereMesh_j3au8")
 surface_material_override/0 = SubResource("ShaderMaterial_qcnxh")
 
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Hill"]
+mesh = SubResource("SphereMesh_oyomd")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("ShaderMaterial_u6ynh")
+
 [node name="floorCast" type="RayCast3D" parent="Hill"]
-transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866026, 0, -0.866026, 0.5, 0, 0, 0)
 target_position = Vector3(0, 0, 1)
 hit_from_inside = true
 
 [node name="wallCast" type="RayCast3D" parent="Hill"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 target_position = Vector3(0, 0, 1)
 hit_from_inside = true
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="Hill"]
-transform = Transform3D(1, 0, 0, 0, 0.700859, 0.713299, 0, -0.713299, 0.700859, 0, 0, 0)
-mesh = SubResource("CylinderMesh_df2ne")
-
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="Hill"]
-transform = Transform3D(1, 0, 0, 0, 0.018831, 0.999823, 0, -0.999823, 0.018831, 0, 0, 0)
-mesh = SubResource("CylinderMesh_df2ne")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_23hxh")

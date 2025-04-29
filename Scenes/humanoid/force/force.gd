@@ -6,8 +6,8 @@ const throw_force = 750.0
 const push_force = 200.0
 const ragdoll_radius = 2.0
 
-const grow_radius = 1.0
-const grow_height = 2.0
+const grow_radius = 0.75
+const grow_height = 1.5
 const render_scale = 0.75
 
 const LOW_VOLUME = -30.0
@@ -75,7 +75,7 @@ func _process(delta):
 func _physics_process(delta):
 	
 	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
-	position = position.move_toward(target_position, delta * 5.0)
+	position = position.move_toward(target_position, delta * 6.0)
 
 	material = mesh.get_surface_override_material(0)	
 	capture_bodies()

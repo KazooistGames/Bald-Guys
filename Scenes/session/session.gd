@@ -98,7 +98,7 @@ func _unhandled_key_input(event):
 			
 		if State != SessionState.Round:
 			State = SessionState.Round	
-			countDown_value = 10
+			countDown_value = 5
 			HUD.set_psa.rpc(str(countDown_value))		
 			Started_Round.emit()
 			
@@ -279,7 +279,16 @@ func local_screenname():
 	
 	if Client_Screennames.has(local_id):
 		return Client_Screennames[local_id]
+	
+	
+func local_humanoid() -> Node3D:
+	
+	for humanoid in Humanoids:
 		
+		if humanoid.name == str(int(multiplayer.get_unique_id())):
+			return humanoid
+		
+	return null
 
 func get_humanoids_screenname(humanoid : Node3D) -> String:
 	

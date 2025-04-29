@@ -213,7 +213,7 @@ func _integrate_forces(state):
 			
 		elif bumped:
 			audio_impact(-36, 0.60)
-			bump(state.get_contact_impulse(index)/1.5/mass)
+			bump(state.get_contact_impulse(index) / 1.6 / mass)
 			
 		index += 1			
 

@@ -134,7 +134,7 @@ func stage_boards() -> void:
 	board_hoverer.clear_boards.rpc()
 	board_hoverer.create_boards.rpc(1, 12, 1, Vector2(18, 25), hash(randi()))
 	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(12, 20), hash(randi()))
-	board_hoverer.create_boards.rpc(5, 3, 4, Vector2(0, 15), hash(randi()))
+	board_hoverer.create_boards.rpc(5, 3, 3, Vector2(0, 15), hash(randi()))
 	board_hoverer.introduce_boards.rpc()
 
 
