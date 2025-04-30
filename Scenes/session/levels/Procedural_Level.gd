@@ -6,7 +6,7 @@ extends Node3D
 	set(value):
 		map_size = value
 		room.request_new_size.rpc(value)
-		board_hoverer.map_size = value
+		hoverboard_stager.map_size = value
 		mesa_grower.map_size = value
 		ramparter.map_size = value
 		limb_grower.map_size = value
@@ -14,7 +14,7 @@ extends Node3D
 @export var autocycle : bool= true
 
 @onready var room : Node3D = $room
-@onready var board_hoverer : Node3D = $Hoverboard_Stager
+@onready var hoverboard_stager : Node3D = $Hoverboard_Stager
 @onready var mesa_grower : Node3D = $Mesa_Grower
 @onready var item_dropper : Node3D = $Item_Dropper
 @onready var ramparter : Node3D = $Ramparter
@@ -49,7 +49,7 @@ func _ready() -> void:
 	map_size = 25
 	
 	#arena going up
-	board_hoverer.finished_introducing.connect(stage_mesas)
+	hoverboard_stager.finished_introducing.connect(stage_mesas)
 	mesa_grower.finished_extending.connect(stage_ramps)
 	ramparter.finished_lifting.connect(stage_limbs)
 	limb_grower.finished_extending.connect(start_reconfigure_timer)
@@ -58,7 +58,7 @@ func _ready() -> void:
 	limb_grower.finished_retracting.connect(unstage_ramps) #unstage the limbs to kick everything off
 	ramparter.finished_collapsing.connect(unstage_mesas)
 	mesa_grower.finished_retracting.connect(unstage_boards) 
-	board_hoverer.finished_retreating.connect(resize_to_lobby)
+	hoverboard_stager.finished_retreating.connect(resize_to_lobby)
 	
 	
 func _process(delta) -> void:
@@ -96,7 +96,7 @@ func _physics_process(delta) -> void:
 	
 func resize_to_lobby() -> void:
 	
-	board_hoverer.clear_boards.rpc()
+	hoverboard_stager.clear_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
 	ramparter.clear_ramps.rpc()
 	limb_grower.clear_limbs.rpc()
@@ -124,23 +124,23 @@ func trigger_map_clear_cycle() -> void:
 	
 	item_dropper.clear_all_items()
 	limb_grower.retract_limbs()
-	board_hoverer.stop_boards.rpc()
+	hoverboard_stager.stop_boards.rpc()
 	mesa_grower.finished_retracting.disconnect(stage_mesas) 
 	room.finished_resizing.disconnect(start_staging)
 	
 	
 func stage_boards() -> void:
 	
-	board_hoverer.clear_boards.rpc()
-	board_hoverer.create_boards.rpc(1, 12, 1, Vector2(18, 25), hash(randi()))
-	board_hoverer.create_boards.rpc(3, 6, 2, Vector2(12, 20), hash(randi()))
-	board_hoverer.create_boards.rpc(5, 3, 3, Vector2(0, 15), hash(randi()))
-	board_hoverer.introduce_boards.rpc()
+	hoverboard_stager.clear_boards.rpc()
+	hoverboard_stager.create_boards.rpc(1, 12, 1, Vector2(18, 25), hash(randi()))
+	hoverboard_stager.create_boards.rpc(3, 6, 2, Vector2(12, 20), hash(randi()))
+	hoverboard_stager.create_boards.rpc(5, 3, 3, Vector2(0, 15), hash(randi()))
+	hoverboard_stager.introduce_boards.rpc()
 
 
 func stage_mesas() -> void:
 
-	board_hoverer.bounce_boards.rpc()
+	hoverboard_stager.bounce_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
 	mesa_grower.create_mesas.rpc(hash(randi()))	
 	mesa_grower.extend_mesas.rpc()
@@ -161,7 +161,7 @@ func stage_limbs() -> void:
 	limb_grower.clear_limbs.rpc()
 	limb_grower.create_limbs.rpc(hash(randi()))		
 	limb_grower.extend_limbs.rpc()
-	board_hoverer.synchronize_all_peers()
+	hoverboard_stager.synchronize_all_peers()
 			
 			
 func start_reconfigure_timer(preset : float = 0.0) -> void:
@@ -195,11 +195,26 @@ func unstage_boards() -> void:
 	
 	mesa_grower.stop.rpc()
 	mesa_grower.clear_mesas.rpc()
-	board_hoverer.retreat_boards.rpc()
+	hoverboard_stager.retreat_boards.rpc()
 	
 	
-
-
+@rpc("call_remote", "authority", "reliable")
+func init_geometry_for_new_client(client_id) -> void:
+	
+	print(multiplayer.get_unique_id(), " initialzed geometry from server.")
+	#hoverboard_stager.rpc_instant_sync.rpc_id(client_id)
+	
+	if mesa_grower.mesas.size() > 0:
+		mesa_grower.create_mesas.rpc_id(client_id, mesa_grower.rng.seed, false)	
+		mesa_grower.stop.rpc_id(client_id)
+		
+	if ramparter.ramps.size() > 0:
+		ramparter.create_ramps.rpc_id(client_id, ramparter.rng.seed, false)	
+		ramparter.stop.rpc_id(client_id)
+	
+	if limb_grower.limbs.size() > 0:
+		limb_grower.create_limbs.rpc_id(client_id, limb_grower.rng.seed, false)	
+		limb_grower.stop.rpc_id(client_id)
 	
 
 

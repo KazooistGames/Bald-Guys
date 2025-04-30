@@ -1,9 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://bihhmgl2g08o3"]
+[gd_scene load_steps=4 format=3 uid="uid://bihhmgl2g08o3"]
 
 [ext_resource type="Script" path="res://Scenes/session/levels/procedural/Mesa_Grower.gd" id="1_4cqld"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="2_7xh0o"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_0stqa"]
+properties/0/path = NodePath(".:configuration")
+properties/0/spawn = true
+properties/0/replication_mode = 2
 
 [node name="Mesa_Grower" type="Node3D"]
 script = ExtResource("1_4cqld")
 
 [node name="LagCompensator" parent="." instance=ExtResource("2_7xh0o")]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_0stqa")

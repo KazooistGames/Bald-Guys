@@ -34,7 +34,7 @@ enum GameState {
 
 var hill_speed : float = 0.75
 var hill_acceleration : float = 2.0
-var hill_radius : float = 5.0
+var hill_radius : float = 4.0
 var hill_velocity : Vector3 = Vector3.ZERO
 
 var phase = 0.0

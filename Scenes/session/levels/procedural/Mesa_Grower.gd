@@ -31,7 +31,6 @@ var count = 30
 signal finished_extending
 signal finished_retracting
 
-
 func _physics_process(delta):
 	
 	delta *= unlagger.delta_scalar(delta)
@@ -109,7 +108,7 @@ func stop():
 
 
 @rpc("call_local", "reliable")
-func create_mesas(new_seed):
+func create_mesas(new_seed, hidden : bool = true):
 	
 	rng.seed = new_seed
 	
@@ -122,10 +121,10 @@ func create_mesas(new_seed):
 		var new_mesa = prefab.instantiate()
 		add_child(new_mesa)
 		new_mesa.position.x = rng.randi_range(-boundary, boundary) * gap
-		new_mesa.position.y = -1
+		new_mesa.position.y = -1 if hidden else (1+index) * height_step
 		new_mesa.position.z = rng.randi_range(-boundary, boundary) * gap
 		new_mesa.rotation.y = rng.randi_range(0, 3) * PI/2
-		new_mesa.preference = new_mesa.Preference.none 
+		new_mesa.preference = new_mesa.Preference.none if hidden else new_mesa.Preference.deep
 		new_mesa.size = random_size
 		mesas.append(new_mesa)
 
@@ -144,6 +143,4 @@ func clear_mesas():
 func get_mesas():
 	
 	return find_children("*", "AnimatableBody3D", true, false)
-	
-	
 	

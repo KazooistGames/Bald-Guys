@@ -75,7 +75,7 @@ func _physics_process(delta):
 
 
 @rpc("call_local", "reliable")	
-func create_ramps(new_seed):
+func create_ramps(new_seed, hidden : bool = true):
 	
 	rng.seed = new_seed
 	
@@ -84,7 +84,7 @@ func create_ramps(new_seed):
 		if rng.randf() <= ramp_roof_freq: #roof
 			var y_offset = Vector3.DOWN * rng.randi_range(0, 1) * 0.75
 			var rand_rotation = PI/2.0 * float(rng.randi_range(0, 3))
-			spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false,  rand_rotation)
+			spawn_ramp(mesa.position + y_offset, mesa.size, mesa.size, mesa.size/2.0, false,  rand_rotation, hidden)
 			
 		if rng.randf() <= ramp_floor_freq: #floor
 			var y_rotation = rng.randi_range(0, 3) * PI/2
@@ -100,13 +100,13 @@ func create_ramps(new_seed):
 			else:		
 				ramp_height = minf(mesa.position.y, mesa.size / 2.0)
 				
-			spawn_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation)
+			spawn_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation, hidden)
 			
 	pass
 	
 
 @rpc("call_local", "reliable")	
-func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify_position = false, y_rotation = 0):
+func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify_position = false, y_rotation = 0, hidden : bool = true):
 	
 	if verify_position:			
 		coordinates.y = height_at_coordinates(coordinates) + 0.5
@@ -115,7 +115,7 @@ func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify
 	var dimensions = Vector3.ZERO
 	dimensions.x = length
 	dimensions.z = thickness
-	dimensions.y = 0.0
+	dimensions.y = 0.0 if hidden else height
 	new_ramp.dimensions = dimensions
 	new_ramp.position = coordinates
 	new_ramp.rotation = Vector3.ZERO

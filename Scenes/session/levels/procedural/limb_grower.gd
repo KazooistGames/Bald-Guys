@@ -68,7 +68,7 @@ func _physics_process(delta):
 
 
 @rpc("call_local", "reliable")
-func create_limbs(new_seed):
+func create_limbs(new_seed, hidden : bool = true):
 	
 	rng.seed = new_seed
 	var orientation_to_use = 0
@@ -79,13 +79,13 @@ func create_limbs(new_seed):
 
 		while rng.randf() <= limb_freq and limbs_on_mesa < 4:
 			var limb_position = mesa.global_position - Vector3.UP * 0.375
-			spawn_limb(orientation_to_use, limb_position)
+			spawn_limb(orientation_to_use, limb_position, 0.25, hidden)
 			orientation_to_use += PI / 2.0
 			orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
 
 
 @rpc("call_local", "reliable")
-func spawn_limb(orientation, location, radius = 0.25):
+func spawn_limb(orientation, location, radius = 0.25, hidden : bool = true):
 	
 	var new_limb = prefab.instantiate()
 	new_limb.preference = new_limb.Preference.deep
@@ -94,7 +94,7 @@ func spawn_limb(orientation, location, radius = 0.25):
 	new_limb.radius = radius
 	new_limb.rotation = Vector3(PI/2.0, orientation, 0)
 	new_limb.position = location
-	new_limb.reverse_growth_scale = 0.0
+	new_limb.reverse_growth_scale = 0.0 if hidden else 1.0
 	new_limb.preference = new_limb.Preference.deep
 	add_child(new_limb)
 	limbs.append(new_limb)

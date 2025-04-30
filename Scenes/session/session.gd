@@ -203,6 +203,9 @@ func create_player_humanoid(peer_id):
 	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
 	Created_Player_Humanoid.emit(new_peer_humanoid)
 	
+	if State == SessionState.Round:
+		Level.init_geometry_for_new_client(peer_id)
+	
 	return new_peer_humanoid
 
 
