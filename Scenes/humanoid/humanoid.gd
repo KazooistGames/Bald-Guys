@@ -604,8 +604,8 @@ func land():
 		linear_velocity.z = move_toward(linear_velocity.z, 0.0, 1.5)
 		
 	else:
-		linear_velocity.x /= 3.0
-		linear_velocity.z /= 3.0
+		linear_velocity.x /= 2.0
+		linear_velocity.z /= 2.0
 	
 
 func audio_boof(db, pitch):

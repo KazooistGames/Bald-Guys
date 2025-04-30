@@ -1,9 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://bfj6oao2wp4ge"]
+[gd_scene load_steps=4 format=3 uid="uid://bfj6oao2wp4ge"]
 
 [ext_resource type="Script" path="res://Scenes/session/levels/procedural/hoverboard_stager.gd" id="1_3otwl"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="3_fcy4a"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_f62p2"]
+properties/0/path = NodePath(".:configuration")
+properties/0/spawn = true
+properties/0/replication_mode = 2
 
 [node name="Hoverboard_Stager" type="Node3D"]
 script = ExtResource("1_3otwl")
 
 [node name="LagCompensator" parent="." instance=ExtResource("3_fcy4a")]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_f62p2")
