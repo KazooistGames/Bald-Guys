@@ -508,7 +508,7 @@ func unlunge():
 	skeleton.lunge_stop()
 
 
-#@rpc("call_local", "reliable")
+@rpc("call_local", "reliable")
 func bump(velocity_impulse):
 	
 	ON_FLOOR = false

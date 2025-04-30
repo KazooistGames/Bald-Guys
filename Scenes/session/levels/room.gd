@@ -1,7 +1,7 @@
 extends Node3D
 
 @export var Max_Size : float = 100.0
-@export var Current_Size : float = 25.0
+@export var Current_Size : float = 0.0
 @export var Next_Size : float = 25.0
 @export var Last_Size : float = 25.0
 @export var Resizing : bool = false
@@ -12,13 +12,12 @@ extends Node3D
 @onready var wall2 : Node3D = $wall2
 @onready var wall3 : Node3D = $wall3
 @onready var wall4 : Node3D = $wall4
-
 @onready var spawns : Array[Node] = $spawns.get_children()
-
 @onready var wall_mesh : PlaneMesh = preload("res://Scenes/geometry_static/Wall/wall_mesh.tres")
 @onready var wall_collider : BoxShape3D = preload("res://Scenes/geometry_static/Wall/wall_collider.tres")
-
 @onready var resize_tween : Tween =  create_tween()
+@onready var synchronizer : MultiplayerSynchronizer = $MultiplayerSynchronizer
+
 var resize_period : float = 3.0
 var resize_timer : float = 0.0
 
@@ -30,9 +29,14 @@ func _ready() -> void:
 	adjust_room_to_size(Next_Size)	
 	wall_collider.size = Vector3(Max_Size, 1.0, Max_Size)
 	
+	if not is_multiplayer_authority():
+		synchronizer.delta_synchronized.connect(func() : adjust_room_to_size(Current_Size))
 
 func _process(delta:float) -> void:
 	
+	if not is_multiplayer_authority():
+		return
+		
 	if not Resizing:
 		pass
 	
