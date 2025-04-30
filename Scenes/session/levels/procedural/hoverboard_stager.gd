@@ -88,7 +88,7 @@ func _physics_process(delta):
 				
 		
 @rpc("call_local", "reliable")
-func create_boards(count, size, speed, height_limits, new_seed):
+func create_boards(count, size, speed, height_limits, new_seed = null):
 	
 	if new_seed != null:
 		rng.seed = new_seed
@@ -173,6 +173,7 @@ func retreat_boards():
 			board.disable_constrain = true
 			board.disable_depenetration = true
 		
+		
 @rpc("call_local", "reliable")	
 func bounce_boards():
 	
@@ -190,6 +191,7 @@ func bounce_boards():
 			board.disable_bounce = false
 			board.disable_constrain = false
 			board.disable_depenetration = false
+
 
 @rpc("call_local", "reliable")	
 func stop_boards():
@@ -221,21 +223,23 @@ func synchronize_all_peers():
 
 	if is_multiplayer_authority():
 		var board_positions : PackedVector3Array = []
+		var board_trajectories : PackedVector3Array = []
 		board_positions.resize(boards.size())
-		
+		board_trajectories.resize(boards.size())
 		
 		for index in range(boards.size()):
 			board_positions[index] = boards[index].position
-		
-		sync_board_positions.rpc(board_positions)
+			board_trajectories[index] = boards[index].trajectory
+			
+		sync_board_positions.rpc(board_positions, board_trajectories)
 		sync_cooldown_progress = 0.0
 		
 		
 @rpc("call_remote", "authority", "reliable")	
-func sync_board_positions(server_positions : PackedVector3Array):
+func sync_board_positions(server_positions : PackedVector3Array, server_trajectories : PackedVector3Array):
 	
 	for index in range(boards.size()-1):
-		boards[index].position = server_positions[index]
-		
+		boards[index].position = server_positions[index] + unlagger.SERVER_PING / 2000.0 * server_trajectories[index]
+		boards[index].trajectory = server_trajectories[index]
 	unlagger.reset()
 

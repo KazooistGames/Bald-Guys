@@ -133,8 +133,8 @@ func stage_boards() -> void:
 	
 	hoverboard_stager.clear_boards.rpc()
 	hoverboard_stager.create_boards.rpc(1, 12, 1, Vector2(18, 25), hash(randi()))
-	hoverboard_stager.create_boards.rpc(3, 6, 2, Vector2(12, 20), hash(randi()))
-	hoverboard_stager.create_boards.rpc(5, 3, 3, Vector2(0, 15), hash(randi()))
+	hoverboard_stager.create_boards.rpc(3, 6, 2, Vector2(12, 20))
+	hoverboard_stager.create_boards.rpc(5, 3, 3, Vector2(0, 15))
 	hoverboard_stager.introduce_boards.rpc()
 
 
@@ -202,17 +202,26 @@ func unstage_boards() -> void:
 func init_geometry_for_new_client(client_id) -> void:
 	
 	print(multiplayer.get_unique_id(), " initialzed geometry from server.")
-	#hoverboard_stager.rpc_instant_sync.rpc_id(client_id)
 	
+	if hoverboard_stager.boards.size() > 0:
+		hoverboard_stager.clear_boards.rpc_id(client_id)
+		hoverboard_stager.create_boards.rpc_id(client_id, 1, 12, 1, Vector2(18, 25), hoverboard_stager.rng.seed)
+		hoverboard_stager.create_boards.rpc_id(client_id, 3, 6, 2, Vector2(12, 20))
+		hoverboard_stager.create_boards.rpc_id(client_id, 5, 3, 3, Vector2(0, 15))
+		hoverboard_stager.bounce_boards.rpc_id(client_id)
+		
 	if mesa_grower.mesas.size() > 0:
+		mesa_grower.clear_mesas.rpc_id(client_id)
 		mesa_grower.create_mesas.rpc_id(client_id, mesa_grower.rng.seed, false)	
 		mesa_grower.stop.rpc_id(client_id)
 		
 	if ramparter.ramps.size() > 0:
+		ramparter.clear_ramps.rpc_id(client_id)
 		ramparter.create_ramps.rpc_id(client_id, ramparter.rng.seed, false)	
 		ramparter.stop.rpc_id(client_id)
 	
 	if limb_grower.limbs.size() > 0:
+		limb_grower.clear_limbs.rpc_id(client_id)
 		limb_grower.create_limbs.rpc_id(client_id, limb_grower.rng.seed, false)	
 		limb_grower.stop.rpc_id(client_id)
 	

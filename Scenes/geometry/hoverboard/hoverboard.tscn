@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://b2efn2ebpbsh5"]
+[gd_scene load_steps=5 format=3 uid="uid://b2efn2ebpbsh5"]
 
 [ext_resource type="Script" path="res://Scenes/geometry/hoverboard/hoverboard.gd" id="1_c4avv"]
 [ext_resource type="Material" uid="uid://svosidjb5wsa" path="res://Materials/geometry.tres" id="2_lqj5k"]
@@ -11,11 +11,6 @@ size = Vector3(3, 0.25, 3)
 resource_local_to_scene = true
 size = Vector3(3, 0.25, 3)
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_7a3qy"]
-properties/0/path = NodePath(".:configuration")
-properties/0/spawn = true
-properties/0/replication_mode = 2
-
 [node name="Hoverboard" type="AnimatableBody3D"]
 sync_to_physics = false
 script = ExtResource("1_c4avv")
@@ -27,6 +22,3 @@ surface_material_override/0 = ExtResource("2_lqj5k")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_w3gda")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_7a3qy")
