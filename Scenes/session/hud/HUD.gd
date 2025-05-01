@@ -73,7 +73,7 @@ func get_psa():
 	return PSA.text
 
 	
-func update_nameplate(key, coordinates, label):
+func update_nameplate(key, coordinates, label, invisible = false):
 	
 	var nameplate = nameplates.find_child(str(key), false, false)
 	var camera = get_viewport().get_camera_3d()
@@ -86,7 +86,7 @@ func update_nameplate(key, coordinates, label):
 		var screen_offset = Vector2(0, screen_size.y / 50.0)	
 		var label_size = nameplate.size / 2.0
 		nameplate.position = screen_coordinates - screen_offset - label_size 
-		nameplate.visible = not camera.is_position_behind(coordinates)
+		nameplate.visible = not camera.is_position_behind(coordinates) and not invisible
 		nameplate.text = label
 	
 

@@ -3,7 +3,7 @@ extends Camera3D
 const MAX_ANGLE = PI/2.3
 
 const DRIVING_DISTANCE = -2.0
-const RAGDOLLED_DISTANCE = -2.0
+const RAGDOLLED_DISTANCE = -3.0
 
 @export var Locked = false
 

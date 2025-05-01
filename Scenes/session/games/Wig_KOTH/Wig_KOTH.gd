@@ -49,31 +49,20 @@ func _ready():
 	core_mesh.mesh.height = 0
 	floorCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	wallCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
-	Hill.position = Vector3(0, hill_radius * 0.9, 0)
-	session.HUD.set_progress_label("Growing Hair...")
-	session.HUD.add_nameplate("HILL", "HILL")
-	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
-	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
-	#session.HUD.modify_nameplate("HILL", "visible", false)
-	
+	Hill.position = Vector3(0, map_size / 2.0, 0)
+	phase = randi()
 
 func _process(delta):
 	
-	phase += delta / 100.0
-
+	session.HUD.update_nameplate("HILL", Hill.global_position, "HILL")	
 	var scoring_players : Array[Node3D] = get_players_in_hill()
 	var indicator_color = Color.GREEN_YELLOW if scoring_players.size() == 0 else Color.ORANGE_RED
 	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", indicator_color)
 	session.HUD.find_child("Progress").visible = scoring_players.has(session.local_humanoid()) and Hill.visible
-	session.HUD.update_nameplate("HILL", Hill.global_position, "HILL")	
-	session.HUD.modify_nameplate("HILL", "visible", Hill.visible)
-	resize_hill(hill_radius, delta)
 	
 
 func _physics_process(delta):
-	
-	Hill.visible = State == GameState.playing
-	hill_collider.disabled = not Hill.visible
+
 	var scoring_players = get_players_in_hill()
 	
 	match State: # GAME STATE MACHINE
@@ -85,7 +74,14 @@ func _physics_process(delta):
 			pass
 	
 		GameState.playing:
+			resize_hill(hill_radius, delta)	
 			
+			if not is_multiplayer_authority():
+				return
+				
+			phase += delta / 100.0
+			Hill.rotation.y = sin(5 * phase) + sin(phase * PI)
+
 			for humanoid in scoring_players:
 				
 				var screenname = session.get_humanoids_screenname(humanoid)
@@ -120,7 +116,8 @@ func _physics_process(delta):
 				hill_velocity = hill_velocity.move_toward(Vector3.DOWN * hill_speed * 1.5, 4.9 * delta)
 				hill_state = HillState.falling
 			
-			hill_velocity = hill_velocity.move_toward(target_direction.normalized() * hill_speed, hill_acceleration * delta)
+			var step = hill_acceleration * delta
+			hill_velocity = hill_velocity.move_toward(target_direction.normalized() * hill_speed, step)
 			Hill.position += hill_velocity * delta
 			var bounds = map_size / 2.0 - hill_radius / 4.0
 			Hill.position.x = clampf(Hill.position.x, -bounds, bounds)
@@ -128,7 +125,7 @@ func _physics_process(delta):
 			Hill.position.z = clampf(Hill.position.z, -bounds, bounds)
 			
 		GameState.finished:			
-			pass
+			resize_hill(0, delta)
 
 	
 func resize_hill(new_radius, time_elapsed):
@@ -186,6 +183,8 @@ func rpc_start():
 @rpc("call_local", "reliable")
 func rpc_reset():
 	
+	session.HUD.remove_nameplate("HILL")
+	
 	if is_multiplayer_authority(): 
 		Hill.visible = false	
 		session.HUD.find_child("Progress").visible = false			
@@ -199,6 +198,11 @@ func rpc_reset():
 func rpc_play():
 	
 	Hill.visible = true
+	hill_collider.disabled = false
+	session.HUD.add_nameplate("HILL", "HILL")
+	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
+	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
+	session.HUD.set_progress_label("Growing Hair...")
 	
 	if is_multiplayer_authority(): 
 		State = GameState.playing
@@ -210,10 +214,13 @@ func rpc_play():
 @rpc("call_local", "reliable")
 func rpc_finish():
 	
+	session.HUD.remove_nameplate("HILL")
+	
 	if is_multiplayer_authority(): 
 		State = GameState.finished
 		Hill.visible = false
 		session.HUD.remove_nameplate("HILL")
+
 
 	
 	

@@ -17,7 +17,6 @@ enum GameState {
 @export var Scores = {}
 
 @onready var wig_remote = $RemoteTransform3D
-#@onready var wig_ffa_hud = $HUD
 @onready var whispers = $Whispers
 @onready var theme = $Theme
 
@@ -27,7 +26,6 @@ enum GameState {
 
 var Wig : Node3D
 var Bearer : Node3D
-
 
 func _ready():
 	
@@ -40,10 +38,6 @@ func _ready():
 	
 	whispers.stream_paused = false
 	theme.stream_paused = true
-	session.HUD.set_progress_lable("Installing Wig...")
-	session.HUD.add_nameplate("WIG", "WIG")
-	session.HUD.modify_nameplate("WIG", "theme_override_colors/font_color", Color.GREEN_YELLOW)
-	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
 	
 	
 func _process(delta):
@@ -257,6 +251,11 @@ func rpc_reset():
 	
 @rpc("call_local", "reliable")
 func rpc_play():
+	
+	session.HUD.set_progress_lable("Installing Wig...")
+	session.HUD.add_nameplate("WIG", "WIG")
+	session.HUD.modify_nameplate("WIG", "theme_override_colors/font_color", Color.GREEN_YELLOW)
+	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
 	
 	if is_multiplayer_authority(): 
 		

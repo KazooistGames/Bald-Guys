@@ -65,8 +65,8 @@ func _process(delta):
 		if Client_Screennames.has(peer_id):
 			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
 			var screenname = Client_Screennames[peer_id]
-			HUD.update_nameplate(humanoid.name, head_position, screenname)
-			HUD.modify_nameplate(humanoid.name, "visible", humanoid.RUNNING)
+			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
+
 				
 	if Game == null:
 		pass
@@ -206,7 +206,16 @@ func create_player_humanoid(peer_id):
 	
 	if State == SessionState.Round:
 		Level.init_geometry_for_new_client(peer_id)
-	
+		
+		if Game.State == Game.GameState.reset:
+			Game.rpc_reset.rpc_id(peer_id)
+		elif Game.State == Game.GameState.starting:
+			Game.rpc_start.rpc_id(peer_id)
+		elif Game.State == Game.GameState.playing:
+			Game.rpc_play.rpc_id(peer_id)
+		elif Game.State == Game.GameState.finished:
+			Game.rpc_finish.rpc_id(peer_id)
+				
 	return new_peer_humanoid
 
 

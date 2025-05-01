@@ -28,7 +28,7 @@ const Lunge_max_traversal = 6
 	
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.5, 7.0)
-@export var JUMP_SPEED = 5.0
+@export var JUMP_SPEED = 5.5
 @export var RUNNING = false
 @export var DOUBLE_JUMP_CHARGES = 1
 
@@ -76,7 +76,7 @@ var cached_floor_obj = null
 var cached_floor_pos = Vector3.ZERO
 
 var just_jumped_timer = 0.0
-var just_jumped_period = 1.0/4.0
+var just_jumped_period = 1.0/3.0
 
 var Lunging = false
 var Lunge_Target : Node3D 
@@ -531,6 +531,7 @@ func jump(calling_client_id = 1):
 	if is_multiplayer_authority():
 		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0
 		just_jumped_timer = rollback_lag	
+		reverse_coyote_timer = rollback_lag
 		var jump_impulse = Vector3.UP * JUMP_SPEED
 		
 		var base_modifier : Callable = func(velocity): 
@@ -557,6 +558,7 @@ func double_jump(calling_client_id = 1):
 	
 	if is_multiplayer_authority():
 		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	
+		just_jumped_timer = rollback_lag	
 		var modifier : Callable = func(velocity):
 			velocity.y = max(0, velocity.y - JUMP_SPEED)
 			return velocity
