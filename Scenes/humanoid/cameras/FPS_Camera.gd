@@ -2,6 +2,9 @@ extends Camera3D
 
 const MAX_ANGLE = PI/2.3
 
+const DRIVING_DISTANCE = -2.0
+const RAGDOLLED_DISTANCE = -2.0
+
 @export var Locked = false
 
 @onready var reticle = $reticle
@@ -34,7 +37,7 @@ func _process(_delta):
 		reticle.position = get_center_of_screen() - reticle.size/2.0
 		
 	HORIZONTAL_SENSITIVITY = 0.002 if humanoid.REACHING else 0.004
-	var cam_depth = -1.5 if humanoid.RAGDOLLED else 0.115
+	var cam_depth = RAGDOLLED_DISTANCE if humanoid.RAGDOLLED else DRIVING_DISTANCE
 	var adjustedOffset = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * cam_depth
 	var adjustedPosition = humanoid.head_position()
 	position = adjustedPosition + adjustedOffset	

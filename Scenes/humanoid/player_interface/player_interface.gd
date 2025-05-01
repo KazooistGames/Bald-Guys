@@ -128,7 +128,7 @@ func rpc_update_Continuous_inputs(inputs):
 		humanoid.rectifier.perform_rollback(rollback_lag)
 		humanoid.step_movement(rollback_lag)
 		
-	humanoid.RUNNING = inputs['run']
+	humanoid.RUNNING = not inputs['run']
 	cache_new_inputs(inputs)
 		
 

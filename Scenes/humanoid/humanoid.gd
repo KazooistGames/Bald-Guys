@@ -212,8 +212,7 @@ func _integrate_forces(state):
 			ragdoll.rpc()
 			
 		elif bumped:
-			audio_impact(-36, 0.60)
-			bump(state.get_contact_impulse(index) / 1.6 / mass)
+			bump.rpc(state.get_contact_impulse(index) / 1.6 / mass)
 			
 		index += 1			
 
@@ -515,7 +514,7 @@ func bump(velocity_impulse):
 	coyote_timer = coyote_duration
 	reverse_coyote_timer = 0.0
 	floorcast.enabled = false
-		
+	audio_impact(-36, 0.60)
 	apply_central_impulse(velocity_impulse * mass)
 
 

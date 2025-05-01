@@ -41,6 +41,10 @@ func _ready():
 	whispers.stream_paused = false
 	theme.stream_paused = true
 	session.HUD.set_progress_lable("Installing Wig...")
+	session.HUD.add_nameplate("WIG", "WIG")
+	session.HUD.modify_nameplate("WIG", "theme_override_colors/font_color", Color.GREEN_YELLOW)
+	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
+	
 	
 func _process(delta):
 	
@@ -253,10 +257,6 @@ func rpc_reset():
 	
 @rpc("call_local", "reliable")
 func rpc_play():
-	
-	session.HUD.add_nameplate("WIG", "WIG")
-	session.HUD.modify_nameplate("WIG", "theme_override_colors/font_color", Color.GREEN_YELLOW)
-	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
 	
 	if is_multiplayer_authority(): 
 		

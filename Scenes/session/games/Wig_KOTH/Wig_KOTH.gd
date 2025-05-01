@@ -16,12 +16,11 @@ enum GameState {
 }
 
 @export var State = GameState.reset
-
+@export var map_size : float = 50
 @export var Scores : Dictionary = {}
 @export var Goal : float = 60
-
-@export var hill_extents : Vector3 = Vector3.ONE
-@export var map_size : float = 50
+@export var hill_radius : float = 4.0
+@export var hill_velocity : Vector3 = Vector3.ZERO
 
 @onready var Hill = $Hill
 @onready var hill_collider : CollisionShape3D = $Hill/CollisionShape3D
@@ -29,13 +28,11 @@ enum GameState {
 @onready var core_mesh : MeshInstance3D = $Hill/MeshInstance3D2
 @onready var floorCast : RayCast3D = $Hill/floorCast
 @onready var wallCast : RayCast3D = $Hill/wallCast
-
 @onready var session = get_parent()
+@onready var synchronizer = $MultiplayerSynchronizer
 
 var hill_speed : float = 0.75
 var hill_acceleration : float = 2.0
-var hill_radius : float = 4.0
-var hill_velocity : Vector3 = Vector3.ZERO
 
 var phase = 0.0
 
@@ -44,31 +41,39 @@ func _ready():
 	session.Started_Round.connect(start_game)
 	session.Ended_Round.connect(reset_game)
 	Hill.visible = false
-	rpc_resize_hill.rpc(0)
+	hill_collider.disabled = true
+	hill_collider.shape.radius = 0
+	hill_mesh.mesh.radius = 0
+	hill_mesh.mesh.height = 0
+	core_mesh.mesh.radius = 0
+	core_mesh.mesh.height = 0
 	floorCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	wallCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	Hill.position = Vector3(0, hill_radius * 0.9, 0)
 	session.HUD.set_progress_label("Growing Hair...")
-
+	session.HUD.add_nameplate("HILL", "HILL")
+	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
+	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
+	#session.HUD.modify_nameplate("HILL", "visible", false)
+	
 
 func _process(delta):
 	
 	phase += delta / 100.0
-	session.HUD.modify_nameplate("WIG", "visible", Hill.visible)
-	session.HUD.update_nameplate("HILL", Hill.global_position, "HILL")	
+
 	var scoring_players : Array[Node3D] = get_players_in_hill()
 	var indicator_color = Color.GREEN_YELLOW if scoring_players.size() == 0 else Color.ORANGE_RED
 	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", indicator_color)
-	session.HUD.find_child("Progress").visible = scoring_players.has(session.local_humanoid())
+	session.HUD.find_child("Progress").visible = scoring_players.has(session.local_humanoid()) and Hill.visible
+	session.HUD.update_nameplate("HILL", Hill.global_position, "HILL")	
+	session.HUD.modify_nameplate("HILL", "visible", Hill.visible)
+	resize_hill(hill_radius, delta)
 	
 
 func _physics_process(delta):
 	
-	Hill.rotation.y = (sin(phase * 5) + sin(PI * phase)) * PI
-	
-	if not is_multiplayer_authority():
-		return
-		
+	Hill.visible = State == GameState.playing
+	hill_collider.disabled = not Hill.visible
 	var scoring_players = get_players_in_hill()
 	
 	match State: # GAME STATE MACHINE
@@ -80,9 +85,6 @@ func _physics_process(delta):
 			pass
 	
 		GameState.playing:
-			
-			if hill_collider.shape.radius != hill_radius:
-				rpc_resize_hill.rpc(move_toward(hill_collider.shape.radius, hill_radius, 1.0 * delta))
 			
 			for humanoid in scoring_players:
 				
@@ -124,25 +126,19 @@ func _physics_process(delta):
 			Hill.position.x = clampf(Hill.position.x, -bounds, bounds)
 			Hill.position.y = clampf(Hill.position.y,  hill_radius / 4.0, map_size / 2.0 - hill_radius / 4.0)
 			Hill.position.z = clampf(Hill.position.z, -bounds, bounds)
-			rpc_reposition_hill.rpc(Hill.position)	
 			
 		GameState.finished:			
 			pass
 
 	
-@rpc("call_local", "reliable")	
-func rpc_resize_hill(radius):
+func resize_hill(new_radius, time_elapsed):
 	
-	hill_collider.shape.radius = radius
-	hill_mesh.mesh.radius = hill_collider.shape.radius
-	hill_mesh.mesh.height = hill_collider.shape.radius * 2.0
-	core_mesh.mesh.radius = hill_collider.shape.radius / 10.0
-	core_mesh.mesh.height = hill_mesh.mesh.height / 10.0
-	
-@rpc("call_local", "reliable")	
-func rpc_reposition_hill(coordinates):
-	
-	Hill.position = coordinates
+	if hill_collider.shape.radius != new_radius:
+		hill_collider.shape.radius = move_toward(hill_collider.shape.radius, new_radius, time_elapsed)
+		hill_mesh.mesh.radius = hill_collider.shape.radius
+		hill_mesh.mesh.height = hill_collider.shape.radius * 2.0
+		core_mesh.mesh.radius = hill_mesh.mesh.radius / 10.0
+		core_mesh.mesh.height = hill_mesh.mesh.height / 10.0
 
 
 func get_players_in_hill() -> Array[Node3D]:
@@ -174,6 +170,7 @@ func reset_game():
 		rpc_reset.rpc()	
 		Scores = {}
 		Hill.visible = false
+		resize_hill(0, hill_radius)
 		
 	
 @rpc("call_local", "reliable")
@@ -193,7 +190,6 @@ func rpc_reset():
 		Hill.visible = false	
 		session.HUD.find_child("Progress").visible = false			
 		State = GameState.reset
-		session.HUD.remove_nameplate("HILL")
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
@@ -202,9 +198,6 @@ func rpc_reset():
 @rpc("call_local", "reliable")
 func rpc_play():
 	
-	session.HUD.add_nameplate("HILL", "HILL")
-	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
-	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
 	Hill.visible = true
 	
 	if is_multiplayer_authority(): 

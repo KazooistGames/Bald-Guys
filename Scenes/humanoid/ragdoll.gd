@@ -38,8 +38,8 @@ var bone_modifiers = {
 @onready var slappy_foot_right = $"Physical Bone foot_r/SlappyFoot"
 
 const MAX_VELOCITY = 100
-const MAX_DISPLACEMENT = 2.0
-const MAX_ANGULAR_DISPLACEMENT = PI
+const MAX_DISPLACEMENT = 5.0
+const MAX_ANGULAR_DISPLACEMENT = 2 * PI
 
 const perfect_match = true
 
@@ -79,15 +79,12 @@ func animate_physical_bones(delta):
 		var animated_transform = get_animated_transform(physical_bone)	
 		var linear_displacement = animated_transform.origin - physical_transform.origin
 		var angular_displacement = animated_transform.basis * physical_transform.basis.inverse()
-		var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
-		var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
-		
-		if physical_bone.bone_name == "head":
-			head_displacement = linear_displacement.length()
-
-		if tooFast or tooFar:
-			correct_physical_bones_trigger = true
-		
+		#var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
+		#var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
+		#
+		#if tooFast or tooFar:
+			#correct_physical_bones_trigger = true
+		#
 		if(correct_physical_bones_trigger):
 			physical_bone.linear_velocity = Vector3.ZERO
 			physical_bone.angular_velocity = Vector3.ZERO
@@ -107,10 +104,11 @@ func animate_physical_bones(delta):
 			var angular_torq = hookes_law(ang_stiff, angular_displacement.get_euler(), ang_damp, ang_vel)
 			physical_bone.angular_velocity += angular_torq * delta
 			
+		if physical_bone.bone_name == "head":
+			head_displacement = linear_displacement.length()
+			
 	process_slappy_feet(delta)
 	
-
-
 
 func process_slappy_feet(delta):
 	

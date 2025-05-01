@@ -61,11 +61,12 @@ func _process(delta):
 	
 	for humanoid in Humanoids:
 		var peer_id = int(str(humanoid.name))
-		
+
 		if Client_Screennames.has(peer_id):
 			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname)
+			HUD.modify_nameplate(humanoid.name, "visible", humanoid.RUNNING)
 				
 	if Game == null:
 		pass
@@ -337,12 +338,12 @@ func pong(ping_timestamp : float): #responding RPC call that passes back initial
 		unlagger.reset()
 	
 	
-func update_nameplate_for_ragdoll(new_value, node):
+func update_nameplate_for_ragdoll(ragdoll_state, node):
 	
 	if not node.is_in_group("humanoids"):
 		pass
 		
-	elif new_value:
+	elif ragdoll_state:
 		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.GRAY)
 		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 16)
 	else:

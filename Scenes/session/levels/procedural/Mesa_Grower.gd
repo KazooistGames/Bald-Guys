@@ -14,7 +14,7 @@ enum Configuration
 }
 @export var configuration = Configuration.inert
 
-@export var height_step = 0.5
+@export var height_step = 0.75
 
 @onready var rng = RandomNumberGenerator.new()
 
