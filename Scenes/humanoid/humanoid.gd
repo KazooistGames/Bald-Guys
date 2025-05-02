@@ -226,7 +226,6 @@ func _integrate_forces(state):
 		elif impact >= RAGDOLL_THRESHOLD and not RAGDOLLED:
 			var impacter = state.get_contact_collider_object(index)
 			print(name, " knocked down by ", impacter)
-			print(just_jumped_timer, " ", just_jumped_period)
 			something_big_happened = true
 			ragdoll.rpc()
 			

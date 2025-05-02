@@ -36,9 +36,7 @@ func _physics_process(delta):
 	
 	
 func cache(age = 0):
-	#print("cached new index ", previous_state_ages.size(), " with age of ", age)
-	#previous_transforms.append(parent_state(PhysicsServer3D.BODY_STATE_TRANSFORM))
-	#previous_velocities.append(parent_state(PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY))
+
 	previous_transforms.append(get_parent().transform)
 	previous_velocities.append(get_parent().linear_velocity)
 	previous_state_ages.append(age)
@@ -51,10 +49,8 @@ func perform_rollback(time_to_rollback):
 	var rollback_transform =  previous_transforms[index]
 	parent.linear_velocity = rollback_velocity
 	parent.transform = rollback_transform
-	print("performed rollback to age ", previous_state_ages[index], " at index ", index)
 	invalidate_cache_array(index)
 
-	#return rollback_transform
 
 
 func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callable = Callable(), delta_modifer: Callable = Callable(), use_gravity = true):
