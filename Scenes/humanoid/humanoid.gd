@@ -159,6 +159,8 @@ func _process(_delta):
 	
 func _integrate_forces(state):	
 	
+	var something_big_happened = false
+	
 	if not is_on_floor() or RAGDOLLED:
 		pass		
 		
@@ -167,7 +169,6 @@ func _integrate_forces(state):
 	
 	var contact_count = state.get_contact_count()
 	var index = 0
-	collision_ons.clear()
 	
 	while index < contact_count and multiplayer_permissive: # loop through all objects we collided with this frame
 		
@@ -215,25 +216,29 @@ func _integrate_forces(state):
 			
 		else: #calculate timing and angle to know if wall jump succeeds
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0
-			var just_jumped = just_jumped_timer < just_jumped_period
-			wall_jumped = glancing and just_jumped and wall_jump_ons
+			var just_jumped = just_jumped_timer <= just_jumped_period
+			wall_jumped = glancing and just_jumped 
 		
 		if wall_jumped: #wall jump success overrides ragdoll
 			wall_jump.rpc(state.get_contact_impulse(index))
+			something_big_happened = true
 			
 		elif impact >= RAGDOLL_THRESHOLD and not RAGDOLLED:
 			var impacter = state.get_contact_collider_object(index)
 			print(name, " knocked down by ", impacter)
+			print(just_jumped_timer, " ", just_jumped_period)
+			something_big_happened = true
 			ragdoll.rpc()
 			
 		elif bumped:
 			bump.rpc(state.get_contact_impulse(index) / 1.6 / mass)
 			
-		index += 1			
-
+		index += 1	
+				
+	return something_big_happened
 
 func _physics_process(delta):	
-	
+	collision_ons.clear()
 	force.external_velocity = linear_velocity
 	
 	if floorcast.enabled:
@@ -245,14 +250,15 @@ func _physics_process(delta):
 
 	if not is_on_floor():
 		coyote_timer += delta	
-		just_jumped_timer += delta		
+		just_jumped_timer += delta	
 			
 	elif not ON_FLOOR and is_multiplayer_authority():		
 		land.rpc()			
 			
 	else:
 		coyote_timer = 0
-	
+		just_jumped_timer = 0.0
+		
 	if not RAGDOLLED:
 		ragdoll_cooldown_timer_seconds += delta	
 	else:
@@ -540,7 +546,6 @@ func bump(velocity_impulse):
 	audio_impact(-36, 0.60)
 	apply_central_impulse(velocity_impulse * mass)
 
-
 @rpc("call_local", "reliable")
 func jump():
 	
@@ -568,18 +573,22 @@ func double_jump():
 @rpc("call_local", "reliable")
 func wall_jump(impulse):
 	
-	linear_velocity.x += impulse.x / mass
-	linear_velocity.y += JUMP_SPEED/2.0
-	linear_velocity.z += impulse.z / mass
-	reset_double_jump()
-	audio_jump(1.6)
-	var speed_boost = impulse.normalized() * JUMP_SPEED / 2.0
-	floor_velocity += speed_boost
-	audio_impact(-18, 1.2)
-	wall_jump_ons = false
+	if wall_jump_ons:
+		linear_velocity.x += impulse.x / mass
+		linear_velocity.y += JUMP_SPEED/2.0
+		linear_velocity.z += impulse.z / mass
+		var speed_boost = impulse.normalized() * JUMP_SPEED / 2.0
+		floor_velocity += speed_boost
+		wall_jump_ons = false
+		reset_double_jump()	
+		audio_jump(1.6)
+		audio_impact(-18, 1.2)
+		
+		if is_multiplayer_authority():
+			rectifier.clear_old_data(0)
 	#
-	#if is_multiplayer_authority():
-		#print("wall jumped")
+	if is_multiplayer_authority():
+		print("wall jumped")
 
 
 @rpc("call_local", "reliable")
@@ -612,34 +621,21 @@ func land():
 		linear_velocity.z /= 2.0
 	
 
-func audio_boof(db, pitch):
-	boofFX.bus = "stank"
-	boofFX.volume_db = db
-	boofFX.pitch_scale = pitch
-	boofFX.play()
-	
-func audio_impact(db, pitch):
-	impactFX.bus = "beef"
-	impactFX.volume_db = db
-	impactFX.pitch_scale = pitch
-	impactFX.play()	
-	
-func audio_jump(pitch):
-	jumpFX.pitch_scale = pitch
-	jumpFX.play()	
 	
 	
 func rollback(lag : float) -> void:
-	
+
 	rectifier.perform_rollback(lag)
 	force_update_transform()
+	collision_ons.clear()
+	wall_jump_ons = true
 	coyote_timer -= lag		
 	coyote_timer = max(coyote_timer, 0.)
 	ON_FLOOR = coyote_timer <= coyote_duration
-	floorcast.enabled = reverse_coyote_timer < coyote_duration
 	reverse_coyote_timer -= lag
 	reverse_coyote_timer = max(reverse_coyote_timer, 0.)
-	just_jumped_timer -= lag
+	floorcast.enabled = reverse_coyote_timer < coyote_duration
+	just_jumped_timer -= lag * 2.0 #fudge factor :)
 	just_jumped_timer = max(just_jumped_timer, 0.)
 	var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
 	var recovery_scalar = ragdoll_recovery_default_duration * sqrt(ragdoll_velocity)
@@ -669,8 +665,7 @@ func predict(lag : float) -> void:
 		var state = PhysicsServer3D.body_get_direct_state(rid)
 		state.linear_velocity = linear_velocity
 		state.transform.origin = position
-
-		_integrate_forces(state)
+			
 		state.integrate_forces()
 		rectifier.cache(lag)
 		
@@ -700,3 +695,20 @@ func get_collider_intersections(collider : CollisionShape3D, motion : Vector3):
 	var result = physics_state.collide_shape(depen_query)
 
 	return result 
+
+
+func audio_boof(db, pitch):
+	boofFX.bus = "stank"
+	boofFX.volume_db = db
+	boofFX.pitch_scale = pitch
+	boofFX.play()
+	
+func audio_impact(db, pitch):
+	impactFX.bus = "beef"
+	impactFX.volume_db = db
+	impactFX.pitch_scale = pitch
+	impactFX.play()	
+	
+func audio_jump(pitch):
+	jumpFX.pitch_scale = pitch
+	jumpFX.play()	

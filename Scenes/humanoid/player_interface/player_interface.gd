@@ -134,7 +134,7 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 		
 		if is_multiplayer_authority():
 			#print("WASD'd!")
-			var rollback_lag = Time.get_unix_time_from_system() - timestamp
+			var rollback_lag = .15 #Time.get_unix_time_from_system() - timestamp
 			humanoid.rollback(rollback_lag)
 			humanoid.predict(rollback_lag)
 		
@@ -149,22 +149,18 @@ func rpc_update_Discrete_inputs(inputs, timestamp):
 	if str(sender_id) != humanoid.name and not is_multiplayer_authority():
 		return
 		
-	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
+	var rollback_lag = .15 #Time.get_unix_time_from_system() - timestamp	
 	
 	if just_pressed('jump', inputs):	
 	
 		var jump_available = humanoid.ON_FLOOR or humanoid.DOUBLE_JUMP_CHARGES > 0
-		if jump_available and is_multiplayer_authority():
-			#print("Jumped!")
-			humanoid.rollback(rollback_lag)
-		
+		if jump_available and is_multiplayer_authority(): #ROLLBACK
+			humanoid.rollback(rollback_lag)	
 		if humanoid.ON_FLOOR:
 			humanoid.jump()
-
 		elif humanoid.DOUBLE_JUMP_CHARGES > 0:
-			humanoid.double_jump()
-			
-		if jump_available and is_multiplayer_authority():
+			humanoid.double_jump()		
+		if jump_available and is_multiplayer_authority(): #PREDICTaw 
 			humanoid.predict(rollback_lag)
 		
 	if just_pressed('recover', inputs): 

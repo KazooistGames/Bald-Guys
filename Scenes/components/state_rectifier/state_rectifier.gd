@@ -3,7 +3,7 @@ extends Node
 static var SERVER_PING = 0.0 
 static var CLIENT_PINGS = {}
 
-const max_state_age = 1.0
+const max_state_age = 0.5
 const debug = false
 
 @onready var parent = get_parent()
@@ -44,16 +44,17 @@ func cache(age = 0):
 	previous_state_ages.append(age)
 	
 	
-func perform_rollback(time_to_rollback) -> Transform3D:
+func perform_rollback(time_to_rollback):
 	
 	var index = get_rollback_index(time_to_rollback)
 	var rollback_velocity =  previous_velocities[index]
 	var rollback_transform =  previous_transforms[index]
 	parent.linear_velocity = rollback_velocity
 	parent.transform = rollback_transform
+	print("performed rollback to age ", previous_state_ages[index], " at index ", index)
 	invalidate_cache_array(index)
-	
-	return rollback_transform
+
+	#return rollback_transform
 
 
 func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callable = Callable(), delta_modifer: Callable = Callable(), use_gravity = true):
@@ -92,7 +93,7 @@ func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callab
 func get_rollback_index(time_to_rollback):
 	
 	var newest_index = previous_state_ages.size() - 1
-	var target_index = min(round(previous_state_ages.size() / 2.0), newest_index)
+	var target_index = max(min(round(previous_state_ages.size() / 2.0), newest_index), 0)
 	var age_at_index = previous_state_ages[target_index] 
 	
 	while(target_index > 0 and age_at_index < time_to_rollback): 
@@ -125,7 +126,15 @@ func invalidate_cache_array(cutoff_index):
 	previous_state_ages = previous_state_ages.slice(0, cutoff_index)
 	previous_transforms = previous_transforms.slice(0, cutoff_index)
 	previous_velocities = previous_velocities.slice(0, cutoff_index)
-
+	
+	
+func clear_old_data(cutoff_age):
+	
+	var cutoff_index = get_rollback_index(cutoff_age)
+	previous_state_ages = previous_state_ages.slice(cutoff_index)
+	previous_transforms = previous_transforms.slice(cutoff_index)
+	previous_velocities = previous_velocities.slice(cutoff_index)
+	
 	
 func mock_cache(start_transform, velocity, time_span):
 	
