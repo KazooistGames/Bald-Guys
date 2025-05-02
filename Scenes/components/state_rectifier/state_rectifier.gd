@@ -6,6 +6,8 @@ static var CLIENT_PINGS = {}
 const max_state_age = 1.0
 const debug = false
 
+@onready var parent = get_parent()
+
 var previous_transforms : Array = []
 var previous_velocities : Array = []
 var previous_state_ages : Array = []
@@ -23,18 +25,33 @@ func _physics_process(delta):
 		previous_velocities.pop_front()
 		previous_state_ages.pop_front()
 	
-	previous_transforms.append(parent_state(PhysicsServer3D.BODY_STATE_TRANSFORM))
-	previous_velocities.append(parent_state(PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY))
+	#previous_transforms.append(parent_state(PhysicsServer3D.BODY_STATE_TRANSFORM))
+	#previous_velocities.append(parent_state(PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY))
+	previous_transforms.append(get_parent().transform)
+	previous_velocities.append(get_parent().linear_velocity)
 	previous_state_ages.append(0)
 	
 	
-func perform_rollback(time_to_rollback):
+func cache(age = 0):
+	#print("cached new index ", previous_state_ages.size(), " with age of ", age)
+	#previous_transforms.append(parent_state(PhysicsServer3D.BODY_STATE_TRANSFORM))
+	#previous_velocities.append(parent_state(PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY))
+	previous_transforms.append(get_parent().transform)
+	previous_velocities.append(get_parent().linear_velocity)
+	previous_state_ages.append(age)
 	
+	
+func perform_rollback(time_to_rollback) -> Transform3D:
+	
+	#var original_position = parent_state(PhysicsServer3D.BODY_STATE_TRANSFORM)
 	var index = get_rollback_index(time_to_rollback)
 	var rollback_velocity =  previous_velocities[index]
 	var rollback_transform =  previous_transforms[index]
-	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, rollback_transform)
-	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, rollback_velocity)
+	parent.linear_velocity = rollback_velocity
+	parent.transform = rollback_transform
+	invalidate_cache_array(index)
+	print('rolled back to ', rollback_velocity)
+	return rollback_transform
 
 
 func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callable = Callable(), delta_modifer: Callable = Callable(), use_gravity = true):
@@ -74,12 +91,17 @@ func get_rollback_index(time_to_rollback):
 	
 	var target_index = round(previous_state_ages.size() / 2.0)
 	var newest_index = previous_state_ages.size() - 1
+	var age_at_index = previous_state_ages[target_index] 
 	
-	while(target_index > 0 and previous_state_ages[target_index] < time_to_rollback): 
-		target_index -= 1 	#give preference to more recent states		
-	while(target_index < newest_index and previous_state_ages[target_index] > time_to_rollback):
+	while(target_index > 0 and age_at_index < time_to_rollback): 
+		target_index -= 1 	#give preference to more recent states	
+		age_at_index = previous_state_ages[target_index] 	
+	
+	while(target_index < newest_index and age_at_index > time_to_rollback):
 		target_index += 1
-	
+		age_at_index = previous_state_ages[target_index] 
+
+	#print("found index ", target_index, ", with age ", age_at_index)
 	return target_index
 
 
@@ -95,12 +117,13 @@ func get_rollback_transfrom(time_to_rollback):
 	return previous_transforms[index]
 	
 	
-func invalidate_cache_array(start_index):
+func invalidate_cache_array(cutoff_index):
 	
-	previous_state_ages = previous_state_ages.slice(start_index)
-	previous_transforms = previous_transforms.slice(start_index)
-	previous_velocities = previous_velocities.slice(start_index)
-	
+	#print("invalidated cache at index ", cutoff_index, ", newer than ", previous_state_ages[cutoff_index])
+	previous_state_ages = previous_state_ages.slice(0, cutoff_index)
+	previous_transforms = previous_transforms.slice(0, cutoff_index)
+	previous_velocities = previous_velocities.slice(0, cutoff_index)
+
 	
 func mock_cache(start_transform, velocity, time_span):
 	

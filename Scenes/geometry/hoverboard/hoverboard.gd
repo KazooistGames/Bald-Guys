@@ -98,7 +98,7 @@ func _physics_process(delta):
 
 func depenetrate_geometry() -> Vector3:
 	
-	var starting_trajectory = trajectory
+	#var starting_trajectory = trajectory
 	var intersections = get_collider_intersections(trajectory)
 	
 	if intersections == null or intersections.size() == 0:
@@ -136,7 +136,7 @@ func constrain_geometry():
 	
 	var starting_trajectory = trajectory
 	var xy_extents = size / 2.0
-	var y_extents = girth / 2.0
+	#var y_extents = girth / 2.0
 	#	X
 	if position.x >= upper_limits.x - xy_extents:
 		trajectory.x = -abs(trajectory.x)	
@@ -168,12 +168,12 @@ func constrain_geometry():
 	return trajectory
 		
 		
-func get_collider_intersections(trajectory):
+func get_collider_intersections(current_trajectory):
 	
 	var physics_state = get_world_3d().direct_space_state
 	
 	query.transform = collider.global_transform
-	query.motion = trajectory
+	query.motion = current_trajectory
 		
 	var result = physics_state.collide_shape(query)
 

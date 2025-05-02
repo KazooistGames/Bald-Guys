@@ -52,7 +52,8 @@ func _ready():
 	Hill.position = Vector3(0, map_size / 2.0, 0)
 	phase = randi()
 
-func _process(delta):
+
+func _process(_delta):
 	
 	session.HUD.update_nameplate("HILL", Hill.global_position, "HILL")	
 	var scoring_players : Array[Node3D] = get_players_in_hill()

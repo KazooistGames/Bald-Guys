@@ -41,7 +41,7 @@ func _process(delta):
 		PSA.text = ""
 		
 		
-func update_scoreboard(delta) -> void:
+func update_scoreboard(_delta) -> void:
 	
 	scoreboard.visible = Input.is_action_pressed("tab")
 	progress_fill.custom_minimum_size.x = progress_bar_length * clampf(ProgressPercent, 0.0, 1.0)
@@ -137,13 +137,13 @@ func set_ping_indicator(value):
 	ping.add_theme_color_override("font_color", ping_color_grade)
 	ping.text = str(value) + " ms"
 	
-	
-func set_player_score(player_id : int) -> void:
-	pass
-	
-	
-func get_player_score(player_id : int) -> float:
-	return 0.0
+	#
+#func set_player_score(player_id : int) -> void:
+	#pass
+	#
+	#
+#func get_player_score(player_id : int) -> float:
+	#return 0.0
 
 
 func set_progress_label(label : String) -> void:

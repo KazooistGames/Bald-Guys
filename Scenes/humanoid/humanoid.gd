@@ -218,23 +218,7 @@ func _integrate_forces(state):
 
 
 func _physics_process(delta):	
-			
-	floor_object = floorcast.get_collider()
-	
-	if floor_object == null:
-		pass
-		
-	elif floor_object == cached_floor_obj:
-		floor_velocity = (floor_object.position - cached_floor_pos) / delta
-		cached_floor_pos = floor_object.position
-		
-	else:
-		cached_floor_pos = floor_object.position
-		floor_velocity = Vector3.ZERO
-		
-	cached_floor_obj = floor_object
-	constant_force = floor_velocity * mass	
-	walk_velocity = linear_velocity - floor_velocity
+
 	
 	if floorcast.enabled:
 		reverse_coyote_timer = 0.0			
@@ -311,7 +295,24 @@ func _physics_process(delta):
 	
 	
 func step_movement(delta):
-	
+		
+	floor_object = floorcast.get_collider()
+		
+	if floor_object == null:
+		pass
+		
+	elif floor_object == cached_floor_obj:
+		floor_velocity = (floor_object.position - cached_floor_pos) / delta
+		cached_floor_pos = floor_object.position
+		
+	else:
+		cached_floor_pos = floor_object.position
+		floor_velocity = Vector3.ZERO
+		
+	cached_floor_obj = floor_object
+	constant_force = floor_velocity * mass	
+	walk_velocity = linear_velocity - floor_velocity
+	#print(floor_velocity)
 	if Lunging: 
 		
 		if Lunge_Target == null:	
@@ -341,13 +342,17 @@ func step_movement(delta):
 			
 	else:	
 		var transversal_walk_target
+		var walk_speed = TOPSPEED * TOPSPEED_MOD
 		
+		if not ON_FLOOR:
+			floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 3.0) * delta)
+			
 		if ON_FLOOR or WALK_VECTOR:
-			transversal_walk_target = WALK_VECTOR.normalized() * TOPSPEED * TOPSPEED_MOD
+			transversal_walk_target = WALK_VECTOR.normalized() * walk_speed
 			
 			if ON_FLOOR:
 				transversal_walk_target.y = linear_velocity.y
-				transversal_walk_target = transversal_walk_target.normalized() * TOPSPEED * TOPSPEED_MOD	
+				transversal_walk_target = transversal_walk_target.normalized() * walk_speed				
 			
 		else:
 			transversal_walk_target = linear_velocity - floor_velocity
@@ -356,6 +361,8 @@ func step_movement(delta):
 		target_linear_velocity.y = linear_velocity.y
 		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
 		
+	return linear_velocity * delta
+	
 	
 func run_permissive():
 	

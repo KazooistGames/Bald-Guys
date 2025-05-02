@@ -50,7 +50,7 @@ func _physics_process(delta):
 	for board in boards:
 		
 		if configuration == Configuration.introducing:
-			var lower_lim = board.lower_limits.y + board.girth / 2.0
+			#var lower_lim = board.lower_limits.y + board.girth / 2.0
 			var upper_lim = board.upper_limits.y - board.girth / 2.0
 			var clamped_target = upper_lim #clampf(map_size/2.0, lower_lim, upper_lim)
 			

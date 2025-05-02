@@ -48,8 +48,8 @@ func _process(delta:float) -> void:
 		
 	else:
 		resize_timer += delta
-		var range : float = Next_Size - Last_Size
-		var desired_size = resize_tween.interpolate_value(Last_Size, range, resize_timer, resize_period, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
+		var tween_range : float = Next_Size - Last_Size
+		var desired_size = Tween.interpolate_value(Last_Size, tween_range, resize_timer, resize_period, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
 		adjust_room_to_size(desired_size)
 	
 	

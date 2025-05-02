@@ -121,7 +121,7 @@ func create_mesas(new_seed, hidden : bool = true):
 		var new_mesa = prefab.instantiate()
 		add_child(new_mesa)
 		new_mesa.position.x = rng.randi_range(-boundary, boundary) * gap
-		new_mesa.position.y = -1 if hidden else (1+index) * height_step
+		new_mesa.position.y = -1.0 if hidden else (1+index) * height_step
 		new_mesa.position.z = rng.randi_range(-boundary, boundary) * gap
 		new_mesa.rotation.y = rng.randi_range(0, 3) * PI/2
 		new_mesa.preference = new_mesa.Preference.none if hidden else new_mesa.Preference.deep

@@ -61,7 +61,7 @@ func _ready() -> void:
 	hoverboard_stager.finished_retreating.connect(resize_to_lobby)
 	
 	
-func _process(delta) -> void:
+func _process(_delta) -> void:
 	
 	session.map_size = map_size
 	

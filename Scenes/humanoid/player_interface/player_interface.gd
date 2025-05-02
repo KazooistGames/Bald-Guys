@@ -56,9 +56,11 @@ func _physics_process(_delta):
 		var continuous_inputs = {}
 		continuous_inputs['look'] = look
 		continuous_inputs['wasd'] = Input.get_vector("left", "right", "forward", "backward")
-		continuous_inputs['run'] = Input.is_action_pressed("run")
-		rpc_update_Continuous_inputs.rpc_id(get_multiplayer_authority(), continuous_inputs)
+		continuous_inputs['run'] = not Input.is_action_pressed("run")
+		var timestamp = Time.get_unix_time_from_system()
+		rpc_update_Continuous_inputs.rpc_id(get_multiplayer_authority(), continuous_inputs, timestamp)
 		WASD = continuous_inputs['wasd']
+		humanoid.RUNNING = continuous_inputs['run']
 	else:
 		camera.rotation = look
 			
@@ -77,7 +79,8 @@ func _input(event):
 		discrete_inputs["recover"] = Input.is_action_pressed("recover")
 		discrete_inputs["primary"] = Input.is_action_pressed("primary")
 		discrete_inputs["secondary"] = Input.is_action_pressed("secondary")
-		rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs)	
+		var timestamp = Time.get_unix_time_from_system()
+		rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs, timestamp)	
 		
 	
 func react_to_ragdoll():
@@ -110,30 +113,52 @@ func attempt_lunge_at_target(target):
 		elif target.is_in_group("humanoids"):
 			humanoid.lunge.rpc(target.get_path())
 			
-			
+	
 @rpc("any_peer", "call_local", "unreliable_ordered")
-func rpc_update_Continuous_inputs(inputs):
+func rpc_update_Continuous_inputs(inputs, timestamp):
 	
 	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
 		return
 		
 	look = inputs['look']	
+	humanoid.RUNNING = inputs['run']
 	
-	if WASD != inputs['wasd']:
+	if WASD != inputs['wasd']: #only on input change
 		WASD = inputs['wasd']
 		var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
 		humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
-		var sender_id = multiplayer.get_remote_sender_id()
-		var rollback_lag = humanoid.unlagger.CLIENT_PINGS[sender_id] / 1000.0
-		humanoid.rectifier.perform_rollback(rollback_lag)
-		humanoid.step_movement(rollback_lag)
-		
-	humanoid.RUNNING = not inputs['run']
+		#var sender_id = multiplayer.get_remote_sender_id()
+		var rollback_lag =  .2 #Time.get_unix_time_from_system() - timestamp
+		humanoid.force_update_transform()
+		print("starting at ", humanoid.linear_velocity)
+		var rollback_transform = humanoid.rectifier.perform_rollback(rollback_lag)
+		#print("rolled back to ", rollback_transform.origin)
+		var total_prediction = Vector3.ZERO
+		humanoid.force_update_transform()
+		var step_size : float
+		var position_delta : Vector3 
+		var velocity_delta : Vector3
+		while rollback_lag > 0:
+
+			step_size = min(get_physics_process_delta_time(), rollback_lag)
+			var starting_velocity = humanoid.linear_velocity
+			position_delta = humanoid.step_movement(step_size)
+			velocity_delta += (humanoid.linear_velocity - starting_velocity)
+			humanoid.position += position_delta
+			rollback_lag -= step_size
+			humanoid.rectifier.cache(rollback_lag)
+			total_prediction += position_delta
+			
+		#humanoid.position = rollback_transform.origin + total_prediction
+		humanoid.force_update_transform()
+		print("predictively accelerating by ", velocity_delta)
+		print("ending at ", humanoid.linear_velocity)
+
 	cache_new_inputs(inputs)
 		
 
 @rpc("any_peer", "call_local", "reliable")
-func rpc_update_Discrete_inputs(inputs):
+func rpc_update_Discrete_inputs(inputs, timestamp):
 	
 	var sender_id = multiplayer.get_remote_sender_id()
 	
