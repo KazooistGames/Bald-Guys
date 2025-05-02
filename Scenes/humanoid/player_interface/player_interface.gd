@@ -13,6 +13,7 @@ var targeted_object : Node3D
 var is_local_interface = false #input hardware is connected to this node
 var cached_inputs = {} #used to determine delta across the network
 	
+
 	
 func _ready():
 
@@ -58,7 +59,8 @@ func _physics_process(_delta):
 		continuous_inputs['wasd'] = Input.get_vector("left", "right", "forward", "backward")
 		continuous_inputs['run'] = not Input.is_action_pressed("run")
 		var timestamp = Time.get_unix_time_from_system()
-		rpc_update_Continuous_inputs.rpc_id(get_multiplayer_authority(), continuous_inputs, timestamp)
+		#rpc_update_Continuous_inputs.rpc_id(get_multiplayer_authority(), continuous_inputs, timestamp)
+		rpc_update_Continuous_inputs.rpc(continuous_inputs, timestamp)
 		WASD = continuous_inputs['wasd']
 		humanoid.RUNNING = continuous_inputs['run']
 	else:
@@ -80,8 +82,9 @@ func _input(event):
 		discrete_inputs["primary"] = Input.is_action_pressed("primary")
 		discrete_inputs["secondary"] = Input.is_action_pressed("secondary")
 		var timestamp = Time.get_unix_time_from_system()
-		rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs, timestamp)	
-		
+		#rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs, timestamp)	
+		rpc_update_Discrete_inputs.rpc(discrete_inputs, timestamp)	
+	
 	
 func react_to_ragdoll():
 	
@@ -117,43 +120,24 @@ func attempt_lunge_at_target(target):
 @rpc("any_peer", "call_local", "unreliable_ordered")
 func rpc_update_Continuous_inputs(inputs, timestamp):
 	
-	if str(multiplayer.get_remote_sender_id()) != humanoid.name:
+	if str(multiplayer.get_remote_sender_id()) != humanoid.name and not is_multiplayer_authority():
 		return
 		
 	look = inputs['look']	
 	humanoid.RUNNING = inputs['run']
 	
 	if WASD != inputs['wasd']: #only on input change
+	
 		WASD = inputs['wasd']
 		var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
 		humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
-		#var sender_id = multiplayer.get_remote_sender_id()
-		var rollback_lag =  Time.get_unix_time_from_system() - timestamp
-		humanoid.force_update_transform()
-		print("starting at ", humanoid.linear_velocity)
-		var rollback_transform = humanoid.rectifier.perform_rollback(rollback_lag)
-		#print("rolled back to ", rollback_transform.origin)
-		var total_prediction = Vector3.ZERO
-		humanoid.force_update_transform()
-		var step_size : float
-		var position_delta : Vector3 
-		var velocity_delta : Vector3
-		while rollback_lag > 0:
-
-			step_size = min(get_physics_process_delta_time(), rollback_lag)
-			var starting_velocity = humanoid.linear_velocity
-			position_delta = humanoid.step_movement(step_size)
-			velocity_delta += (humanoid.linear_velocity - starting_velocity)
-			humanoid.position += position_delta
-			rollback_lag -= step_size
-			humanoid.rectifier.cache(rollback_lag)
-			total_prediction += position_delta
-			
-		#humanoid.position = rollback_transform.origin + total_prediction
-		humanoid.force_update_transform()
-		print("predictively accelerating by ", velocity_delta)
-		print("ending at ", humanoid.linear_velocity)
-
+		
+		if is_multiplayer_authority():
+			#print("WASD'd!")
+			var rollback_lag = Time.get_unix_time_from_system() - timestamp
+			humanoid.rollback(rollback_lag)
+			humanoid.predict(rollback_lag)
+		
 	cache_new_inputs(inputs)
 		
 
@@ -162,19 +146,29 @@ func rpc_update_Discrete_inputs(inputs, timestamp):
 	
 	var sender_id = multiplayer.get_remote_sender_id()
 	
-	if str(sender_id) != humanoid.name:
+	if str(sender_id) != humanoid.name and not is_multiplayer_authority():
 		return
 		
-	if just_pressed('jump', inputs):
+	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
+	
+	if just_pressed('jump', inputs):	
+	
+		var jump_available = humanoid.ON_FLOOR or humanoid.DOUBLE_JUMP_CHARGES > 0
+		if jump_available and is_multiplayer_authority():
+			#print("Jumped!")
+			humanoid.rollback(rollback_lag)
 		
 		if humanoid.ON_FLOOR:
-			humanoid.jump.rpc(sender_id)
+			humanoid.jump()
 
 		elif humanoid.DOUBLE_JUMP_CHARGES > 0:
-			humanoid.double_jump.rpc(sender_id)
+			humanoid.double_jump()
+			
+		if jump_available and is_multiplayer_authority():
+			humanoid.predict(rollback_lag)
 		
 	if just_pressed('recover', inputs): 
-		recovery_minigame.attempt_early_recovery(sender_id)
+		recovery_minigame.attempt_early_recovery(rollback_lag)
 			
 	if just_pressed('secondary', inputs):
 		

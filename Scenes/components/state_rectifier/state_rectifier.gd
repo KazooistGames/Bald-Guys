@@ -14,6 +14,9 @@ var previous_state_ages : Array = []
 	
 
 func _physics_process(delta):
+	
+	if not is_multiplayer_authority():
+		return
 
 	for index in range(previous_state_ages.size()): #age every stored state
 		previous_state_ages[index] += delta
@@ -43,14 +46,13 @@ func cache(age = 0):
 	
 func perform_rollback(time_to_rollback) -> Transform3D:
 	
-	#var original_position = parent_state(PhysicsServer3D.BODY_STATE_TRANSFORM)
 	var index = get_rollback_index(time_to_rollback)
 	var rollback_velocity =  previous_velocities[index]
 	var rollback_transform =  previous_transforms[index]
 	parent.linear_velocity = rollback_velocity
 	parent.transform = rollback_transform
 	invalidate_cache_array(index)
-	print('rolled back to ', rollback_velocity)
+	
 	return rollback_transform
 
 
@@ -89,8 +91,8 @@ func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callab
 
 func get_rollback_index(time_to_rollback):
 	
-	var target_index = round(previous_state_ages.size() / 2.0)
 	var newest_index = previous_state_ages.size() - 1
+	var target_index = min(round(previous_state_ages.size() / 2.0), newest_index)
 	var age_at_index = previous_state_ages[target_index] 
 	
 	while(target_index > 0 and age_at_index < time_to_rollback): 

@@ -77,10 +77,10 @@ func _physics_process(delta) -> void:
 
 	if not multiplayer_permissive:
 		pass
-
-	elif not autocycle:
+	elif not multiplayer.has_multiplayer_peer():
 		pass
-		
+	elif not autocycle:
+		pass		
 	elif autocycle_timer < 0:
 		item_dropper.collect_items.rpc(0, Vector3.UP * 35.0)
 		item_dropper.collect_items.rpc(2, Vector3.UP * 35.0, 0.75)

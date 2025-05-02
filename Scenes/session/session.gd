@@ -67,10 +67,11 @@ func _process(delta):
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
 
-				
-	if Game == null:
-		pass
-		
+	
+	if not is_multiplayer_authority():
+		pass			
+	elif Game == null:
+		pass	
 	else:
 		
 		HUD.Scores = Game.Scores

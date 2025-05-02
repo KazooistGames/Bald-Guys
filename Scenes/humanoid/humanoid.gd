@@ -83,6 +83,11 @@ var Lunge_Target : Node3D
 var lunge_target_last_position = Vector3.ZERO
 var lunge_total_traversal
 
+var depen_query : PhysicsShapeQueryParameters3D
+
+var wall_jump_ons = true
+var collision_ons : Array = []
+
 signal ragdoll_change(new_state)
 signal ragdolled
 signal unragdolled
@@ -103,6 +108,10 @@ func _ready():
 		getRandomSkinTone()
 		unlagger.max_rectification_scalar = 1.2
 		
+	depen_query = PhysicsShapeQueryParameters3D.new()	
+	depen_query.collision_mask = 0b0001		
+	depen_query.exclude = [get_rid(), self.get_parent_node_3d()]
+	
 
 func _process(_delta):
 	
@@ -150,8 +159,6 @@ func _process(_delta):
 	
 func _integrate_forces(state):	
 	
-	force.external_velocity = linear_velocity
-	
 	if not is_on_floor() or RAGDOLLED:
 		pass		
 		
@@ -160,12 +167,20 @@ func _integrate_forces(state):
 	
 	var contact_count = state.get_contact_count()
 	var index = 0
+	collision_ons.clear()
 	
 	while index < contact_count and multiplayer_permissive: # loop through all objects we collided with this frame
-	
+		
+		var them = state.get_contact_collider_object(index)
+		
+		if collision_ons.has(them):
+			index += 1
+			continue
+		else:	
+			collision_ons.append(them)
+		
 		var normal = state.get_contact_local_normal(index)
 		var impact = state.get_contact_impulse(index).length()
-		
 		#perform object-type specific logic
 		if state.get_contact_collider_object(index) is RigidBody3D: #other "loose" items		 
 			var their_velocity = state.get_contact_collider_velocity_at_position(index)
@@ -201,12 +216,12 @@ func _integrate_forces(state):
 		else: #calculate timing and angle to know if wall jump succeeds
 			var glancing = abs(LOOK_VECTOR.normalized().dot(normal)) <= 2.0/3.0
 			var just_jumped = just_jumped_timer < just_jumped_period
-			wall_jumped = glancing and just_jumped
+			wall_jumped = glancing and just_jumped and wall_jump_ons
 		
 		if wall_jumped: #wall jump success overrides ragdoll
 			wall_jump.rpc(state.get_contact_impulse(index))
 			
-		elif impact >= RAGDOLL_THRESHOLD:
+		elif impact >= RAGDOLL_THRESHOLD and not RAGDOLLED:
 			var impacter = state.get_contact_collider_object(index)
 			print(name, " knocked down by ", impacter)
 			ragdoll.rpc()
@@ -218,7 +233,8 @@ func _integrate_forces(state):
 
 
 func _physics_process(delta):	
-
+	
+	force.external_velocity = linear_velocity
 	
 	if floorcast.enabled:
 		reverse_coyote_timer = 0.0			
@@ -271,7 +287,7 @@ func _physics_process(delta):
 	else:
 		gravity_scale = 1.0
 		skeleton.processFallOrientation(delta, LOOK_VECTOR, linear_velocity)	
-		floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 3.0) * delta)
+		#floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 3.0) * delta)
 		var jumpDeltaScale = clampf(animation.get("parameters/Jump/blend_position"), 0.0, 1.0)
 		leg_collider.shape.height = lerp(1.3, .8, jumpDeltaScale)
 		leg_collider.position.y = lerp(.65, .8, jumpDeltaScale)
@@ -291,7 +307,7 @@ func _physics_process(delta):
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
 	
-	step_movement(delta)
+	return step_movement(delta)
 	
 	
 func step_movement(delta):
@@ -312,7 +328,7 @@ func step_movement(delta):
 	cached_floor_obj = floor_object
 	constant_force = floor_velocity * mass	
 	walk_velocity = linear_velocity - floor_velocity
-	#print(floor_velocity)
+
 	if Lunging: 
 		
 		if Lunge_Target == null:	
@@ -526,65 +542,45 @@ func bump(velocity_impulse):
 
 
 @rpc("call_local", "reliable")
-func jump(calling_client_id = 1):
+func jump():
 	
 	ON_FLOOR = false
+	wall_jump_ons = true
 	just_jumped_timer = 0.0
 	coyote_timer = coyote_duration
 	reverse_coyote_timer = 0.0
 	floorcast.enabled = false
 	audio_jump(0.8)
-
-	if is_multiplayer_authority():
-		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0
-		just_jumped_timer = rollback_lag	
-		reverse_coyote_timer = rollback_lag
-		var jump_impulse = Vector3.UP * JUMP_SPEED
-		
-		var base_modifier : Callable = func(velocity): 
-			velocity.y = max(0, velocity.y)
-			return velocity
-			
-		var delta_modifier : Callable = func(velocity):
-			return velocity * Vector3(1.0, 0, 1.0)
-			
-		rectifier.apply_retroactive_impulse(rollback_lag, jump_impulse, base_modifier, delta_modifier)
-		
-	else:
-		var offset = max(0.0, linear_velocity.y)
-		var new_y_speed = Vector3.UP * (JUMP_SPEED + offset)
-		set_axis_velocity(new_y_speed)
+	var offset = max(0.0, linear_velocity.y)
+	var new_y_speed = JUMP_SPEED + offset
+	linear_velocity.y = new_y_speed
 		
 
 @rpc("call_local", "reliable")
-func double_jump(calling_client_id = 1):
-	
+func double_jump():
+	wall_jump_ons = true
 	just_jumped_timer = 0.0
 	audio_jump(1.2)
 	DOUBLE_JUMP_CHARGES -= 1
+	linear_velocity.y = max(JUMP_SPEED, linear_velocity.y)
 	
-	if is_multiplayer_authority():
-		var rollback_lag = unlagger.CLIENT_PINGS[calling_client_id] / 1000.0	
-		just_jumped_timer = rollback_lag	
-		var modifier : Callable = func(velocity):
-			velocity.y = max(0, velocity.y - JUMP_SPEED)
-			return velocity
-		rectifier.apply_retroactive_impulse(rollback_lag, Vector3.UP * JUMP_SPEED, modifier)
-	else:
-		set_axis_velocity(Vector3.UP * JUMP_SPEED)
-		
 	
 @rpc("call_local", "reliable")
 func wall_jump(impulse):
 	
-	apply_central_impulse(impulse)
-	apply_central_impulse(Vector3.UP * JUMP_SPEED/2.0 * mass)
+	linear_velocity.x += impulse.x / mass
+	linear_velocity.y += JUMP_SPEED/2.0
+	linear_velocity.z += impulse.z / mass
 	reset_double_jump()
 	audio_jump(1.6)
 	var speed_boost = impulse.normalized() * JUMP_SPEED / 2.0
 	floor_velocity += speed_boost
 	audio_impact(-18, 1.2)
-	
+	wall_jump_ons = false
+	#
+	#if is_multiplayer_authority():
+		#print("wall jumped")
+
 
 @rpc("call_local", "reliable")
 func reset_double_jump():
@@ -632,3 +628,75 @@ func audio_jump(pitch):
 	jumpFX.pitch_scale = pitch
 	jumpFX.play()	
 	
+	
+func rollback(lag : float) -> void:
+	
+	rectifier.perform_rollback(lag)
+	force_update_transform()
+	coyote_timer -= lag		
+	coyote_timer = max(coyote_timer, 0.)
+	ON_FLOOR = coyote_timer <= coyote_duration
+	floorcast.enabled = reverse_coyote_timer < coyote_duration
+	reverse_coyote_timer -= lag
+	reverse_coyote_timer = max(reverse_coyote_timer, 0.)
+	just_jumped_timer -= lag
+	just_jumped_timer = max(just_jumped_timer, 0.)
+	var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
+	var recovery_scalar = ragdoll_recovery_default_duration * sqrt(ragdoll_velocity)
+	ragdoll_recovery_progress -= lag / recovery_scalar
+	ragdoll_recovery_progress = max(ragdoll_recovery_progress, 0.)
+	#print("Rolled back to ", position, " moving at ", linear_velocity)
+
+
+func predict(lag : float) -> void:
+	
+	var step_size : float
+	var position_delta : Vector3 
+	var rid = get_rid()
+	
+	while lag > 0:
+		step_size = min(get_physics_process_delta_time(), lag)
+		lag -= step_size
+		position_delta = _physics_process(step_size)
+		position += position_delta
+		depenetrate_geometry(leg_collider)
+		depenetrate_geometry(chest_collider)
+		force_update_transform()
+		
+		if not ON_FLOOR:
+			linear_velocity -= Vector3.UP * 9.8 * step_size
+			
+		var state = PhysicsServer3D.body_get_direct_state(rid)
+		state.linear_velocity = linear_velocity
+		state.transform.origin = position
+
+		_integrate_forces(state)
+		state.integrate_forces()
+		rectifier.cache(lag)
+		
+	#print("predicted up to ", position, " moving at ", linear_velocity)
+	
+	
+func depenetrate_geometry(collider : CollisionShape3D) -> Vector3:
+	
+	#var starting_trajectory = trajectory
+	var intersections = get_collider_intersections(collider, linear_velocity)
+	
+	if intersections == null or intersections.size() == 0:
+		return Vector3.ZERO
+					
+	var penetration = intersections[0] - intersections[1] 
+	position -= penetration
+	
+	return penetration	
+
+
+func get_collider_intersections(collider : CollisionShape3D, motion : Vector3):
+	
+	var physics_state = get_world_3d().direct_space_state	
+	depen_query.transform = collider.global_transform
+	depen_query.motion = motion
+	depen_query.shape = collider.shape
+	var result = physics_state.collide_shape(depen_query)
+
+	return result 

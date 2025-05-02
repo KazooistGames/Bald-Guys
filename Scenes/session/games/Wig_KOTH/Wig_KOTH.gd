@@ -42,11 +42,11 @@ func _ready():
 	session.Ended_Round.connect(reset_game)
 	Hill.visible = false
 	hill_collider.disabled = true
-	hill_collider.shape.radius = 0
-	hill_mesh.mesh.radius = 0
-	hill_mesh.mesh.height = 0
-	core_mesh.mesh.radius = 0
-	core_mesh.mesh.height = 0
+	hill_collider.shape.radius = 0.01
+	hill_mesh.mesh.radius = 0.01
+	hill_mesh.mesh.height = 0.01
+	core_mesh.mesh.radius = 0.01
+	core_mesh.mesh.height = 0.01
 	floorCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	wallCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	Hill.position = Vector3(0, map_size / 2.0, 0)

@@ -14,8 +14,6 @@ var difficulty = 1.0
 var lever_phase = 0.0
 var locked = false
 
-var lever_phase_lag_offset = 0.0
-
 signal succeeded 
 signal failed
 
@@ -60,14 +58,11 @@ func start_game():
 			
 func lever_on_target(phase):
 	
-	phase += lever_phase_lag_offset
 	var simulated_position = sin(phase) * backdrop.size.x / 2.0
 	return abs(simulated_position) <= target.size.x / 2.0
 	
 	
-func attempt_early_recovery(client_id):
-	
-	lever_phase_lag_offset = unlagger.CLIENT_PINGS[client_id] / 1000.0
+func attempt_early_recovery(lever_phase_lag_offset):
 	
 	if not is_multiplayer_authority():
 		return
