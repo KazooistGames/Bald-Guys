@@ -128,7 +128,7 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 		var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
 		humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
 		#var sender_id = multiplayer.get_remote_sender_id()
-		var rollback_lag =  .2 #Time.get_unix_time_from_system() - timestamp
+		var rollback_lag =  Time.get_unix_time_from_system() - timestamp
 		humanoid.force_update_transform()
 		print("starting at ", humanoid.linear_velocity)
 		var rollback_transform = humanoid.rectifier.perform_rollback(rollback_lag)
