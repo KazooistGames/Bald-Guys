@@ -15,7 +15,9 @@ var previous_state_ages : Array = []
 
 func _physics_process(delta):
 	
-	if not is_multiplayer_authority():
+	if not multiplayer.has_multiplayer_peer():
+		return
+	elif not is_multiplayer_authority():
 		return
 
 	for index in range(previous_state_ages.size()): #age every stored state
