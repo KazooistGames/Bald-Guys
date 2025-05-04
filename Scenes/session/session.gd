@@ -259,7 +259,7 @@ func respawn_node(node_path, spawn_position):
 
 func Commission_Next_Round():
 	
-	var unique_round_id = randi_range(1, 1)
+	var unique_round_id = randi_range(0, 0)
 	var game_prefab_path = ""
 	
 	match unique_round_id:

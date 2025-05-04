@@ -16,6 +16,12 @@ properties/2/replication_mode = 2
 
 [node name="Wig_FFA" type="Node3D"]
 script = ExtResource("1_2sjt2")
+map_size = null
+State = null
+Goal = null
+Scores = null
+Total_Wigs = null
+wig_remotes = null
 
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="."]
 

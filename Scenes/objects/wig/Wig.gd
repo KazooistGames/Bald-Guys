@@ -16,7 +16,7 @@ extends RigidBody3D
 		
 @export var AUTHORITY_POSITION = Vector3.ZERO
 
-@export var radius = 0.25
+@export var radius = 0.15
 var cached_radius
 	
 @onready var Dawn = $Dawn
