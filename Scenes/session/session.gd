@@ -50,7 +50,6 @@ func _ready():
 	gameSpawner.spawned.connect(handle_new_game)
 	
 	if is_multiplayer_authority():
-		Commission_Next_Round()
 		create_player_humanoid(1)
 		Commissioned = true
 
@@ -99,10 +98,7 @@ func _unhandled_key_input(event):
 	elif event.is_action_pressed("Toggle"):
 			
 		if State != SessionState.Round:
-			State = SessionState.Round	
-			countDown_value = 5
-			HUD.set_psa.rpc(str(countDown_value))		
-			Started_Round.emit()
+			Commission_Next_Round()
 			
 		else:	
 			State = SessionState.Intermission			
@@ -151,19 +147,16 @@ func handle_new_game(new_game):
 	Game = new_game
 
 
-func Finished_Round(winner):
+func Finished_Round():
 	
-	HUD.set_psa.rpc("Winner:\n\n" + winner, -1)
 	Ended_Round.emit()	
-	Commission_Next_Round()
 
 
 @rpc("authority", "call_local")
 func spawn_player(parent_path, humanoid_path):
 		
 	var parent = get_node(parent_path)
-	var humanoid = get_node(humanoid_path)	
-		
+	var humanoid = get_node(humanoid_path)		
 	humanoid.unragdoll(false)
 	humanoid.linear_velocity = Vector3.ZERO
 	var spawn_position = get_random_spawn(parent)
@@ -268,24 +261,33 @@ func Commission_Next_Round():
 		1:
 			game_prefab_path = "res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn"
 			
-	if game_prefab_path != "":
-		load_game(game_prefab_path)
+	Game = load_game(game_prefab_path)
+	State = SessionState.Round	
+	countDown_value = 5
+	HUD.set_psa.rpc(str(countDown_value))	
+	Game.rpc_start()
+	Started_Round.emit()
 	
-
+		
+var last_prefab
 func load_game(path):
 	
 	var prefab = load(path)
+	print("Commissioning a new round of ", prefab)
 	
-	if prefab == null:
-		return
+	if prefab == null:	
+		return null
 		
-	if Game != null:
-		Game.queue_free()
+	elif last_prefab == prefab:		
+		Game.rpc_reset.rpc()
+		return Game
 		
-	Game = prefab.instantiate()
-	add_child(Game, true)
-	print("Commissioned a round of ", Game)
-	
+	else:
+		var new_game = prefab.instantiate()
+		add_child(new_game, true)	
+		last_prefab = prefab
+		return new_game
+		
 	
 func local_screenname():
 	

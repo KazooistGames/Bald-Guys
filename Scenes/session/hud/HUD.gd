@@ -85,7 +85,7 @@ func update_nameplate(key, coordinates, label, invisible = false):
 		var screen_size = DisplayServer.screen_get_size()
 		var screen_offset = Vector2(0, screen_size.y / 50.0)	
 		var label_size = nameplate.size / 2.0
-		nameplate.position = screen_coordinates - screen_offset - label_size 
+		nameplate.position = nameplate.position.lerp(screen_coordinates - screen_offset - label_size, 0.3)
 		nameplate.visible = not camera.is_position_behind(coordinates) and not invisible
 		nameplate.text = label
 	

@@ -13,7 +13,7 @@ enum GameState {
 
 @export var map_size = 50
 @export var State = GameState.reset
-@export var Goal = 5 #107.34
+@export var Goal = 10 #107.34
 @export var Scores = {}
 @export var Total_Wigs = 2
 @export var wig_remotes : Array = []
@@ -32,11 +32,12 @@ var active_index = -1
 
 func _ready():
 	
-	session.Started_Round.connect(start_game)
-	session.Ended_Round.connect(reset_game)
+	#session.Started_Round.connect(start_game)
+	#session.Ended_Round.connect(reset_game)
 	session.Destroying_Player_Humanoid.connect(
 		func (humanoid): 
-			if humanoid == bearers[active_index]: 
+			
+			if humanoid == wig_remote.get_parent(): 
 				drop_active_wig())
 	
 	whispers.stream_paused = false
@@ -48,8 +49,9 @@ func _process(delta):
 	session.HUD.find_child("Progress").visible = bearer_is_local_player()
 
 	active_index = wigs.size() - 1
+	wigs = get_tree().get_nodes_in_group("wigs")
 	
-	if active_index < 0:
+	if  wigs.size() == 0:
 		whispers.stream_paused = true
 		theme.stream_paused = true
 		
@@ -96,12 +98,13 @@ func _process(delta):
 				Scores[bearer_name] += delta
 	
 			elif wigs.size() < Total_Wigs:
-				rpc_fuse_wig_to_bearer.rpc(active_index)
+				rpc_fuse_wig_to_head.rpc(wigs[active_index].get_path(), bearers[active_index].get_path())
 				rpc_spawn_new_wig.rpc()
 				
 			else:
+				rpc_fuse_wig_to_head.rpc(wigs[active_index].get_path(), bearers[active_index].get_path())
 				rpc_finish.rpc()
-				session.Finished_Round(str(bearer_name))
+				session.Finished_Round()
 			
 		GameState.finished:			
 			pass
@@ -118,17 +121,17 @@ func bearer_is_local_player():
 	else:	
 		return str(multiplayer.get_unique_id()) == bearers[active_index].name
 
-
-func start_game():
-	
-	if is_multiplayer_authority(): 
-		rpc_start.rpc()
-	
-	
-func reset_game():
-	
-	if is_multiplayer_authority(): 
-		rpc_reset.rpc()	
+#
+#func start_game():
+	#
+	#if is_multiplayer_authority(): 
+		#rpc_start.rpc()
+	#
+	#
+#func reset_game():
+	#
+	#if is_multiplayer_authority(): 
+		#rpc_reset.rpc()	
 
 
 func dawn_active_wig(humanoid):
@@ -152,9 +155,9 @@ func dawn_active_wig(humanoid):
 		pass
 		
 	else:
+		#bearers[active_index] = humanoid
 		wigs[active_index].interactable.gained_interaction.disconnect(dawn_active_wig)
 		humanoid.ragdolled.connect(drop_active_wig)
-		bearers[active_index] = humanoid
 		rpc_put_wig_on_head.rpc(wigs[active_index].get_path(), humanoid.get_path())
 
 		
@@ -171,6 +174,7 @@ func drop_active_wig():
 	elif bearers[active_index].ragdolled.is_connected(drop_active_wig):
 		bearers[active_index].ragdolled.disconnect(drop_active_wig)
 		wigs[active_index].linear_velocity = bearers[active_index].linear_velocity * 1.5 + Vector3(0, 3, 0)
+		#bearers[active_index] = null
 
 	rpc_put_wig_on_head.rpc(wigs[active_index].get_path(), null)
 	
@@ -202,10 +206,10 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 		var bearer = wig_remote.get_parent()
 		
 		if bearer:
-			session.HUD.modify_nameplate(bearers[active_index].name, "theme_override_colors/font_color", Color.WHITE)
-			session.HUD.modify_nameplate(bearers[active_index].name, "theme_override_font_sizes/font_size", 16)
+			session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
+			session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 			bearer.remove_child(wig_remote)
-			bearer = null
+			bearers[wigs.find(wig)] = null
 			
 		add_child(wig_remote)
 		session.HUD.find_child("Progress").visible = false
@@ -219,26 +223,30 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 		var new_bearer = get_node(path_to_bearer)
 		remove_child(wig_remote)
 		new_bearer.find_child("*head").add_child(wig_remote)
-		wig_remote.remote_path = wigs[active_index].get_path()
+		wig_remote.remote_path = path_to_wig
 		wig_remote.position = Vector3(0, 0.275, -.075)		
 		wig.toggle_strobing(false)
 		wig.Dawn.play()
 		session.HUD.find_child("Progress").visible = bearer_is_local_player()
-		session.HUD.modify_nameplate(bearers[active_index].name, "theme_override_colors/font_color", Color.ORANGE_RED)
-		session.HUD.modify_nameplate(bearers[active_index].name, "theme_override_font_sizes/font_size", 24)
+		session.HUD.modify_nameplate(new_bearer.name, "theme_override_colors/font_color", Color.ORANGE_RED)
+		session.HUD.modify_nameplate(new_bearer.name, "theme_override_font_sizes/font_size", 24)
+		bearers[wigs.find(wig)] = new_bearer
 	
 	
 @rpc("call_local", "reliable")
-func rpc_fuse_wig_to_bearer(index : int):
+func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
 	
-	var bearer = bearers[index]
+	var wig = get_node(path_to_wig)
+	var bearer = get_node(path_to_bearer)
 	
-	if bearer == null:
+	if bearer == null or wig == null:
 		return
 		
+	wig_remote = RemoteTransform3D.new()
+	add_child(wig_remote)
 	bearer.ragdolled.disconnect(drop_active_wig)
-	session.HUD.modify_nameplate(bearers[active_index].name, "theme_override_colors/font_color", Color.WHITE)
-	session.HUD.modify_nameplate(bearers[active_index].name, "theme_override_font_sizes/font_size", 16)
+	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
+	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 			
 
 @rpc("call_local", "reliable")
@@ -284,23 +292,20 @@ func rpc_play():
 	if is_multiplayer_authority(): 	
 		rpc_spawn_new_wig.rpc()
 		State = GameState.playing	
+		Total_Wigs = ceil(session.Client_Screennames.size() / 2.0)
 		
+		for value in session.Client_Screennames.values():
+			Scores[value] = 0
+	
 	
 @rpc("call_local", "reliable")
 func rpc_finish():
 	
 	if is_multiplayer_authority(): 
-
-		if active_index < 0:
-			pass
-		elif bearers[active_index]:
-			bearers[active_index].ragdolled.disconnect(drop_active_wig)
-			
 		State = GameState.finished	
 	
 	
 
-	
 
 		
 

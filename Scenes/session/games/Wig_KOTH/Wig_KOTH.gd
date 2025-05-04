@@ -38,8 +38,8 @@ var phase = 0.0
 
 func _ready():
 	
-	session.Started_Round.connect(start_game)
-	session.Ended_Round.connect(reset_game)
+	#session.Started_Round.connect(start_game)
+	#session.Ended_Round.connect(reset_game)
 	Hill.visible = false
 	hill_collider.disabled = true
 	hill_collider.shape.radius = 0.01
@@ -87,11 +87,15 @@ func _physics_process(delta):
 				
 				var screenname = session.get_humanoids_screenname(humanoid)
 				
-				if Scores.has(screenname):
+				if not Scores.has(screenname):
+					Scores[screenname] = 0
+					
+				elif Scores[screenname] < Goal:
 					Scores[screenname] += delta
 					
 				else:
-					Scores[screenname] = 0
+					rpc_finish.rpc()
+					session.Finished_Round()
 
 			var collision_point : Vector3 = Vector3.ZERO
 			var target_direction : Vector3 = Vector3.ZERO
@@ -154,22 +158,7 @@ func get_players_in_hill() -> Array[Node3D]:
 			
 	return players
 		
-		
-func start_game():
-	
-	if is_multiplayer_authority(): 
-		rpc_reset.rpc()
-		rpc_start.rpc()
-	
-	
-func reset_game():
-	
-	if is_multiplayer_authority(): 
-		rpc_reset.rpc()	
-		Scores = {}
-		Hill.visible = false
-		resize_hill(0, hill_radius)
-		
+			
 	
 @rpc("call_local", "reliable")
 func rpc_start():
@@ -187,7 +176,9 @@ func rpc_reset():
 	session.HUD.remove_nameplate("HILL")
 	
 	if is_multiplayer_authority(): 
-		Hill.visible = false	
+		Scores = {}
+		Hill.visible = false
+		resize_hill(0, hill_radius)
 		session.HUD.find_child("Progress").visible = false			
 		State = GameState.reset
 		
