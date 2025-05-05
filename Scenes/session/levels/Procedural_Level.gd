@@ -198,8 +198,7 @@ func unstage_boards() -> void:
 	hoverboard_stager.retreat_boards.rpc()
 	
 	
-@rpc("call_remote", "authority", "reliable")
-func init_geometry_for_new_client(client_id) -> void:
+func init_for_new_client(client_id) -> void:
 	
 	print(multiplayer.get_unique_id(), " initialzed geometry from server.")
 	

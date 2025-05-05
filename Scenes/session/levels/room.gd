@@ -6,7 +6,7 @@ extends Node3D
 @export var Last_Size : float = 25.0
 @export var Resizing : bool = false
 
-@onready var floor : Node3D = $floor
+@onready var bottom : Node3D = $floor
 @onready var ceiling : Node3D = $ceiling
 @onready var wall : Node3D = $wall
 @onready var wall2 : Node3D = $wall2

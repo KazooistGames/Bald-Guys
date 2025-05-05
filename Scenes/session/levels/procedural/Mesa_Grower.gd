@@ -113,8 +113,10 @@ func create_mesas(new_seed, hidden : bool = true):
 	rng.seed = new_seed
 	
 	for index in range(count):
-			
-		var random_size = rng.randi_range(4, 10) * 0.5	
+		var tier = index/10
+		var min_size = 8 - tier * 2
+		var max_size = 14 - tier * 2
+		var random_size = rng.randi_range(min_size, max_size) * 0.5	
 		var boundary = map_size/2.0 - random_size/2.0
 		boundary /= gap
 

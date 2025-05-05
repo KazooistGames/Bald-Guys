@@ -85,7 +85,7 @@ func create_limbs(new_seed, hidden : bool = true):
 
 
 @rpc("call_local", "reliable")
-func spawn_limb(orientation, location, radius = 0.25, hidden : bool = true):
+func spawn_limb(orientation, location, radius = 1.0/3.0, hidden : bool = true):
 	
 	var new_limb = prefab.instantiate()
 	new_limb.preference = new_limb.Preference.deep

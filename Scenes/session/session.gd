@@ -12,7 +12,8 @@ const SessionState = {
 @export var State = SessionState.Lobby
 @export var Commissioned = false
 @export var Humanoids = []
-@export var Game : Node3D = null
+@export var Active_Game : Node3D = null
+@export var Games : Array = []
 
 @export var map_size = 0
 
@@ -50,7 +51,7 @@ func _ready():
 	gameSpawner.spawned.connect(handle_new_game)
 	
 	if is_multiplayer_authority():
-		create_player_humanoid(1)
+		add_player(1)
 		Commissioned = true
 
 
@@ -69,17 +70,17 @@ func _process(delta):
 	
 	if not is_multiplayer_authority():
 		pass			
-	elif Game == null:
+	elif Active_Game == null:
 		pass	
 	else:
 		
-		HUD.Scores = Game.Scores
-		HUD.Goal = Game.Goal
+		HUD.Scores = Active_Game.Scores
+		HUD.Goal = Active_Game.Goal
 		
-		if Game.State == Game.GameState.starting:	
+		if Active_Game.State == Active_Game.GameState.starting:	
 				
 			if countDown_value <= 0:
-				Game.rpc_play.rpc()
+				Active_Game.rpc_play.rpc()
 			
 			elif countDown_timer > 1:
 				countDown_timer = 0
@@ -141,10 +142,10 @@ func handle_new_level(new_level):
 	
 func handle_new_game(new_game):
 	
-	if Game != null:
-		Game.queue_free()
+	if Active_Game != null:
+		Active_Game.queue_free()
 	
-	Game = new_game
+	Active_Game = new_game
 
 
 func Finished_Round():
@@ -182,8 +183,9 @@ func get_random_spawn(parent):
 	return valid_spawns.pick_random().global_position
 
 
-func create_player_humanoid(peer_id):
+func add_player(peer_id):
 	
+	print(str(peer_id) + " joined")
 	unlagger.CLIENT_PINGS[peer_id] = 0
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
@@ -199,17 +201,20 @@ func create_player_humanoid(peer_id):
 	Created_Player_Humanoid.emit(new_peer_humanoid)
 	
 	if State == SessionState.Round:
-		Level.init_geometry_for_new_client(peer_id)
+		Level.init_for_new_client(peer_id)
 		
-		if Game.State == Game.GameState.reset:
-			Game.rpc_reset.rpc_id(peer_id)
-		elif Game.State == Game.GameState.starting:
-			Game.rpc_start.rpc_id(peer_id)
-		elif Game.State == Game.GameState.playing:
-			Game.rpc_play.rpc_id(peer_id)
-		elif Game.State == Game.GameState.finished:
-			Game.rpc_finish.rpc_id(peer_id)
+		if Active_Game.State == Active_Game.GameState.reset:
+			Active_Game.rpc_reset.rpc_id(peer_id)
+		elif Active_Game.State == Active_Game.GameState.starting:
+			Active_Game.rpc_start.rpc_id(peer_id)
+		elif Active_Game.State == Active_Game.GameState.playing:
+			Active_Game.rpc_play.rpc_id(peer_id)
+		elif Active_Game.State == Active_Game.GameState.finished:
+			Active_Game.rpc_finish.rpc_id(peer_id)
 				
+	for game in Games:
+		game.init_for_new_client(peer_id)			
+	
 	return new_peer_humanoid
 
 
@@ -219,8 +224,10 @@ func handle_new_humanoid(new_humanoid):
 	HUD.add_nameplate(new_humanoid.name, new_humanoid.name)
 	
 
-func destroy_player_humanoid(peer_id):
+func remove_player(peer_id):
 	
+	print(str(peer_id) + " left")
+	Client_Screennames.erase(peer_id)
 	var player_Humanoid = get_node_or_null(str(peer_id))
 	
 	if player_Humanoid:
@@ -260,12 +267,12 @@ func Commission_Next_Round():
 			game_prefab_path = "res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn"
 		1:
 			game_prefab_path = "res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn"
-			
-	Game = load_game(game_prefab_path)
+
+	Active_Game = load_game(game_prefab_path)
 	State = SessionState.Round	
 	countDown_value = 5
 	HUD.set_psa.rpc(str(countDown_value))	
-	Game.rpc_start()
+	Active_Game.rpc_start()
 	Started_Round.emit()
 	
 		
@@ -273,18 +280,21 @@ var last_prefab
 func load_game(path):
 	
 	var prefab = load(path)
-	print("Commissioning a new round of ", prefab)
 	
 	if prefab == null:	
+		print("Could not load game at path: ", path)
 		return null
 		
-	elif last_prefab == prefab:		
-		Game.rpc_reset.rpc()
-		return Game
+	elif last_prefab == prefab:	
+		print("Replaying last round of ", prefab)	
+		Active_Game.rpc_reset.rpc()
+		return Active_Game
 		
 	else:
+		print("Commissioning a new round of ", prefab)
 		var new_game = prefab.instantiate()
 		add_child(new_game, true)	
+		Games.append(new_game)
 		last_prefab = prefab
 		return new_game
 		
@@ -305,6 +315,7 @@ func local_humanoid() -> Node3D:
 			return humanoid
 		
 	return null
+
 
 func get_humanoids_screenname(humanoid : Node3D) -> String:
 	

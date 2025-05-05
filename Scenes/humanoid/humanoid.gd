@@ -585,9 +585,6 @@ func wall_jump(impulse):
 		
 		if is_multiplayer_authority():
 			rectifier.clear_old_data(0)
-	#
-	if is_multiplayer_authority():
-		print("wall jumped")
 
 
 @rpc("call_local", "reliable")

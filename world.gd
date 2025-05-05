@@ -123,8 +123,8 @@ func start_host_lobby():
 	session = session_Prefab.instantiate()
 	viewPort.add_child(session)
 	
-	multiplayer.peer_connected.connect(add_player_to_session)
-	multiplayer.peer_disconnected.connect(remove_player_from_session)
+	multiplayer.peer_connected.connect(session.add_player)
+	multiplayer.peer_disconnected.connect(session.remove_player)
 	session.Client_Screennames[1] = get_screenname_entry()
 
 
@@ -154,41 +154,14 @@ func join_lobby():
 	multiplayer.server_disconnected.connect(leave_session)
 	
 
-func add_player_to_session(peer_id):
-	
-	print(str(peer_id) + " joined")
-	session.create_player_humanoid(peer_id)
-	
-	
-func remove_player_from_session(peer_id):
-	
-	print(str(peer_id) + " left")
-	session.Client_Screennames.erase(peer_id)
-	
-	session.destroy_player_humanoid(peer_id)
-
-		
-#func give_humanoid_to_client(humanoid):
-	#
-	#var peer_id = str(humanoid.name).to_int()
-	#
-	#if multiplayer.get_unique_id() == peer_id:
-		#LOCAL_PLAYER_INTERFACE.character = humanoid
-
-#
-#func handle_new_session_spawn(new_session):
-	#
-	#new_session.Created_Player_Humanoid.connect(give_humanoid_to_client)
-
-
 func leave_session():
 		
 	if not multiplayer.has_multiplayer_peer():
 		pass
 		
 	elif multiplayer.is_server():
-		multiplayer.peer_connected.disconnect(add_player_to_session)
-		multiplayer.peer_disconnected.disconnect(remove_player_from_session)
+		multiplayer.peer_connected.disconnect(session.add_player)
+		multiplayer.peer_disconnected.disconnect(session.remove_player)
 	
 	else:
 		multiplayer.server_disconnected.disconnect(leave_session)

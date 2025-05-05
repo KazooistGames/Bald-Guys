@@ -33,3 +33,6 @@ autoplay = true
 stream = ExtResource("3_j0k30")
 volume_db = -15.0
 autoplay = true
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("..")

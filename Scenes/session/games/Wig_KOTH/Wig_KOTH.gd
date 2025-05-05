@@ -214,6 +214,8 @@ func rpc_finish():
 		session.HUD.remove_nameplate("HILL")
 
 
-	
+
+func init_for_new_client(client_id) -> void:
+	pass
 	
 

@@ -37,7 +37,7 @@ func _ready():
 	session.Destroying_Player_Humanoid.connect(
 		func (humanoid): 
 			
-			if humanoid == wig_remote.get_parent(): 
+			if humanoid == bearers[active_index]: 
 				drop_active_wig())
 	
 	whispers.stream_paused = false
@@ -45,17 +45,16 @@ func _ready():
 	
 	
 func _process(delta):
-	
-	session.HUD.find_child("Progress").visible = bearer_is_local_player()
 
 	active_index = wigs.size() - 1
 	wigs = get_tree().get_nodes_in_group("wigs")
 	
-	if  wigs.size() == 0:
+	if  wigs.size() == 0 or State != GameState.playing:
 		whispers.stream_paused = true
 		theme.stream_paused = true
 		
 	else:
+		session.HUD.find_child("Progress").visible = bearer_is_local_player()
 		whispers.global_position = wigs[active_index].global_position
 		whispers.stream_paused = bearer_is_local_player()
 		theme.stream_paused = not whispers.stream_paused
@@ -89,10 +88,13 @@ func _process(delta):
 				rpc_spawn_new_wig.rpc()
 				return
 				
-			var bearer_name = session.get_humanoids_screenname(bearers[active_index])	
-				
 			if bearers[active_index] == null:
-				pass
+				return
+				
+			var bearer_name = session.get_humanoids_screenname(bearers[active_index])
+			
+			if not Scores.has(bearer_name):
+				Scores[bearer_name] = delta
 			
 			elif Scores[bearer_name] < Goal:
 				Scores[bearer_name] += delta
@@ -224,9 +226,11 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 		remove_child(wig_remote)
 		new_bearer.find_child("*head").add_child(wig_remote)
 		wig_remote.remote_path = path_to_wig
-		wig_remote.position = Vector3(0, 0.275, -.075)		
+		wig_remote.position = Vector3(0, 0.2, -.025)		
 		wig.toggle_strobing(false)
 		wig.Dawn.play()
+		wig.collider.disabled = true
+		wig.freeze = true
 		session.HUD.find_child("Progress").visible = bearer_is_local_player()
 		session.HUD.modify_nameplate(new_bearer.name, "theme_override_colors/font_color", Color.ORANGE_RED)
 		session.HUD.modify_nameplate(new_bearer.name, "theme_override_font_sizes/font_size", 24)
@@ -236,10 +240,14 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 @rpc("call_local", "reliable")
 func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
 	
+		
+	if path_to_wig == null or path_to_bearer == null:
+		return
+	
 	var wig = get_node(path_to_wig)
 	var bearer = get_node(path_to_bearer)
 	
-	if bearer == null or wig == null:
+	if wig == null or bearer == null:
 		return
 		
 	wig_remote = RemoteTransform3D.new()
@@ -301,11 +309,23 @@ func rpc_play():
 @rpc("call_local", "reliable")
 func rpc_finish():
 	
+	session.HUD.find_child("Progress").visible = false
+	
 	if is_multiplayer_authority(): 
 		State = GameState.finished	
-	
-	
 
+
+func init_for_new_client(client_id) -> void:
+	
+	for index in range(wigs.size()):
+		rpc_spawn_new_wig.rpc_id(client_id)
+		var wig_path = wigs[index].get_path()
+		var bearer_path = null if bearers[index] == null else bearers[index].get_path()
+		rpc_put_wig_on_head.rpc_id(client_id, wig_path, bearer_path)
+		rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
+	
+	
+	
 
 		
 
