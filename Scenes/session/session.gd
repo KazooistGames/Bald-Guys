@@ -39,6 +39,8 @@ var local_ping_ms = 0.0
 var countDown_timer = 0
 var countDown_value = 0
 
+var wigs : Array[Node] = []
+var bearers : Array[Node] = []
 
 func _ready():
 		
@@ -68,15 +70,21 @@ func _process(delta):
 			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
 
 	
-	if not is_multiplayer_authority():
-		pass			
-	elif Active_Game == null:
+		
+	if Active_Game == null:
 		pass	
 	else:
 		
 		HUD.Scores = Active_Game.Scores
 		HUD.Goal = Active_Game.Goal
 		
+		if not is_multiplayer_authority():
+			pass	
+			
+		if Games.size() >= 1:
+			wigs = Games[0].wigs
+			bearers = Games[0].bearers
+
 		if Active_Game.State == Active_Game.GameState.starting:	
 				
 			if countDown_value <= 0:
@@ -259,7 +267,7 @@ func respawn_node(node_path, spawn_position):
 
 func Commission_Next_Round():
 	
-	var unique_round_id = randi_range(0, 0)
+	var unique_round_id = Games.size() #randi_range(0, 0)
 	var game_prefab_path = ""
 	
 	match unique_round_id:

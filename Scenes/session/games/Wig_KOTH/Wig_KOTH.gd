@@ -34,7 +34,11 @@ enum GameState {
 var hill_speed : float = 0.75
 var hill_acceleration : float = 2.0
 
-var phase = 0.0
+var hill_phase = 0.0
+
+var wig_radii : Vector2 = Vector2(0.15, 0.45)
+var wig_start_offset = Vector3(0, 0.2, -0.025)
+var wig_end_offset = Vector3(0, 0.5, -0.075)
 
 func _ready():
 	
@@ -50,7 +54,7 @@ func _ready():
 	floorCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	wallCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	Hill.position = Vector3(0, map_size / 2.0, 0)
-	phase = randi()
+	hill_phase = randi()
 
 
 func _process(_delta):
@@ -80,8 +84,8 @@ func _physics_process(delta):
 			if not is_multiplayer_authority():
 				return
 				
-			phase += delta / 100.0
-			Hill.rotation.y = sin(5 * phase) + sin(phase * PI)
+			hill_phase += delta / 100.0
+			Hill.rotation.y = sin(5 * hill_phase) + sin(hill_phase * PI)
 
 			for humanoid in scoring_players:
 				
@@ -92,6 +96,7 @@ func _physics_process(delta):
 					
 				elif Scores[screenname] < Goal:
 					Scores[screenname] += delta
+					rpc_adjust_wig_size.rpc(humanoid.get_path(), Scores[screenname]/Goal)
 					
 				else:
 					rpc_finish.rpc()
@@ -153,12 +158,24 @@ func get_players_in_hill() -> Array[Node3D]:
 	
 	for body in all_bodies:
 		
-		if body.is_in_group("humanoids"):
+		if not body.is_in_group("humanoids"):
+			pass
+		elif not session.bearers.has(body):
+			pass
+		else:	
 			players.append(body)
 			
 	return players
 		
-			
+@rpc("call_local", "reliable")
+func rpc_adjust_wig_size(path_to_bearer, progress : float):
+	var bearer = get_node(path_to_bearer)
+	var index = session.bearers.find(bearer)
+	var wig = session.wigs[index]
+	wig.radius = lerp(wig_radii.x, wig_radii.y, progress)
+	var remote = bearer.find_child("*RemoteTransform*", true, false)
+	remote.position = lerp(wig_start_offset, wig_end_offset, progress)
+	
 	
 @rpc("call_local", "reliable")
 func rpc_start():

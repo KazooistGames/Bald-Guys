@@ -32,8 +32,6 @@ var active_index = -1
 
 func _ready():
 	
-	#session.Started_Round.connect(start_game)
-	#session.Ended_Round.connect(reset_game)
 	session.Destroying_Player_Humanoid.connect(
 		func (humanoid): 
 			
@@ -104,6 +102,7 @@ func _process(delta):
 				rpc_spawn_new_wig.rpc()
 				
 			else:
+				bearers[active_index].ragdolled.disconnect(drop_active_wig)
 				rpc_fuse_wig_to_head.rpc(wigs[active_index].get_path(), bearers[active_index].get_path())
 				rpc_finish.rpc()
 				session.Finished_Round()
@@ -252,7 +251,6 @@ func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
 		
 	wig_remote = RemoteTransform3D.new()
 	add_child(wig_remote)
-	bearer.ragdolled.disconnect(drop_active_wig)
 	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
 	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 			
