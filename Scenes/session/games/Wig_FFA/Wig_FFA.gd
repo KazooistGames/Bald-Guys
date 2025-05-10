@@ -313,8 +313,6 @@ func handle_player_joining(client_id) -> void:
 	for index in range(wigs.size()):
 		rpc_spawn_new_wig.rpc_id(client_id)
 		var wig_path = wigs[index].get_path()
-		
-		
 		var bearer_path = null 
 		
 		if index < bearers.size():

@@ -70,30 +70,36 @@ func _process(delta):
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
 		
-	if Active_Game != null:
+	if Games.size() >= 1:
+		wigs = Games[0].wigs
+		bearers = Games[0].bearers
+
+func _physics_process(delta):
+	
+	if not is_multiplayer_authority():
+		return	
+	
+	if State == SessionState.Lobby:
+		
+		pass
+		
+	elif Active_Game.State == Active_Game.GameState.starting:	
+			
+		if countDown_value <= 0:
+			Active_Game.rpc_play.rpc()
+		
+		elif countDown_timer > 1:
+			countDown_timer = 0
+			countDown_value -= 1
+			HUD.set_psa.rpc(str(countDown_value))
+		
+		else:
+			countDown_timer += delta
+			
+	elif Active_Game.State == Active_Game.GameState.playing:
 		HUD.Scores = Active_Game.Scores
 		HUD.Goal = Active_Game.Goal
-		
-		if not is_multiplayer_authority():
-			return	
-			
-		if Games.size() >= 1:
-			wigs = Games[0].wigs
-			bearers = Games[0].bearers
-
-		if Active_Game.State == Active_Game.GameState.starting:	
-				
-			if countDown_value <= 0:
-				Active_Game.rpc_play.rpc()
-			
-			elif countDown_timer > 1:
-				countDown_timer = 0
-				countDown_value -= 1
-				HUD.set_psa.rpc(str(countDown_value))
-			
-			else:
-				countDown_timer += delta
-		
+	
 
 func _unhandled_key_input(event):
 	
