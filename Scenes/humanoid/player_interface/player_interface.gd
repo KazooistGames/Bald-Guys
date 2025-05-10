@@ -165,31 +165,34 @@ func rpc_update_Discrete_inputs(inputs, timestamp):
 		
 	if just_pressed('recover', inputs): 
 		recovery_minigame.attempt_early_recovery(rollback_lag)
+		
+	if not is_multiplayer_authority():
+		pass
 			
-	if just_pressed('secondary', inputs):
+	elif just_pressed('secondary', inputs):
 		
 		if not humanoid.RAGDOLLED:
 			force.rpc_secondary.rpc()	
-			force.unlagger.reset(sender_id)
 			
-	elif just_released('secondary', inputs):
+	elif just_released('secondary', inputs):	
 		force.rpc_reset.rpc()
+			
+	if not is_multiplayer_authority():
+		pass	
 		
-	if just_pressed('primary', inputs):
+	elif just_pressed('primary', inputs):
 		
 		if humanoid.RAGDOLLED:
 			pass	
 			
 		elif force.action == force.Action.holding:
 			force.rpc_trigger.rpc()
-			force.unlagger.reset(sender_id)
 			
 		elif force.action == force.Action.cooldown:
 			pass	
 			
 		else:
 			force.rpc_primary.rpc()
-			force.unlagger.reset(sender_id)
 			attempt_lunge_at_target(targeted_object)
 		
 	cache_new_inputs(inputs)

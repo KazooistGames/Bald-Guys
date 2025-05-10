@@ -12,7 +12,7 @@ const SessionState = {
 @export var State = SessionState.Lobby
 @export var Commissioned = false
 @export var Humanoids = []
-@export var Active_Game : Node3D = null
+#@export var Active_Game : Node3D = null
 @export var Games : Array = []
 @export var Round : int = 0
 
@@ -56,7 +56,8 @@ func _ready():
 	
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
-
+	Started_Round.connect(Level.trigger_map_generation_cycle)
+	Ended_Round.connect(Level.trigger_map_clear_cycle)
 
 func _process(delta):
 		
@@ -79,14 +80,17 @@ func _physics_process(delta):
 	if not is_multiplayer_authority():
 		return	
 	
+	HUD.Scores = Games[Round].Scores
+	HUD.Goal = Games[Round].Goal
+	
 	if State == SessionState.Lobby:
 		
 		pass
 		
-	elif Active_Game.State == Active_Game.GameState.starting:	
+	elif Games[Round].State == Games[Round].GameState.starting:	
 			
 		if countDown_value <= 0:
-			Active_Game.rpc_play.rpc()
+			Games[Round].rpc_play.rpc()
 		
 		elif countDown_timer > 1:
 			countDown_timer = 0
@@ -95,10 +99,6 @@ func _physics_process(delta):
 		
 		else:
 			countDown_timer += delta
-			
-	elif Active_Game.State == Active_Game.GameState.playing:
-		HUD.Scores = Active_Game.Scores
-		HUD.Goal = Active_Game.Goal
 	
 
 func _unhandled_key_input(event):
@@ -116,9 +116,10 @@ func _unhandled_key_input(event):
 
 func FinishRound():
 	
-	Active_Game.GameOver.disconnect(FinishRound)
-	Active_Game.rpc_finish.rpc()
-	State = SessionState.Intermission	
+	Games[Round].GameOver.disconnect(FinishRound)
+	Games[Round].rpc_finish.rpc()
+	State = SessionState.Intermission
+	Round += 1	
 	Ended_Round.emit()	
 	
 
@@ -229,13 +230,12 @@ func StartRound():
 	
 	countDown_timer = 0
 	countDown_value = 5
-	Active_Game = Games[Round]
-	Active_Game.GameOver.connect(FinishRound)
+	Games[Round] = Games[Round]
+	Games[Round].GameOver.connect(FinishRound)
 	State = SessionState.Round	
 	HUD.set_psa.rpc(countDown_value)	
-	Active_Game.rpc_start.rpc()
+	Games[Round].rpc_start.rpc()
 	Started_Round.emit()
-	Round += 1
 	
 		
 var last_prefab

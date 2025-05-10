@@ -60,10 +60,8 @@ func _process(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
 		multiplayer_permissive = true
-	elif is_multiplayer_authority():
-		multiplayer_permissive = true
 	else:
-		multiplayer_permissive = false
+		multiplayer_permissive = is_multiplayer_authority()
 		
 	mesh.mesh.radius = collider.shape.radius * render_scale
 	mesh.mesh.height = collider.shape.height * render_scale

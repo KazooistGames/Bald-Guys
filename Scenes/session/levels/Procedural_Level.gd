@@ -45,9 +45,6 @@ func _ready() -> void:
 	if not multiplayer_permissive:
 		return
 		
-	session.Started_Round.connect(trigger_map_generation_cycle)
-	session.Ended_Round.connect(trigger_map_clear_cycle)
-	
 	map_size = 25
 	
 	#arena going up
