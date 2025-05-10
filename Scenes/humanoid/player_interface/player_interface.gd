@@ -21,9 +21,9 @@ func _ready():
 	humanoid = get_parent()
 	force = humanoid.find_child("Force")
 	camera = humanoid.find_child("Camera*")
-	humanoid.ragdolled.connect(react_to_ragdoll)
-	humanoid.unragdolled.connect(react_to_ragdoll_recovery)
-	recovery_minigame.succeeded.connect(react_early_recovery)
+	humanoid.ragdolled.connect(handle_ragdoll)
+	humanoid.unragdolled.connect(handle_ragdoll_recovery)
+	recovery_minigame.succeeded.connect(handle_early_recovery)
 	
 
 func _process(_delta):
@@ -86,19 +86,19 @@ func _input(event):
 		rpc_update_Discrete_inputs.rpc(discrete_inputs, timestamp)	
 	
 	
-func react_to_ragdoll():
+func handle_ragdoll(_humanoid):
 	
 	if is_local_interface:
 		recovery_minigame.start_game()
 	
 	
-func react_to_ragdoll_recovery():
+func handle_ragdoll_recovery():
 	
 	if is_local_interface:
 		recovery_minigame.visible = false
 
 
-func react_early_recovery():
+func handle_early_recovery():
 	
 	if is_multiplayer_authority() and humanoid.RAGDOLLED:
 		humanoid.ragdoll_recovery_progress = 1.0

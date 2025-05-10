@@ -37,7 +37,6 @@ func _ready():
 	
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
-	#sessionSpawner.spawned.connect(handle_new_session_spawn)
 	multiplayer.connected_to_server.connect(introduce_myself_to_server)
 	multiplayer.connected_to_server.connect(acknowledge_popup)
 	

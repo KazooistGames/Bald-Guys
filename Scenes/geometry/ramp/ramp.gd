@@ -1,7 +1,7 @@
 
 extends StaticBody3D
 
-const debounce_period = 0.25 #limit rate that we re-generate a convex mesh
+const debounce_period = 0.2 #limit rate that we re-generate a convex mesh
 
 @export var dimensions = Vector3(1.0, 1.0, 1.0)
 

@@ -18,9 +18,8 @@ enum GameState {
 @export var State = GameState.reset
 @export var map_size : float = 50
 @export var Scores : Dictionary = {}
-@export var Goal : float = 60
-@export var hill_radius : float = 4.0
-@export var hill_velocity : Vector3 = Vector3.ZERO
+@export var Goal : float = 10
+@export var Hill_Size : float = 4.0 
 
 @onready var Hill = $Hill
 @onready var hill_collider : CollisionShape3D = $Hill/CollisionShape3D
@@ -32,18 +31,18 @@ enum GameState {
 @onready var synchronizer = $MultiplayerSynchronizer
 
 var hill_speed : float = 0.75
+var hill_velocity : Vector3 = Vector3.ZERO
 var hill_acceleration : float = 2.0
-
 var hill_phase = 0.0
 
 var wig_radii : Vector2 = Vector2(0.15, 0.45)
 var wig_start_offset = Vector3(0, 0.2, -0.025)
 var wig_end_offset = Vector3(0, 0.5, -0.075)
 
+signal GameOver
+
 func _ready():
-	
-	#session.Started_Round.connect(start_game)
-	#session.Ended_Round.connect(reset_game)
+
 	Hill.visible = false
 	hill_collider.disabled = true
 	hill_collider.shape.radius = 0.01
@@ -51,14 +50,13 @@ func _ready():
 	hill_mesh.mesh.height = 0.01
 	core_mesh.mesh.radius = 0.01
 	core_mesh.mesh.height = 0.01
-	floorCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
-	wallCast.target_position = Vector3.FORWARD * hill_radius * 3.0 / 4.0
 	Hill.position = Vector3(0, map_size / 2.0, 0)
 	hill_phase = randi()
 
 
-func _process(_delta):
+func _process(delta):
 	
+	resize_hill(Hill_Size, delta)	
 	session.HUD.update_nameplate("HILL", Hill.global_position, "HILL")	
 	var scoring_players : Array[Node3D] = get_players_in_hill()
 	var indicator_color = Color.GREEN_YELLOW if scoring_players.size() == 0 else Color.ORANGE_RED
@@ -67,8 +65,9 @@ func _process(_delta):
 	
 
 func _physics_process(delta):
-
-	var scoring_players = get_players_in_hill()
+		
+	if not is_multiplayer_authority():
+		return
 	
 	match State: # GAME STATE MACHINE
 			
@@ -79,11 +78,8 @@ func _physics_process(delta):
 			pass
 	
 		GameState.playing:
-			resize_hill(hill_radius, delta)	
-			
-			if not is_multiplayer_authority():
-				return
-				
+			Hill_Size = 4.0
+			var scoring_players = get_players_in_hill()
 			hill_phase += delta / 100.0
 			Hill.rotation.y = sin(5 * hill_phase) + sin(hill_phase * PI)
 
@@ -99,8 +95,7 @@ func _physics_process(delta):
 					rpc_adjust_wig_size.rpc(humanoid.get_path(), Scores[screenname]/Goal)
 					
 				else:
-					rpc_finish.rpc()
-					session.Finished_Round()
+					GameOver.emit()
 
 			var collision_point : Vector3 = Vector3.ZERO
 			var target_direction : Vector3 = Vector3.ZERO
@@ -117,7 +112,7 @@ func _physics_process(delta):
 				collision_point = floorCast.get_collision_point()	
 				target_direction = (collision_point - Hill.global_position).normalized()
 				
-				if Hill.global_position.y - collision_point.y < hill_radius / 4.0:
+				if Hill.global_position.y - collision_point.y < Hill_Size / 4.0:
 					target_direction += Vector3.UP
 				
 				hill_state = HillState.crawling
@@ -129,13 +124,13 @@ func _physics_process(delta):
 			var step = hill_acceleration * delta
 			hill_velocity = hill_velocity.move_toward(target_direction.normalized() * hill_speed, step)
 			Hill.position += hill_velocity * delta
-			var bounds = map_size / 2.0 - hill_radius / 4.0
+			var bounds = map_size / 2.0 - Hill_Size / 4.0
 			Hill.position.x = clampf(Hill.position.x, -bounds, bounds)
-			Hill.position.y = clampf(Hill.position.y,  hill_radius / 4.0, map_size / 2.0 - hill_radius / 4.0)
+			Hill.position.y = clampf(Hill.position.y,  Hill_Size / 4.0, bounds)
 			Hill.position.z = clampf(Hill.position.z, -bounds, bounds)
 			
 		GameState.finished:			
-			resize_hill(0, delta)
+			Hill_Size = 0.0
 
 	
 func resize_hill(new_radius, time_elapsed):
@@ -146,6 +141,8 @@ func resize_hill(new_radius, time_elapsed):
 		hill_mesh.mesh.height = hill_collider.shape.radius * 2.0
 		core_mesh.mesh.radius = hill_mesh.mesh.radius / 10.0
 		core_mesh.mesh.height = hill_mesh.mesh.height / 10.0
+		floorCast.target_position = Vector3.FORWARD * Hill_Size * 3.0 / 4.0
+		wallCast.target_position = Vector3.FORWARD * Hill_Size * 3.0 / 4.0
 
 
 func get_players_in_hill() -> Array[Node3D]:
@@ -167,8 +164,10 @@ func get_players_in_hill() -> Array[Node3D]:
 			
 	return players
 		
+		
 @rpc("call_local", "reliable")
 func rpc_adjust_wig_size(path_to_bearer, progress : float):
+	
 	var bearer = get_node(path_to_bearer)
 	var index = session.bearers.find(bearer)
 	var wig = session.wigs[index]
@@ -191,12 +190,12 @@ func rpc_start():
 func rpc_reset():
 	
 	session.HUD.remove_nameplate("HILL")
+	session.HUD.find_child("Progress").visible = false		
 	
 	if is_multiplayer_authority(): 
 		Scores = {}
 		Hill.visible = false
-		resize_hill(0, hill_radius)
-		session.HUD.find_child("Progress").visible = false			
+		Hill_Size = 0.0
 		State = GameState.reset
 		
 		for value in session.Client_Screennames.values():
@@ -227,12 +226,15 @@ func rpc_finish():
 	
 	if is_multiplayer_authority(): 
 		State = GameState.finished
-		Hill.visible = false
+		#Hill.visible = false
 		session.HUD.remove_nameplate("HILL")
 
 
-
-func init_for_new_client(client_id) -> void:
+func handle_player_joining(client_id) -> void:
+	
 	pass
 	
 
+func handle_player_leaving(client_id) -> void:
+	
+	pass

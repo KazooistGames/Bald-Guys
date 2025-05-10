@@ -13,9 +13,8 @@ enum GameState {
 
 @export var map_size = 50
 @export var State = GameState.reset
-@export var Goal = 10 #107.34
+@export var Goal = 30 #107.34
 @export var Scores = {}
-@export var Total_Wigs = 2
 @export var wig_remotes : Array = []
 
 @onready var whispers = $Whispers
@@ -23,28 +22,22 @@ enum GameState {
 @onready var session = get_parent()
 @onready var wig_remote = $RemoteTransform3D
 
-#var Active_Wig : Node3D = null
+signal GameOver
 
 var wigs : Array[Node] = []
-var bearers : Array[Node] = []
-var active_index = -1
+var bearers : Array = []
+#var active_index = -1
 
 
 func _ready():
-	
-	session.Destroying_Player_Humanoid.connect(
-		func (humanoid): 
-			
-			if humanoid == bearers[active_index]: 
-				drop_active_wig())
-	
+
 	whispers.stream_paused = false
 	theme.stream_paused = true
 	
 	
 func _process(delta):
 
-	active_index = wigs.size() - 1
+	#active_index = wigs.size() - 1
 	wigs = get_tree().get_nodes_in_group("wigs")
 	
 	if  wigs.size() == 0 or State != GameState.playing:
@@ -52,26 +45,27 @@ func _process(delta):
 		theme.stream_paused = true
 		
 	else:
-		session.HUD.find_child("Progress").visible = bearer_is_local_player()
-		whispers.global_position = wigs[active_index].global_position
-		whispers.stream_paused = bearer_is_local_player()
+		session.HUD.find_child("Progress").visible = active_bearer_is_local_player()
+		whispers.global_position = wigs.back().global_position
+		whispers.stream_paused = active_bearer_is_local_player()
 		theme.stream_paused = not whispers.stream_paused
-		session.HUD.update_nameplate("WIG", wigs[active_index].global_position, "WIG")
+		session.HUD.update_nameplate("WIG", wigs.back().global_position, "WIG")
 		
-		if bearers[active_index] != null:
+		if bearers.back() != null:
 			session.HUD.modify_nameplate("WIG", "visible", false)	
-			
-
+		
 	if whispers.get_playback_position() >= beas_mote_transition:
 		whispers.seek(0)
 				
 	if theme.get_playback_position() < beas_mote_transition:
 		theme.seek(beas_mote_transition)
-	
+
+
+func _physics_process(delta):
+		
 	if not is_multiplayer_authority():
 		return		
 
-	
 	match State: # GAME STATE MACHINE
 			
 		GameState.reset:		
@@ -86,10 +80,10 @@ func _process(delta):
 				rpc_spawn_new_wig.rpc()
 				return
 				
-			if bearers[active_index] == null:
+			if bearers.back() == null:
 				return
 				
-			var bearer_name = session.get_humanoids_screenname(bearers[active_index])
+			var bearer_name = session.get_humanoids_screenname(bearers.back())
 			
 			if not Scores.has(bearer_name):
 				Scores[bearer_name] = delta
@@ -97,88 +91,91 @@ func _process(delta):
 			elif Scores[bearer_name] < Goal:
 				Scores[bearer_name] += delta
 	
-			elif wigs.size() < Total_Wigs:
-				rpc_fuse_wig_to_head.rpc(wigs[active_index].get_path(), bearers[active_index].get_path())
+			elif wigs.size() < ceil(session.Client_Screennames.size() / 2.0):	
+				bearers.back().ragdolled.disconnect(drop_wig)
+				rpc_fuse_wig_to_head.rpc(wigs.back().get_path(), bearers.back().get_path())
 				rpc_spawn_new_wig.rpc()
 				
 			else:
-				bearers[active_index].ragdolled.disconnect(drop_active_wig)
-				rpc_fuse_wig_to_head.rpc(wigs[active_index].get_path(), bearers[active_index].get_path())
-				rpc_finish.rpc()
-				session.Finished_Round()
+				bearers.back().ragdolled.disconnect(drop_wig)
+				GameOver.emit()
 			
 		GameState.finished:			
 			pass
 		
 		
-func bearer_is_local_player():
+func active_bearer_is_local_player():
 	
-	if active_index < 0:
-		return false
-		
-	elif bearers[active_index] == null:
+	if bearers.back() == null:
 		return false
 		
 	else:	
-		return str(multiplayer.get_unique_id()) == bearers[active_index].name
-
-#
-#func start_game():
-	#
-	#if is_multiplayer_authority(): 
-		#rpc_start.rpc()
-	#
-	#
-#func reset_game():
-	#
-	#if is_multiplayer_authority(): 
-		#rpc_reset.rpc()	
+		return str(multiplayer.get_unique_id()) == bearers.back().name
 
 
 func dawn_active_wig(humanoid):
 	
 	if not is_multiplayer_authority():
 		return
-	
-	if active_index < 0:
+		
+	if not humanoid.is_in_group("humanoids"): #this node is not a humanoid
 		pass
 		
-	elif not humanoid.is_in_group("humanoids"):
-		pass
-		
-	elif bearers[active_index] != null:
+	elif bearers.back() != null: #this wig already has a bearer
 		pass
 	
-	elif bearers.has(humanoid):
+	elif bearers.has(humanoid): #this guy already has a wig
 		pass
 		
-	elif humanoid.RAGDOLLED:
+	elif humanoid.RAGDOLLED: #this humanoid is unable to dawn the wig
 		pass
 		
 	else:
 		#bearers[active_index] = humanoid
-		wigs[active_index].interactable.gained_interaction.disconnect(dawn_active_wig)
-		humanoid.ragdolled.connect(drop_active_wig)
-		rpc_put_wig_on_head.rpc(wigs[active_index].get_path(), humanoid.get_path())
+		wigs.back().interactable.gained_interaction.disconnect(dawn_active_wig)
+		humanoid.ragdolled.connect(drop_wig)
+		rpc_put_wig_on_head.rpc(wigs.back().get_path(), humanoid.get_path())
 
 		
-func drop_active_wig():
+func drop_wig(humanoid):
 	
 	if not is_multiplayer_authority():
 		return
+	elif humanoid == null:
+		return
 		
-	wigs[active_index].interactable.gained_interaction.connect(dawn_active_wig)
-
-	if bearers[active_index] == null:
-		pass
+	if humanoid.ragdolled.is_connected(drop_wig):
+		humanoid.ragdolled.disconnect(drop_wig)	
+			
+	var wig_index = bearers.find(humanoid)
+	var bearer_velocity = bearers[wig_index].linear_velocity * 1.5
+	var offset_velocity = Vector3(randi_range(-1, 1), 3, randi_range(-1, 1))
+	wigs[wig_index].linear_velocity =  bearer_velocity + offset_velocity
 		
-	elif bearers[active_index].ragdolled.is_connected(drop_active_wig):
-		bearers[active_index].ragdolled.disconnect(drop_active_wig)
-		wigs[active_index].linear_velocity = bearers[active_index].linear_velocity * 1.5 + Vector3(0, 3, 0)
-		#bearers[active_index] = null
+	wigs[wig_index].interactable.gained_interaction.connect(dawn_active_wig)
+	rpc_put_wig_on_head.rpc(wigs[wig_index].get_path(), null)
 
-	rpc_put_wig_on_head.rpc(wigs[active_index].get_path(), null)
+
+func handle_player_leaving(client_id):
 	
+		var humanoid = session.get_node_or_null(str(client_id))
+	
+		if bearers.size() == 0:
+			return
+		elif bearers.back() == null:
+			return
+			
+		if humanoid == null:
+			pass
+		elif State != GameState.playing:
+			pass
+		elif not bearers.has(humanoid):
+			pass
+		elif humanoid == bearers.back(): 
+			drop_wig(humanoid)
+		else:
+			wigs[bearers.find(humanoid)].queue_free()
+
 
 @rpc("call_local", "reliable")
 func rpc_spawn_new_wig():
@@ -213,7 +210,6 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 			bearers[wigs.find(wig)] = null
 			
 		add_child(wig_remote)
-		session.HUD.find_child("Progress").visible = false
 		wig_remote.remote_path = ""
 		wig.toggle_strobing(true)
 		wig.Drop.play()
@@ -230,21 +226,23 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 		wig.Dawn.play()
 		wig.collider.disabled = true
 		wig.freeze = true
-		session.HUD.find_child("Progress").visible = bearer_is_local_player()
 		session.HUD.modify_nameplate(new_bearer.name, "theme_override_colors/font_color", Color.ORANGE_RED)
 		session.HUD.modify_nameplate(new_bearer.name, "theme_override_font_sizes/font_size", 24)
-		bearers[wigs.find(wig)] = new_bearer
+		var wig_index = wigs.find(wig)
+		bearers[wig_index] = new_bearer
+		print(wigs, bearers)
 	
 	
 @rpc("call_local", "reliable")
 func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
-	
-		
+			
 	if path_to_wig == null or path_to_bearer == null:
 		return
 	
 	var wig = get_node(path_to_wig)
 	var bearer = get_node(path_to_bearer)
+	var wig_index = wigs.find(wig)
+	bearers[wig_index] = bearer
 	
 	if wig == null or bearer == null:
 		return
@@ -267,19 +265,16 @@ func rpc_start():
 func rpc_reset():
 	
 	session.HUD.remove_nameplate("WIG")
+	session.HUD.find_child("Progress").visible = false		
 	theme.seek(beas_mote_transition)
 	
+	for wig in wigs:
+		wig.queue_free()
+	
+	wigs = []
+	bearers = []
+	
 	if is_multiplayer_authority(): 	
-		session.HUD.find_child("Progress").visible = false
-		
-		if active_index < 0:
-			pass
-		elif bearers[active_index]:
-			drop_active_wig()
-			bearers[active_index] = null
-
-		for wig in wigs:
-			wig.queue_free()
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
@@ -298,7 +293,6 @@ func rpc_play():
 	if is_multiplayer_authority(): 	
 		rpc_spawn_new_wig.rpc()
 		State = GameState.playing	
-		Total_Wigs = ceil(session.Client_Screennames.size() / 2.0)
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
@@ -311,16 +305,25 @@ func rpc_finish():
 	
 	if is_multiplayer_authority(): 
 		State = GameState.finished	
+		rpc_fuse_wig_to_head.rpc(wigs.back().get_path(), bearers.back().get_path())
 
 
-func init_for_new_client(client_id) -> void:
+func handle_player_joining(client_id) -> void:
 	
 	for index in range(wigs.size()):
 		rpc_spawn_new_wig.rpc_id(client_id)
 		var wig_path = wigs[index].get_path()
-		var bearer_path = null if bearers[index] == null else bearers[index].get_path()
+		
+		
+		var bearer_path = null 
+		
+		if index < bearers.size():
+			bearer_path = null if bearers[index] == null else bearers[index].get_path()
+		
 		rpc_put_wig_on_head.rpc_id(client_id, wig_path, bearer_path)
-		rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
+		
+		if State == GameState.finished or index < wigs.size()-1: #fuse wig if not active or game is finished
+			rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
 	
 	
 	

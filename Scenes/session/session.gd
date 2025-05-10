@@ -14,22 +14,24 @@ const SessionState = {
 @export var Humanoids = []
 @export var Active_Game : Node3D = null
 @export var Games : Array = []
+@export var Round : int = 0
 
 @export var map_size = 0
+
+@onready var SEED = hash(randi())
 
 @onready var Level : Node3D = $Procedural_Level
 @onready var HUD = $HUD
 
 @onready var humanoidSpawner = $HumanoidSpawner
-@onready var gameSpawner = $GameSpawner
 
 @onready var raycast = $RayCast3D
 
 @onready var pinger = $PingTimer
 @onready var unlagger = $LagCompensator
 
-signal Created_Player_Humanoid
-signal Destroying_Player_Humanoid
+signal Created_Humanoid
+signal Destroying_Humanoid
 
 signal Started_Round
 signal Ended_Round
@@ -40,21 +42,20 @@ var countDown_timer = 0
 var countDown_value = 0
 
 var wigs : Array[Node] = []
-var bearers : Array[Node] = []
+var bearers : Array = []
+
 
 func _ready():
 		
 	if is_multiplayer_authority():
+		add_player(1)
 		pinger.timeout.connect(ping_clients)
 		pinger.timeout.connect(fix_out_of_bounds)
+		print("session SEED: ", SEED)
+		rpc_CommissionSession.rpc(SEED)
 	
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
-	gameSpawner.spawned.connect(handle_new_game)
-	
-	if is_multiplayer_authority():
-		add_player(1)
-		Commissioned = true
 
 
 func _process(delta):
@@ -68,18 +69,13 @@ func _process(delta):
 			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
-
-	
 		
-	if Active_Game == null:
-		pass	
-	else:
-		
+	if Active_Game != null:
 		HUD.Scores = Active_Game.Scores
 		HUD.Goal = Active_Game.Goal
 		
 		if not is_multiplayer_authority():
-			pass	
+			return	
 			
 		if Games.size() >= 1:
 			wigs = Games[0].wigs
@@ -107,72 +103,89 @@ func _unhandled_key_input(event):
 	elif event.is_action_pressed("Toggle"):
 			
 		if State != SessionState.Round:
-			Commission_Next_Round()
-			
+			StartRound()
 		else:	
-			State = SessionState.Intermission			
-			Ended_Round.emit()
+			FinishRound()
 
 
-func fix_out_of_bounds():
+func FinishRound():
 	
-	for humanoid in Humanoids:
+	Active_Game.GameOver.disconnect(FinishRound)
+	Active_Game.rpc_finish.rpc()
+	State = SessionState.Intermission	
+	Ended_Round.emit()	
+	
+
+func add_player(peer_id):
+	
+	if not is_multiplayer_authority():
+		return
+	
+	print(str(peer_id) + " joined")
+	unlagger.CLIENT_PINGS[peer_id] = 0
+	
+	var new_peer_humanoid = Humanoid_Prefab.instantiate()
+	new_peer_humanoid.name = str(peer_id)
+	Humanoids.append(new_peer_humanoid)
+	add_child(new_peer_humanoid)
+	
+	rpc_respawn_player.rpc(new_peer_humanoid.get_path())
+
+	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name)
+	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
+	Created_Humanoid.emit(new_peer_humanoid)
+	
+	rpc_CommissionSession.rpc_id(peer_id, SEED)
+	Level.init_for_new_client(peer_id)
+	
+	for game in Games:	
+			
+		if game.State == game.GameState.reset:
+			game.rpc_reset.rpc_id(peer_id)
+		elif game.State == game.GameState.starting:
+			game.rpc_start.rpc_id(peer_id)
+		elif game.State == game.GameState.playing:
+			game.rpc_play.rpc_id(peer_id)
+		elif game.State == game.GameState.finished:
+			game.rpc_finish.rpc_id(peer_id)
+			
+		game.handle_player_joining(peer_id)
+	
+	return new_peer_humanoid
+
+
+func handle_new_humanoid(new_humanoid):
+	
+	new_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
+	HUD.add_nameplate(new_humanoid.name, new_humanoid.name)
+	
+
+func remove_player(peer_id):
+	
+	print(str(peer_id) + " left")
+	Client_Screennames.erase(peer_id)
+	var players_humanoid = get_node_or_null(str(peer_id))
+	
+	if players_humanoid:
+		Destroying_Humanoid.emit(players_humanoid.get_path())
 		
-		if not node_is_in_bounds(humanoid):		
-			spawn_player.rpc(Level.get_path(), humanoid.get_path())
+		for game in Games:
+			game.handle_player_leaving(peer_id)
+			
+		Humanoids.erase(players_humanoid)
+		HUD.remove_nameplate(str(peer_id))
+		players_humanoid.ragdoll_change.disconnect(update_nameplate_for_ragdoll)
+		players_humanoid.queue_free()	
 			
 
-func node_is_in_bounds(node):
-	
-	if not Level:
-		return true
-	
-	raycast.global_position = node.global_position + Vector3.DOWN #move raycast to node position
-	raycast.target_position = Vector3.UP * Level.map_size * 5 #shoot it up to the ceiling
-	raycast.force_raycast_update()	
-	var hit_the_ceiling = raycast.is_colliding()	
-	
-	raycast.global_position = node.global_position + Vector3.UP
-	raycast.target_position = Vector3.DOWN * Level.map_size * 5 #shoot it to the floor
-	raycast.force_raycast_update()	
-	var hit_the_floor = raycast.is_colliding()
-
-	return hit_the_ceiling and hit_the_floor #node is considered inside level if it hits one
-	
-
-func handle_new_level(new_level):
-	
-	if Level != null:
-		Level.queue_free()
+@rpc("authority", "call_local", "reliable")
+func rpc_respawn_player(humanoid_path):
 		
-	Level = new_level
-	
-	
-func handle_new_game(new_game):
-	
-	if Active_Game != null:
-		Active_Game.queue_free()
-	
-	Active_Game = new_game
-
-
-func Finished_Round():
-	
-	Ended_Round.emit()	
-
-
-@rpc("authority", "call_local")
-func spawn_player(parent_path, humanoid_path):
-		
-	var parent = get_node(parent_path)
 	var humanoid = get_node(humanoid_path)		
 	humanoid.unragdoll(false)
 	humanoid.linear_velocity = Vector3.ZERO
-	var spawn_position = get_random_spawn(parent)
-	var rid = humanoid.get_rid()
-	var new_transform = Transform3D.IDENTITY.translated(spawn_position)
-	PhysicsServer3D.body_set_state(rid, PhysicsServer3D.BODY_STATE_TRANSFORM, new_transform)
-	humanoid.find_child("*lowerBody*").position = Vector3.UP
+	var spawn_position = get_random_spawn(Level)
+	humanoid.position = spawn_position
 
 
 func get_random_spawn(parent):
@@ -189,153 +202,61 @@ func get_random_spawn(parent):
 			valid_spawns.append(spawn)
 	
 	return valid_spawns.pick_random().global_position
-
-
-func add_player(peer_id):
 	
-	print(str(peer_id) + " joined")
-	unlagger.CLIENT_PINGS[peer_id] = 0
 	
-	var new_peer_humanoid = Humanoid_Prefab.instantiate()
-	new_peer_humanoid.name = str(peer_id)
-	Humanoids.append(new_peer_humanoid)
-	add_child(new_peer_humanoid)
-	
-	var random_spawn_position = get_random_spawn(Level)
-	respawn_node.rpc(new_peer_humanoid.get_path(), random_spawn_position)
-
-	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name)
-	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
-	Created_Player_Humanoid.emit(new_peer_humanoid)
-	
-	if State == SessionState.Round:
-		Level.init_for_new_client(peer_id)
-		
-		if Active_Game.State == Active_Game.GameState.reset:
-			Active_Game.rpc_reset.rpc_id(peer_id)
-		elif Active_Game.State == Active_Game.GameState.starting:
-			Active_Game.rpc_start.rpc_id(peer_id)
-		elif Active_Game.State == Active_Game.GameState.playing:
-			Active_Game.rpc_play.rpc_id(peer_id)
-		elif Active_Game.State == Active_Game.GameState.finished:
-			Active_Game.rpc_finish.rpc_id(peer_id)
-				
-	for game in Games:
-		game.init_for_new_client(peer_id)			
-	
-	return new_peer_humanoid
-
-
-func handle_new_humanoid(new_humanoid):
-	
-	new_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
-	HUD.add_nameplate(new_humanoid.name, new_humanoid.name)
-	
-
-func remove_player(peer_id):
-	
-	print(str(peer_id) + " left")
-	Client_Screennames.erase(peer_id)
-	var player_Humanoid = get_node_or_null(str(peer_id))
-	
-	if player_Humanoid:
-		Destroying_Player_Humanoid.emit(player_Humanoid)
-		Humanoids.erase(player_Humanoid)
-		HUD.remove_nameplate(str(peer_id))
-		player_Humanoid.ragdoll_change.disconnect(update_nameplate_for_ragdoll)
-		player_Humanoid.queue_free()		
-
-
-func move_to_level():
-	
-	State = SessionState.Round
-	
-	for humanoid in Humanoids:
-		spawn_player.rpc(Level.get_path(), humanoid.get_path())
-		
-	Started_Round.emit()
-
-
 @rpc("call_local", "authority", "reliable")
-func respawn_node(node_path, spawn_position):
+func rpc_CommissionSession(Seed):
 	
-	var node = get_node(node_path)
-	
-	if node != null:
-		node.position = spawn_position
-	
-
-func Commission_Next_Round():
-	
-	var unique_round_id = Games.size() #randi_range(0, 0)
-	var game_prefab_path = ""
+	var rng = RandomNumberGenerator.new()
+	rng.seed = Seed
+	var unique_round_id = rng.randi_range(0, 0)
 	
 	match unique_round_id:
 		0:
-			game_prefab_path = "res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn"
-		1:
-			game_prefab_path = "res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn"
-
-	Active_Game = load_game(game_prefab_path)
-	State = SessionState.Round	
+			load_game("res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn")			
+			load_game("res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn")
+			
+	Commissioned = true
+	
+	
+func StartRound():
+	
+	countDown_timer = 0
 	countDown_value = 5
-	HUD.set_psa.rpc(str(countDown_value))	
-	Active_Game.rpc_start()
+	Active_Game = Games[Round]
+	Active_Game.GameOver.connect(FinishRound)
+	State = SessionState.Round	
+	HUD.set_psa.rpc(countDown_value)	
+	Active_Game.rpc_start.rpc()
 	Started_Round.emit()
+	Round += 1
 	
 		
 var last_prefab
 func load_game(path):
 	
 	var prefab = load(path)
+	var return_val
 	
 	if prefab == null:	
 		print("Could not load game at path: ", path)
-		return null
+		return_val = null
 		
 	elif last_prefab == prefab:	
-		print("Replaying last round of ", prefab)	
-		Active_Game.rpc_reset.rpc()
-		return Active_Game
+		print("Duplicating round of ", prefab)	
+		Games.append(Games.back())
+		return_val = Games.back()
 		
 	else:
-		print("Commissioning a new round of ", prefab)
+		print("Commissioning a round of ", prefab)
 		var new_game = prefab.instantiate()
 		add_child(new_game, true)	
 		Games.append(new_game)
-		last_prefab = prefab
-		return new_game
+		return_val = new_game
 		
-	
-func local_screenname():
-	
-	var local_id = int(str(multiplayer.get_unique_id()))
-	
-	if Client_Screennames.has(local_id):
-		return Client_Screennames[local_id]
-	
-	
-func local_humanoid() -> Node3D:
-	
-	for humanoid in Humanoids:
-		
-		if humanoid.name == str(int(multiplayer.get_unique_id())):
-			return humanoid
-		
-	return null
-
-
-func get_humanoids_screenname(humanoid : Node3D) -> String:
-	
-	if humanoid == null:
-		return ''	
-		
-	elif Client_Screennames.has(int(str(humanoid.name))):
-		return Client_Screennames[int(str(humanoid.name))]
-		
-	else:
-		return ''
-		
+	last_prefab = prefab
+	return return_val
+			
 	  
 func ping_clients():
 	
@@ -380,3 +301,62 @@ func update_nameplate_for_ragdoll(ragdoll_state, node):
 	else:
 		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.WHITE)
 		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 20)
+
+
+func fix_out_of_bounds():
+	
+	for humanoid in Humanoids:
+		
+		if not node_is_in_bounds(humanoid):		
+			rpc_respawn_player.rpc(humanoid.get_path())
+			
+
+func node_is_in_bounds(node):
+	
+	if not Level:
+		return true
+	
+	raycast.global_position = node.global_position + Vector3.DOWN #move raycast to node position
+	raycast.target_position = Vector3.UP * Level.map_size * 5 #shoot it up to the ceiling
+	raycast.force_raycast_update()	
+	var hit_the_ceiling = raycast.is_colliding()	
+	
+	raycast.global_position = node.global_position + Vector3.UP
+	raycast.target_position = Vector3.DOWN * Level.map_size * 5 #shoot it to the floor
+	raycast.force_raycast_update()	
+	var hit_the_floor = raycast.is_colliding()
+
+	return hit_the_ceiling and hit_the_floor #node is considered inside level if it hits one
+
+
+func local_screenname():
+	
+	var local_id = int(str(multiplayer.get_unique_id()))
+	
+	if Client_Screennames.has(local_id):
+		return Client_Screennames[local_id]
+	
+	
+func local_humanoid() -> Node3D:
+	
+	if not multiplayer.has_multiplayer_peer():
+		return null
+	
+	for humanoid in Humanoids:
+		
+		if humanoid.name == str(int(multiplayer.get_unique_id())):
+			return humanoid
+		
+	return null
+
+
+func get_humanoids_screenname(humanoid : Node3D) -> String:
+	
+	if humanoid == null:
+		return ''	
+		
+	elif Client_Screennames.has(int(str(humanoid.name))):
+		return Client_Screennames[int(str(humanoid.name))]
+		
+	else:
+		return ''

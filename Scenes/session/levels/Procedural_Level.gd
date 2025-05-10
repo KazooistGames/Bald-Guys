@@ -33,8 +33,7 @@ var rng : RandomNumberGenerator = RandomNumberGenerator.new()
 func _ready() -> void:
 	
 	#hook into session framework
-	session.Started_Round.connect(trigger_map_generation_cycle)
-	session.Ended_Round.connect(trigger_map_clear_cycle)
+
 	
 	if not multiplayer.has_multiplayer_peer():
 		multiplayer_permissive = true
@@ -46,6 +45,9 @@ func _ready() -> void:
 	if not multiplayer_permissive:
 		return
 		
+	session.Started_Round.connect(trigger_map_generation_cycle)
+	session.Ended_Round.connect(trigger_map_clear_cycle)
+	
 	map_size = 25
 	
 	#arena going up
@@ -69,7 +71,7 @@ func _process(_delta) -> void:
 func _physics_process(delta) -> void:
 	
 	if not multiplayer.has_multiplayer_peer():
-		multiplayer_permissive = true
+		multiplayer_permissive = false
 	elif is_multiplayer_authority():
 		multiplayer_permissive = true
 	else:
@@ -77,10 +79,10 @@ func _physics_process(delta) -> void:
 
 	if not multiplayer_permissive:
 		pass
-	elif not multiplayer.has_multiplayer_peer():
-		pass
+		
 	elif not autocycle:
-		pass		
+		pass	
+			
 	elif autocycle_timer < 0:
 		item_dropper.collect_items.rpc(0, Vector3.UP * 35.0)
 		item_dropper.collect_items.rpc(2, Vector3.UP * 35.0, 0.75)
@@ -132,7 +134,7 @@ func trigger_map_clear_cycle() -> void:
 func stage_boards() -> void:
 	
 	hoverboard_stager.clear_boards.rpc()
-	hoverboard_stager.create_boards.rpc(1, 12, 1, Vector2(18, 25), hash(randi()))
+	hoverboard_stager.create_boards.rpc(1, 12, 1, Vector2(18, 25), session.SEED)
 	hoverboard_stager.create_boards.rpc(3, 6, 2, Vector2(12, 20))
 	hoverboard_stager.create_boards.rpc(5, 3, 3, Vector2(0, 15))
 	hoverboard_stager.introduce_boards.rpc()
@@ -142,7 +144,7 @@ func stage_mesas() -> void:
 
 	hoverboard_stager.bounce_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
-	mesa_grower.create_mesas.rpc(hash(randi()))	
+	mesa_grower.create_mesas.rpc(session.SEED)	
 	mesa_grower.extend_mesas.rpc()
 
 
@@ -150,7 +152,7 @@ func stage_ramps() -> void:
 	
 	mesa_grower.stop.rpc()
 	ramparter.clear_ramps.rpc()
-	ramparter.create_ramps.rpc(hash(randi()))
+	ramparter.create_ramps.rpc(session.SEED)
 	ramparter.lift.rpc()
 	
 	
@@ -159,7 +161,7 @@ func stage_limbs() -> void:
 	mesa_grower.stop.rpc()
 	ramparter.stop.rpc()	
 	limb_grower.clear_limbs.rpc()
-	limb_grower.create_limbs.rpc(hash(randi()))		
+	limb_grower.create_limbs.rpc(session.SEED)		
 	limb_grower.extend_limbs.rpc()
 	hoverboard_stager.synchronize_all_peers()
 			
@@ -211,17 +213,17 @@ func init_for_new_client(client_id) -> void:
 		
 	if mesa_grower.mesas.size() > 0:
 		mesa_grower.clear_mesas.rpc_id(client_id)
-		mesa_grower.create_mesas.rpc_id(client_id, mesa_grower.rng.seed, false)	
+		mesa_grower.create_mesas.rpc_id(client_id, session.SEED, false)	
 		mesa_grower.stop.rpc_id(client_id)
 		
 	if ramparter.ramps.size() > 0:
 		ramparter.clear_ramps.rpc_id(client_id)
-		ramparter.create_ramps.rpc_id(client_id, ramparter.rng.seed, false)	
+		ramparter.create_ramps.rpc_id(client_id, session.SEED, false)	
 		ramparter.stop.rpc_id(client_id)
 	
 	if limb_grower.limbs.size() > 0:
 		limb_grower.clear_limbs.rpc_id(client_id)
-		limb_grower.create_limbs.rpc_id(client_id, limb_grower.rng.seed, false)	
+		limb_grower.create_limbs.rpc_id(client_id, session.SEED, false)	
 		limb_grower.stop.rpc_id(client_id)
 	
 

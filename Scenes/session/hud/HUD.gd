@@ -64,6 +64,7 @@ func update_scoreboard(_delta) -> void:
 @rpc("call_local", "reliable")
 func set_psa(message = "", ttl = 1):
 	
+	message = str(message)
 	PSA.text = message
 	psaTTL = ttl
 	
@@ -85,7 +86,13 @@ func update_nameplate(key, coordinates, label, invisible = false):
 		var screen_size = DisplayServer.screen_get_size()
 		var screen_offset = Vector2(0, screen_size.y / 50.0)	
 		var label_size = nameplate.size / 2.0
-		nameplate.position = nameplate.position.lerp(screen_coordinates - screen_offset - label_size, 0.3)
+		var position_target = screen_coordinates - screen_offset - label_size
+		var position_delta = position_target - nameplate.position
+		#print(position_delta.length())
+		#print(position_delta)
+		#nameplate.position = nameplate.position.lerp(screen_coordinates - screen_offset - label_size, 0.3)
+		var step = pow(position_delta.length(), 2.0) / 75
+		nameplate.position = nameplate.position.move_toward(position_target, step)
 		nameplate.visible = not camera.is_position_behind(coordinates) and not invisible
 		nameplate.text = label
 	

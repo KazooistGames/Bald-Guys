@@ -19,9 +19,6 @@ script = ExtResource("1_2sjt2")
 
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="."]
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-spawn_path = NodePath("..")
-
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_ryau5")
 

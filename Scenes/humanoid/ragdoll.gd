@@ -31,7 +31,7 @@ var bone_modifiers = {
 @onready var Animated_Skeleton : Skeleton3D = get_parent()
 @onready var rootBone = $"Physical Bone lowerBody"
 
-@onready var physicalBones = []
+@onready var physicalBones : Array = []
 @onready var mockBoneIndices = []
 
 @onready var slappy_foot_left = $"Physical Bone foot_l/SlappyFoot"
@@ -68,23 +68,13 @@ func animate_physical_bones(delta):
 		instantly_match_animated_bone(boneIndex)
 		
 	for physical_bone in physicalBones:	
-		
-		#if perfect_match:
-			#var boneIndex = physicalBones.find(physical_bone)
-			#instantly_match_animated_bone(boneIndex)
-			#continue
 			
 		var bone_modifier = bone_modifiers.get(physical_bone.bone_name, 1.0)
 		var physical_transform = get_physical_transform(physical_bone)
 		var animated_transform = get_animated_transform(physical_bone)	
 		var linear_displacement = animated_transform.origin - physical_transform.origin
 		var angular_displacement = animated_transform.basis * physical_transform.basis.inverse()
-		#var tooFast = physical_bone.linear_velocity.length() >= MAX_VELOCITY
-		#var tooFar = linear_displacement.length() >= MAX_DISPLACEMENT
-		#
-		#if tooFast or tooFar:
-			#correct_physical_bones_trigger = true
-		#
+
 		if(correct_physical_bones_trigger):
 			physical_bone.linear_velocity = Vector3.ZERO
 			physical_bone.angular_velocity = Vector3.ZERO
@@ -128,7 +118,9 @@ func set_gravity(value):
 
 func hookes_law(stiffness, displacement, damping, velocity):
 	
-	return (stiffness * displacement) - (damping * velocity)
+	var centering_force = (stiffness * displacement)
+	var damping_force = (damping * velocity)
+	return centering_force - damping_force
 
 
 func ragdoll_velocity():
@@ -173,3 +165,24 @@ func toggle_physical_bone_collider(bone_name, value):
 			
 		if bone.bone_name == bone_name:
 			bone.get_child(0).disabled = not value
+
+
+func sync_loose_bones():
+	
+	if not is_multiplayer_authority():
+		return
+	
+	for bone : PhysicalBone3D in physicalBones:	
+		var path = bone.get_path()
+		rpc_set_bone_physics.rpc(path, bone.transform, bone.linear_velocity)
+		
+		
+@rpc("call_remote", "authority")
+func rpc_set_bone_physics(bone_path : NodePath, new_transform : Transform3D, new_velocity : Vector3):
+	
+	var bone : PhysicsBody3D = get_node(bone_path)
+	bone.transform = new_transform
+	bone.linear_velocity = new_velocity
+		
+	
+	

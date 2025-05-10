@@ -89,7 +89,7 @@ var wall_jump_ons = true
 var collision_ons : Array = []
 
 signal ragdoll_change(new_state)
-signal ragdolled
+signal ragdolled(humanoid : RigidBody3D)
 signal unragdolled
 
 
@@ -468,7 +468,7 @@ func ragdoll(velocity_override = Vector3.ZERO):
 			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = linear_velocity
 			
-		ragdolled.emit()
+		ragdolled.emit(self)
 		skeleton.ragdoll_start()
 		ragdoll_recovery_progress = 0.0
 		animation.active = false

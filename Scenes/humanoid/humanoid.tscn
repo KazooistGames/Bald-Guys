@@ -26,21 +26,15 @@ friction = 0.0
 properties/0/path = NodePath(".:RUNNING")
 properties/0/spawn = true
 properties/0/replication_mode = 2
-properties/1/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:linear_velocity")
+properties/1/path = NodePath(".:SKIN_COLOR")
 properties/1/spawn = true
-properties/1/replication_mode = 1
-properties/2/path = NodePath("Skeleton3D/Ragdoll/Physical Bone lowerBody:angular_velocity")
+properties/1/replication_mode = 2
+properties/2/path = NodePath(".:REACHING")
 properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:SKIN_COLOR")
+properties/2/replication_mode = 2
+properties/3/path = NodePath(".:constant_force")
 properties/3/spawn = true
 properties/3/replication_mode = 2
-properties/4/path = NodePath(".:REACHING")
-properties/4/spawn = true
-properties/4/replication_mode = 2
-properties/5/path = NodePath(".:constant_force")
-properties/5/spawn = true
-properties/5/replication_mode = 2
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_26vqe"]
 resource_local_to_scene = true
@@ -5673,6 +5667,9 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_l8k7m")
+}
 tree_root = ExtResource("3_1nlf8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Add2/add_amount = 1.0
