@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3 uid="uid://hshq8ksyaw22"]
+
+[ext_resource type="Script" path="res://Scenes/humanoid/cameras/3rd_Camera.gd" id="1_ydos4"]
+[ext_resource type="Material" uid="uid://bnku3p4cuequa" path="res://Materials/post_processing.tres" id="2_iqr6u"]
+[ext_resource type="Texture2D" uid="uid://6p02e8vrmean" path="res://icon.svg" id="3_0jnoh"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_e76kf"]
+flip_faces = true
+size = Vector2(2, 2)
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_mq3ua"]
+radius = 0.25
+
+[node name="Camera3D" type="Camera3D"]
+doppler_tracking = 2
+current = true
+fov = 80.0
+near = 0.075
+script = ExtResource("1_ydos4")
+
+[node name="postprocessing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+transparency = 0.15
+cast_shadow = 0
+mesh = SubResource("QuadMesh_e76kf")
+skeleton = NodePath("../../../..")
+surface_material_override/0 = ExtResource("2_iqr6u")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+target_position = Vector3(0, 0, -100)
+collision_mask = 11
+hit_back_faces = false
+
+[node name="reticle" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1148.0
+offset_bottom = -644.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("3_0jnoh")
+expand_mode = 1
+
+[node name="ShapeCast3D" type="ShapeCast3D" parent="."]
+shape = SubResource("SphereShape3D_mq3ua")
+target_position = Vector3(0, 0, -100)
+collision_mask = 11
+debug_shape_custom_color = Color(1, 0, 0, 1)

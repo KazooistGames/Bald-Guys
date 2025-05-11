@@ -156,24 +156,24 @@ func join_lobby():
 func leave_session():
 		
 	if session != null:
-		session.queue_free()	
-		
+		session.queue_free()
+		 	
+	pause_menu.visible = false
+	State = ClientState.Menus
+	music.play()	
+	
 	if not multiplayer.has_multiplayer_peer():
-		pass
+		pass	
 		
 	elif multiplayer.is_server():
 		multiplayer.peer_connected.disconnect(session.add_player)
 		multiplayer.peer_disconnected.disconnect(session.remove_player)
-	
+		
 	else:
 		multiplayer.server_disconnected.disconnect(leave_session)
 		
 	multiplayer.multiplayer_peer = null
-	
-	pause_menu.visible = false
-		
-	State = ClientState.Menus
-	music.play()
+
 	
 		
 func quit():
@@ -230,6 +230,9 @@ func rpc_handoff_object(path, auth_id):
 @rpc("call_remote", "reliable", "any_peer")	
 func rpc_set_client_screenname(player_name):
 	
+	if session == null:
+		return
+		
 	var id = multiplayer.get_remote_sender_id()
 	session.Client_Screennames[id] = player_name
 

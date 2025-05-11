@@ -35,7 +35,7 @@ func _ready():
 	theme.stream_paused = true
 	
 	
-func _process(delta):
+func _process(_delta):
 
 	#active_index = wigs.size() - 1
 	wigs = get_tree().get_nodes_in_group("wigs")
@@ -63,7 +63,9 @@ func _process(delta):
 
 func _physics_process(delta):
 		
-	if not is_multiplayer_authority():
+	if not multiplayer.has_multiplayer_peer():
+		pass
+	elif not is_multiplayer_authority():
 		return		
 
 	match State: # GAME STATE MACHINE

@@ -40,7 +40,8 @@ func _physics_process(_delta):
 	humanoid.LOOK_VECTOR = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 	force.Aim = (humanoid.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
 	var offset_to_zero = 1.0 - abs(humanoid.LOOK_VECTOR.normalized().dot(Vector3.UP))
-	force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
+	#force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
+	force.base_position = humanoid.head_position().lerp(Vector3.ZERO, offset_to_zero * 0.33)
 	force.rotation = camera.rotation 
 	
 	if camera.shapecast.is_colliding():

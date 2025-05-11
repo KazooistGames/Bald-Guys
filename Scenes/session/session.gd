@@ -71,7 +71,9 @@ func _process(delta):
 
 func _physics_process(delta):
 	
-	if not is_multiplayer_authority():
+	if not multiplayer.has_multiplayer_peer():
+		pass
+	elif not is_multiplayer_authority():
 		return	
 		
 	HUD.Scores = Games[Round].Scores
@@ -332,6 +334,11 @@ func node_is_in_bounds(node):
 
 func local_screenname():
 	
+	if not multiplayer.has_multiplayer_peer():
+		return
+	elif not is_multiplayer_authority():
+		return	
+		
 	var local_id = int(str(multiplayer.get_unique_id()))
 	
 	if Client_Screennames.has(local_id):

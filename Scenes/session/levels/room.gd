@@ -34,8 +34,10 @@ func _ready() -> void:
 
 func _process(delta:float) -> void:
 	
-	if not is_multiplayer_authority():
-		return
+	if not multiplayer.has_multiplayer_peer():
+		pass
+	elif not is_multiplayer_authority():
+		return	
 		
 	if not Resizing:
 		pass

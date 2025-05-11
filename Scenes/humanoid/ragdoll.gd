@@ -169,7 +169,9 @@ func toggle_physical_bone_collider(bone_name, value):
 
 func sync_loose_bones():
 	
-	if not is_multiplayer_authority():
+	if not multiplayer.has_multiplayer_peer():
+		pass
+	elif not is_multiplayer_authority():
 		return
 	
 	for bone : PhysicalBone3D in physicalBones:	

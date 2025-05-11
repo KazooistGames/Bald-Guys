@@ -42,18 +42,13 @@ func _ready() -> void:
 	limb_grower.finished_retracting.connect(unstage_ramps) #unstage the limbs to kick everything off
 	ramparter.finished_collapsing.connect(unstage_mesas)
 	mesa_grower.finished_retracting.connect(unstage_boards) 
-	hoverboard_stager.finished_retreating.connect(resize_to_lobby)
+	hoverboard_stager.finished_retreating.connect(reset_map)
 	
 	
-func _process(delta):
+func _process(_delta):
 
-	room.request_size(Map_Size)
-	#hoverboard_stager.Map_Size = room.Current_Size
-	#mesa_grower.Map_Size = room.Current_Size
-	#ramparter.Map_Size = room.Current_Size
-	#limb_grower.Map_Size = room.Current_Size
-	
-
+	room.request_size(Map_Size)	
+	hoverboard_stager.Map_Size = room.Current_Size
 
 func _physics_process(delta) -> void:
 	
@@ -83,7 +78,7 @@ func _physics_process(delta) -> void:
 		autocycle_timer += delta
 	
 	
-func resize_to_lobby() -> void:
+func reset_map() -> void:
 	
 	hoverboard_stager.clear_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
@@ -129,7 +124,7 @@ func stage_boards() -> void:
 
 func stage_mesas() -> void:
 
-	#mesa_grower.rpc_set_rng.rpc(hash(level_rng.randi()), null)
+	mesa_grower.Map_Size = room.Current_Size
 	hoverboard_stager.bounce_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
 	mesa_grower.create_mesas.rpc()	
@@ -138,7 +133,7 @@ func stage_mesas() -> void:
 
 func stage_ramps() -> void:
 	
-	#ramparter.rpc_set_rng.rpc(hash(level_rng.randi()), null)
+	ramparter.Map_Size = room.Current_Size
 	mesa_grower.stop.rpc()
 	ramparter.clear_ramps.rpc()
 	ramparter.create_ramps.rpc()
@@ -147,7 +142,7 @@ func stage_ramps() -> void:
 	
 func stage_limbs() -> void:
 	
-	#limb_grower.rpc_set_rng.rpc(hash(level_rng.randi()), null)
+	limb_grower.Map_Size = room.Current_Size
 	mesa_grower.stop.rpc()
 	ramparter.stop.rpc()	
 	limb_grower.clear_limbs.rpc()

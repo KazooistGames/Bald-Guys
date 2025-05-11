@@ -36,8 +36,7 @@ var geometry_material = preload("res://Materials/geometry.tres")
 func _process(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
-		pass
-		
+		return	
 	elif not is_multiplayer_authority():
 		return
 		

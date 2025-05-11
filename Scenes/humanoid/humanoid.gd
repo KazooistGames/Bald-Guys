@@ -444,6 +444,13 @@ func head_position():
 	var adjustedPosition = headPosition.rotated(Vector3.UP, skeleton.rotation.y ) 
 	return adjustedPosition
 	
+	
+func bone_position(bone_name):
+	
+	var bone_position = skeleton.bone_position(bone_name)
+	var adjustedPosition = bone_position.rotated(Vector3.UP, skeleton.rotation.y ) 
+	return adjustedPosition	
+
 
 func get_ragdoll_ready():
 	

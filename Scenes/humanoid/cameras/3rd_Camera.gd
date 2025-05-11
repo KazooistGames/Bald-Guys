@@ -2,8 +2,10 @@ extends Camera3D
 
 const MAX_ANGLE = PI/2.3
 
-const DRIVING_DISTANCE = -2.0
-const RAGDOLLED_DISTANCE = -3.0
+const DRAW_STRENGTH = -2.5
+const RISE_STRANGTH = 1.25
+const PAN_STRENGTH = 1.5
+const VERT_STRENGTH = .5
 
 @export var Locked = false
 
@@ -18,8 +20,8 @@ const RAGDOLLED_DISTANCE = -3.0
 var VERTICAL_SENSATIVITY = 0.005
 var HORIZONTAL_SENSITIVITY = 0.005
 
-var is_local_camera = false
 
+var is_local_camera = false
 
 func _ready():
 
@@ -35,13 +37,17 @@ func _process(_delta):
 	if is_local_camera:
 		reticle.expand_mode = 1
 		reticle.size = Vector2.ONE * 4	
-		reticle.position = get_center_of_screen() - reticle.size/2.0
+		reticle.position = get_center_of_screen() - reticle.size / 2.0
 		
 	HORIZONTAL_SENSITIVITY = 0.002 if humanoid.REACHING else 0.004
-	var cam_depth = RAGDOLLED_DISTANCE if humanoid.RAGDOLLED else DRIVING_DISTANCE
-	var adjustedOffset = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * cam_depth
-	var adjustedPosition = humanoid.head_position()
-	position = adjustedPosition + adjustedOffset	
+	var verticality = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI).dot(Vector3.UP)
+	var draw_offset : Vector3 = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * DRAW_STRENGTH
+	var rise_offset : Vector3 = Vector3.UP * RISE_STRANGTH * (1.0 - verticality) * VERT_STRENGTH
+	var base_position : Vector3 = humanoid.bone_position('lowerBody')
+	var pan_offset = (humanoid.bone_position('chin') - base_position) * Vector3(PAN_STRENGTH, 0, PAN_STRENGTH)
+	position = base_position + draw_offset + rise_offset + pan_offset 
+
+	print(verticality)
 	
 	if force.action == force.Action.inert:
 		Locked = false	

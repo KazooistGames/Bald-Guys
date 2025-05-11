@@ -13,10 +13,10 @@
 [ext_resource type="AudioStream" uid="uid://c3y031bmnuw74" path="res://audio/deepSwing.mp3" id="11_030sq"]
 [ext_resource type="AudioStream" uid="uid://bwlo06x8jfil" path="res://audio/punch.mp3" id="11_neikv"]
 [ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/humanoid/force/force.tscn" id="13_uhqou"]
-[ext_resource type="PackedScene" uid="uid://yaefhdh5sdlv" path="res://Scenes/humanoid/cameras/FPS_Camera.tscn" id="14_jolxv"]
 [ext_resource type="PackedScene" uid="uid://jdvdhg8sqgv1" path="res://Scenes/humanoid/player_interface/player_interface.tscn" id="15_vslm3"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="16_kptge"]
 [ext_resource type="PackedScene" uid="uid://yduju68nnoqu" path="res://Scenes/components/state_rectifier/state_rectifier.tscn" id="16_vrifw"]
+[ext_resource type="PackedScene" uid="uid://hshq8ksyaw22" path="res://Scenes/humanoid/cameras/3rd_Camera.tscn" id="17_hksxe"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_vc0al"]
 resource_local_to_scene = true
@@ -5727,6 +5727,6 @@ hit_back_faces = false
 
 [node name="Force" parent="." instance=ExtResource("13_uhqou")]
 
-[node name="Camera3D" parent="." instance=ExtResource("14_jolxv")]
-
 [node name="player_interface" parent="." instance=ExtResource("15_vslm3")]
+
+[node name="Camera3D" parent="." instance=ExtResource("17_hksxe")]
