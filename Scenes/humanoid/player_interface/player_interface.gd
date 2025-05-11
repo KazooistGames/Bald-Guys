@@ -14,7 +14,6 @@ var is_local_interface = false #input hardware is connected to this node
 var cached_inputs = {} #used to determine delta across the network
 	
 
-	
 func _ready():
 
 	add_to_group("interfaces")
@@ -59,7 +58,6 @@ func _physics_process(_delta):
 		continuous_inputs['wasd'] = Input.get_vector("left", "right", "forward", "backward")
 		continuous_inputs['run'] = not Input.is_action_pressed("run")
 		var timestamp = Time.get_unix_time_from_system()
-		#rpc_update_Continuous_inputs.rpc_id(get_multiplayer_authority(), continuous_inputs, timestamp)
 		rpc_update_Continuous_inputs.rpc(continuous_inputs, timestamp)
 		WASD = continuous_inputs['wasd']
 		humanoid.RUNNING = continuous_inputs['run']
@@ -82,8 +80,24 @@ func _input(event):
 		discrete_inputs["primary"] = Input.is_action_pressed("primary")
 		discrete_inputs["secondary"] = Input.is_action_pressed("secondary")
 		var timestamp = Time.get_unix_time_from_system()
-		#rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs, timestamp)	
-		rpc_update_Discrete_inputs.rpc(discrete_inputs, timestamp)	
+		
+		if detected_input_change(discrete_inputs) or cached_inputs.size() == 0:
+			rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs, timestamp)	
+			
+		cache_new_inputs(discrete_inputs)
+	
+	
+func detected_input_change(inputs) -> bool:
+	
+	for key in inputs.keys():
+		
+		if just_pressed(key, inputs):
+			return true
+			
+		if just_released(key, inputs):
+			return true
+			
+	return false
 	
 	
 func handle_ragdoll(_humanoid):
@@ -120,7 +134,7 @@ func attempt_lunge_at_target(target):
 @rpc("any_peer", "call_local", "unreliable_ordered")
 func rpc_update_Continuous_inputs(inputs, timestamp):
 	
-	if str(multiplayer.get_remote_sender_id()) != humanoid.name and not is_multiplayer_authority():
+	if not is_multiplayer_authority():
 		return
 		
 	look = inputs['look']	
@@ -142,45 +156,46 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 		
 
 @rpc("any_peer", "call_local", "reliable")
-func rpc_update_Discrete_inputs(inputs, timestamp):
+func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	
 	var sender_id = multiplayer.get_remote_sender_id()
 	
-	if str(sender_id) != humanoid.name and not is_multiplayer_authority():
+	if not is_multiplayer_authority():
 		return
 		
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
 	
+	var action_committed = false
+	
+	for key in inputs.keys():
+		
+		if just_pressed(key, inputs):
+			action_committed = true
+		
+	if action_committed: #ROLLBACK
+		humanoid.rollback(rollback_lag)	
+	
 	if just_pressed('jump', inputs):	
 	
 		var jump_available = humanoid.ON_FLOOR or humanoid.DOUBLE_JUMP_CHARGES > 0
-		if jump_available and is_multiplayer_authority(): #ROLLBACK
-			humanoid.rollback(rollback_lag)	
+
 		if humanoid.ON_FLOOR:
-			humanoid.jump()
+			humanoid.jump.rpc()
 		elif humanoid.DOUBLE_JUMP_CHARGES > 0:
-			humanoid.double_jump()		
-		if jump_available and is_multiplayer_authority(): #PREDICTaw 
-			humanoid.predict(rollback_lag)
-		
+			humanoid.double_jump.rpc()
+	
 	if just_pressed('recover', inputs): 
 		recovery_minigame.attempt_early_recovery(rollback_lag)
-		
-	if not is_multiplayer_authority():
-		pass
 			
-	elif just_pressed('secondary', inputs):
+	if just_pressed('secondary', inputs):
 		
 		if not humanoid.RAGDOLLED:
 			force.rpc_secondary.rpc()	
 			
 	elif just_released('secondary', inputs):	
 		force.rpc_reset.rpc()
-			
-	if not is_multiplayer_authority():
-		pass	
-		
-	elif just_pressed('primary', inputs):
+				
+	if just_pressed('primary', inputs):
 		
 		if humanoid.RAGDOLLED:
 			pass	
@@ -194,6 +209,9 @@ func rpc_update_Discrete_inputs(inputs, timestamp):
 		else:
 			force.rpc_primary.rpc()
 			attempt_lunge_at_target(targeted_object)
+		
+	if action_committed: #PREDICT
+		humanoid.predict(rollback_lag)
 		
 	cache_new_inputs(inputs)
 

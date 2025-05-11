@@ -155,6 +155,9 @@ func join_lobby():
 
 func leave_session():
 		
+	if session != null:
+		session.queue_free()	
+		
 	if not multiplayer.has_multiplayer_peer():
 		pass
 		
@@ -168,9 +171,6 @@ func leave_session():
 	multiplayer.multiplayer_peer = null
 	
 	pause_menu.visible = false
-	
-	if session != null:
-		session.queue_free()
 		
 	State = ClientState.Menus
 	music.play()

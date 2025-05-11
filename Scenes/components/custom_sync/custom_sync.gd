@@ -4,7 +4,7 @@ extends Node
 
 var get_net_var_delegate : Callable
 
-var logging = true
+var logging = false
 
 signal synced
 

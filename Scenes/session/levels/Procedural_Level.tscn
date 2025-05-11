@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://b5fc4lv4wybum"]
+[gd_scene load_steps=9 format=3 uid="uid://b5fc4lv4wybum"]
 
 [ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/session/levels/room.tscn" id="1_halqj"]
 [ext_resource type="Script" path="res://Scenes/session/levels/Procedural_Level.gd" id="2_lukeg"]
@@ -7,6 +7,11 @@
 [ext_resource type="PackedScene" uid="uid://drujlef4qyslo" path="res://Scenes/session/levels/procedural/item_dropper.tscn" id="6_nuajx"]
 [ext_resource type="PackedScene" uid="uid://bxvldmj0gbd3m" path="res://Scenes/session/levels/procedural/ramparter.tscn" id="7_fnc5j"]
 [ext_resource type="PackedScene" uid="uid://bmsru2apinfke" path="res://Scenes/session/levels/procedural/limb_grower.tscn" id="8_n5db1"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_0x168"]
+properties/0/path = NodePath(".:Map_Size")
+properties/0/spawn = true
+properties/0/replication_mode = 2
 
 [node name="Procedural_Level" type="Node3D"]
 script = ExtResource("2_lukeg")
@@ -22,3 +27,6 @@ script = ExtResource("2_lukeg")
 [node name="Ramparter" parent="." instance=ExtResource("7_fnc5j")]
 
 [node name="Limb_Grower" parent="." instance=ExtResource("8_n5db1")]
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_0x168")

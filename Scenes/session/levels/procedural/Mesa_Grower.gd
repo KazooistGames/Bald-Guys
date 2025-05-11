@@ -1,10 +1,9 @@
 extends Node3D
 
 const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
-
 const gap = 2.0
 
-@export var map_size : int = 50
+@export var Map_Size : int = 50
 
 enum Configuration 
 {
@@ -13,23 +12,21 @@ enum Configuration
 	retracting = 2
 }
 @export var configuration = Configuration.inert
-
 @export var height_step = 0.75
 
 @onready var rng = RandomNumberGenerator.new()
-
+@onready var previous_rng_state = rng.state
 @onready var unlagger = $LagCompensator
 
 var extend_speed = 0.5
 var retract_speed = 2.0
-
 var in_position = false
 var mesas = []
-
 var count = 30
 
 signal finished_extending
 signal finished_retracting
+
 
 func _physics_process(delta):
 	
@@ -108,16 +105,16 @@ func stop():
 
 
 @rpc("call_local", "reliable")
-func create_mesas(new_seed, hidden : bool = true):
+func create_mesas(hidden : bool = true):
 	
-	rng.seed = new_seed
-	
+	previous_rng_state = rng.state
+	#print(multiplayer.get_unique_id(), " ", name, " seed is ", rng.seed, " state is ", rng.state)
 	for index in range(count):
 		var tier = index/10
 		var min_size = 8 - tier * 2
 		var max_size = 14 - tier * 2
 		var random_size = rng.randi_range(min_size, max_size) * 0.5	
-		var boundary = map_size/2.0 - random_size/2.0
+		var boundary = Map_Size/2.0 - random_size/2.0
 		boundary /= gap
 
 		var new_mesa = prefab.instantiate()
@@ -146,3 +143,14 @@ func get_mesas():
 	
 	return find_children("*", "AnimatableBody3D", true, false)
 	
+	
+@rpc("call_local", "authority", "reliable")	
+func rpc_set_rng(new_seed, new_state):
+	
+	if new_seed != null:
+		rng.seed = new_seed
+		
+	if new_state != null:
+		rng.state = new_state
+		
+	print(multiplayer.get_unique_id(), " ", name, " seed is ", rng.seed, " state is ", rng.state)

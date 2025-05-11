@@ -16,17 +16,11 @@ const SessionState = {
 @export var Games : Array = []
 @export var Round : int = 0
 
-@export var map_size = 0
-
-@onready var SEED = hash(randi())
-
+@onready var session_rng = RandomNumberGenerator.new()
 @onready var Level : Node3D = $Procedural_Level
 @onready var HUD = $HUD
-
 @onready var humanoidSpawner = $HumanoidSpawner
-
 @onready var raycast = $RayCast3D
-
 @onready var pinger = $PingTimer
 @onready var unlagger = $LagCompensator
 
@@ -48,16 +42,15 @@ var bearers : Array = []
 func _ready():
 		
 	if is_multiplayer_authority():
-		add_player(1)
 		pinger.timeout.connect(ping_clients)
 		pinger.timeout.connect(fix_out_of_bounds)
-		print("session SEED: ", SEED)
-		rpc_CommissionSession.rpc(SEED)
+		add_player(1)
 	
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
 	Started_Round.connect(Level.trigger_map_generation_cycle)
 	Ended_Round.connect(Level.trigger_map_clear_cycle)
+
 
 func _process(delta):
 		
@@ -75,11 +68,12 @@ func _process(delta):
 		wigs = Games[0].wigs
 		bearers = Games[0].bearers
 
+
 func _physics_process(delta):
 	
 	if not is_multiplayer_authority():
 		return	
-	
+		
 	HUD.Scores = Games[Round].Scores
 	HUD.Goal = Games[Round].Goal
 	
@@ -142,7 +136,7 @@ func add_player(peer_id):
 	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
 	Created_Humanoid.emit(new_peer_humanoid)
 	
-	rpc_CommissionSession.rpc_id(peer_id, SEED)
+	rpc_CommissionSession.rpc_id(peer_id, session_rng.seed)
 	Level.init_for_new_client(peer_id)
 	
 	for game in Games:	
@@ -214,15 +208,16 @@ func get_random_spawn(parent):
 @rpc("call_local", "authority", "reliable")
 func rpc_CommissionSession(Seed):
 	
-	var rng = RandomNumberGenerator.new()
-	rng.seed = Seed
-	var unique_round_id = rng.randi_range(0, 0)
+	session_rng.seed = Seed
+	print(multiplayer.get_unique_id(), " session seed: ", session_rng.seed)
+	var unique_round_id = session_rng.randi_range(0, 0)
 	
 	match unique_round_id:
 		0:
 			load_game("res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn")			
 			load_game("res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn")
 			
+	Level.seed_procedural_generators(hash(session_rng.randi()))
 	Commissioned = true
 	
 	
@@ -245,16 +240,16 @@ func load_game(path):
 	var return_val
 	
 	if prefab == null:	
-		print("Could not load game at path: ", path)
+		print(multiplayer.get_unique_id(), " could not load game at path: ", path)
 		return_val = null
 		
 	elif last_prefab == prefab:	
-		print("Duplicating round of ", prefab)	
+		print(multiplayer.get_unique_id(), " duplicating round of ", path)	
 		Games.append(Games.back())
 		return_val = Games.back()
 		
 	else:
-		print("Commissioning a round of ", prefab)
+		print(multiplayer.get_unique_id(), " commissioning a round of ", path)
 		var new_game = prefab.instantiate()
 		add_child(new_game, true)	
 		Games.append(new_game)
@@ -323,12 +318,12 @@ func node_is_in_bounds(node):
 		return true
 	
 	raycast.global_position = node.global_position + Vector3.DOWN #move raycast to node position
-	raycast.target_position = Vector3.UP * Level.map_size * 5 #shoot it up to the ceiling
+	raycast.target_position = Vector3.UP * Level.Map_Size * 5 #shoot it up to the ceiling
 	raycast.force_raycast_update()	
 	var hit_the_ceiling = raycast.is_colliding()	
 	
 	raycast.global_position = node.global_position + Vector3.UP
-	raycast.target_position = Vector3.DOWN * Level.map_size * 5 #shoot it to the floor
+	raycast.target_position = Vector3.DOWN * Level.Map_Size * 5 #shoot it to the floor
 	raycast.force_raycast_update()	
 	var hit_the_floor = raycast.is_colliding()
 

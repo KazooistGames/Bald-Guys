@@ -2,7 +2,7 @@ extends Node3D
 
 const prefab = preload("res://Scenes/geometry/pillar/pillar.tscn")
 
-@export var map_size = 50
+@export var Map_Size = 50
 
 const extend_period = 2.0
 const retract_period = 2.0
@@ -14,9 +14,8 @@ enum Configuration
 	retracting = 2
 }
 @export var configuration = Configuration.inert
-
 @onready var rng = RandomNumberGenerator.new()
-
+@onready var previous_rng_state = rng.state
 @onready var unlagger = $LagCompensator
 
 var in_position = false
@@ -68,9 +67,9 @@ func _physics_process(delta):
 
 
 @rpc("call_local", "reliable")
-func create_limbs(new_seed, hidden : bool = true):
+func create_limbs(hidden : bool = true):
 	
-	rng.seed = new_seed
+	previous_rng_state = rng.state
 	var orientation_to_use = 0
 	
 	for mesa in $"../Mesa_Grower".mesas:
@@ -158,3 +157,13 @@ func get_limbs():
 	return find_children("*", "AnimatableBody3D", true, false)
 	
 	
+@rpc("call_local", "authority", "reliable")	
+func rpc_set_rng(new_seed, new_state):
+	
+	if new_seed != null:
+		rng.seed = new_seed
+		
+	if new_state != null:
+		rng.state = new_state
+
+	print(multiplayer.get_unique_id(), " ", name, " seed is ", rng.seed, " state is ", rng.state)

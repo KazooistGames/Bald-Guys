@@ -11,12 +11,11 @@ enum Configuration
 	collapsing = 2
 }
 
-@export var map_size = 50
-
+@export var Map_Size = 50
 @export var configuration = Configuration.inert
 
 @onready var rng = RandomNumberGenerator.new()
-
+@onready var previous_rng_state = rng.state
 @onready var unlagger = $LagCompensator
 
 var ramps = []
@@ -35,7 +34,8 @@ signal finished_collapsing
 
 
 func _physics_process(delta):
-
+	
+	delta *= unlagger.delta_scalar(delta)
 	in_position = true
 	
 	if configuration == Configuration.inert or ramps.size() == 0:
@@ -75,9 +75,9 @@ func _physics_process(delta):
 
 
 @rpc("call_local", "reliable")	
-func create_ramps(new_seed, hidden : bool = true):
+func create_ramps(hidden : bool = true):
 	
-	rng.seed = new_seed
+	previous_rng_state = rng.state
 	
 	for mesa in $"../Mesa_Grower".mesas:
 			
@@ -101,8 +101,6 @@ func create_ramps(new_seed, hidden : bool = true):
 				ramp_height = minf(mesa.position.y, mesa.size / 2.0)
 				
 			spawn_ramp(ramp_position, mesa.size, mesa.size, ramp_height, false, y_rotation, hidden)
-			
-	pass
 	
 
 @rpc("call_local", "reliable")	
@@ -127,8 +125,8 @@ func spawn_ramp(coordinates, length = 1.0, thickness = 2.0, height = 0.5, verify
 		
 func height_at_coordinates(coordinates):
 	
-	var origin = Vector3(coordinates.x, map_size, coordinates.z)
-	var destination = Vector3(coordinates.x, -map_size - 1, coordinates.z)
+	var origin = Vector3(coordinates.x, Map_Size, coordinates.z)
+	var destination = Vector3(coordinates.x, -Map_Size - 1, coordinates.z)
 	var query = PhysicsRayQueryParameters3D.create(origin, destination, 0b0001, [])
 	query.hit_back_faces = false
 	query.hit_from_inside = false
@@ -191,3 +189,14 @@ func get_ramps():
 	
 	return find_children("*", "AnimatableBody3D", false, false)
 
+
+@rpc("call_local", "authority", "reliable")	
+func rpc_set_rng(new_seed, new_state):
+	
+	if new_seed != null:
+		rng.seed = new_seed
+		
+	if new_state != null:
+		rng.state = new_state
+
+	print(multiplayer.get_unique_id(), " ", name, " seed is ", rng.seed, " state is ", rng.state)

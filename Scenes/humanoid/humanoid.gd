@@ -545,6 +545,7 @@ func bump(velocity_impulse):
 	audio_impact(-36, 0.60)
 	apply_central_impulse(velocity_impulse * mass)
 
+
 @rpc("call_local", "reliable")
 func jump():
 	

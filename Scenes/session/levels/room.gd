@@ -54,7 +54,7 @@ func _process(delta:float) -> void:
 	
 	
 @rpc("call_local", "reliable")
-func request_new_size(new_size : float) -> void:
+func request_size(new_size : float) -> void:
 	
 	if new_size <= 0:
 		return

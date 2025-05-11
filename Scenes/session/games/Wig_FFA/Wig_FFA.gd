@@ -40,16 +40,16 @@ func _process(delta):
 	#active_index = wigs.size() - 1
 	wigs = get_tree().get_nodes_in_group("wigs")
 	
-	if  wigs.size() == 0 or State != GameState.playing:
+	if wigs.size() == 0 or State != GameState.playing:
 		whispers.stream_paused = true
 		theme.stream_paused = true
 		
 	else:
 		session.HUD.find_child("Progress").visible = active_bearer_is_local_player()
+		session.HUD.update_nameplate("WIG", wigs.back().global_position, "WIG")
 		whispers.global_position = wigs.back().global_position
 		whispers.stream_paused = active_bearer_is_local_player()
 		theme.stream_paused = not whispers.stream_paused
-		session.HUD.update_nameplate("WIG", wigs.back().global_position, "WIG")
 		
 		if bearers.back() != null:
 			session.HUD.modify_nameplate("WIG", "visible", false)	
@@ -167,14 +167,13 @@ func handle_player_leaving(client_id):
 			
 		if humanoid == null:
 			pass
-		elif State != GameState.playing:
-			pass
 		elif not bearers.has(humanoid):
 			pass
-		elif humanoid == bearers.back(): 
+		elif humanoid == bearers.back() and State == GameState.playing: #this is the active wig
 			drop_wig(humanoid)
-		else:
-			wigs[bearers.find(humanoid)].queue_free()
+		else: #we either arent playing, or this wig is already fused - either way, destroy it
+			var wig = wigs[bearers.find(humanoid)]
+			rpc_destroy_wig.rpc(wig.get_path())
 
 
 @rpc("call_local", "reliable")
@@ -192,6 +191,15 @@ func rpc_spawn_new_wig():
 	bearers.append(null)
 	new_wig.interactable.gained_interaction.connect(dawn_active_wig)
 	return new_wig
+
+
+@rpc("call_local", "reliable")
+func rpc_destroy_wig(path_to_wig : NodePath):
+	
+	var wig = get_node(path_to_wig)
+	
+	if wig != null:
+		wig.queue_free()
 
 
 @rpc("call_local", "reliable")
@@ -302,10 +310,22 @@ func rpc_play():
 func rpc_finish():
 	
 	session.HUD.find_child("Progress").visible = false
+	session.HUD.remove_nameplate("WIG")
 	
 	if is_multiplayer_authority(): 
 		State = GameState.finished	
-		rpc_fuse_wig_to_head.rpc(wigs.back().get_path(), bearers.back().get_path())
+		
+		for index in wigs.size():
+			
+			var bearer = bearers[index]
+			var wig = wigs[index]
+			
+			if wig == null:
+				pass
+			elif bearer == null:
+				rpc_destroy_wig.rpc(wig.get_path())
+			else:
+				rpc_fuse_wig_to_head.rpc(wig.get_path(), bearer.get_path())
 
 
 func handle_player_joining(client_id) -> void:

@@ -61,7 +61,9 @@ func _process(delta):
 	var scoring_players : Array[Node3D] = get_players_in_hill()
 	var indicator_color = Color.GREEN_YELLOW if scoring_players.size() == 0 else Color.ORANGE_RED
 	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", indicator_color)
-	session.HUD.find_child("Progress").visible = scoring_players.has(session.local_humanoid()) and Hill.visible
+	
+	if State == GameState.playing:
+		session.HUD.find_child("Progress").visible = scoring_players.has(session.local_humanoid()) and Hill.visible
 	
 
 func _physics_process(delta):

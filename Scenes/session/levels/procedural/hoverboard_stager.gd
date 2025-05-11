@@ -16,9 +16,10 @@ enum Configuration
 @export var configuration = Configuration.introducing
 
 @export var boards : Array[Node] = []
-@export var map_size = 50
+@export var Map_Size = 50
 
 @onready var rng = RandomNumberGenerator.new()
+@onready var previous_rng_state = rng.state
 @onready var unlagger = $LagCompensator
 
 var sync_cooldown_progress = 0.0
@@ -52,7 +53,7 @@ func _physics_process(delta):
 		if configuration == Configuration.introducing:
 			#var lower_lim = board.lower_limits.y + board.girth / 2.0
 			var upper_lim = board.upper_limits.y - board.girth / 2.0
-			var clamped_target = upper_lim #clampf(map_size/2.0, lower_lim, upper_lim)
+			var clamped_target = upper_lim #clampf(Map_Size/2.0, lower_lim, upper_lim)
 			
 			if board.position.y > clamped_target:
 				all_boards_in_position = false
@@ -88,14 +89,11 @@ func _physics_process(delta):
 				
 		
 @rpc("call_local", "reliable")
-func create_boards(count, size, speed, height_limits, new_seed = null):
-	
-	if new_seed != null:
-		rng.seed = new_seed
+func create_boards(count, size, speed, height_limits):
 	
 	for index in range(count): #create hovering platforms
 		var new_board = spawn_board(size)
-		var extents = map_size / 2.0
+		var extents = Map_Size / 2.0
 		new_board.lower_limits = Vector3(-extents, height_limits.x, -extents)
 		new_board.upper_limits = Vector3(extents, height_limits.y, extents)
 		new_board.speed = speed
@@ -103,13 +101,14 @@ func create_boards(count, size, speed, height_limits, new_seed = null):
 
 func spawn_board(size):
 
+	previous_rng_state = rng.state
 	var new_board = prefab.instantiate()
 	add_child(new_board, true)		
 	new_board.size = size
-	var boundary = map_size / 2.0 - new_board.size
+	var boundary = Map_Size / 2.0 - new_board.size
 	new_board.position.x = rng.randi_range(-boundary, boundary)
 	new_board.position.z = rng.randi_range(-boundary, boundary)
-	new_board.position.y = map_size + randi_range(3, 8)
+	new_board.position.y = Map_Size + randi_range(3, 8)
 	new_board.disable_bounce = configuration != Configuration.bouncing
 	new_board.disable_constrain = configuration != Configuration.bouncing
 	new_board.disable_depenetration = configuration != Configuration.bouncing
@@ -180,6 +179,7 @@ func bounce_boards():
 	if configuration != Configuration.bouncing:
 		configuration = Configuration.bouncing
 		unlagger.reset()	
+		previous_rng_state = rng.state
 		
 		for board in boards:
 			var random_vector = Vector3.ZERO
@@ -243,3 +243,14 @@ func sync_board_positions(server_positions : PackedVector3Array, server_trajecto
 		boards[index].trajectory = server_trajectories[index]
 	unlagger.reset()
 
+
+@rpc("call_local", "authority", "reliable")	
+func rpc_set_rng(new_seed, new_state):
+	
+	if new_seed != null:
+		rng.seed = new_seed
+		
+	if new_state != null:
+		rng.state = new_state
+	
+	print(multiplayer.get_unique_id(), " ", name, " seed is ", rng.seed, " state is ", rng.state)
