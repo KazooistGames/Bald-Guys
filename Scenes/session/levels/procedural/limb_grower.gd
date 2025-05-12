@@ -78,13 +78,13 @@ func create_limbs(hidden : bool = true):
 
 		while rng.randf() <= limb_freq and limbs_on_mesa < 4:
 			var limb_position = mesa.global_position - Vector3.UP * 0.375
-			spawn_limb(orientation_to_use, limb_position, 0.25, hidden)
+			spawn_limb(orientation_to_use, limb_position, 1.0/3.0, hidden)
 			orientation_to_use += PI / 2.0
 			orientation_to_use = fmod(orientation_to_use, 2.0 * PI)
 
 
 @rpc("call_local", "reliable")
-func spawn_limb(orientation, location, radius = 1.0/3.0, hidden : bool = true):
+func spawn_limb(orientation, location, radius = 1.0/2.0, hidden : bool = true):
 	
 	var new_limb = prefab.instantiate()
 	new_limb.preference = new_limb.Preference.deep

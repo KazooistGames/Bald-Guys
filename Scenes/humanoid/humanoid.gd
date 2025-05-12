@@ -27,7 +27,7 @@ const Lunge_max_traversal = 6
 @export var WALK_VECTOR = Vector3(0,0,0)
 	
 @export var FACING_VECTOR = Vector3(0,0,0)
-@export var SPEED_GEARS = Vector2(3.5, 7.0)
+@export var SPEED_GEARS = Vector2(3.0, 7.0)
 @export var JUMP_SPEED = 5.5
 @export var RUNNING = false
 @export var DOUBLE_JUMP_CHARGES = 1

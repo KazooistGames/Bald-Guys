@@ -1,11 +1,10 @@
 extends Camera3D
 
 const MAX_ANGLE = PI/2.3
-
 const DRAW_STRENGTH = -2.5
-const RISE_STRANGTH = 1.25
+const RISE_STRENGTH = 1.25
 const PAN_STRENGTH = 1.5
-const VERT_STRENGTH = .5
+const VERT_STRENGTH = 0.5
 
 @export var Locked = false
 
@@ -13,14 +12,12 @@ const VERT_STRENGTH = .5
 @onready var raycast = $RayCast3D
 @onready var shapecast = $ShapeCast3D
 @onready var postprocessing = $postprocessing
-
 @onready var humanoid = get_parent()
 @onready var force = humanoid.find_child("Force")
 
+var goal_position : Vector3 = Vector3.ZERO
 var VERTICAL_SENSATIVITY = 0.005
 var HORIZONTAL_SENSITIVITY = 0.005
-
-
 var is_local_camera = false
 
 func _ready():
@@ -29,25 +26,29 @@ func _ready():
 	
 	is_local_camera = str(multiplayer.get_unique_id()) == humanoid.name
 	current = is_local_camera
-	reticle.visible = is_local_camera
 	
 	
-func _process(_delta):
+func _physics_process(delta):
 	
+	HORIZONTAL_SENSITIVITY = 0.002 if humanoid.REACHING else 0.004	
+
+	var verticality = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI).dot(Vector3.UP)
+	var rise_offset : Vector3 = Vector3.UP * RISE_STRENGTH * (1.0 - verticality) * VERT_STRENGTH	
+	var base_position : Vector3 = humanoid.bone_position('lowerBody')
+	var pan_offset = (humanoid.bone_position('chin') - base_position) * Vector3(PAN_STRENGTH, 0, PAN_STRENGTH)
+	var pivot_position = base_position + rise_offset + pan_offset
+	
+	#draw the camera back then adjust for any detected collisions
+	var draw_offset = corrected_draw(pivot_position)
+	
+	goal_position = pivot_position + draw_offset
+	var reposition_speed : float = position.distance_to(goal_position) * 15
+	position = position.move_toward(goal_position, reposition_speed * delta)
+
 	if is_local_camera:
 		reticle.expand_mode = 1
 		reticle.size = Vector2.ONE * 4	
 		reticle.position = get_center_of_screen() - reticle.size / 2.0
-		
-	HORIZONTAL_SENSITIVITY = 0.002 if humanoid.REACHING else 0.004
-	var verticality = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI).dot(Vector3.UP)
-	var draw_offset : Vector3 = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * DRAW_STRENGTH
-	var rise_offset : Vector3 = Vector3.UP * RISE_STRANGTH * (1.0 - verticality) * VERT_STRENGTH
-	var base_position : Vector3 = humanoid.bone_position('lowerBody')
-	var pan_offset = (humanoid.bone_position('chin') - base_position) * Vector3(PAN_STRENGTH, 0, PAN_STRENGTH)
-	position = base_position + draw_offset + rise_offset + pan_offset 
-
-	print(verticality)
 	
 	if force.action == force.Action.inert:
 		Locked = false	
@@ -55,12 +56,14 @@ func _process(_delta):
 		Locked = true		
 	elif force.action == force.Action.cooldown:
 		Locked = false
-
+		
+	reticle.visible = is_local_camera and force.action != force.Action.inert
 
 func rotate_by_relative_delta(relative_delta):
 	
 	if Locked:
 		pass
+		
 	else:
 		rotate_y(-relative_delta.x * HORIZONTAL_SENSITIVITY )
 		rotate_object_local(Vector3(1,0,0), -relative_delta.y * VERTICAL_SENSATIVITY)
@@ -78,4 +81,30 @@ func get_center_of_screen():
 	screenCenter.x = snapped(screenCenter.x, 1)
 	screenCenter.y = snapped(screenCenter.y, 1)
 	return screenCenter
+	
+	
+func corrected_draw(pivot_position) -> Vector3:
+	
+	var standard_draw : Vector3 = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * DRAW_STRENGTH 
+	var obstruction : Dictionary = get_obstruction(pivot_position, pivot_position+standard_draw)
+	
+	if obstruction.size() > 0:
+		var collision_position : Vector3 = humanoid.to_local(obstruction['position'])
+		var collision_draw : Vector3 = collision_position - pivot_position		
+		return standard_draw.move_toward(collision_draw, 0.75)
+				
+	return standard_draw
+	
+
+func get_obstruction(pivot_position, draw_position) -> Dictionary:
+	
+	var space_state = get_world_3d().direct_space_state
+	var query : PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
+	query.from = humanoid.to_global(pivot_position)
+	query.to = humanoid.to_global(draw_position)
+	query.collision_mask = 0b0001
+	query.exclude = [self, humanoid]
+	
+	var result = space_state.intersect_ray(query)
+	return result
 	
