@@ -4642,6 +4642,8 @@ bone_name = "lowerBody"
 transform = Transform3D(1, -1.40954e-12, 1.42109e-14, -2.66454e-15, 1, 0, 0, 0, 1, -1.45301e-08, 0.100939, 0.00135406)
 shape = SubResource("SphereShape3D_cpdqq")
 
+[node name="StateRectifier" parent="Skeleton3D/Ragdoll/Physical Bone lowerBody" instance=ExtResource("16_vrifw")]
+
 [node name="Physical Bone upperBody" type="PhysicalBone3D" parent="Skeleton3D/Ragdoll"]
 transform = Transform3D(1, -1.20556e-08, 1.17365e-08, 1.17361e-08, 0.999639, 0.0268508, -1.20559e-08, -0.0268508, 0.999639, 7.81696e-05, 1.14651, -0.0204405)
 collision_layer = 4

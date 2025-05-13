@@ -101,9 +101,9 @@ func detected_input_change(inputs) -> bool:
 	return false
 	
 	
-func update_recovery_minigame_difficulty():
+func update_recovery_minigame_difficulty(rollback):
 	
-	var ragdoll_speed = humanoid.find_child("*lowerBody", true, false).linear_velocity.length()	
+	var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_velocity(rollback)
 	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)	
 		
 	
@@ -191,7 +191,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 			humanoid.double_jump.rpc()
 	
 	if just_pressed('recover', inputs): 
-		update_recovery_minigame_difficulty()
+		update_recovery_minigame_difficulty(rollback_lag)
 		recovery_minigame.attempt_early_recovery(timestamp)
 			
 	if just_pressed('secondary', inputs):

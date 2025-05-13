@@ -53,6 +53,7 @@ const Lunge_max_traversal = 6
 @onready var synchronizer = $MultiplayerSynchronizer
 @onready var unlagger = $LagCompensator
 @onready var rectifier = $StateRectifier
+@onready var ragdoll_rectifier = $"Skeleton3D/Ragdoll/Physical Bone lowerBody/StateRectifier"
 
 var multiplayer_permissive = false
 

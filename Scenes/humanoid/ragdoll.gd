@@ -1,13 +1,15 @@
 extends Skeleton3D
 
-@export var RAGDOLLED = false
+const MAX_VELOCITY = 100
+const MAX_DISPLACEMENT = 5.0
+const MAX_ANGULAR_DISPLACEMENT = 2 * PI
+const perfect_match = true
 
+@export var RAGDOLLED = false
 @export var LINEAR_STIFFNESS = 500.0
 @export var LINEAR_DAMPING = 40.0
-
 @export var ANGULAR_STIFFNESS = 800.0
 @export var ANGULAR_DAMPING = 80.0
-
 @export var head_displacement = 0.0
 
 var bone_modifiers = {
@@ -30,18 +32,10 @@ var bone_modifiers = {
 
 @onready var Animated_Skeleton : Skeleton3D = get_parent()
 @onready var rootBone = $"Physical Bone lowerBody"
-
 @onready var physicalBones : Array = []
 @onready var mockBoneIndices = []
-
 @onready var slappy_foot_left = $"Physical Bone foot_l/SlappyFoot"
 @onready var slappy_foot_right = $"Physical Bone foot_r/SlappyFoot"
-
-const MAX_VELOCITY = 100
-const MAX_DISPLACEMENT = 5.0
-const MAX_ANGULAR_DISPLACEMENT = 2 * PI
-
-const perfect_match = true
 
 var correct_physical_bones_trigger
 
@@ -86,8 +80,7 @@ func animate_physical_bones(delta):
 			var lin_stiff = LINEAR_STIFFNESS * bone_modifier
 			var lin_damp = LINEAR_DAMPING * bone_modifier
 			var linear_force = hookes_law(lin_stiff, linear_displacement, lin_damp, physical_bone.linear_velocity)
-			physical_bone.linear_velocity += linear_force * delta
-			
+			physical_bone.linear_velocity += linear_force * delta		
 			var ang_stiff = ANGULAR_STIFFNESS * bone_modifier
 			var ang_damp = ANGULAR_DAMPING * bone_modifier
 			var ang_vel = physical_bone.angular_velocity
@@ -154,7 +147,9 @@ func instantly_match_animated_bone(boneIndex):
 		
 			
 func reset_skeleton():
+	
 	correct_physical_bones_trigger = true
+	
 	for index in range(0, get_bone_count()-1):
 		instantly_match_animated_bone(index)
 		
@@ -171,6 +166,7 @@ func sync_loose_bones():
 	
 	if not multiplayer.has_multiplayer_peer():
 		pass
+		
 	elif not is_multiplayer_authority():
 		return
 	

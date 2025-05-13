@@ -30,8 +30,6 @@ func _physics_process(delta):
 		previous_velocities.pop_front()
 		previous_state_ages.pop_front()
 	
-	#previous_transforms.append(parent_state(PhysicsServer3D.BODY_STATE_TRANSFORM))
-	#previous_velocities.append(parent_state(PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY))
 	previous_transforms.append(get_parent().transform)
 	previous_velocities.append(get_parent().linear_velocity)
 	previous_state_ages.append(0)
