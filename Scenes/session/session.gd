@@ -76,11 +76,13 @@ func _physics_process(delta):
 	elif not is_multiplayer_authority():
 		return	
 		
+	if Round >= Games.size():
+		return
+		
 	HUD.Scores = Games[Round].Scores
 	HUD.Goal = Games[Round].Goal
 	
 	if State == SessionState.Lobby:
-		
 		pass
 		
 	elif Games[Round].State == Games[Round].GameState.starting:	

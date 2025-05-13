@@ -2,9 +2,10 @@ extends Camera3D
 
 const MAX_ANGLE = PI/2.3
 const DRAW_STRENGTH = -2.5
-const RISE_STRENGTH = 1.25
+const RISE_STRENGTH = 1.0
 const PAN_STRENGTH = 1.5
-const VERT_STRENGTH = 0.5
+const VERT_STRENGTH = 0.25
+const REPO_STRENGTH = 15
 
 @export var Locked = false
 
@@ -19,6 +20,13 @@ var goal_position : Vector3 = Vector3.ZERO
 var VERTICAL_SENSATIVITY = 0.005
 var HORIZONTAL_SENSITIVITY = 0.005
 var is_local_camera = false
+var reposition_speed : float 
+var draw_offset : Vector3
+var base_position : Vector3
+var verticality : float 
+var rise_offset : Vector3 
+var pan_offset : Vector3
+var pivot_position : Vector3
 
 func _ready():
 
@@ -32,17 +40,25 @@ func _physics_process(delta):
 	
 	HORIZONTAL_SENSITIVITY = 0.002 if humanoid.REACHING else 0.004	
 
-	var verticality = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI).dot(Vector3.UP)
-	var rise_offset : Vector3 = Vector3.UP * RISE_STRENGTH * (1.0 - verticality) * VERT_STRENGTH	
-	var base_position : Vector3 = humanoid.bone_position('lowerBody')
-	var pan_offset = (humanoid.bone_position('chin') - base_position) * Vector3(PAN_STRENGTH, 0, PAN_STRENGTH)
-	var pivot_position = base_position + rise_offset + pan_offset
-	
-	#draw the camera back then adjust for any detected collisions
-	var draw_offset = corrected_draw(pivot_position)
-	
-	goal_position = pivot_position + draw_offset
-	var reposition_speed : float = position.distance_to(goal_position) * 15
+	if humanoid.REACHING:
+		base_position = humanoid.bone_position('lowerBody')
+		pan_offset = (humanoid.bone_position('chin') - base_position)
+		pivot_position = base_position + pan_offset
+		draw_offset = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * 0.15
+		goal_position = pivot_position + draw_offset
+		reposition_speed = position.distance_to(goal_position) * 25
+		
+	else:		
+		verticality = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI).dot(Vector3.UP)
+		rise_offset = Vector3.UP.move_toward(Vector3.ZERO, (verticality) * VERT_STRENGTH) * RISE_STRENGTH	
+		base_position = humanoid.bone_position('lowerBody')
+		pan_offset = (humanoid.bone_position('chin') - base_position) * Vector3(PAN_STRENGTH, 0, PAN_STRENGTH)
+		pivot_position = base_position + rise_offset + pan_offset	
+		#draw the camera back then adjust for any detected collisions
+		draw_offset = corrected_draw(pivot_position)	
+		goal_position = pivot_position + draw_offset	
+		reposition_speed = position.distance_to(goal_position) * 15
+		
 	position = position.move_toward(goal_position, reposition_speed * delta)
 
 	if is_local_camera:
@@ -91,7 +107,8 @@ func corrected_draw(pivot_position) -> Vector3:
 	if obstruction.size() > 0:
 		var collision_position : Vector3 = humanoid.to_local(obstruction['position'])
 		var collision_draw : Vector3 = collision_position - pivot_position		
-		return standard_draw.move_toward(collision_draw, 0.75)
+		return collision_draw
+		return standard_draw.move_toward(collision_draw, 1.0)
 				
 	return standard_draw
 	

@@ -16,7 +16,6 @@ resource_name = "Compressor"
 
 [sub_resource type="AudioEffectChorus" id="AudioEffectChorus_edlpp"]
 resource_name = "Chorus"
-wet = 0.25
 
 [sub_resource type="AudioEffectPhaser" id="AudioEffectPhaser_3f3i7"]
 resource_name = "Phaser"
@@ -57,7 +56,7 @@ bus/4/name = &"muzic"
 bus/4/solo = false
 bus/4/mute = false
 bus/4/bypass_fx = false
-bus/4/volume_db = 0.0
+bus/4/volume_db = -11.9576
 bus/4/send = &"Master"
 bus/4/effect/0/effect = SubResource("AudioEffectCompressor_4rqj5")
 bus/4/effect/0/enabled = true

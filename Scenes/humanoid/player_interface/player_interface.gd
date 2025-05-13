@@ -101,6 +101,12 @@ func detected_input_change(inputs) -> bool:
 	return false
 	
 	
+func update_recovery_minigame_difficulty():
+	
+	var ragdoll_speed = humanoid.find_child("*lowerBody", true, false).linear_velocity.length()	
+	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)	
+		
+	
 func handle_ragdoll(_humanoid):
 	
 	if is_local_interface:
@@ -130,7 +136,7 @@ func attempt_lunge_at_target(target):
 			
 		elif target.is_in_group("humanoids"):
 			humanoid.lunge.rpc(target.get_path())
-			
+	
 	
 @rpc("any_peer", "call_local", "unreliable_ordered")
 func rpc_update_Continuous_inputs(inputs, timestamp):
@@ -164,8 +170,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	if not is_multiplayer_authority():
 		return
 		
-	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
-	
+	var rollback_lag = Time.get_unix_time_from_system() - timestamp		
 	var action_committed = false
 	
 	for key in inputs.keys():
@@ -186,7 +191,8 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 			humanoid.double_jump.rpc()
 	
 	if just_pressed('recover', inputs): 
-		recovery_minigame.attempt_early_recovery(rollback_lag)
+		update_recovery_minigame_difficulty()
+		recovery_minigame.attempt_early_recovery(timestamp)
 			
 	if just_pressed('secondary', inputs):
 		

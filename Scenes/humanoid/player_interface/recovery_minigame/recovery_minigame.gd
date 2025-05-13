@@ -5,13 +5,9 @@ extends Control
 @onready var target = $Target
 @onready var lever = $Lever
 
-@onready var net_sync = $CustomSync
-@onready var unlagger = $LagCompensator
 
 var progress = 0.0
 var difficulty = 1.0
-
-var lever_phase = 0.0
 var locked = false
 
 signal succeeded 
@@ -21,30 +17,24 @@ signal failed
 func _ready():
 	
 	visible = false
-	net_sync.get_net_var_delegate = get_net_vars
-	net_sync.synced.connect(unlagger.reset)
-	unlagger.max_rectification_scalar = 1.2
 
 
 func _process(delta):
-	
-	delta *= unlagger.delta_scalar(delta)
-	lever_phase += delta * difficulty	
 	
 	if progress >= 1.0:
 		early_succeed()
 
 	target.visible = not locked
 	lever.visible = not locked
-	
+
 	var total_length = backdrop.size.x
 	var total_position = backdrop.position.x
 	fill.size.x = total_length * progress
 	fill.position.x = total_position * progress
 	
-	lever.position.x = sin(lever_phase) * total_length / 2.0
+	lever.position.x = sin(Time.get_unix_time_from_system()) * total_length / 2.0
 	
-	if lever_on_target(lever_phase):
+	if lever_on_target(Time.get_unix_time_from_system()):
 		target.color = Color('ffc354')
 	else:
 		target.color = Color('b98457')
@@ -56,24 +46,24 @@ func start_game():
 	locked = false
 			
 			
-func lever_on_target(phase):
+func lever_on_target(timestamp):
 	
-	var simulated_position = sin(phase) * backdrop.size.x / 2.0
+	target.size.x = 100 / difficulty
+	target.position.x = -50 / difficulty
+	var simulated_position = sin(timestamp) * backdrop.size.x / 2.0
 	return abs(simulated_position) <= target.size.x / 2.0
 	
 	
-func attempt_early_recovery(lever_phase_lag_offset):
+func attempt_early_recovery(unix_time):
 	
 	if not is_multiplayer_authority():
 		return
 	elif locked: 
 		early_fail.rpc()	
-	elif lever_on_target(lever_phase - lever_phase_lag_offset):
+	elif lever_on_target(unix_time):
 		early_succeed.rpc()		
 	else:
 		early_fail.rpc()
-	
-	net_sync.force_sync()
 		
 		
 @rpc("authority", "call_local")
@@ -90,9 +80,3 @@ func early_fail():
 	locked = true
 	failed.emit()
 	
-	
-func get_net_vars():
-	
-	var net_vars = {}
-	net_vars["lever_phase"] = lever_phase
-	return net_vars

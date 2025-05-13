@@ -1,18 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://dgdro4aicbogg"]
+[gd_scene load_steps=2 format=3 uid="uid://dgdro4aicbogg"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/player_interface/recovery_minigame/recovery_minigame.gd" id="1_f05lj"]
-[ext_resource type="PackedScene" uid="uid://bli473c2dcgmy" path="res://Scenes/components/custom_sync/custom_sync.tscn" id="2_iuvrm"]
-[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="2_qxui2"]
 
 [node name="RecoveryMinigame" type="Control"]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 3
-anchors_preset = 8
+anchors_preset = 7
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 0.5
+anchor_bottom = 1.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
 script = ExtResource("1_f05lj")
 
 [node name="BackDrop" type="ColorRect" parent="."]
@@ -35,9 +34,9 @@ color = Color(0.725125, 0, 0.342341, 1)
 
 [node name="Target" type="ColorRect" parent="."]
 layout_mode = 2
-offset_left = -25.0
+offset_left = -15.0
 offset_top = -2.0
-offset_right = 25.0
+offset_right = 15.0
 offset_bottom = 6.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -73,7 +72,3 @@ offset_right = 5.0
 offset_bottom = 17.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
-
-[node name="CustomSync" parent="." instance=ExtResource("2_iuvrm")]
-
-[node name="LagCompensator" parent="." instance=ExtResource("2_qxui2")]
