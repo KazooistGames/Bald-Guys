@@ -103,7 +103,7 @@ func detected_input_change(inputs) -> bool:
 	
 func update_recovery_minigame_difficulty(rollback):
 	
-	var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_velocity(rollback)
+	var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_velocity(rollback).length()
 	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)	
 		
 	

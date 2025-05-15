@@ -1,5 +1,7 @@
 extends Control
 
+const lever_speed = 2.0
+
 @onready var fill = $Fill
 @onready var backdrop = $BackDrop
 @onready var target = $Target
@@ -26,13 +28,15 @@ func _process(delta):
 
 	target.visible = not locked
 	lever.visible = not locked
+	target.size.x = 150 / difficulty
+	target.position.x = -target.size.x/2.0
 
 	var total_length = backdrop.size.x
 	var total_position = backdrop.position.x
 	fill.size.x = total_length * progress
 	fill.position.x = total_position * progress
 	
-	lever.position.x = sin(Time.get_unix_time_from_system()) * total_length / 2.0
+	lever.position.x = sin(lever_speed * Time.get_unix_time_from_system()) * total_length / 2.0
 	
 	if lever_on_target(Time.get_unix_time_from_system()):
 		target.color = Color('ffc354')
@@ -48,9 +52,7 @@ func start_game():
 			
 func lever_on_target(timestamp):
 	
-	target.size.x = 100 / difficulty
-	target.position.x = -50 / difficulty
-	var simulated_position = sin(timestamp) * backdrop.size.x / 2.0
+	var simulated_position = sin(lever_speed * timestamp) * backdrop.size.x / 2.0
 	return abs(simulated_position) <= target.size.x / 2.0
 	
 	
