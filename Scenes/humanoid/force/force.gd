@@ -1,21 +1,20 @@
 extends Area3D
 
-
 const hold_force = 8000.0	
 const throw_force = 750.0
 const push_force = 200.0
 const ragdoll_radius = 2.0
-
 const grow_radius = 0.75
 const grow_height = 1.5
 const render_scale = 0.75
-
 const LOW_VOLUME = -30.0
+const max_charge_duration = 0.75
+const min_charge_duration = 0.25
 
 enum Action {
 	inert = 0,
 	holding = 1,
-	charging = 2,	
+	charging = 2,
 	cooldown = -1,
 }
 
@@ -33,20 +32,16 @@ enum Action {
 @onready var unlagger = $LagCompensator
 
 var contained_bodies = []
-
-var charge_period = 0.25
+var charge_period = 1.0
 var charge_timer = 0.0
-
-var cooldown_period = 0.75
+var cooldown_period = 0.5
 var cooldown_timer = 0.0
-
 var offset = 1.25
 var target_position
-
 var material;
-
 var multiplayer_permissive = false
 
+signal released_charge(float)
 
 func _ready():
 	
@@ -99,9 +94,9 @@ func _physics_process(delta):
 			
 	elif action == Action.charging:
 
-		charge_timer += delta
-		var progress = pow(clamp(charge_timer/charge_period, 0.0, 1.0), 3.0)
-		
+		charge_timer = clamp(charge_timer + delta, 0.0, charge_period)
+		var progress = charge_timer / charge_period
+		#print(progress)
 		if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
 			collider.shape.radius = lerp(0.0, 1.0, progress)
 			collider.shape.height = lerp(0.0, 2.0, progress)
@@ -111,8 +106,9 @@ func _physics_process(delta):
 
 		if not multiplayer_permissive:
 			pass	
+			
 		elif progress >= 1.0:
-			rpc_trigger.rpc()
+			rpc_release.rpc()
 		
 	elif action == Action.inert:	
 		
@@ -149,6 +145,7 @@ func _physics_process(delta):
 		
 		if not multiplayer_permissive:
 			pass	
+			
 		elif cooldown_timer >= cooldown_period:
 			rpc_reset.rpc()
 		
@@ -160,7 +157,7 @@ func rpc_primary():
 	
 	if action != Action.inert:
 		return
-				
+						
 	mesh.visible = true	
 	collision_mask = 14
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
@@ -174,7 +171,8 @@ func rpc_primary():
 	material.set_shader_parameter("transparency", 0.05)
 	material.set_shader_parameter("color", Vector3(1., 0., 1.))
 	action = Action.charging
-
+	charge_period = max_charge_duration
+	
 
 @rpc("call_local", "reliable")
 func rpc_secondary():
@@ -230,9 +228,6 @@ func rpc_trigger():
 			rpc_throw_object.rpc(node.get_path())
 			
 	elif action == Action.charging:
-
-		if charge_timer < charge_period:
-			return
 		
 		for node in contained_bodies:
 			rpc_push_object.rpc(node.get_path())
@@ -247,6 +242,24 @@ func rpc_trigger():
 	hum.volume_db = LOW_VOLUME
 	cooldown_timer = 0.0
 	action = Action.cooldown
+
+
+@rpc("call_local", "reliable")
+func rpc_release():
+		
+	if not is_multiplayer_authority():
+		pass
+		
+	elif action != Action.charging:
+		pass
+		
+	elif charge_timer < min_charge_duration:
+		charge_period = min_charge_duration
+		
+	else:
+		charge_period = charge_timer
+		released_charge.emit(charge_timer)
+		return
 	
 
 @rpc("call_local", "reliable")

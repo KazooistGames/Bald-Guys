@@ -6,9 +6,20 @@ const RISE_STRENGTH = 1.0
 const PAN_STRENGTH = 1.5
 const VERT_STRENGTH = 0.25
 const REPO_STRENGTH = 15
+const zoom_deadband = 0.25
 
 @export var Locked = false
-
+@export var Zoomed = false :
+	get:
+		return Zoomed
+	set(value):
+		if value == Zoomed:
+			zoom_debounce = 0.0
+		elif zoom_debounce >= zoom_deadband or value:
+			Zoomed = value
+		else:
+			zoom_debounce += get_physics_process_delta_time()
+		
 @onready var reticle = $reticle
 @onready var raycast = $RayCast3D
 @onready var shapecast = $ShapeCast3D
@@ -27,6 +38,7 @@ var verticality : float
 var rise_offset : Vector3 
 var pan_offset : Vector3
 var pivot_position : Vector3
+var zoom_debounce = 0.0
 
 func _ready():
 
@@ -38,15 +50,29 @@ func _ready():
 	
 func _physics_process(delta):
 	
-	HORIZONTAL_SENSITIVITY = 0.002 if humanoid.REACHING else 0.004	
-
-	if humanoid.REACHING:
+	if is_local_camera:
+		reticle.expand_mode = 1
+		reticle.size = Vector2.ONE * 4	
+		reticle.position = get_center_of_screen() - reticle.size / 2.0
+	
+	Locked = humanoid.LUNGING	
+	Zoomed = force.action != force.Action.inert
+	HORIZONTAL_SENSITIVITY = 0.002 if Zoomed else 0.004	
+	reticle.visible = is_local_camera and Zoomed	
+	
+	if Zoomed:
+		var deadbanded = position == goal_position
 		base_position = humanoid.bone_position('lowerBody')
 		pan_offset = (humanoid.bone_position('chin') - base_position)
 		pivot_position = base_position + pan_offset
 		draw_offset = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * 0.15
 		goal_position = pivot_position + draw_offset
-		reposition_speed = position.distance_to(goal_position) * 25
+		reposition_speed = 20
+		
+		if deadbanded:
+			position = goal_position
+		else:
+			position = position.move_toward(goal_position, reposition_speed * delta)
 		
 	else:		
 		verticality = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI).dot(Vector3.UP)
@@ -58,22 +84,8 @@ func _physics_process(delta):
 		draw_offset = corrected_draw(pivot_position)	
 		goal_position = pivot_position + draw_offset	
 		reposition_speed = position.distance_to(goal_position) * 15
-		
-	position = position.move_toward(goal_position, reposition_speed * delta)
-
-	if is_local_camera:
-		reticle.expand_mode = 1
-		reticle.size = Vector2.ONE * 4	
-		reticle.position = get_center_of_screen() - reticle.size / 2.0
+		position = position.move_toward(goal_position, reposition_speed * delta)
 	
-	if force.action == force.Action.inert:
-		Locked = false	
-	elif force.action == force.Action.charging:
-		Locked = true		
-	elif force.action == force.Action.cooldown:
-		Locked = false
-		
-	reticle.visible = is_local_camera and force.action != force.Action.inert
 
 func rotate_by_relative_delta(relative_delta):
 	

@@ -125,17 +125,17 @@ func handle_early_recovery():
 		humanoid.ragdoll_recovery_progress = 1.0
 
 
-func attempt_lunge_at_target(target):
-	
-	if target != null:
-		var disposition = target.global_position - humanoid.global_position
-		var distance = disposition.length()
-		
-		if distance > 3.5:
-			pass
-			
-		elif target.is_in_group("humanoids"):
-			humanoid.lunge.rpc(target.get_path())
+#func attempt_lunge_at_target(target):
+	#
+	#if target != null:
+		#var disposition = target.global_position - humanoid.global_position
+		#var distance = disposition.length()
+		#
+		#if distance > 3.5:
+			#pass
+			#
+		#elif target.is_in_group("humanoids"):
+			#humanoid.lunge.rpc(target.get_path())
 	
 	
 @rpc("any_peer", "call_local", "unreliable_ordered")
@@ -215,7 +215,9 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 			
 		else:
 			force.rpc_primary.rpc()
-			attempt_lunge_at_target(targeted_object)
+
+	elif just_released('primary', inputs):	
+		force.rpc_release.rpc()
 		
 	if action_committed: #PREDICT
 		humanoid.predict(rollback_lag)

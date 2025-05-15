@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3 uid="uid://bplpok0vdxb3l"]
+[gd_scene load_steps=49 format=3 uid="uid://bplpok0vdxb3l"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/humanoid.gd" id="1_omd7n"]
 [ext_resource type="PackedScene" uid="uid://6df6up57x4jw" path="res://Scenes/components/physics_sync/physics_sync.tscn" id="2_jteu5"]
@@ -14,7 +14,6 @@
 [ext_resource type="AudioStream" uid="uid://bwlo06x8jfil" path="res://audio/punch.mp3" id="11_neikv"]
 [ext_resource type="PackedScene" uid="uid://bg13x1s1aib1u" path="res://Scenes/humanoid/force/force.tscn" id="13_uhqou"]
 [ext_resource type="PackedScene" uid="uid://jdvdhg8sqgv1" path="res://Scenes/humanoid/player_interface/player_interface.tscn" id="15_vslm3"]
-[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="16_kptge"]
 [ext_resource type="PackedScene" uid="uid://yduju68nnoqu" path="res://Scenes/components/state_rectifier/state_rectifier.tscn" id="16_vrifw"]
 [ext_resource type="PackedScene" uid="uid://hshq8ksyaw22" path="res://Scenes/humanoid/cameras/3rd_Camera.tscn" id="17_hksxe"]
 
@@ -35,6 +34,9 @@ properties/2/replication_mode = 2
 properties/3/path = NodePath(".:constant_force")
 properties/3/spawn = true
 properties/3/replication_mode = 2
+properties/4/path = NodePath(".:LUNGING")
+properties/4/spawn = true
+properties/4/replication_mode = 1
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_26vqe"]
 resource_local_to_scene = true
@@ -3724,8 +3726,6 @@ lerp_val = 0.1
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_0d5cw")
-
-[node name="LagCompensator" parent="." instance=ExtResource("16_kptge")]
 
 [node name="StateRectifier" parent="." instance=ExtResource("16_vrifw")]
 

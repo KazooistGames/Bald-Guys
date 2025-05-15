@@ -2,10 +2,7 @@ extends RigidBody3D
 
 const floor_normal = Vector3(0, 1, 0)
 const floor_dot_product = 1.0 / 2.0
-
-const Lunge_Deadband = 0.75
-const Lunge_Speed = 15
-const Lunge_max_traversal = 6
+const Lunge_Speed = 40
 
 @export var SKIN_COLOR : Color:
 	
@@ -19,39 +16,31 @@ const Lunge_max_traversal = 6
 		material.albedo_color = value
 		model.set_surface_override_material(0, material)
 	
+@export var LUNGING = false
 @export var RAGDOLLED = false
 @export var ON_FLOOR = true
 @export var REACHING = 0
-
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
-	
 @export var FACING_VECTOR = Vector3(0,0,0)
 @export var SPEED_GEARS = Vector2(3.0, 7.0)
 @export var JUMP_SPEED = 5.5
 @export var RUNNING = false
 @export var DOUBLE_JUMP_CHARGES = 1
-
 @export var floor_velocity = Vector3(0,0,0)
 @export var walk_velocity = Vector3.ZERO
 
 @onready var skeleton = $Skeleton3D
 @onready var animation = $AnimationTree
-
 @onready var leg_collider = $CollisionShapeLegs
 @onready var chest_collider = $CollisionShapeChest
 @onready var head_collider = $CollisionShapeHead
-
 @onready var floorcast = $FloorCast3D
-
 @onready var boofFX = $RagdollAudio
 @onready var impactFX = $StaticImpactAudio
 @onready var jumpFX = $JumpAudio
-
 @onready var force = $Force
-
 @onready var synchronizer = $MultiplayerSynchronizer
-@onready var unlagger = $LagCompensator
 @onready var rectifier = $StateRectifier
 @onready var ragdoll_rectifier = $"Skeleton3D/Ragdoll/Physical Bone lowerBody/StateRectifier"
 
@@ -79,10 +68,8 @@ var cached_floor_pos = Vector3.ZERO
 var just_jumped_timer = 0.0
 var just_jumped_period = 1.0/3.0
 
-var Lunging = false
-var Lunge_Target : Node3D 
-var lunge_target_last_position = Vector3.ZERO
-var lunge_total_traversal
+var lunge_timer = 0.0
+var lunge_duration = 1.0
 
 var depen_query : PhysicsShapeQueryParameters3D
 
@@ -107,12 +94,12 @@ func _ready():
 	
 	if is_multiplayer_authority(): 
 		getRandomSkinTone()
-		unlagger.max_rectification_scalar = 1.2
-		
+	
 	depen_query = PhysicsShapeQueryParameters3D.new()	
 	depen_query.collision_mask = 0b0001		
 	depen_query.exclude = [get_rid(), self.get_parent_node_3d()]
 	
+	force.released_charge.connect(lunge)
 
 func _process(_delta):
 	
@@ -269,7 +256,7 @@ func _physics_process(delta):
 					
 	if RAGDOLLED:
 		skeleton.processRagdollOrientation(delta)
-		Lunging = false
+		LUNGING = false
 						
 	elif ON_FLOOR:
 		
@@ -335,33 +322,15 @@ func step_movement(delta):
 	constant_force = floor_velocity * mass	
 	walk_velocity = linear_velocity - floor_velocity
 
-	if Lunging: 
+	if LUNGING: 
+		lunge_timer += delta
 		
-		if Lunge_Target == null:	
-				
-			if multiplayer_permissive:
-				unlunge.rpc()
-				
-			return
-			
-		lunge_total_traversal += linear_velocity.length() * delta
-		var lunge_expired = lunge_total_traversal >= Lunge_max_traversal
-		
-		if lunge_expired and multiplayer_permissive:
+		if lunge_timer >= lunge_duration:
 			unlunge.rpc()
-			
-		var disposition = Lunge_Target.global_position - global_position
-		var in_range = disposition.length() <= Lunge_Deadband
-		
-		if in_range and multiplayer_permissive:
-			unlunge.rpc()
-			
+			force.rpc_trigger.rpc()
 		else:
-			var deadband_next_frame_stepsize = (disposition.length() - Lunge_Deadband) / delta
-			var intercept_position = Lunge_Target.global_position + Lunge_Target.linear_velocity * delta
-			var intercept_route = (intercept_position - global_position).normalized()
-			linear_velocity = intercept_route * min(Lunge_Speed, deadband_next_frame_stepsize * 1.1)
-			
+			linear_velocity = force.Aim.normalized() * Lunge_Speed
+
 	else:	
 		var transversal_walk_target
 		var walk_speed = TOPSPEED * TOPSPEED_MOD
@@ -475,7 +444,8 @@ func ragdoll(velocity_override = Vector3.ZERO):
 		else:
 			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
 			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = linear_velocity
-			
+		
+		unlunge()
 		ragdolled.emit(self)
 		skeleton.ragdoll_start()
 		ragdoll_recovery_progress = 0.0
@@ -512,35 +482,34 @@ func unragdoll(use_skeleton_position : bool = true):
 
 
 @rpc("call_local", "reliable")
-func lunge(target_node_path):
+func lunge(duration):
 	
-	var target_node = get_node(target_node_path)
-	
-	if target_node == null:
-		print("Null lunge target: " + target_node_path)
+	if LUNGING:
 		return
+		
+	var charge_to_lunge_ratio = 3.0
+	lunge_duration = duration/charge_to_lunge_ratio
+	lunge_timer = 0.0
 	
+
 	if ON_FLOOR:
 		ON_FLOOR = false
 		coyote_timer = coyote_duration
 		reverse_coyote_timer = 0.0
 		floorcast.enabled = false
 	
-	leg_collider.disabled = true
-	Lunge_Target = target_node
-	lunge_target_last_position = Lunge_Target.global_position
-	lunge_total_traversal = 0
-	Lunging = true
-	skeleton.lunge_start()
+	#leg_collider.disabled = true
+	LUNGING = true
+	#skeleton.lunge_start()
 	
 	
 @rpc("call_local", "reliable")
 func unlunge():	
 	
 	leg_collider.disabled = false
-	Lunging = false
-	linear_velocity = Vector3.ZERO
-	skeleton.lunge_stop()
+	LUNGING = false
+	linear_velocity = linear_velocity/5
+	#skeleton.lunge_stop()
 
 
 @rpc("call_local", "reliable")
