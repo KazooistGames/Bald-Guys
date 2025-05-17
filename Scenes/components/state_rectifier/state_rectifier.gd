@@ -8,9 +8,9 @@ const debug = false
 
 @onready var parent = get_parent()
 
-var previous_transforms : Array = []
-var previous_velocities : Array = []
-var previous_state_ages : Array = []
+var previous_transforms : Array[Transform3D] = []
+var previous_velocities : Array[Vector3] = []
+var previous_state_ages : Array[float] = []
 	
 
 func _physics_process(delta):
@@ -30,8 +30,11 @@ func _physics_process(delta):
 		previous_velocities.pop_front()
 		previous_state_ages.pop_front()
 	
-	previous_transforms.append(get_parent().transform)
-	previous_velocities.append(get_parent().linear_velocity)
+	previous_transforms.append(parent.transform)
+	
+	if parent is RigidBody3D:
+		previous_velocities.append(parent.linear_velocity)
+		
 	previous_state_ages.append(0)
 	
 	
@@ -45,10 +48,13 @@ func cache(age = 0):
 func perform_rollback(time_to_rollback):
 	
 	var index = get_rollback_index(time_to_rollback)
-	var rollback_velocity =  previous_velocities[index]
 	var rollback_transform =  previous_transforms[index]
-	parent.linear_velocity = rollback_velocity
 	parent.transform = rollback_transform
+	
+	if parent is RigidBody3D:
+		var rollback_velocity =  previous_velocities[index]
+		parent.linear_velocity = rollback_velocity
+
 	invalidate_cache_array(index)
 
 
@@ -104,8 +110,11 @@ func get_rollback_index(time_to_rollback):
 	return target_index
 
 
-func get_rollback_velocity(time_to_rollback):
+func get_rollback_velocity(time_to_rollback) -> Vector3:
 	
+	if not parent is RigidBody3D:
+		return Vector3.ZERO
+		
 	var index = get_rollback_index(time_to_rollback)
 	return previous_velocities[index]
 
@@ -121,7 +130,9 @@ func invalidate_cache_array(cutoff_index):
 	#print("invalidated cache at index ", cutoff_index, ", newer than ", previous_state_ages[cutoff_index])
 	previous_state_ages = previous_state_ages.slice(0, cutoff_index)
 	previous_transforms = previous_transforms.slice(0, cutoff_index)
-	previous_velocities = previous_velocities.slice(0, cutoff_index)
+	
+	if parent is RigidBody3D:
+		previous_velocities = previous_velocities.slice(0, cutoff_index)
 	
 	
 func clear_old_data(cutoff_age):
@@ -132,9 +143,9 @@ func clear_old_data(cutoff_age):
 	previous_velocities = previous_velocities.slice(cutoff_index)
 	
 	
-func mock_cache(start_transform, velocity, time_span):
+func mock_cache(start_transform : Transform3D, velocity : Vector3, time_span : float) -> void:
 	
-	var delta = 1.0 / Engine.physics_ticks_per_second
+	var delta : float = 1.0 / Engine.physics_ticks_per_second
 	
 	while time_span > 0:
 		previous_transforms.append(start_transform)
@@ -144,8 +155,8 @@ func mock_cache(start_transform, velocity, time_span):
 		time_span -= delta
 
 
-func parent_state(state_enum):
+func parent_state(state_enum : PhysicsServer3D.BodyState) -> Transform3D:
 	
-	var rid = get_parent().get_rid()
-	var transform_state = PhysicsServer3D.body_get_state(rid, state_enum)
+	var rid : RID = get_parent().get_rid()
+	var transform_state : Transform3D = PhysicsServer3D.body_get_state(rid, state_enum)
 	return transform_state

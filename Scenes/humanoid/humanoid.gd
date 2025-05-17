@@ -3,6 +3,7 @@ extends RigidBody3D
 const floor_normal = Vector3(0, 1, 0)
 const floor_dot_product = 1.0 / 2.0
 const Lunge_Speed = 35
+const lunge_duration_scale = 5.0
 
 @export var SKIN_COLOR : Color:
 	
@@ -99,7 +100,7 @@ func _ready():
 	depen_query.collision_mask = 0b0001		
 	depen_query.exclude = [get_rid(), self.get_parent_node_3d()]
 	
-	force.released_charge.connect(lunge)
+	force.released_charge.connect(handle_force_charge_release)
 
 
 func _process(_delta):
@@ -182,6 +183,9 @@ func _integrate_forces(state):
 			if my_velocity.length() < relative_velocity.length():	
 				var kinetic_impulse = pow(relative_velocity.length(), 0.75)
 				impact *= kinetic_impulse
+			
+			if LUNGING:
+				impact = 0
 				
 		else: #unstoppable/immovable objects
 			pass
@@ -221,7 +225,8 @@ func _integrate_forces(state):
 			var impacter = state.get_contact_collider_object(index)
 			print(name, " knocked down by ", impacter)
 			something_big_happened = true
-			ragdoll.rpc(linear_velocity/5.0 if LUNGING else linear_velocity)
+			var lunge_speed_ratio = Lunge_Speed / SPEED_GEARS.y
+			ragdoll.rpc(linear_velocity/lunge_speed_ratio if LUNGING else linear_velocity)
 			
 		elif bumped:
 			bump.rpc(state.get_contact_impulse(index) / 1.6 / mass)
@@ -284,7 +289,7 @@ func _physics_process(delta):
 		leg_collider.shape.height = move_toward(leg_collider.shape.height, 1.3, scalar)
 		leg_collider.position.y = move_toward(leg_collider.position.y, .65, scalar)
 		floorcast.target_position.y = move_toward(floorcast.target_position.y, -1.1, scalar)
-		force.charge_armed = true
+		force.charge_ready = true
 		
 	else:
 		gravity_scale = 1.0
@@ -304,7 +309,6 @@ func _physics_process(delta):
 	chest_collider.position = chest_collider.transform.origin.slerp(upperBody.origin, 0.5)	
 	chest_collider.position += Vector3(0, 0.05, 0.0)
 	chest_collider.transform = chest_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
-
 	head_collider.position = skeleton.bone_transform("chin").origin
 	head_collider.rotation = skeleton.bone_rotation("head")
 	head_collider.transform = head_collider.transform.rotated(Vector3.UP, skeleton.rotation.y)
@@ -334,7 +338,7 @@ func step_movement(delta):
 	if LUNGING: 
 		lunge_timer += delta
 		
-		if lunge_timer >= lunge_duration:
+		if lunge_timer >= lunge_duration and is_multiplayer_authority():
 			unlunge.rpc()
 			force.rpc_trigger.rpc()
 		else:
@@ -358,7 +362,7 @@ func step_movement(delta):
 			transversal_walk_target = linear_velocity - floor_velocity
 			
 		var target_linear_velocity = transversal_walk_target + floor_velocity
-		target_linear_velocity.y = 0 if force.action == force.Action.charging else linear_velocity.y
+		target_linear_velocity.y = linear_velocity.y
 		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
 		
 	return linear_velocity * delta
@@ -492,8 +496,7 @@ func lunge(duration):
 	if LUNGING:
 		return
 		
-	var charge_to_lunge_ratio = 3.0
-	lunge_duration = duration/charge_to_lunge_ratio
+	lunge_duration = duration/lunge_duration_scale
 	lunge_timer = 0.0
 	DOUBLE_JUMP_CHARGES = 0
 
@@ -516,7 +519,8 @@ func unlunge():
 		
 	leg_collider.disabled = false
 	LUNGING = false
-	linear_velocity = linear_velocity/5.0
+	var ratio = Lunge_Speed / SPEED_GEARS.y
+	linear_velocity = linear_velocity/ratio
 	#skeleton.lunge_stop()
 
 
@@ -686,12 +690,18 @@ func audio_boof(db, pitch):
 	boofFX.pitch_scale = pitch
 	boofFX.play()
 	
+	
 func audio_impact(db, pitch):
 	impactFX.bus = "beef"
 	impactFX.volume_db = db
 	impactFX.pitch_scale = pitch
 	impactFX.play()	
 	
+	
 func audio_jump(pitch):
 	jumpFX.pitch_scale = pitch
 	jumpFX.play()	
+
+
+func handle_force_charge_release(charge_duration):
+	lunge.rpc(charge_duration)

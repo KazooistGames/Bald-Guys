@@ -8,8 +8,8 @@ const grow_radius = 0.75
 const grow_height = 1.5
 const render_scale = 0.75
 const LOW_VOLUME = -30.0
-const max_charge_duration = 0.75
-const min_charge_duration = 0.25
+const max_charge_duration = 1.0
+const min_charge_duration = 1.0/3.0
 
 enum Action {
 	inert = 0,
@@ -18,7 +18,8 @@ enum Action {
 	cooldown = -1,
 }
 
-@export var charge_armed = true
+@export var charge_armed = false
+@export var charge_ready = true
 @export var action = Action.inert
 @export var base_position = Vector3.ZERO
 @export var Aim = Vector3.ZERO
@@ -30,7 +31,7 @@ enum Action {
 @onready var mesh = $MeshInstance3D
 @onready var hum = $hum
 @onready var raycast = $RayCast3D
-@onready var unlagger = $LagCompensator
+@onready var rectifier = $StateRectifier
 
 var contained_bodies = []
 var charge_period = 1.0
@@ -41,6 +42,7 @@ var offset = 1.25
 var target_position
 var material;
 var multiplayer_permissive = false
+var push_ons : Array[Node3D] = []
 
 signal released_charge(float)
 
@@ -62,9 +64,14 @@ func _process(delta):
 		
 	mesh.mesh.radius = collider.shape.radius * render_scale
 	mesh.mesh.height = collider.shape.height * render_scale
-	mesh.rotate(Vector3.UP, delta * 0.9)
-	mesh.rotate(Vector3.FORWARD, delta)
-	mesh.rotate(Vector3.RIGHT, delta * 1.1)
+	
+	if action == Action.holding:
+		mesh.rotate(Vector3.UP, delta * 0.9)
+		mesh.rotate(Vector3.FORWARD, delta)
+		mesh.rotate(Vector3.RIGHT, delta * 1.1)
+		
+	elif action == Action.charging:
+		mesh.rotation = Vector3.FORWARD
 		
 
 func _physics_process(delta):
@@ -75,9 +82,6 @@ func _physics_process(delta):
 	material = mesh.get_surface_override_material(0)	
 	capture_bodies()
 	hum.stream_paused = action == Action.inert
-	
-	var scalar = unlagger.delta_scalar(delta)
-	delta *= scalar
 	
 	if action == Action.holding:
 		
@@ -100,8 +104,8 @@ func _physics_process(delta):
 		var progress = charge_timer / charge_period
 
 		if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
-			collider.shape.radius = lerp(0.0, 1.0, progress)
-			collider.shape.height = lerp(0.0, 2.0, progress)
+			collider.shape.radius = lerp(0.0, 1.5, charge_timer/max_charge_duration)
+			collider.shape.height = lerp(0.0, 3.0, charge_timer/max_charge_duration)
 			
 		#hum.volume_db = lerp(LOW_VOLUME, LOW_VOLUME / 1.5, progress)
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
@@ -111,6 +115,11 @@ func _physics_process(delta):
 			
 		elif progress >= 1.0:
 			rpc_release.rpc()
+			
+		if charge_armed:
+			
+			for node in contained_bodies:
+				rpc_push_object.rpc(node.get_path())
 		
 	elif action == Action.inert:	
 		
@@ -158,25 +167,27 @@ func rpc_primary():
 	
 	if action != Action.inert:
 		return
-	elif not charge_armed:
+	elif not charge_ready:
 		return
 				
-	charge_armed = false		
+	charge_ready = false		
 	mesh.visible = true	
 	collision_mask = 14
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
+	hum.bus = "beef"
 	hum.play()
 	charge_timer = 0	
-	unlagger.reset_full_duplex()
 	material.set_shader_parameter("glow_freq", 0.0)
 	material.set_shader_parameter("base_freq", 0.0)
 	material.set_shader_parameter("transparency", 0.05)
 	material.set_shader_parameter("color", Vector3(1., 0., 1.))
 	action = Action.charging
 	charge_period = max_charge_duration
-	
+	charge_armed = false
+	push_ons = []
+
 
 @rpc("call_local", "reliable")
 func rpc_secondary():
@@ -189,10 +200,10 @@ func rpc_secondary():
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
-	unlagger.reset_full_duplex()
 	hum.play()
 	hum.volume_db = LOW_VOLUME
 	hum.pitch_scale = 1.0
+	hum.bus = "phaser"
 	material.set_shader_parameter("glow_freq", PI)
 	material.set_shader_parameter("base_freq", 1.0 + 1.0/PI)
 	material.set_shader_parameter("transparency", 0.025)
@@ -240,7 +251,6 @@ func rpc_trigger():
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	angular_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED	
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
-	unlagger.reset_full_duplex()	
 	hum.bus = "beef"		
 	hum.play()
 	hum.volume_db = LOW_VOLUME
@@ -262,6 +272,7 @@ func rpc_release():
 		
 	else:
 		charge_period = charge_timer
+		charge_armed = true
 		released_charge.emit(charge_timer)
 		return
 	
@@ -283,17 +294,20 @@ func rpc_push_object(node_path):
 	var node = get_node(node_path)
 	
 	if !can_be_pushed(node):
-		pass
+		return
+	elif push_ons.has(node):
+		return
 		
-	elif node.is_in_group("humanoids"):
+	push_ons.append(node)	
+	if node.is_in_group("humanoids"):
 		
 		if multiplayer.get_unique_id() != node.get_multiplayer_authority():
 			return
 	
 		var disposition = node.global_position - get_parent().global_position
 		var direction = disposition.normalized().lerp(Vector3.UP, 0.15)
-		direction = direction.lerp(Aim, 0.5)
-		var magnitude = push_force / 8.0 / max(0.75, disposition.length())
+		#direction = direction.lerp(Aim, 0.5)
+		var magnitude = push_force / 5.0 / max(0.75, disposition.length())
 		var impulse = direction * magnitude
 		
 		if disposition.length() <= ragdoll_radius:
@@ -389,5 +403,12 @@ func launch_trajectory():
 	else:
 		return Aim.normalized()
 	
+	
+func rollback(lag):
+	pass
+	
+	
+func predict(lag):
+	pass
 	
 			

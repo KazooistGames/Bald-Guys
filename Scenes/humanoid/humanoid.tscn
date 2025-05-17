@@ -36,7 +36,7 @@ properties/3/spawn = true
 properties/3/replication_mode = 2
 properties/4/path = NodePath(".:LUNGING")
 properties/4/spawn = true
-properties/4/replication_mode = 1
+properties/4/replication_mode = 2
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_26vqe"]
 resource_local_to_scene = true

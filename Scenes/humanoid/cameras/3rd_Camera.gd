@@ -6,7 +6,7 @@ const RISE_STRENGTH = 1.0
 const PAN_STRENGTH = 1.5
 const VERT_STRENGTH = 0.25
 const REPO_STRENGTH = 15
-const zoom_deadband = 0.0
+const zoom_deadband = 0.1
 
 @export var Locked = false
 @export var Zoomed = false :
@@ -38,7 +38,7 @@ var verticality : float
 var rise_offset : Vector3 
 var pan_offset : Vector3
 var pivot_position : Vector3
-var zoom_debounce = 0.0
+var zoom_debounce : float = 0.0
 
 func _ready():
 
@@ -57,7 +57,7 @@ func _physics_process(delta):
 	
 	if force.action == force.Action.holding:
 		Zoomed = true
-	elif force.action == force.Action.charging and not humanoid.LUNGING:
+	elif force.action == force.Action.charging:
 		Zoomed = true
 	else:
 		Zoomed = false
@@ -65,6 +65,7 @@ func _physics_process(delta):
 	Locked = humanoid.LUNGING	
 	HORIZONTAL_SENSITIVITY = 0.002 if Zoomed else 0.004	
 	reticle.visible = is_local_camera and Zoomed	
+	#near = 0.075 if Zoomed else 0.15
 	
 	if Zoomed:
 		var deadbanded = position == goal_position

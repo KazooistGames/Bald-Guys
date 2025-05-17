@@ -180,6 +180,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		
 	if action_committed: #ROLLBACK
 		humanoid.rollback(rollback_lag)	
+		force.rollback(rollback_lag)
 	
 	if just_pressed('jump', inputs):	
 	
@@ -220,6 +221,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		force.rpc_release.rpc()
 		
 	if action_committed: #PREDICT
+		force.predict(rollback_lag)
 		humanoid.predict(rollback_lag)
 		
 	cache_new_inputs(inputs)

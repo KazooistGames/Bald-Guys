@@ -182,7 +182,7 @@ func rpc_spawn_new_wig():
 		
 	var new_wig = wig_prefab.instantiate()
 	add_child(new_wig, true)
-	var random_boundaries = map_size / 2.0
+	var random_boundaries = map_size / 2.25
 	var random_position = Vector3(randi_range(-random_boundaries, random_boundaries), random_boundaries, randi_range(-random_boundaries, random_boundaries))
 	new_wig.global_position = random_position
 	new_wig.toggle_strobing(true)
