@@ -10,7 +10,6 @@ enum HillState {
 
 enum GameState {
 	reset,
-	starting,
 	playing,
 	finished
 }
@@ -78,8 +77,6 @@ func _physics_process(delta):
 		GameState.reset:
 			pass
 			
-		GameState.starting:	
-			pass
 	
 		GameState.playing:
 			Hill_Size = 4.0
@@ -179,16 +176,6 @@ func rpc_adjust_wig_size(path_to_bearer, progress : float):
 	var remote = bearer.find_child("*RemoteTransform*", true, false)
 	remote.position = lerp(wig_start_offset, wig_end_offset, progress)
 	
-	
-@rpc("call_local", "reliable")
-func rpc_start():
-	
-	if is_multiplayer_authority(): 
-		State = GameState.starting
-		
-		for value in session.Client_Screennames.values():
-			Scores[value] = 0
-	
 
 @rpc("call_local", "reliable")
 func rpc_reset():
@@ -197,6 +184,7 @@ func rpc_reset():
 	session.HUD.find_child("Progress").visible = false		
 	
 	if is_multiplayer_authority(): 
+		session.HUD.set_psa.rpc("Grow your Hair!")
 		Scores = {}
 		Hill.visible = false
 		Hill_Size = 0.0
@@ -229,8 +217,8 @@ func rpc_finish():
 	session.HUD.remove_nameplate("HILL")
 	
 	if is_multiplayer_authority(): 
+		session.HUD.find_child("Progress").visible = false
 		State = GameState.finished
-		#Hill.visible = false
 		session.HUD.remove_nameplate("HILL")
 
 

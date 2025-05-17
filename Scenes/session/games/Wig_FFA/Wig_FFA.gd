@@ -6,7 +6,6 @@ const beas_mote_end = 162.0
 
 enum GameState {
 	reset,
-	starting,
 	playing,
 	finished
 }
@@ -71,9 +70,6 @@ func _physics_process(delta):
 	match State: # GAME STATE MACHINE
 			
 		GameState.reset:		
-			pass
-			
-		GameState.starting:				
 			pass
 	
 		GameState.playing:
@@ -186,7 +182,9 @@ func rpc_spawn_new_wig():
 		
 	var new_wig = wig_prefab.instantiate()
 	add_child(new_wig, true)
-	new_wig.global_position = Vector3(0, map_size / 2.0 , 0)
+	var random_boundaries = map_size / 2.0
+	var random_position = Vector3(randi_range(-random_boundaries, random_boundaries), random_boundaries, randi_range(-random_boundaries, random_boundaries))
+	new_wig.global_position = random_position
 	new_wig.toggle_strobing(true)
 	new_wig.radius = 0.15
 	wigs.append(new_wig)
@@ -261,14 +259,6 @@ func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
 	add_child(wig_remote)
 	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
 	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
-			
-
-@rpc("call_local", "reliable")
-func rpc_start():
-	
-	if is_multiplayer_authority(): 
-		rpc_reset()
-		State = GameState.starting
 	
 
 @rpc("call_local", "reliable")
@@ -301,6 +291,7 @@ func rpc_play():
 	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
 	
 	if is_multiplayer_authority(): 	
+		session.HUD.set_psa.rpc("Capture the Wig!")
 		rpc_spawn_new_wig.rpc()
 		State = GameState.playing	
 		

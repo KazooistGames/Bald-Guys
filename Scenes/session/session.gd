@@ -12,9 +12,9 @@ const SessionState = {
 @export var State = SessionState.Lobby
 @export var Commissioned = false
 @export var Humanoids = []
-#@export var Active_Game : Node3D = null
 @export var Games : Array = []
 @export var Round : int = 0
+
 
 @onready var session_rng = RandomNumberGenerator.new()
 @onready var Level : Node3D = $Procedural_Level
@@ -73,6 +73,7 @@ func _physics_process(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
 		pass
+		
 	elif not is_multiplayer_authority():
 		return	
 		
@@ -85,10 +86,10 @@ func _physics_process(delta):
 	if State == SessionState.Lobby:
 		pass
 		
-	elif Games[Round].State == Games[Round].GameState.starting:	
-			
+	elif State == SessionState.Intermission:
+		
 		if countDown_value <= 0:
-			Games[Round].rpc_play.rpc()
+			Try_Start_Round()
 		
 		elif countDown_timer > 1:
 			countDown_timer = 0
@@ -106,15 +107,37 @@ func _unhandled_key_input(event):
 			
 	elif event.is_action_pressed("Toggle"):
 			
-		if State != SessionState.Round:
-			StartRound()
-		else:	
-			FinishRound()
+		if State == SessionState.Lobby:
+			Try_Start_Session()
+			
+		elif State == SessionState.Intermission:
+			Try_Start_Round()
+			
+		elif State == SessionState.Round:	
+			Try_Finish_Round()
 
 
-func FinishRound():
+func Try_Start_Session():
 	
-	Games[Round].GameOver.disconnect(FinishRound)
+	State = SessionState.Intermission
+	countDown_timer = 0
+	countDown_value = 5
+	
+
+func Try_Start_Round():
+	
+	Games[Round].GameOver.connect(Try_Finish_Round)
+	Games[Round].rpc_play.rpc()
+	State = SessionState.Round	
+	HUD.set_psa.rpc(countDown_value)	
+	Started_Round.emit()
+	
+	
+func Try_Finish_Round():
+	
+	countDown_timer = 0
+	countDown_value = 5
+	Games[Round].GameOver.disconnect(Try_Finish_Round)
 	Games[Round].rpc_finish.rpc()
 	State = SessionState.Intermission
 	Round += 1	
@@ -147,10 +170,10 @@ func add_player(peer_id):
 			
 		if game.State == game.GameState.reset:
 			game.rpc_reset.rpc_id(peer_id)
-		elif game.State == game.GameState.starting:
-			game.rpc_start.rpc_id(peer_id)
+			
 		elif game.State == game.GameState.playing:
 			game.rpc_play.rpc_id(peer_id)
+			
 		elif game.State == game.GameState.finished:
 			game.rpc_finish.rpc_id(peer_id)
 			
@@ -223,18 +246,6 @@ func rpc_CommissionSession(Seed):
 			
 	Level.seed_procedural_generators(hash(session_rng.randi()))
 	Commissioned = true
-	
-	
-func StartRound():
-	
-	countDown_timer = 0
-	countDown_value = 5
-	Games[Round] = Games[Round]
-	Games[Round].GameOver.connect(FinishRound)
-	State = SessionState.Round	
-	HUD.set_psa.rpc(countDown_value)	
-	Games[Round].rpc_start.rpc()
-	Started_Round.emit()
 	
 		
 var last_prefab

@@ -18,6 +18,7 @@ enum Action {
 	cooldown = -1,
 }
 
+@export var armed = true
 @export var action = Action.inert
 @export var base_position = Vector3.ZERO
 @export var Aim = Vector3.ZERO
@@ -96,7 +97,7 @@ func _physics_process(delta):
 
 		charge_timer = clamp(charge_timer + delta, 0.0, charge_period)
 		var progress = charge_timer / charge_period
-		#print(progress)
+
 		if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
 			collider.shape.radius = lerp(0.0, 1.0, progress)
 			collider.shape.height = lerp(0.0, 2.0, progress)
@@ -156,6 +157,8 @@ func _physics_process(delta):
 func rpc_primary():
 	
 	if action != Action.inert:
+		return
+	elif not armed:
 		return
 						
 	mesh.visible = true	
@@ -258,6 +261,7 @@ func rpc_release():
 		
 	else:
 		charge_period = charge_timer
+		armed = false
 		released_charge.emit(charge_timer)
 		return
 	

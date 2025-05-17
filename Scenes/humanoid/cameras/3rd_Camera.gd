@@ -6,7 +6,7 @@ const RISE_STRENGTH = 1.0
 const PAN_STRENGTH = 1.5
 const VERT_STRENGTH = 0.25
 const REPO_STRENGTH = 15
-const zoom_deadband = 0.25
+const zoom_deadband = 0.0
 
 @export var Locked = false
 @export var Zoomed = false :
@@ -55,8 +55,14 @@ func _physics_process(delta):
 		reticle.size = Vector2.ONE * 4	
 		reticle.position = get_center_of_screen() - reticle.size / 2.0
 	
+	if force.action == force.Action.holding:
+		Zoomed = true
+	elif force.action == force.Action.charging and not humanoid.LUNGING:
+		Zoomed = true
+	else:
+		Zoomed = false
+	
 	Locked = humanoid.LUNGING	
-	Zoomed = force.action != force.Action.inert
 	HORIZONTAL_SENSITIVITY = 0.002 if Zoomed else 0.004	
 	reticle.visible = is_local_camera and Zoomed	
 	
@@ -84,6 +90,7 @@ func _physics_process(delta):
 		draw_offset = corrected_draw(pivot_position)	
 		goal_position = pivot_position + draw_offset	
 		reposition_speed = position.distance_to(goal_position) * 15
+		
 		position = position.move_toward(goal_position, reposition_speed * delta)
 	
 
@@ -113,7 +120,14 @@ func get_center_of_screen():
 	
 func corrected_draw(pivot_position) -> Vector3:
 	
-	var standard_draw : Vector3 = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * DRAW_STRENGTH 
+	var movement_scalar = 1
+	
+	if humanoid.LUNGING:
+		movement_scalar = 2.0
+	elif not humanoid.RUNNING:
+		movement_scalar = 0.5
+		
+	var standard_draw : Vector3 = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * DRAW_STRENGTH * movement_scalar
 	var obstruction : Dictionary = get_obstruction(pivot_position, pivot_position+standard_draw)
 	
 	if obstruction.size() > 0:

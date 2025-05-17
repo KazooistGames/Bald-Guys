@@ -2,7 +2,7 @@ extends RigidBody3D
 
 const floor_normal = Vector3(0, 1, 0)
 const floor_dot_product = 1.0 / 2.0
-const Lunge_Speed = 40
+const Lunge_Speed = 35
 
 @export var SKIN_COLOR : Color:
 	
@@ -23,7 +23,7 @@ const Lunge_Speed = 40
 @export var LOOK_VECTOR = Vector3(0,0,0)
 @export var WALK_VECTOR = Vector3(0,0,0)
 @export var FACING_VECTOR = Vector3(0,0,0)
-@export var SPEED_GEARS = Vector2(3.0, 7.0)
+@export var SPEED_GEARS = Vector2(3.5, 7.0)
 @export var JUMP_SPEED = 5.5
 @export var RUNNING = false
 @export var DOUBLE_JUMP_CHARGES = 1
@@ -101,12 +101,15 @@ func _ready():
 	
 	force.released_charge.connect(lunge)
 
+
 func _process(_delta):
 	
 	if not multiplayer.has_multiplayer_peer():
 		multiplayer_permissive = true
+		
 	elif is_multiplayer_authority():
 		multiplayer_permissive = true
+		
 	else:
 		multiplayer_permissive = false
 			
@@ -182,7 +185,10 @@ func _integrate_forces(state):
 				
 		else: #unstoppable/immovable objects
 			pass
-
+		
+		if LUNGING:
+			impact /= 2.0
+			
 		var shape = state.get_contact_local_shape(index)
 		
 		if shape == 0:
@@ -215,7 +221,7 @@ func _integrate_forces(state):
 			var impacter = state.get_contact_collider_object(index)
 			print(name, " knocked down by ", impacter)
 			something_big_happened = true
-			ragdoll.rpc()
+			ragdoll.rpc(linear_velocity/5.0 if LUNGING else linear_velocity)
 			
 		elif bumped:
 			bump.rpc(state.get_contact_impulse(index) / 1.6 / mass)
@@ -224,7 +230,9 @@ func _integrate_forces(state):
 				
 	return something_big_happened
 
+
 func _physics_process(delta):	
+	
 	collision_ons.clear()
 	force.external_velocity = linear_velocity
 	
@@ -276,6 +284,7 @@ func _physics_process(delta):
 		leg_collider.shape.height = move_toward(leg_collider.shape.height, 1.3, scalar)
 		leg_collider.position.y = move_toward(leg_collider.position.y, .65, scalar)
 		floorcast.target_position.y = move_toward(floorcast.target_position.y, -1.1, scalar)
+		force.armed = true
 		
 	else:
 		gravity_scale = 1.0
@@ -304,7 +313,7 @@ func _physics_process(delta):
 	
 	
 func step_movement(delta):
-		
+	
 	floor_object = floorcast.get_collider()
 		
 	if floor_object == null:
@@ -349,7 +358,7 @@ func step_movement(delta):
 			transversal_walk_target = linear_velocity - floor_velocity
 			
 		var target_linear_velocity = transversal_walk_target + floor_velocity
-		target_linear_velocity.y = linear_velocity.y
+		target_linear_velocity.y = 0 if force.action == force.Action.charging else linear_velocity.y
 		linear_velocity = linear_velocity.move_toward(target_linear_velocity, get_acceleration() * delta)
 		
 	return linear_velocity * delta
@@ -433,17 +442,13 @@ func get_ragdoll_recovered():
 	
 
 @rpc("call_local", "reliable")
-func ragdoll(velocity_override = Vector3.ZERO):
+func ragdoll(velocity_override):
 	
 	if not RAGDOLLED:
 		audio_boof(-15, 1.0)
 		
-		if velocity_override != Vector3.ZERO:
-			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = velocity_override
-			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = velocity_override
-		else:
-			$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = linear_velocity
-			$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = linear_velocity
+		$"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity = velocity_override
+		$"Skeleton3D/Ragdoll/Physical Bone upperBody".linear_velocity = velocity_override
 		
 		unlunge()
 		ragdolled.emit(self)
@@ -490,7 +495,7 @@ func lunge(duration):
 	var charge_to_lunge_ratio = 3.0
 	lunge_duration = duration/charge_to_lunge_ratio
 	lunge_timer = 0.0
-	
+	DOUBLE_JUMP_CHARGES = 0
 
 	if ON_FLOOR:
 		ON_FLOOR = false
@@ -506,9 +511,12 @@ func lunge(duration):
 @rpc("call_local", "reliable")
 func unlunge():	
 	
+	if not LUNGING:
+		return
+		
 	leg_collider.disabled = false
 	LUNGING = false
-	linear_velocity = linear_velocity/5
+	linear_velocity = linear_velocity/5.0
 	#skeleton.lunge_stop()
 
 
@@ -573,7 +581,7 @@ func reset_double_jump():
 		
 @rpc("call_local", "reliable")
 func land():
-	
+
 	reset_double_jump()
 	coyote_timer = 0
 	audio_impact(-24, 0.5)
@@ -643,6 +651,7 @@ func predict(lag : float) -> void:
 		state.integrate_forces()
 		rectifier.cache(lag)
 		
+	force_update_transform()	
 	#print("predicted up to ", position, " moving at ", linear_velocity)
 	
 	
