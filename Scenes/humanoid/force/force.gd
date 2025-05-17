@@ -18,7 +18,7 @@ enum Action {
 	cooldown = -1,
 }
 
-@export var armed = true
+@export var charge_armed = true
 @export var action = Action.inert
 @export var base_position = Vector3.ZERO
 @export var Aim = Vector3.ZERO
@@ -43,6 +43,7 @@ var material;
 var multiplayer_permissive = false
 
 signal released_charge(float)
+
 
 func _ready():
 	
@@ -102,7 +103,7 @@ func _physics_process(delta):
 			collider.shape.radius = lerp(0.0, 1.0, progress)
 			collider.shape.height = lerp(0.0, 2.0, progress)
 			
-		hum.volume_db = lerp(LOW_VOLUME, LOW_VOLUME / 1.5, progress)
+		#hum.volume_db = lerp(LOW_VOLUME, LOW_VOLUME / 1.5, progress)
 		hum.pitch_scale = lerp(0.5, 1.5, progress)
 
 		if not multiplayer_permissive:
@@ -152,15 +153,15 @@ func _physics_process(delta):
 		
 	#mesh.set_surface_override_material(0, material)
 	
-	
 @rpc("call_local", "reliable")
 func rpc_primary():
 	
 	if action != Action.inert:
 		return
-	elif not armed:
+	elif not charge_armed:
 		return
-						
+				
+	charge_armed = false		
 	mesh.visible = true	
 	collision_mask = 14
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED
@@ -261,7 +262,6 @@ func rpc_release():
 		
 	else:
 		charge_period = charge_timer
-		armed = false
 		released_charge.emit(charge_timer)
 		return
 	

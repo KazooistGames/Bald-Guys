@@ -284,7 +284,7 @@ func _physics_process(delta):
 		leg_collider.shape.height = move_toward(leg_collider.shape.height, 1.3, scalar)
 		leg_collider.position.y = move_toward(leg_collider.position.y, .65, scalar)
 		floorcast.target_position.y = move_toward(floorcast.target_position.y, -1.1, scalar)
-		force.armed = true
+		force.charge_armed = true
 		
 	else:
 		gravity_scale = 1.0
