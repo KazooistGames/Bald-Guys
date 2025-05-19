@@ -54,6 +54,10 @@ func cache(age = 0):
 func perform_rollback(time_to_rollback):
 	
 	var index = get_rollback_index(time_to_rollback)
+	
+	if index < 0:
+		return
+		
 	var rollback_transform =  previous_transforms[index]
 	parent.transform = rollback_transform
 	
@@ -65,7 +69,9 @@ func perform_rollback(time_to_rollback):
 	
 	for key in StateKeys:		
 		parent.set(key, state[key])
-		print("rolled back ", parent.name, " ", key, " to ", state[key])
+		
+		if debug:
+			print("rolled back ", parent.name, " ", key, " to ", state[key])
 	
 	invalidate_cache_array(index)
 
@@ -106,6 +112,9 @@ func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callab
 
 func get_rollback_index(time_to_rollback):
 	
+	if previous_ages.size() == 0:
+		return -1
+		
 	var newest_index = previous_ages.size() - 1
 	var target_index = max(min(round(previous_ages.size() / 2.0), newest_index), 0)
 	var age_at_index = previous_ages[target_index] 
@@ -146,6 +155,9 @@ func get_rollback_state(time_to_rollback):
 func invalidate_cache_array(cutoff_index):
 	
 	#print("invalidated cache at index ", cutoff_index, ", newer than ", previous_ages[cutoff_index])
+	if cutoff_index < previous_ages.size() - 1:
+		cutoff_index += 1
+		
 	previous_ages = previous_ages.slice(0, cutoff_index)
 	previous_states = previous_states.slice(0, cutoff_index)
 	previous_transforms = previous_transforms.slice(0, cutoff_index)

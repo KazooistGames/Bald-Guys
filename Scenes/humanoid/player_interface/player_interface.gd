@@ -170,7 +170,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		return
 		
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
-	rollback_lag = .25
+	#rollback_lag = .25
 	var action_committed = false
 	
 	for key in inputs.keys():
@@ -221,7 +221,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		force.rpc_release.rpc()
 		
 	if action_committed: #PREDICT
-		var lag : float 		
+		var lag : float = rollback_lag
 		var step_size : float
 		
 		while lag > 0:

@@ -22,15 +22,15 @@ const coyote_duration = 0.15
 @export var RAGDOLLED = false
 @export var ON_FLOOR = true
 @export var REACHING = 0
-@export var LOOK_VECTOR = Vector3(0,0,0)
-@export var WALK_VECTOR = Vector3(0,0,0)
-@export var FACING_VECTOR = Vector3(0,0,0)
-@export var SPEED_GEARS = Vector2(3.5, 7.0)
+@export var LOOK_VECTOR : Vector3 = Vector3(0,0,0)
+@export var WALK_VECTOR : Vector3 = Vector3(0,0,0)
+@export var FACING_VECTOR : Vector3 = Vector3(0,0,0)
+@export var SPEED_GEARS : Vector2 = Vector2(3.5, 7.0)
 @export var JUMP_SPEED = 5.5
 @export var RUNNING = false
 @export var DOUBLE_JUMP_CHARGES = 1
-@export var floor_velocity = Vector3(0,0,0)
-@export var walk_velocity = Vector3.ZERO
+@export var floor_velocity : Vector3= Vector3(0,0,0)
+@export var walk_velocity : Vector3 = Vector3.ZERO
 
 @onready var skeleton = $Skeleton3D
 @onready var animation = $AnimationTree
@@ -95,10 +95,14 @@ func _ready():
 	
 	if is_multiplayer_authority(): 
 		getRandomSkinTone()
+		rectifier.StateKeys.append("WALK_VECTOR")
 		rectifier.StateKeys.append("LOOK_VECTOR")
+		rectifier.StateKeys.append("RUNNING")
 		rectifier.StateKeys.append("ON_FLOOR")
 		rectifier.StateKeys.append("DOUBLE_JUMP_CHARGES")
 		rectifier.StateKeys.append("LUNGING")
+		rectifier.StateKeys.append("RAGDOLLED")
+		rectifier.StateKeys.append("floor_velocity")
 		rectifier.StateKeys.append("coyote_timer")
 		rectifier.StateKeys.append("reverse_coyote_timer")
 		rectifier.StateKeys.append("just_jumped_timer")
@@ -642,6 +646,9 @@ func predict(step_size : float) -> void:
 	var position_delta : Vector3 
 	var rid = get_rid()
 	
+	if not ON_FLOOR:
+		linear_velocity -= Vector3.UP * 9.8 * step_size
+		
 	position_delta = _physics_process(step_size)
 	position += position_delta		
 	force_update_transform()
@@ -651,9 +658,6 @@ func predict(step_size : float) -> void:
 		
 	depenetrate_geometry(leg_collider)
 	depenetrate_geometry(chest_collider)
-	
-	if not ON_FLOOR:
-		linear_velocity -= Vector3.UP * 9.8 * step_size
 		
 	var state = PhysicsServer3D.body_get_direct_state(rid)
 	state.linear_velocity = linear_velocity

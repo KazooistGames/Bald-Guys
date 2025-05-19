@@ -53,12 +53,12 @@ func _ready():
 	wielder = get_parent()
 	rpc_reset()
 	monitoring = true
-	#rectifier.StateKeys.append("charge_ready")
 	
 	if is_multiplayer_authority():
 		rectifier.StateKeys.append("Aim")
 		rectifier.StateKeys.append("action")
 		rectifier.StateKeys.append("charge_armed")
+		rectifier.StateKeys.append("charge_ready")
 		rectifier.StateKeys.append("charge_timer")
 		rectifier.StateKeys.append("cooldown_timer")
 

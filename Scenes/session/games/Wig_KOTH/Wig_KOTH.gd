@@ -184,7 +184,6 @@ func rpc_reset():
 	session.HUD.find_child("Progress").visible = false		
 	
 	if is_multiplayer_authority(): 
-		session.HUD.set_psa.rpc("Grow your Hair!")
 		Scores = {}
 		Hill.visible = false
 		Hill_Size = 0.0
@@ -205,6 +204,7 @@ func rpc_play():
 	session.HUD.set_progress_label("Growing Hair...")
 	
 	if is_multiplayer_authority(): 
+		session.HUD.set_psa.rpc("Grow your Hair!")
 		State = GameState.playing
 		
 		for value in session.Client_Screennames.values():
