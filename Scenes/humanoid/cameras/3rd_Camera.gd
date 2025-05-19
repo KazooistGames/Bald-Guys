@@ -6,7 +6,6 @@ const RISE_STRENGTH = 1.0
 const PAN_STRENGTH = 1.5
 const VERT_STRENGTH = 0.25
 const REPO_STRENGTH = 15
-const zoom_deadband = 0.1
 
 @export var Locked = false
 @export var Zoomed = false :
@@ -39,6 +38,8 @@ var rise_offset : Vector3
 var pan_offset : Vector3
 var pivot_position : Vector3
 var zoom_debounce : float = 0.0
+var zoom_deadband = 0.1
+
 
 func _ready():
 
@@ -56,13 +57,15 @@ func _physics_process(delta):
 		reticle.position = get_center_of_screen() - reticle.size / 2.0
 	
 	if force.action == force.Action.holding:
+		zoom_deadband = 0.1
 		Zoomed = true
 	elif force.action == force.Action.charging:
+		zoom_deadband = 0.35
 		Zoomed = true
 	else:
 		Zoomed = false
 	
-	Locked = humanoid.LUNGING	
+	Locked = humanoid.LUNGING or (Locked and zoom_debounce < zoom_deadband)
 	HORIZONTAL_SENSITIVITY = 0.002 if Zoomed else 0.004	
 	reticle.visible = is_local_camera and Zoomed	
 	#near = 0.075 if Zoomed else 0.15
@@ -90,7 +93,7 @@ func _physics_process(delta):
 		#draw the camera back then adjust for any detected collisions
 		draw_offset = corrected_draw(pivot_position)	
 		goal_position = pivot_position + draw_offset	
-		reposition_speed = position.distance_to(goal_position) * 15
+		reposition_speed = position.distance_to(goal_position) * 12
 		
 		position = position.move_toward(goal_position, reposition_speed * delta)
 	

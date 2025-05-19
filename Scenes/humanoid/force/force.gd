@@ -79,88 +79,101 @@ func _physics_process(delta):
 	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
 	position = position.move_toward(target_position, delta * 6.0)
 
-	material = mesh.get_surface_override_material(0)	
+
 	capture_bodies()
 	hum.stream_paused = action == Action.inert
 	
 	if action == Action.holding:
-		
-		if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
-			collider.shape.radius = move_toward(collider.shape.radius, grow_radius, 2.0 * delta)
-			collider.shape.height = move_toward(collider.shape.height, grow_height, 5.0 * delta)
-		
-		for body in contained_bodies:			
-
-			if can_be_held(body):
-				var disposition = global_position - body.global_position	
-				var direction = disposition.normalized()
-				var magnitude = hold_force * pow(disposition.length(), 2.0)
-				body.apply_central_force(direction * magnitude)
-				body.apply_central_force(external_velocity * body.mass)
+		process_holding(delta)
 			
 	elif action == Action.charging:
-
-		charge_timer = clamp(charge_timer + delta, 0.0, charge_period)
-		var progress = charge_timer / charge_period
-
-		if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
-			collider.shape.radius = lerp(0.0, 1.5, charge_timer/max_charge_duration)
-			collider.shape.height = lerp(0.0, 3.0, charge_timer/max_charge_duration)
-			
-		#hum.volume_db = lerp(LOW_VOLUME, LOW_VOLUME / 1.5, progress)
-		hum.pitch_scale = lerp(0.5, 1.5, progress)
-
-		if not multiplayer_permissive:
-			pass	
-			
-		elif progress >= 1.0:
-			rpc_release.rpc()
-			
-		if charge_armed:
-			
-			for node in contained_bodies:
-				rpc_push_object.rpc(node.get_path())
+		process_charging(delta)
 		
 	elif action == Action.inert:	
-		
-		position = target_position
-		
-		if not mesh.visible:
-			pass
-			
-		elif collider.shape.radius == 0 or collider.shape.height == 0:
-			mesh.visible = false	
-			collider.shape.radius = 0
-			collider.shape.height = 0
-			
-		elif collider.shape.radius != 0:
-			collider.shape.radius = move_toward(collider.shape.radius, 0, 10.0 * delta)
-			collider.shape.height = move_toward(collider.shape.height, 0, 10.0 * delta)
+		process_inert(delta)
 	
 	elif action == Action.cooldown:
-			
-		if collider.shape.radius == 0:
-			mesh.visible = false	
-			
-		cooldown_timer += delta
-		var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
-		var collider_shrinkage = clamp(progress * 3.0, 0.0, 1.0)
+		process_cooldown(delta)			
+
+	
+func process_holding(delta):
+	
+	if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
+		collider.shape.radius = move_toward(collider.shape.radius, grow_radius, 2.0 * delta)
+		collider.shape.height = move_toward(collider.shape.height, grow_height, 5.0 * delta)
 		
-		if collider.shape.radius <= 0 or collider.shape.height <= 0:
-			mesh.visible = false	
-		else:
-			collider.shape.radius = lerp(grow_radius, 0.0, collider_shrinkage)
-			collider.shape.height = lerp(grow_height, 0.0, collider_shrinkage)
+	for body in contained_bodies:			
+
+		if can_be_held(body):
+			var disposition = global_position - body.global_position	
+			var direction = disposition.normalized()
+			var magnitude = hold_force * pow(disposition.length(), 2.0)
+			body.apply_central_force(direction * magnitude)
+			body.apply_central_force(external_velocity * body.mass)
 			
-		hum.pitch_scale = lerp(1.5, 0.5, progress)
-		
-		if not multiplayer_permissive:
-			pass	
 			
-		elif cooldown_timer >= cooldown_period:
-			rpc_reset.rpc()
+func process_charging(delta):
+	
+	charge_timer = clamp(charge_timer + delta, 0.0, charge_period)
+	var progress = charge_timer / charge_period
+
+	if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
+		collider.shape.radius = lerp(0.0, 1.5, charge_timer/max_charge_duration)
+		collider.shape.height = lerp(0.0, 3.0, charge_timer/max_charge_duration)
 		
-	#mesh.set_surface_override_material(0, material)
+	#hum.volume_db = lerp(LOW_VOLUME, LOW_VOLUME / 1.5, progress)
+	hum.pitch_scale = lerp(0.5, 1.5, progress)
+
+	if not multiplayer_permissive:
+		pass	
+		
+	elif progress >= 1.0:
+		rpc_release.rpc()
+		
+	if charge_armed:
+		
+		for node in contained_bodies:
+			rpc_push_object.rpc(node.get_path())
+	
+	
+func process_inert(delta):
+	position = target_position
+	
+	if not mesh.visible:
+		pass
+		
+	elif collider.shape.radius == 0 or collider.shape.height == 0:
+		mesh.visible = false	
+		collider.shape.radius = 0
+		collider.shape.height = 0
+		
+	elif collider.shape.radius != 0:
+		collider.shape.radius = move_toward(collider.shape.radius, 0, 10.0 * delta)
+		collider.shape.height = move_toward(collider.shape.height, 0, 10.0 * delta)
+
+
+func process_cooldown(delta):
+	if collider.shape.radius == 0:
+		mesh.visible = false	
+		
+	cooldown_timer += delta
+	var progress = clamp(cooldown_timer/cooldown_period, 0.0, 1.0)
+	var collider_shrinkage = clamp(progress * 3.0, 0.0, 1.0)
+	
+	if collider.shape.radius <= 0 or collider.shape.height <= 0:
+		mesh.visible = false	
+	else:
+		collider.shape.radius = lerp(grow_radius, 0.0, collider_shrinkage)
+		collider.shape.height = lerp(grow_height, 0.0, collider_shrinkage)
+		
+	hum.pitch_scale = lerp(1.5, 0.5, progress)
+	
+	if not multiplayer_permissive:
+		pass	
+		
+	elif cooldown_timer >= cooldown_period:
+		rpc_reset.rpc()
+		
 	
 @rpc("call_local", "reliable")
 func rpc_primary():
@@ -178,7 +191,8 @@ func rpc_primary():
 	gravity_space_override = Area3D.SPACE_OVERRIDE_DISABLED
 	hum.bus = "beef"
 	hum.play()
-	charge_timer = 0	
+	charge_timer = 0
+	material = mesh.get_surface_override_material(0)		
 	material.set_shader_parameter("glow_freq", 0.0)
 	material.set_shader_parameter("base_freq", 0.0)
 	material.set_shader_parameter("transparency", 0.05)
@@ -194,7 +208,7 @@ func rpc_secondary():
 	
 	if action != Action.inert:
 		return	
-		
+	
 	mesh.visible = true
 	collision_mask = 12
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_REPLACE
@@ -204,6 +218,7 @@ func rpc_secondary():
 	hum.volume_db = LOW_VOLUME
 	hum.pitch_scale = 1.0
 	hum.bus = "phaser"
+	material = mesh.get_surface_override_material(0)	
 	material.set_shader_parameter("glow_freq", PI)
 	material.set_shader_parameter("base_freq", 1.0 + 1.0/PI)
 	material.set_shader_parameter("transparency", 0.025)
@@ -328,7 +343,7 @@ func get_scattered_aim(node):
 	var lerp_val = (count - 1) * 0.075
 	lerp_val = clampf(lerp_val, 0.0, 0.5)
 	var disposition = node.global_position - get_parent().global_position
-	disposition.y =0
+	disposition.y = 0
 	return launch_trajectory().lerp(disposition.normalized(), lerp_val)
 		
 		
@@ -400,15 +415,45 @@ func launch_trajectory():
 	
 	if raycast.is_colliding():
 		return (raycast.get_collision_point() - global_position).normalized()
+		
 	else:
 		return Aim.normalized()
 	
 	
 func rollback(lag):
-	pass
+	
+	rectifier.perform_rollback(lag)
+	
+	match action:
+		
+		Action.charging:
+			charge_timer -= lag
+			pass
+			
+		Action.cooldown:
+			cooldown_timer -= lag
+			pass
+	
 	
 	
 func predict(lag):
-	pass
+	
+	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
+	capture_bodies()
+	position = position.move_toward(target_position, lag * 6.0)
+	
+	if action == Action.holding:
+		process_holding(lag)
+			
+	elif action == Action.charging:
+		process_charging(lag)
+		
+	elif action == Action.inert:	
+		process_inert(lag)
+	
+	elif action == Action.cooldown:
+		process_cooldown(lag)	
+			
+	
 	
 			
