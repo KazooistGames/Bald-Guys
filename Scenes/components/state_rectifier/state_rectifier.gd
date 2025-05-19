@@ -1,8 +1,5 @@
 extends Node
 
-static var SERVER_PING = 0.0 
-static var CLIENT_PINGS = {}
-
 const max_state_age = 0.5
 const debug = false
 
@@ -31,6 +28,7 @@ func _physics_process(delta):
 	elif previous_ages[0] >= max_state_age: #discard states that are too old
 		previous_transforms.pop_front()
 		previous_velocities.pop_front()
+		previous_states.pop_front()
 		previous_ages.pop_front()
 	
 	cache(0)
@@ -49,7 +47,8 @@ func cache(age = 0):
 	
 	for key in StateKeys:		
 		state[key] = parent.get(key)
-		previous_states.append(state)
+		
+	previous_states.append(state)
 		
 	
 func perform_rollback(time_to_rollback):
@@ -66,6 +65,7 @@ func perform_rollback(time_to_rollback):
 	
 	for key in StateKeys:		
 		parent.set(key, state[key])
+		print("rolled back ", parent.name, " ", key, " to ", state[key])
 	
 	invalidate_cache_array(index)
 

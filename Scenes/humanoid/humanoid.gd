@@ -4,6 +4,7 @@ const floor_normal = Vector3(0, 1, 0)
 const floor_dot_product = 1.0 / 2.0
 const Lunge_Speed = 35
 const lunge_duration_scale = 5.0
+const coyote_duration = 0.15
 
 @export var SKIN_COLOR : Color:
 	
@@ -59,7 +60,6 @@ var ragdoll_recovery_default_duration = 3.0
 var ragdoll_recovery_default_boost = 0.1
 
 var coyote_timer = 0.0
-var coyote_duration = 0.15
 var reverse_coyote_timer = 0.0
 
 var floor_object = null
@@ -95,6 +95,15 @@ func _ready():
 	
 	if is_multiplayer_authority(): 
 		getRandomSkinTone()
+		rectifier.StateKeys.append("LOOK_VECTOR")
+		rectifier.StateKeys.append("ON_FLOOR")
+		rectifier.StateKeys.append("DOUBLE_JUMP_CHARGES")
+		rectifier.StateKeys.append("LUNGING")
+		rectifier.StateKeys.append("coyote_timer")
+		rectifier.StateKeys.append("reverse_coyote_timer")
+		rectifier.StateKeys.append("just_jumped_timer")
+		rectifier.StateKeys.append("ragdoll_recovery_progress")
+		rectifier.StateKeys.append("lunge_timer")
 	
 	depen_query = PhysicsShapeQueryParameters3D.new()	
 	depen_query.collision_mask = 0b0001		
@@ -289,7 +298,7 @@ func _physics_process(delta):
 		leg_collider.shape.height = move_toward(leg_collider.shape.height, 1.3, scalar)
 		leg_collider.position.y = move_toward(leg_collider.position.y, .65, scalar)
 		floorcast.target_position.y = move_toward(floorcast.target_position.y, -1.1, scalar)
-		force.charge_ready = true
+		#force.charge_ready = true
 		
 	else:
 		gravity_scale = 1.0
@@ -506,9 +515,7 @@ func lunge(duration):
 		reverse_coyote_timer = 0.0
 		floorcast.enabled = false
 	
-	#leg_collider.disabled = true
 	LUNGING = true
-	#skeleton.lunge_start()
 	
 	
 @rpc("call_local", "reliable")
@@ -516,12 +523,11 @@ func unlunge():
 	
 	if not LUNGING:
 		return
-		
-	leg_collider.disabled = false
+
 	LUNGING = false
+	lunge_timer = 0.0
 	var ratio = Lunge_Speed / SPEED_GEARS.y
 	linear_velocity = linear_velocity/ratio
-	#skeleton.lunge_stop()
 
 
 @rpc("call_local", "reliable")
@@ -615,49 +621,45 @@ func rollback(lag : float) -> void:
 	force_update_transform()
 	collision_ons.clear()
 	wall_jump_ons = true
-	coyote_timer -= lag		
-	coyote_timer = max(coyote_timer, 0.)
-	ON_FLOOR = coyote_timer <= coyote_duration
-	reverse_coyote_timer -= lag
-	reverse_coyote_timer = max(reverse_coyote_timer, 0.)
+	#coyote_timer -= lag		
+	#coyote_timer = max(coyote_timer, 0.)
+	#ON_FLOOR = coyote_timer <= coyote_duration
+	#reverse_coyote_timer -= lag
+	#reverse_coyote_timer = max(reverse_coyote_timer, 0.)
 	floorcast.enabled = reverse_coyote_timer < coyote_duration
-	just_jumped_timer -= lag * 2.0 #fudge factor :)
-	just_jumped_timer = max(just_jumped_timer, 0.)
-	var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
-	var recovery_scalar = ragdoll_recovery_default_duration * sqrt(ragdoll_velocity)
-	ragdoll_recovery_progress -= lag / recovery_scalar
-	ragdoll_recovery_progress = max(ragdoll_recovery_progress, 0.)
+	#just_jumped_timer -= lag * 2.0 #fudge factor :)
+	#just_jumped_timer = max(just_jumped_timer, 0.)
+	#var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
+	#var recovery_scalar = ragdoll_recovery_default_duration * sqrt(ragdoll_velocity)
+	#ragdoll_recovery_progress -= lag / recovery_scalar
+	#ragdoll_recovery_progress = max(ragdoll_recovery_progress, 0.)
 	#print("Rolled back to ", position, " moving at ", linear_velocity)
 	floorcast.force_raycast_update() #because we are simulating physics async
 
-func predict(lag : float) -> void:
+
+func predict(step_size : float) -> void:
 	
-	var step_size : float
 	var position_delta : Vector3 
 	var rid = get_rid()
 	
-	while lag > 0:
-		step_size = min(get_physics_process_delta_time(), lag)
-		lag -= step_size
-		position_delta = _physics_process(step_size)
-		position += position_delta		
-		force_update_transform()
+	position_delta = _physics_process(step_size)
+	position += position_delta		
+	force_update_transform()
+	
+	if floorcast.enabled:
+		floorcast.force_raycast_update() #because we are simulating physics async
 		
-		if floorcast.enabled:
-			floorcast.force_raycast_update() #because we are simulating physics async
-			
-		depenetrate_geometry(leg_collider)
-		depenetrate_geometry(chest_collider)
+	depenetrate_geometry(leg_collider)
+	depenetrate_geometry(chest_collider)
+	
+	if not ON_FLOOR:
+		linear_velocity -= Vector3.UP * 9.8 * step_size
 		
-		if not ON_FLOOR:
-			linear_velocity -= Vector3.UP * 9.8 * step_size
-			
-		var state = PhysicsServer3D.body_get_direct_state(rid)
-		state.linear_velocity = linear_velocity
-		state.transform.origin = position
-		force_update_transform()
-		state.integrate_forces()
-		rectifier.cache(lag)		
+	var state = PhysicsServer3D.body_get_direct_state(rid)
+	state.linear_velocity = linear_velocity
+	state.transform.origin = position
+	force_update_transform()
+	state.integrate_forces()	
 	#print("predicted up to ", position, " moving at ", linear_velocity)
 	
 	

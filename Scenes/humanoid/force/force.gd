@@ -17,10 +17,10 @@ enum Action {
 	charging = 2,
 	cooldown = -1,
 }
+@export var action = Action.inert
 
 @export var charge_armed = false
 @export var charge_ready = true
-@export var action = Action.inert
 @export var base_position = Vector3.ZERO
 @export var Aim = Vector3.ZERO
 @export var Max_kg = 100
@@ -53,10 +53,18 @@ func _ready():
 	wielder = get_parent()
 	rpc_reset()
 	monitoring = true
+	#rectifier.StateKeys.append("charge_ready")
+	
+	if is_multiplayer_authority():
+		rectifier.StateKeys.append("Aim")
+		rectifier.StateKeys.append("action")
+		rectifier.StateKeys.append("charge_armed")
+		rectifier.StateKeys.append("charge_timer")
+		rectifier.StateKeys.append("cooldown_timer")
 
 
 func _process(delta):
-	
+	#rectifier.StateKeys.clear()
 	if not multiplayer.has_multiplayer_peer():
 		multiplayer_permissive = true
 	else:
@@ -78,7 +86,8 @@ func _physics_process(delta):
 	
 	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
 	position = position.move_toward(target_position, delta * 6.0)
-
+	charge_armed = false
+	charge_ready = wielder.ON_FLOOR and not action == Action.charging
 	capture_bodies()
 	hum.stream_paused = action == Action.inert
 	
@@ -130,6 +139,8 @@ func process_charging(delta):
 	elif progress >= 1.0:
 		rpc_release.rpc()
 		
+	charge_armed = progress >= 1.0
+	
 	if charge_armed:
 		
 		for node in contained_bodies:
@@ -137,6 +148,7 @@ func process_charging(delta):
 	
 	
 func process_inert(delta):
+	
 	position = target_position
 	
 	if not mesh.visible:
@@ -430,25 +442,19 @@ func rollback(lag):
 	match action:
 		
 		Action.charging:
-			charge_timer -= lag
+			charge_timer = maxf(charge_timer - lag, 0.0)
 			pass
 			
 		Action.cooldown:
-			cooldown_timer -= lag
+			cooldown_timer = maxf(cooldown_timer - lag, 0.0)
 			pass
+		
 	
-	
-	
-func predict(lag):
-	
-	var step_size : float
+func predict(step_size):
 
-	while lag > 0:
-		step_size = min(get_physics_process_delta_time(), lag)
-		lag -= step_size	
-		_physics_process(step_size)
-		force_update_transform()
-		rectifier.cache(lag)
+	_physics_process(step_size)
+	force_update_transform()
+	rectifier.cache(step_size)
 		
 	
 	
