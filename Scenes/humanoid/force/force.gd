@@ -4,8 +4,8 @@ const hold_force = 8000.0
 const throw_force = 750.0
 const push_force = 200.0
 const ragdoll_radius = 2.0
-const grow_radius = 0.75
-const grow_height = 1.5
+const grow_radius = 1.0
+const grow_height = 2.0
 const render_scale = 0.75
 const LOW_VOLUME = -30.0
 const max_charge_duration = 1.0
@@ -79,7 +79,6 @@ func _physics_process(delta):
 	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
 	position = position.move_toward(target_position, delta * 6.0)
 
-
 	capture_bodies()
 	hum.stream_paused = action == Action.inert
 	
@@ -98,9 +97,10 @@ func _physics_process(delta):
 	
 func process_holding(delta):
 	
-	if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
-		collider.shape.radius = move_toward(collider.shape.radius, grow_radius, 2.0 * delta)
-		collider.shape.height = move_toward(collider.shape.height, grow_height, 5.0 * delta)
+	if collider.shape.radius != 0.75:
+		collider.shape.radius = move_toward(collider.shape.radius, 0.75, 2.0 * delta)
+	if collider.shape.height != 1.5:
+		collider.shape.height = move_toward(collider.shape.height, 1.5, 5.0 * delta)
 		
 	for body in contained_bodies:			
 
@@ -118,8 +118,8 @@ func process_charging(delta):
 	var progress = charge_timer / charge_period
 
 	if collider.shape.radius != grow_radius or collider.shape.height != grow_height:
-		collider.shape.radius = lerp(0.0, 1.5, charge_timer/max_charge_duration)
-		collider.shape.height = lerp(0.0, 3.0, charge_timer/max_charge_duration)
+		collider.shape.radius = lerp(0.0, 1.0, charge_timer/max_charge_duration)
+		collider.shape.height = lerp(0.0, 2.0, charge_timer/max_charge_duration)
 		
 	#hum.volume_db = lerp(LOW_VOLUME, LOW_VOLUME / 1.5, progress)
 	hum.pitch_scale = lerp(0.5, 1.5, progress)
@@ -153,6 +153,7 @@ func process_inert(delta):
 
 
 func process_cooldown(delta):
+	
 	if collider.shape.radius == 0:
 		mesh.visible = false	
 		
@@ -167,6 +168,11 @@ func process_cooldown(delta):
 		collider.shape.height = lerp(grow_height, 0.0, collider_shrinkage)
 		
 	hum.pitch_scale = lerp(1.5, 0.5, progress)
+	
+	if charge_armed:
+		
+		for node in contained_bodies:
+			rpc_push_object.rpc(node.get_path())
 	
 	if not multiplayer_permissive:
 		pass	
@@ -314,21 +320,18 @@ func rpc_push_object(node_path):
 		return
 		
 	push_ons.append(node)	
+	
 	if node.is_in_group("humanoids"):
 		
 		if multiplayer.get_unique_id() != node.get_multiplayer_authority():
 			return
 	
 		var disposition = node.global_position - get_parent().global_position
-		var direction = disposition.normalized().lerp(Vector3.UP, 0.15)
-		#direction = direction.lerp(Aim, 0.5)
-		var magnitude = push_force / 5.0 / max(0.75, disposition.length())
-		var impulse = direction * magnitude
-		
-		if disposition.length() <= ragdoll_radius:
-			node.ragdoll.rpc(impulse)
-		else:
-			node.bump.rpc(impulse / 2.0)
+		var direction = disposition.normalized().lerp(Vector3.UP, 0.25)
+		direction = direction.lerp(Aim, 0.5)
+		var magnitude = push_force / 2.0 * charge_timer / max_charge_duration
+		var impulse = direction * magnitude	
+		node.ragdoll.rpc(impulse)
 		
 	else:
 		var disposition = (node.global_position - get_parent().global_position).normalized()
@@ -438,22 +441,15 @@ func rollback(lag):
 	
 func predict(lag):
 	
-	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
-	capture_bodies()
-	position = position.move_toward(target_position, lag * 6.0)
-	
-	if action == Action.holding:
-		process_holding(lag)
-			
-	elif action == Action.charging:
-		process_charging(lag)
+	var step_size : float
+
+	while lag > 0:
+		step_size = min(get_physics_process_delta_time(), lag)
+		lag -= step_size	
+		_physics_process(step_size)
+		force_update_transform()
+		rectifier.cache(lag)
 		
-	elif action == Action.inert:	
-		process_inert(lag)
-	
-	elif action == Action.cooldown:
-		process_cooldown(lag)	
-			
 	
 	
 			

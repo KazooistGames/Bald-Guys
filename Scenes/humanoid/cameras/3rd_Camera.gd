@@ -93,8 +93,7 @@ func _physics_process(delta):
 		#draw the camera back then adjust for any detected collisions
 		draw_offset = corrected_draw(pivot_position)	
 		goal_position = pivot_position + draw_offset	
-		reposition_speed = position.distance_to(goal_position) * 12
-		
+		reposition_speed = position.distance_to(goal_position) * 13	
 		position = position.move_toward(goal_position, reposition_speed * delta)
 	
 

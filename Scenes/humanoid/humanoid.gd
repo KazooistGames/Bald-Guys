@@ -36,7 +36,7 @@ const lunge_duration_scale = 5.0
 @onready var leg_collider = $CollisionShapeLegs
 @onready var chest_collider = $CollisionShapeChest
 @onready var head_collider = $CollisionShapeHead
-@onready var floorcast = $FloorCast3D
+@onready var floorcast : RayCast3D = $FloorCast3D
 @onready var boofFX = $RagdollAudio
 @onready var impactFX = $StaticImpactAudio
 @onready var jumpFX = $JumpAudio
@@ -241,17 +241,17 @@ func _physics_process(delta):
 	collision_ons.clear()
 	force.external_velocity = linear_velocity
 	
-	if floorcast.enabled:
+	if floorcast.enabled: #reverse coyote timer basically deadbands when we can land
 		reverse_coyote_timer = 0.0			
-	elif reverse_coyote_timer >= coyote_duration:	
+	elif reverse_coyote_timer >= coyote_duration: #turn floorcast back on
 		floorcast.enabled = true		
-	else:	
-		reverse_coyote_timer += delta
+	else:	#starts after we jump and turn off floorcast
+		reverse_coyote_timer += delta 
 
 	if not is_on_floor():
 		coyote_timer += delta	
 		just_jumped_timer += delta	
-			
+
 	elif not ON_FLOOR and is_multiplayer_authority():		
 		land.rpc()			
 			
@@ -628,7 +628,7 @@ func rollback(lag : float) -> void:
 	ragdoll_recovery_progress -= lag / recovery_scalar
 	ragdoll_recovery_progress = max(ragdoll_recovery_progress, 0.)
 	#print("Rolled back to ", position, " moving at ", linear_velocity)
-
+	floorcast.force_raycast_update() #because we are simulating physics async
 
 func predict(lag : float) -> void:
 	
@@ -640,10 +640,14 @@ func predict(lag : float) -> void:
 		step_size = min(get_physics_process_delta_time(), lag)
 		lag -= step_size
 		position_delta = _physics_process(step_size)
-		position += position_delta
+		position += position_delta		
+		force_update_transform()
+		
+		if floorcast.enabled:
+			floorcast.force_raycast_update() #because we are simulating physics async
+			
 		depenetrate_geometry(leg_collider)
 		depenetrate_geometry(chest_collider)
-		force_update_transform()
 		
 		if not ON_FLOOR:
 			linear_velocity -= Vector3.UP * 9.8 * step_size
@@ -651,11 +655,9 @@ func predict(lag : float) -> void:
 		var state = PhysicsServer3D.body_get_direct_state(rid)
 		state.linear_velocity = linear_velocity
 		state.transform.origin = position
-			
+		force_update_transform()
 		state.integrate_forces()
-		rectifier.cache(lag)
-		
-	force_update_transform()	
+		rectifier.cache(lag)		
 	#print("predicted up to ", position, " moving at ", linear_velocity)
 	
 	

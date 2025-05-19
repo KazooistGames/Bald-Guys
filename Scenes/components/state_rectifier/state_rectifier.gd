@@ -6,13 +6,16 @@ static var CLIENT_PINGS = {}
 const max_state_age = 0.5
 const debug = false
 
+@export var StateKeys : Array[String] = []
+
 @onready var parent = get_parent()
 
 var previous_transforms : Array[Transform3D] = []
 var previous_velocities : Array[Vector3] = []
-var previous_state_ages : Array[float] = []
+var previous_ages : Array[float] = []
+var previous_states : Array[Dictionary]
 	
-
+	
 func _physics_process(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
@@ -20,30 +23,34 @@ func _physics_process(delta):
 	elif not is_multiplayer_authority():
 		return
 
-	for index in range(previous_state_ages.size()): #age every stored state
-		previous_state_ages[index] += delta
+	for index in range(previous_ages.size()): #age every stored state
+		previous_ages[index] += delta
 	
-	if previous_state_ages.size() == 0:
+	if previous_ages.size() == 0:
 		pass
-	elif previous_state_ages[0] >= max_state_age: #discard states that are too old
+	elif previous_ages[0] >= max_state_age: #discard states that are too old
 		previous_transforms.pop_front()
 		previous_velocities.pop_front()
-		previous_state_ages.pop_front()
+		previous_ages.pop_front()
 	
+	cache(0)
+	
+	
+func cache(age = 0):
+
 	previous_transforms.append(parent.transform)
 	
 	if parent is RigidBody3D:
 		previous_velocities.append(parent.linear_velocity)
 		
-	previous_state_ages.append(0)
+	previous_ages.append(age)
 	
+	var state : Dictionary = {}
 	
-func cache(age = 0):
-
-	previous_transforms.append(get_parent().transform)
-	previous_velocities.append(get_parent().linear_velocity)
-	previous_state_ages.append(age)
-	
+	for key in StateKeys:		
+		state[key] = parent.get(key)
+		previous_states.append(state)
+		
 	
 func perform_rollback(time_to_rollback):
 	
@@ -55,6 +62,11 @@ func perform_rollback(time_to_rollback):
 		var rollback_velocity =  previous_velocities[index]
 		parent.linear_velocity = rollback_velocity
 
+	var state = get_rollback_state(time_to_rollback)
+	
+	for key in StateKeys:		
+		parent.set(key, state[key])
+	
 	invalidate_cache_array(index)
 
 
@@ -94,17 +106,17 @@ func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callab
 
 func get_rollback_index(time_to_rollback):
 	
-	var newest_index = previous_state_ages.size() - 1
-	var target_index = max(min(round(previous_state_ages.size() / 2.0), newest_index), 0)
-	var age_at_index = previous_state_ages[target_index] 
+	var newest_index = previous_ages.size() - 1
+	var target_index = max(min(round(previous_ages.size() / 2.0), newest_index), 0)
+	var age_at_index = previous_ages[target_index] 
 	
 	while(target_index > 0 and age_at_index < time_to_rollback): 
 		target_index -= 1 	#give preference to more recent states	
-		age_at_index = previous_state_ages[target_index] 	
+		age_at_index = previous_ages[target_index] 	
 	
 	while(target_index < newest_index and age_at_index > time_to_rollback):
 		target_index += 1
-		age_at_index = previous_state_ages[target_index] 
+		age_at_index = previous_ages[target_index] 
 
 	#print("found index ", target_index, ", with age ", age_at_index)
 	return target_index
@@ -125,10 +137,17 @@ func get_rollback_transfrom(time_to_rollback):
 	return previous_transforms[index]
 	
 	
+func get_rollback_state(time_to_rollback):
+	
+	var index = get_rollback_index(time_to_rollback)
+	return previous_states[index]	
+
+
 func invalidate_cache_array(cutoff_index):
 	
-	#print("invalidated cache at index ", cutoff_index, ", newer than ", previous_state_ages[cutoff_index])
-	previous_state_ages = previous_state_ages.slice(0, cutoff_index)
+	#print("invalidated cache at index ", cutoff_index, ", newer than ", previous_ages[cutoff_index])
+	previous_ages = previous_ages.slice(0, cutoff_index)
+	previous_states = previous_states.slice(0, cutoff_index)
 	previous_transforms = previous_transforms.slice(0, cutoff_index)
 	
 	if parent is RigidBody3D:
@@ -138,7 +157,7 @@ func invalidate_cache_array(cutoff_index):
 func clear_old_data(cutoff_age):
 	
 	var cutoff_index = get_rollback_index(cutoff_age)
-	previous_state_ages = previous_state_ages.slice(cutoff_index)
+	previous_ages = previous_ages.slice(cutoff_index)
 	previous_transforms = previous_transforms.slice(cutoff_index)
 	previous_velocities = previous_velocities.slice(cutoff_index)
 	
@@ -150,7 +169,7 @@ func mock_cache(start_transform : Transform3D, velocity : Vector3, time_span : f
 	while time_span > 0:
 		previous_transforms.append(start_transform)
 		previous_velocities.append(velocity)
-		previous_state_ages.append(time_span)
+		previous_ages.append(time_span)
 		start_transform.origin += velocity * delta
 		time_span -= delta
 

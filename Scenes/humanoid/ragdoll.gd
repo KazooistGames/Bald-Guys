@@ -179,8 +179,8 @@ func sync_loose_bones():
 func rpc_set_bone_physics(bone_path : NodePath, new_transform : Transform3D, new_velocity : Vector3):
 	
 	var bone : PhysicsBody3D = get_node(bone_path)
-	bone.transform = bone.transform.interpolate_with(new_transform, 0.5)
-	bone.linear_velocity = bone.linear_velocity.move_toward(new_velocity, 0.25)
+	bone.transform = bone.transform.interpolate_with(new_transform, 0.25)
+	bone.linear_velocity = bone.linear_velocity.move_toward(new_velocity, 0.5)
 		
 	
 	

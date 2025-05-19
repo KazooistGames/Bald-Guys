@@ -35,13 +35,12 @@ func _process(_delta):
 func _physics_process(_delta):	
 
 	var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
-	humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
+	humanoid.WALK_VECTOR = direction.rotated(Vector3.UP, camera.rotation.y)
 	humanoid.REACHING = force.action
 	humanoid.LOOK_VECTOR = Vector3(sin(camera.rotation.y), camera.rotation.x, cos(camera.rotation.y))
 	force.Aim = (humanoid.LOOK_VECTOR * Vector3(-1, 1, -1)).normalized()
 	var offset_to_zero = 1.0 - abs(humanoid.LOOK_VECTOR.normalized().dot(Vector3.UP))
-	#force.base_position = camera.position.lerp(Vector3.ZERO, offset_to_zero * 0.33)
-	force.base_position = humanoid.head_position().lerp(Vector3.ZERO, offset_to_zero * 0.33)
+	force.base_position = humanoid.head_position().lerp(Vector3.ZERO, offset_to_zero / 3.0)
 	force.rotation = camera.rotation 
 	
 	if camera.shapecast.is_colliding():
@@ -170,7 +169,8 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	if not is_multiplayer_authority():
 		return
 		
-	var rollback_lag = Time.get_unix_time_from_system() - timestamp		
+	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
+	#rollback_lag = .5
 	var action_committed = false
 	
 	for key in inputs.keys():
