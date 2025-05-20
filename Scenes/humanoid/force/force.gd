@@ -445,7 +445,7 @@ func predict(step_size):
 
 	_physics_process(step_size)
 	force_update_transform()
-	rectifier.cache(step_size)
+	#rectifier.update_cache(step_size)
 		
 	
 	
