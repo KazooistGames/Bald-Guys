@@ -4,11 +4,11 @@ const max_state_age = 0.5
 const debug = false
 
 @export var StateKeys : Array[String] = []
+@export var Whitelist : Array[String] = []
+@export var Blacklist : Array[String] = []
 
 @onready var parent = get_parent()
 
-var previous_transforms : Array[Transform3D] = []
-var previous_velocities : Array[Vector3] = []
 var previous_ages : Array[float] = []
 var previous_states : Array[Dictionary]
 	
@@ -26,89 +26,62 @@ func _physics_process(delta):
 	if previous_ages.size() == 0:
 		pass
 	elif previous_ages[0] >= max_state_age: #discard states that are too old
-		previous_transforms.pop_front()
-		previous_velocities.pop_front()
+
 		previous_states.pop_front()
 		previous_ages.pop_front()
 	
 	cache(0)
 	
 	
-func cache(age = 0):
+func cache(age = 0, blacklist : Array[String] = [], whitelist : Array[String] = [], debug = false):
 
-	previous_transforms.append(parent.transform)
-	
-	if parent is RigidBody3D:
-		previous_velocities.append(parent.linear_velocity)
-		
 	previous_ages.append(age)
 	
 	var state : Dictionary = {}
 	
 	for key in StateKeys:		
-		state[key] = parent.get(key)
+		var key_allowed = true
+		
+		if blacklist.has(key):
+			key_allowed = false
+		elif not whitelist.has(key) and not whitelist.is_empty():
+			key_allowed = false
+			
+		if key_allowed:
+			state[key] = parent.get(key)
+		
+		if debug:
+			print("cached  ", parent.name, " ", key, " at ", state[key])
+			
 		
 	previous_states.append(state)
 		
 	
-func perform_rollback(time_to_rollback):
+func perform_rollback(time_to_rollback, blacklist : Array= [], whitelist : Array = [], debug = false):
 	
 	var index = get_rollback_index(time_to_rollback)
 	
 	if index < 0:
 		return
 		
-	var rollback_transform =  previous_transforms[index]
-	parent.transform = rollback_transform
-	
-	if parent is RigidBody3D:
-		var rollback_velocity =  previous_velocities[index]
-		parent.linear_velocity = rollback_velocity
-
 	var state = get_rollback_state(time_to_rollback)
 	
-	for key in StateKeys:		
-		parent.set(key, state[key])
+	for key in StateKeys:			
+		var key_allowed = true
 		
-		if debug:
-			print("rolled back ", parent.name, " ", key, " to ", state[key])
+		if blacklist.has(key):
+			key_allowed = false
+		elif not whitelist.has(key) and not whitelist.is_empty():
+			key_allowed = false
+			
+		if key_allowed:
+			parent.set(key, state[key])
+		
+			if debug:
+				print("rolled back ", parent.name, " ", key, " to ", state[key])
 	
 	invalidate_cache_array(index)
 
-
-
-func apply_retroactive_impulse(time_to_rollback, impulse, base_modifier : Callable = Callable(), delta_modifer: Callable = Callable(), use_gravity = true):
-	
-	var index = get_rollback_index(time_to_rollback)
-	var base_velocity =  previous_velocities[index]
-	var delta_velocity = previous_velocities[previous_velocities.size()-1] - base_velocity
-	
-	if base_modifier.is_valid():
-		base_velocity = base_modifier.call(base_velocity)
-		
-	if delta_modifer.is_valid():
-		delta_velocity = delta_modifer.call(delta_velocity)
-	
-	var starting_transform = previous_transforms[index]
-	var predicted_transform = previous_transforms[index]
-	var predicted_velocity = base_velocity + impulse + delta_velocity
-	predicted_transform.origin += predicted_velocity * time_to_rollback 
-	
-	if debug:
-		print("Rolled back ", time_to_rollback, " from " ,get_parent().transform.origin ," moving ", base_velocity, " at index ", index)
-	
-	if use_gravity:
-		predicted_transform.origin -= Vector3.UP * 4.9 * pow(time_to_rollback, 2.0)		
-		predicted_velocity -= Vector3.UP * 9.8 * time_to_rollback
-		
-	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, predicted_transform)
-	PhysicsServer3D.body_set_state(get_parent().get_rid(), PhysicsServer3D.BODY_STATE_LINEAR_VELOCITY, predicted_velocity)
-	invalidate_cache_array(index)
-	mock_cache(starting_transform, predicted_velocity, time_to_rollback)
-	
-	if debug:
-		print("wound up at ", predicted_transform.origin, " and set velocity to ", predicted_velocity)
-	
 
 func get_rollback_index(time_to_rollback):
 	
@@ -130,21 +103,6 @@ func get_rollback_index(time_to_rollback):
 	#print("found index ", target_index, ", with age ", age_at_index)
 	return target_index
 
-
-func get_rollback_velocity(time_to_rollback) -> Vector3:
-	
-	if not parent is RigidBody3D:
-		return Vector3.ZERO
-		
-	var index = get_rollback_index(time_to_rollback)
-	return previous_velocities[index]
-
-
-func get_rollback_transfrom(time_to_rollback):
-	
-	var index = get_rollback_index(time_to_rollback)
-	return previous_transforms[index]
-	
 	
 func get_rollback_state(time_to_rollback):
 	
@@ -160,30 +118,13 @@ func invalidate_cache_array(cutoff_index):
 		
 	previous_ages = previous_ages.slice(0, cutoff_index)
 	previous_states = previous_states.slice(0, cutoff_index)
-	previous_transforms = previous_transforms.slice(0, cutoff_index)
-	
-	if parent is RigidBody3D:
-		previous_velocities = previous_velocities.slice(0, cutoff_index)
 	
 	
 func clear_old_data(cutoff_age):
 	
 	var cutoff_index = get_rollback_index(cutoff_age)
 	previous_ages = previous_ages.slice(cutoff_index)
-	previous_transforms = previous_transforms.slice(cutoff_index)
-	previous_velocities = previous_velocities.slice(cutoff_index)
-	
-	
-func mock_cache(start_transform : Transform3D, velocity : Vector3, time_span : float) -> void:
-	
-	var delta : float = 1.0 / Engine.physics_ticks_per_second
-	
-	while time_span > 0:
-		previous_transforms.append(start_transform)
-		previous_velocities.append(velocity)
-		previous_ages.append(time_span)
-		start_transform.origin += velocity * delta
-		time_span -= delta
+	previous_states = previous_states.slice(cutoff_index)
 
 
 func parent_state(state_enum : PhysicsServer3D.BodyState) -> Transform3D:

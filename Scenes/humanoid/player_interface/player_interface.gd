@@ -61,6 +61,7 @@ func _physics_process(_delta):
 		rpc_update_Continuous_inputs.rpc(continuous_inputs, timestamp)
 		WASD = continuous_inputs['wasd']
 		humanoid.RUNNING = continuous_inputs['run']
+		
 	else:
 		camera.rotation = look
 			
@@ -102,7 +103,7 @@ func detected_input_change(inputs) -> bool:
 	
 func update_recovery_minigame_difficulty(rollback):
 	
-	var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_velocity(rollback).length()
+	var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_state(rollback)["linear_velocity"].length()
 	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)	
 		
 	
@@ -122,19 +123,6 @@ func handle_early_recovery():
 	
 	if is_multiplayer_authority() and humanoid.RAGDOLLED:
 		humanoid.ragdoll_recovery_progress = 1.0
-
-
-#func attempt_lunge_at_target(target):
-	#
-	#if target != null:
-		#var disposition = target.global_position - humanoid.global_position
-		#var distance = disposition.length()
-		#
-		#if distance > 3.5:
-			#pass
-			#
-		#elif target.is_in_group("humanoids"):
-			#humanoid.lunge.rpc(target.get_path())
 	
 	
 @rpc("any_peer", "call_local", "unreliable_ordered")
@@ -143,21 +131,29 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 	if not is_multiplayer_authority():
 		return
 		
+	var action_committed = false
+	var rollback_lag = Time.get_unix_time_from_system() - timestamp
+	rollback_lag = 0.5
+	
+	for key in inputs.keys():
+		
+		if just_pressed(key, inputs):
+			action_committed = true
+		
+	if action_committed: #ROLLBACK	
+		humanoid.rollback(rollback_lag, [], ["WALK_VECTOR", "LOOK_VECTOR", "RUNNING"])	
+		force.rollback(rollback_lag)
+		
+	
 	look = inputs['look']	
 	humanoid.RUNNING = inputs['run']
-	
-	if WASD != inputs['wasd']: #only on input change
-	
-		WASD = inputs['wasd']
-		var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
-		humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
+	WASD = inputs['wasd']
+	var direction = (Basis.IDENTITY * Vector3(WASD.x, 0, WASD.y)).normalized()
+	humanoid.WALK_VECTOR =  direction.rotated(Vector3.UP, camera.rotation.y)
 		
-		if is_multiplayer_authority():
-			#print("WASD'd!")
-			var rollback_lag = Time.get_unix_time_from_system() - timestamp
-			humanoid.rollback(rollback_lag)
-			humanoid.predict(rollback_lag)
-		
+	if action_committed:
+		perform_player_prediction(rollback_lag)
+
 	cache_new_inputs(inputs)
 		
 
@@ -170,7 +166,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		return
 		
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
-	#rollback_lag = .25
+	rollback_lag = .25
 	var action_committed = false
 	
 	for key in inputs.keys():
@@ -178,7 +174,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		if just_pressed(key, inputs):
 			action_committed = true
 		
-	if action_committed: #ROLLBACK
+	if action_committed: #ROLLBACK			
 		humanoid.rollback(rollback_lag)	
 		force.rollback(rollback_lag)
 	
@@ -221,16 +217,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		force.rpc_release.rpc()
 		
 	if action_committed: #PREDICT
-		var lag : float = rollback_lag
-		var step_size : float
-		
-		while lag > 0:
-			step_size = min(get_physics_process_delta_time(), lag)
-			lag -= step_size
-			humanoid.predict(step_size)
-			humanoid.rectifier.cache(lag)	
-			force.predict(step_size)	
-			force.rectifier.cache(lag)
+		perform_player_prediction(rollback_lag)
 		
 	cache_new_inputs(inputs)
 
@@ -286,4 +273,18 @@ func get_local_camera():
 		return local_cameras[0]
 	else:
 		return null
+
+
+func perform_player_prediction(rollback_lag):
+	
+	var lag : float = rollback_lag
+	var step_size : float
+	
+	while lag > 0:
+		step_size = min(get_physics_process_delta_time(), lag)
+		lag -= step_size
+		humanoid.predict(step_size)
+		humanoid.rectifier.cache(lag, [], [], true)	
+		force.predict(step_size)	
+		force.rectifier.cache(lag)
 

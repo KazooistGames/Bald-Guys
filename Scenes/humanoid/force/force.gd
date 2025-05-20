@@ -61,7 +61,8 @@ func _ready():
 		rectifier.StateKeys.append("charge_ready")
 		rectifier.StateKeys.append("charge_timer")
 		rectifier.StateKeys.append("cooldown_timer")
-
+		rectifier.StateKeys.append("transform")
+		
 
 func _process(delta):
 	#rectifier.StateKeys.clear()
@@ -87,7 +88,7 @@ func _physics_process(delta):
 	target_position = base_position + Aim.normalized() * offset * (1 + held_mass() / Max_kg / 2.0)
 	position = position.move_toward(target_position, delta * 6.0)
 	charge_armed = false
-	charge_ready = wielder.ON_FLOOR and not action == Action.charging
+	charge_ready = (wielder.ON_FLOOR and not action == Action.charging) or charge_ready
 	capture_bodies()
 	hum.stream_paused = action == Action.inert
 	
@@ -438,16 +439,6 @@ func launch_trajectory():
 func rollback(lag):
 	
 	rectifier.perform_rollback(lag)
-	
-	match action:
-		
-		Action.charging:
-			charge_timer = maxf(charge_timer - lag, 0.0)
-			pass
-			
-		Action.cooldown:
-			cooldown_timer = maxf(cooldown_timer - lag, 0.0)
-			pass
 		
 	
 func predict(step_size):

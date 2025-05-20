@@ -95,6 +95,8 @@ func _ready():
 	
 	if is_multiplayer_authority(): 
 		getRandomSkinTone()
+		rectifier.StateKeys.append("linear_velocity")
+		rectifier.StateKeys.append("transform")
 		rectifier.StateKeys.append("WALK_VECTOR")
 		rectifier.StateKeys.append("LOOK_VECTOR")
 		rectifier.StateKeys.append("RUNNING")
@@ -108,6 +110,8 @@ func _ready():
 		rectifier.StateKeys.append("just_jumped_timer")
 		rectifier.StateKeys.append("ragdoll_recovery_progress")
 		rectifier.StateKeys.append("lunge_timer")
+		ragdoll_rectifier.StateKeys.append("linear_velocity")
+		ragdoll_rectifier.StateKeys.append("transform")
 	
 	depen_query = PhysicsShapeQueryParameters3D.new()	
 	depen_query.collision_mask = 0b0001		
@@ -422,7 +426,7 @@ func get_acceleration():
 		return 10.0		
 	else:	
 		var translationalSpeed = walk_velocity.length()
-		return 15 + translationalSpeed * 2
+		return 15 + translationalSpeed * 3
 		
 
 func getRandomSkinTone():
@@ -603,7 +607,6 @@ func land():
 	var translational_velocity = Vector3(linear_velocity.x, 0, linear_velocity.z)
 	var deadstop_point = 2.0
 	
-	
 	if translational_velocity.length() <= deadstop_point:
 		linear_velocity.x = 0
 		linear_velocity.z = 0
@@ -616,28 +619,14 @@ func land():
 		linear_velocity.x /= 2.0
 		linear_velocity.z /= 2.0
 	
-
 	
-	
-func rollback(lag : float) -> void:
+func rollback(lag : float, blacklist : Array = [], whitelist : Array = []) -> void:
 
-	rectifier.perform_rollback(lag)
+	rectifier.perform_rollback(lag, blacklist, whitelist, true)
 	force_update_transform()
 	collision_ons.clear()
 	wall_jump_ons = true
-	#coyote_timer -= lag		
-	#coyote_timer = max(coyote_timer, 0.)
-	#ON_FLOOR = coyote_timer <= coyote_duration
-	#reverse_coyote_timer -= lag
-	#reverse_coyote_timer = max(reverse_coyote_timer, 0.)
 	floorcast.enabled = reverse_coyote_timer < coyote_duration
-	#just_jumped_timer -= lag * 2.0 #fudge factor :)
-	#just_jumped_timer = max(just_jumped_timer, 0.)
-	#var ragdoll_velocity = max(1.0, $"Skeleton3D/Ragdoll/Physical Bone lowerBody".linear_velocity.length())
-	#var recovery_scalar = ragdoll_recovery_default_duration * sqrt(ragdoll_velocity)
-	#ragdoll_recovery_progress -= lag / recovery_scalar
-	#ragdoll_recovery_progress = max(ragdoll_recovery_progress, 0.)
-	#print("Rolled back to ", position, " moving at ", linear_velocity)
 	floorcast.force_raycast_update() #because we are simulating physics async
 
 
