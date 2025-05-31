@@ -100,11 +100,6 @@ func detected_input_change(inputs) -> bool:
 			
 	return false
 	
-	
-func update_recovery_minigame_difficulty(rollback):
-	
-	var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_state(rollback)["linear_velocity"].length()
-	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)	
 		
 	
 func handle_ragdoll(_humanoid):
@@ -133,7 +128,7 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 		
 	var action_committed = false
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp
-	rollback_lag = 0.25
+	#rollback_lag = 0.25
 	
 	for key in inputs.keys():
 		
@@ -141,7 +136,7 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 			action_committed = true
 		
 	if action_committed: #ROLLBACK	
-		humanoid.rollback(rollback_lag, [], [])	
+		humanoid.rollback(rollback_lag, [], ["WALK_VECTOR", "LOOK_VECTOR", "RUNNING"])	
 		force.rollback(rollback_lag)
 		
 	
@@ -166,7 +161,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		return
 		
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
-	rollback_lag = .25
+	#rollback_lag = .25
 	var action_committed = false
 	
 	for key in inputs.keys():
@@ -188,7 +183,9 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 			humanoid.double_jump.rpc()
 	
 	if just_pressed('recover', inputs): 
-		update_recovery_minigame_difficulty(rollback_lag)
+		
+		var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_state(rollback_lag)["linear_velocity"].length()
+		recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)	
 		recovery_minigame.attempt_early_recovery(timestamp)
 			
 	if just_pressed('secondary', inputs):

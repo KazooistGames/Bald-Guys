@@ -20,7 +20,8 @@ extends Node3D
 var resize_period : float = 3.0
 var resize_timer : float = 0.0
 
-signal finished_resizing
+signal finished_shrinking
+signal finished_growing
 
 
 func _ready() -> void:
@@ -44,9 +45,15 @@ func _process(delta:float) -> void:
 	
 	elif Current_Size == Next_Size or resize_timer >= resize_period:
 		Resizing = false
+		
+		if Current_Size > Last_Size:
+			finished_growing.emit()
+			
+		elif Current_Size < Last_Size:
+			finished_shrinking.emit()
+			
 		Last_Size = Next_Size
 		resize_timer = 0.0
-		finished_resizing.emit()
 		
 	else:
 		resize_timer += delta

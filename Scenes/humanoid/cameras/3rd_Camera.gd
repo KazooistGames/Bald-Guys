@@ -56,11 +56,14 @@ func _physics_process(delta):
 		reticle.size = Vector2.ONE * 4	
 		reticle.position = get_center_of_screen() - reticle.size / 2.0
 	
-	if force.action == force.Action.holding:
+	if humanoid.RAGDOLLED:
+		zoom_deadband = 0.1
+		Zoomed = false
+	elif force.action == force.Action.holding:
 		zoom_deadband = 0.1
 		Zoomed = true
 	elif force.action == force.Action.charging:
-		zoom_deadband = 0.35
+		zoom_deadband = 0.5
 		Zoomed = true
 	else:
 		Zoomed = false

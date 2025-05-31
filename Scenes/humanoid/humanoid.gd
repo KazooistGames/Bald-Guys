@@ -426,7 +426,7 @@ func get_acceleration():
 		return 10.0		
 	else:	
 		var translationalSpeed = walk_velocity.length()
-		return 15 + translationalSpeed * 3
+		return 15 #+ translationalSpeed * 3
 		
 
 func getRandomSkinTone():
@@ -586,9 +586,6 @@ func wall_jump(impulse):
 		reset_double_jump()	
 		audio_jump(1.6)
 		audio_impact(-18, 1.2)
-		
-		if is_multiplayer_authority():
-			rectifier.clear_old_data(0)
 
 
 @rpc("call_local", "reliable")
@@ -622,7 +619,7 @@ func land():
 	
 func rollback(lag : float, blacklist : Array = [], whitelist : Array = []) -> void:
 
-	rectifier.perform_rollback(lag, blacklist, whitelist, true)
+	rectifier.perform_rollback(lag, blacklist, whitelist)
 	force_update_transform()
 	collision_ons.clear()
 	wall_jump_ons = true

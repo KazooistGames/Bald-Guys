@@ -2,8 +2,6 @@ extends Node3D
 
 @export var Map_Size : int = 25
 
-@export var autocycle : bool= true
-
 @onready var room : Node3D = $room
 @onready var hoverboard_stager : Node3D = $Hoverboard_Stager
 @onready var mesa_grower : Node3D = $Mesa_Grower
@@ -11,11 +9,12 @@ extends Node3D
 @onready var ramparter : Node3D = $Ramparter
 @onready var limb_grower : Node3D = $Limb_Grower
 @onready var session : Node3D = get_parent()
-
-var autocycle_period : float = 120.0
-var autocycle_timer : float = -1.0			
+	
 var multiplayer_permissive : bool = false
 var level_rng : RandomNumberGenerator = RandomNumberGenerator.new()
+
+signal generated
+signal demolished
 
 		
 func _ready() -> void:
@@ -32,23 +31,31 @@ func _ready() -> void:
 	if not multiplayer_permissive:
 		return	
 	
+	stage_boards()
+	item_dropper.spawn_field(0, 5, 5, 5, Vector3.UP * Map_Size / 2.0)
+	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * Map_Size / 2.0)
+	
 	#arena going up
-	hoverboard_stager.finished_introducing.connect(stage_mesas)
+	room.finished_growing.connect(stage_mesas)
 	mesa_grower.finished_extending.connect(stage_ramps)
 	ramparter.finished_lifting.connect(stage_limbs)
-	limb_grower.finished_extending.connect(start_reconfigure_timer)
+	limb_grower.finished_extending.connect(func(): generated.emit())
 	
 	#arena going down
 	limb_grower.finished_retracting.connect(unstage_ramps) #unstage the limbs to kick everything off
 	ramparter.finished_collapsing.connect(unstage_mesas)
 	mesa_grower.finished_retracting.connect(unstage_boards) 
 	hoverboard_stager.finished_retreating.connect(reset_map)
+	room.finished_shrinking.connect(func(): demolished.emit())
 	
 	
 func _process(_delta):
 
 	room.request_size(Map_Size)	
 	hoverboard_stager.Map_Size = room.Current_Size
+	item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
+	item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
+
 
 func _physics_process(delta) -> void:
 	
@@ -61,22 +68,19 @@ func _physics_process(delta) -> void:
 
 	if not multiplayer_permissive:
 		pass
-		
-	elif not autocycle:
-		pass	
 			
-	elif autocycle_timer < 0:
-		item_dropper.collect_items.rpc(0, Vector3.UP * 35.0)
-		item_dropper.collect_items.rpc(2, Vector3.UP * 35.0, 0.75)
 		
-	elif autocycle_timer >= autocycle_period or Input.is_action_just_pressed("Toggle2"):
-		autocycle_timer = -1
-		unstage_limbs()
-		print("reconfiguring map...")
-		
-	else:
-		autocycle_timer += delta
+func generate() -> void:
 	
+	Map_Size = 50
+
+
+
+func demolish() -> void:
+	
+	limb_grower.retract_limbs()
+	hoverboard_stager.stop_boards.rpc()
+
 	
 func reset_map() -> void:
 	
@@ -84,33 +88,7 @@ func reset_map() -> void:
 	mesa_grower.clear_mesas.rpc()
 	ramparter.clear_ramps.rpc()
 	limb_grower.clear_limbs.rpc()
-	Map_Size = 25
-		
-		
-func trigger_map_generation_cycle() -> void:
-	
-	Map_Size = 50
-	autocycle_timer = -1
-	room.finished_resizing.connect(start_staging)
-
-		
-func start_staging() -> void:
-	
-	Map_Size = 50
-	autocycle_timer = -1
-	item_dropper.spawn_field(0, 5, 5, 5, Vector3.UP * Map_Size / 2.0)
-	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * Map_Size / 2.0)
-	stage_boards()
-	mesa_grower.finished_retracting.connect(stage_mesas) 
-	
-
-func trigger_map_clear_cycle() -> void:
-	
-	item_dropper.clear_all_items()
-	limb_grower.retract_limbs()
-	hoverboard_stager.stop_boards.rpc()
-	mesa_grower.finished_retracting.disconnect(stage_mesas) 
-	room.finished_resizing.disconnect(start_staging)
+	Map_Size = 25	
 	
 	
 func stage_boards() -> void:
@@ -151,12 +129,12 @@ func stage_limbs() -> void:
 	hoverboard_stager.synchronize_all_peers()
 			
 			
-func start_reconfigure_timer(preset : float = 0.0) -> void:
-	
-	item_dropper.disperse_items.rpc(0)
-	item_dropper.disperse_items.rpc(2, 6.0)
-	limb_grower.stop.rpc()
-	autocycle_timer = preset			
+#func start_reconfigure_timer(preset : float = 0.0) -> void:
+	#
+	#item_dropper.disperse_items.rpc(0)
+	#item_dropper.disperse_items.rpc(2, 6.0)
+	#limb_grower.stop.rpc()
+	#autocycle_timer = preset			
 	
 			
 func unstage_limbs() -> void:

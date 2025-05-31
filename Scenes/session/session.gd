@@ -48,8 +48,8 @@ func _ready():
 	
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
-	Started_Round.connect(Level.trigger_map_generation_cycle)
-	Ended_Round.connect(Level.trigger_map_clear_cycle)
+	#Started_Round.connect(Level.generate)
+	#Ended_Round.connect(Level.demolish)
 
 
 func _process(delta):
@@ -121,7 +121,9 @@ func Try_Start_Session():
 	
 	State = SessionState.Intermission
 	countDown_timer = 0
-	countDown_value = 5
+	countDown_value = 30
+	HUD.set_psa.rpc(str(countDown_value))
+	Level.generate()
 	
 
 func Try_Start_Round():
@@ -129,17 +131,17 @@ func Try_Start_Round():
 	Games[Round].GameOver.connect(Try_Finish_Round)
 	Games[Round].rpc_play.rpc()
 	State = SessionState.Round	
-	HUD.set_psa.rpc(countDown_value)	
 	Started_Round.emit()
 	
 	
 func Try_Finish_Round():
 	
 	countDown_timer = 0
-	countDown_value = 5
+	countDown_value = 30
 	Games[Round].GameOver.disconnect(Try_Finish_Round)
 	Games[Round].rpc_finish.rpc()
 	State = SessionState.Intermission
+	HUD.set_psa.rpc(str(countDown_value))
 	Round += 1	
 	Ended_Round.emit()	
 	
