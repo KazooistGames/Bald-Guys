@@ -31,12 +31,12 @@ func _ready() -> void:
 	if not multiplayer_permissive:
 		return	
 	
-	stage_boards()
 	item_dropper.spawn_field(0, 5, 5, 5, Vector3.UP * Map_Size / 2.0)
 	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * Map_Size / 2.0)
 	
 	#arena going up
-	room.finished_growing.connect(stage_mesas)
+	room.finished_growing.connect(stage_boards)
+	hoverboard_stager.finished_introducing.connect(stage_mesas)
 	mesa_grower.finished_extending.connect(stage_ramps)
 	ramparter.finished_lifting.connect(stage_limbs)
 	limb_grower.finished_extending.connect(func(): generated.emit())
@@ -53,8 +53,10 @@ func _process(_delta):
 
 	room.request_size(Map_Size)	
 	hoverboard_stager.Map_Size = room.Current_Size
-	item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
-	item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
+	
+	if room.Current_Size != 50:
+		item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
+		item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
 
 
 func _physics_process(delta) -> void:
@@ -93,6 +95,8 @@ func reset_map() -> void:
 	
 func stage_boards() -> void:
 	
+	item_dropper.disperse_items.rpc(0)
+	item_dropper.disperse_items.rpc(2, 6.0)
 	hoverboard_stager.clear_boards.rpc()
 	hoverboard_stager.create_boards.rpc(1, 12, 1, Vector2(18, 25))
 	hoverboard_stager.create_boards.rpc(3, 6, 2, Vector2(12, 20))

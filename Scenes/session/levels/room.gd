@@ -43,7 +43,7 @@ func _process(delta:float) -> void:
 	if not Resizing:
 		pass
 	
-	elif Current_Size == Next_Size or resize_timer >= resize_period:
+	elif Current_Size == Next_Size or resize_timer == resize_period:
 		Resizing = false
 		
 		if Current_Size > Last_Size:
@@ -56,7 +56,7 @@ func _process(delta:float) -> void:
 		resize_timer = 0.0
 		
 	else:
-		resize_timer += delta
+		resize_timer = move_toward(resize_timer, resize_period, delta)
 		var tween_range : float = Next_Size - Last_Size
 		var desired_size = Tween.interpolate_value(Last_Size, tween_range, resize_timer, resize_period, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
 		adjust_room_to_size(desired_size)
