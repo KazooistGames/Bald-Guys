@@ -21,7 +21,7 @@ var whitelist : Array[String] =  [
 	"RUNNING", 
 	"ON_FLOOR",
 	#"RAGDOLLED", 
-	#"ragdoll_recovery_progress"
+	"ragdoll_recovery_progress"
 ]
 
 var blacklist : Array[String] = [
@@ -111,7 +111,7 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 		
 	var action_committed = false
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp
-	rollback_lag = 0.25
+	#rollback_lag = 0.15
 	
 	if just_changed('wasd', inputs):
 		action_committed = true
@@ -143,7 +143,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		return
 		
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
-	rollback_lag = .25
+	#rollback_lag = .15
 	var action_committed = false
 
 	for key in inputs.keys():

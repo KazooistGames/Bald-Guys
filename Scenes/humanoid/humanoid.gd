@@ -490,6 +490,7 @@ func ragdoll(velocity_override):
 func unragdoll(use_skeleton_position : bool = true):
 	
 	if RAGDOLLED:
+		ragdoll_recovery_progress = 0
 		ragdoll_cooldown_timer_seconds = 0
 		
 		if use_skeleton_position:
