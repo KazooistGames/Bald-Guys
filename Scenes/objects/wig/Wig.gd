@@ -1,6 +1,8 @@
 
 extends RigidBody3D
 
+const radius_speed = 0.25
+
 @export var HAIR_COLOR : Color:
 	
 	get:
@@ -8,6 +10,7 @@ extends RigidBody3D
 		
 	set(value):
 		HAIR_COLOR = value
+		#light.light_color = value
 		if not mesh: return
 		material = mesh.get_surface_override_material(0)
 		material.albedo_color = value
@@ -15,19 +18,17 @@ extends RigidBody3D
 		mesh.set_surface_override_material(0, material)
 		
 @export var AUTHORITY_POSITION = Vector3.ZERO
-
 @export var radius = 0.15
-var cached_radius
 	
 @onready var Dawn = $Dawn
 @onready var Drop = $Drop
-
-
 @onready var mesh = $MeshInstance3D
 @onready var collider = $CollisionShape3D
 @onready var interactable = $Interactable
 @onready var synchronizer = $MultiplayerSynchronizer
+@onready var light = $OmniLight3D
 @onready var material = mesh.get_surface_override_material(0)
+
 
 var strobing_enabled = false
 var strobing_phase = 0
@@ -46,22 +47,25 @@ func _ready():
 		return
 		
 	getRandomHairColor()
-
+	material.emission_energy_multiplier = 1
 
 func _process(delta):
 	
-	if cached_radius != radius:
-		cached_radius = radius
-		mesh.mesh.radius = radius
-		mesh.mesh.height = radius * 2
-		collider.shape.radius = radius
+	light.light_color = HAIR_COLOR
+	material.emission_energy_multiplier = 1 + radius
+	light.light_energy = radius * 2
 	
-	if strobing_enabled:
-		material.emission_energy_multiplier = 1 * abs(sin(strobing_phase))
-		strobing_phase += delta
-	
-	else:
-		material.emission_energy_multiplier = 0.5
+	if mesh.mesh.radius != radius:
+		mesh.mesh.radius = move_toward(mesh.mesh.radius, radius, delta * radius_speed)
+		mesh.mesh.height = mesh.mesh.radius * 2
+		collider.shape.radius = mesh.mesh.radius
+		
+	#if strobing_enabled:
+#
+		#strobing_phase += delta
+	#
+	#else:
+		#material.emission_energy_multiplier = 0.5
 		
 
 func getRandomHairColor():

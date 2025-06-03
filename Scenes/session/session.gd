@@ -136,15 +136,25 @@ func Try_Start_Round():
 	
 func Try_Finish_Round():
 	
-	countDown_timer = 0
-	countDown_value = 30
 	Games[Round].GameOver.disconnect(Try_Finish_Round)
 	Games[Round].rpc_finish.rpc()
-	State = SessionState.Intermission
-	HUD.set_psa.rpc(str(countDown_value))
-	Round += 1	
+	Round += 1		
 	Ended_Round.emit()	
 	
+	if Round >= Games.size():
+		Try_Reset_Session()
+	else:
+		State = SessionState.Intermission
+		countDown_timer = 0
+		countDown_value = 30
+		HUD.set_psa.rpc(str(countDown_value))
+
+	
+func Try_Reset_Session():
+	
+	State = SessionState.Lobby
+	Level.demolish()	
+
 
 func add_player(peer_id):
 	

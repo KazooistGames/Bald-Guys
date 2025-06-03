@@ -426,7 +426,7 @@ func get_acceleration():
 		return 10.0		
 	else:	
 		var translationalSpeed = walk_velocity.length()
-		return 15 #+ translationalSpeed * 3
+		return 20 - translationalSpeed #+ translationalSpeed * 3
 		
 
 func getRandomSkinTone():
@@ -552,6 +552,11 @@ func bump(velocity_impulse):
 @rpc("call_local", "reliable")
 func jump():
 	
+	if not ON_FLOOR:
+		return
+	elif RAGDOLLED:
+		return
+		
 	ON_FLOOR = false
 	wall_jump_ons = true
 	just_jumped_timer = 0.0
@@ -566,6 +571,7 @@ func jump():
 
 @rpc("call_local", "reliable")
 func double_jump():
+	
 	wall_jump_ons = true
 	just_jumped_timer = 0.0
 	audio_jump(1.2)
@@ -597,6 +603,11 @@ func reset_double_jump():
 @rpc("call_local", "reliable")
 func land():
 
+	if ON_FLOOR:
+		return
+	elif RAGDOLLED:
+		return
+		
 	reset_double_jump()
 	coyote_timer = 0
 	audio_impact(-24, 0.5)

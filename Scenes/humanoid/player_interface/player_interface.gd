@@ -13,6 +13,20 @@ var targeted_object : Node3D
 var is_local_interface = false #input hardware is connected to this node
 var cached_inputs = {} #used to determine delta across the network
 	
+var whitelist : Array[String] =  [
+	"transform",
+	"linear_velocity",
+	"WALK_VECTOR", 
+	"LOOK_VECTOR", 
+	"RUNNING", 
+	"ON_FLOOR",
+	#"RAGDOLLED", 
+	#"ragdoll_recovery_progress"
+]
+
+var blacklist : Array[String] = [
+	'RAGDOLLED', 
+]	
 
 func _ready():
 
@@ -26,7 +40,7 @@ func _ready():
 	
 
 func _process(_delta):
-			
+	
 	var ragdoll_speed = humanoid.find_child("*lowerBody", true, false).linear_velocity.length()
 	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
 	recovery_minigame.progress = humanoid.ragdoll_recovery_progress
@@ -88,37 +102,6 @@ func _input(event):
 		cache_new_inputs(discrete_inputs)
 	
 	
-func detected_input_change(inputs) -> bool:
-	
-	for key in inputs.keys():
-		
-		if just_pressed(key, inputs):
-			return true
-			
-		if just_released(key, inputs):
-			return true
-			
-	return false
-	
-		
-	
-func handle_ragdoll(_humanoid):
-	
-	if is_local_interface:
-		recovery_minigame.start_game()
-	
-	
-func handle_ragdoll_recovery():
-	
-	if is_local_interface:
-		recovery_minigame.visible = false
-
-
-func handle_early_recovery():
-	
-	if is_multiplayer_authority() and humanoid.RAGDOLLED:
-		humanoid.ragdoll_recovery_progress = 1.0
-	
 	
 @rpc("any_peer", "call_local", "unreliable_ordered")
 func rpc_update_Continuous_inputs(inputs, timestamp):
@@ -128,15 +111,14 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 		
 	var action_committed = false
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp
-	#rollback_lag = 0.25
+	rollback_lag = 0.25
 	
-	for key in inputs.keys():
-		
-		if just_pressed(key, inputs):
-			action_committed = true
+	if just_changed('wasd', inputs):
+		action_committed = true
 		
 	if action_committed: #ROLLBACK	
-		humanoid.rollback(rollback_lag, [], ["WALK_VECTOR", "LOOK_VECTOR", "RUNNING"])	
+
+		humanoid.rollback(rollback_lag, [], whitelist)	
 		force.rollback(rollback_lag)
 		
 	
@@ -161,16 +143,20 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		return
 		
 	var rollback_lag = Time.get_unix_time_from_system() - timestamp	
-	#rollback_lag = .25
+	rollback_lag = .25
 	var action_committed = false
-	
+
 	for key in inputs.keys():
 		
 		if just_pressed(key, inputs):
 			action_committed = true
 		
-	if action_committed: #ROLLBACK			
-		humanoid.rollback(rollback_lag)	
+	if action_committed: #ROLLBACK		
+		
+		#if not humanoid.ON_FLOOR:
+			#blacklist.append('ON_FLOOR')
+			
+		humanoid.rollback(rollback_lag, blacklist, [])	
 		force.rollback(rollback_lag)
 	
 	if just_pressed('jump', inputs):	
@@ -247,6 +233,14 @@ func just_pressed(action_key, new_inputs):
 	return return_val
 	
 	
+func just_changed(action_key, new_inputs):
+	
+	if not cached_inputs.has(action_key):
+		return false
+	else:
+		return cached_inputs[action_key] != new_inputs[action_key]
+	
+	
 func cache_new_inputs(new_inputs):
 	
 	for key in new_inputs.keys():
@@ -270,6 +264,37 @@ func get_local_camera():
 		return local_cameras[0]
 	else:
 		return null
+	
+	
+func detected_input_change(inputs) -> bool:
+	
+	for key in inputs.keys():
+		
+		if just_pressed(key, inputs):
+			return true
+			
+		if just_released(key, inputs):
+			return true
+			
+	return false
+		
+	
+func handle_ragdoll(_humanoid):
+	
+	if is_local_interface:
+		recovery_minigame.start_game()
+	
+	
+func handle_ragdoll_recovery():
+	
+	if is_local_interface:
+		recovery_minigame.visible = false
+
+
+func handle_early_recovery():
+	
+	if is_multiplayer_authority() and humanoid.RAGDOLLED:
+		humanoid.ragdoll_recovery_progress = 1.0
 
 
 func perform_player_prediction(rollback_lag):
