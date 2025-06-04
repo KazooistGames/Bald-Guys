@@ -1,7 +1,7 @@
 extends Node3D
 
 const prefab = preload("res://Scenes/geometry/mesa/mesa.tscn")
-const gap = 2.0
+const gap = 3.0
 
 @export var Map_Size : int = 50
 

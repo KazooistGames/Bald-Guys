@@ -144,6 +144,9 @@ func resize_hill(new_radius, time_elapsed):
 		core_mesh.mesh.height = hill_mesh.mesh.height / 10.0
 		floorCast.target_position = Vector3.FORWARD * Hill_Size * 3.0 / 4.0
 		wallCast.target_position = Vector3.FORWARD * Hill_Size * 3.0 / 4.0
+	elif new_radius == 0:
+		Hill.visible = false
+		hill_collider.disabled = true
 
 
 func get_players_in_hill() -> Array[Node3D]:

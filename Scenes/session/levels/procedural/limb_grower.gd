@@ -26,7 +26,7 @@ signal finished_extending
 signal finished_retracting
 
 
-var limb_freq = 1.0/3.0
+var limb_freq = 0.4
 
 
 func _physics_process(delta):

@@ -26,7 +26,7 @@ var collapse_speed = 5.0
 
 var in_position = false
 
-var ramp_floor_freq = 0.5
+var ramp_floor_freq = 1.0/3.0
 var ramp_roof_freq = 0.5
 
 signal finished_lifting

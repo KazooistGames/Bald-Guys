@@ -64,9 +64,9 @@ func _process(delta):
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
 		
-	if Games.size() >= 1:
-		wigs = Games[0].wigs
-		bearers = Games[0].bearers
+	#if Games.size() >= 1:
+		#wigs = Games[0].wigs
+		#bearers = Games[0].bearers
 
 
 func _physics_process(delta):
@@ -255,6 +255,7 @@ func rpc_CommissionSession(Seed):
 		0:
 			load_game("res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn")			
 			load_game("res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn")
+			load_game("res://Scenes/session/games/Wig_LMS/Wig_LMS.tscn")
 			
 	Level.seed_procedural_generators(hash(session_rng.randi()))
 	Commissioned = true
