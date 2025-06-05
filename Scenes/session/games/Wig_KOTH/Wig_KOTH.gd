@@ -157,14 +157,10 @@ func get_players_in_hill() -> Array[Node3D]:
 	var all_bodies : Array[Node3D] = Hill.get_overlapping_bodies()
 	var players : Array[Node3D] = []
 	
-	for body in all_bodies:
+	for bearer in session.bearers:
 		
-		if not body.is_in_group("humanoids"):
-			pass
-		elif not session.bearers.has(body):
-			pass
-		else:	
-			players.append(body)
+		if all_bodies.has(bearer):
+			players.append(bearer)
 			
 	return players
 		
