@@ -95,7 +95,12 @@ func _input(event):
 		discrete_inputs["secondary"] = Input.is_action_pressed("secondary")
 		var timestamp = Time.get_unix_time_from_system()
 		
-		discrete_inputs["recover"] = Input.is_action_pressed("recover") and recovery_minigame.lever_on_target(timestamp, recovery_minigame.difficulty)
+		if not Input.is_action_pressed("recover") or recovery_minigame.locked:
+			discrete_inputs["recover"] = false
+		elif recovery_minigame.lever_on_target(timestamp, recovery_minigame.difficulty):
+			discrete_inputs["recover"] = true
+		else:
+			recovery_minigame.early_fail()
 		
 		if detected_input_change(discrete_inputs) or cached_inputs.size() == 0:
 			rpc_update_Discrete_inputs.rpc_id(get_multiplayer_authority(), discrete_inputs, timestamp)	
