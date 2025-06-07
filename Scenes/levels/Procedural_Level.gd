@@ -54,7 +54,6 @@ func _process(_delta):
 	room.request_size(Map_Size)	
 	hoverboard_stager.Map_Size = room.Current_Size
 	
-	
 	if is_multiplayer_authority():
 		
 		if room.Current_Size != 50:
