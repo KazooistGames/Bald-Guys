@@ -1,6 +1,7 @@
 extends Control
 
 const lever_speed = 2.0
+const base_target_size = 150
 
 @onready var fill = $Fill
 @onready var backdrop = $BackDrop
@@ -28,7 +29,7 @@ func _process(delta):
 
 	target.visible = not locked
 	lever.visible = not locked
-	target.size.x = 150 / difficulty
+	target.size.x = base_target_size / difficulty
 	target.position.x = -target.size.x/2.0
 
 	var total_length = backdrop.size.x
@@ -50,10 +51,10 @@ func start_game():
 	locked = false
 			
 			
-func lever_on_target(timestamp):
+func lever_on_target(timestamp, difficulty = 1.0):
 	
 	var simulated_position = sin(lever_speed * timestamp) * backdrop.size.x / 2.0
-	return abs(simulated_position) <= target.size.x / 2.0
+	return abs(simulated_position) <= base_target_size / (2.0 * difficulty)
 	
 	
 func attempt_early_recovery(unix_time):

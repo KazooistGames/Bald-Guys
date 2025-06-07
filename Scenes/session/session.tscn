@@ -1,10 +1,10 @@
 [gd_scene load_steps=8 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
-[ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/session/levels/borealis/borealis.tscn" id="2_ywwqv"]
+[ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/levels/borealis/borealis.tscn" id="2_ywwqv"]
 [ext_resource type="PackedScene" uid="uid://bi27y02b7i065" path="res://Scenes/session/hud/HUD.tscn" id="4_ik81w"]
 [ext_resource type="PackedScene" uid="uid://4lgyaxekgwqy" path="res://Scenes/session/ambience/ambience.tscn" id="5_opotq"]
-[ext_resource type="PackedScene" uid="uid://b5fc4lv4wybum" path="res://Scenes/session/levels/Procedural_Level.tscn" id="5_xlqqg"]
+[ext_resource type="PackedScene" uid="uid://b5fc4lv4wybum" path="res://Scenes/levels/Procedural_Level.tscn" id="5_xlqqg"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="6_qr0l4"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]

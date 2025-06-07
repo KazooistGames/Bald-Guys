@@ -56,9 +56,11 @@ func update_scoreboard(_delta) -> void:
 		scores_text.text += "\n" + "%3.2f" % value
 		
 	var local_name = session.local_screenname()
+	#print(local_name)
 	if Scores.has(local_name):
 		var local_score = Scores[local_name]
 		ProgressPercent = clampf(local_score/Goal, 0.0, 1.0)
+		#print(multiplayer.get_unique_id(), local_score)
 		
 		
 @rpc("call_local", "reliable")

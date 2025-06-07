@@ -203,7 +203,7 @@ func rpc_play():
 	session.HUD.set_progress_label("Growing Hair...")
 	
 	if is_multiplayer_authority(): 
-		session.HUD.set_psa.rpc("Grow your Hair!")
+		session.HUD.set_psa.rpc("Grow your Hair!", 3)
 		State = GameState.playing
 		
 		for value in session.Client_Screennames.values():

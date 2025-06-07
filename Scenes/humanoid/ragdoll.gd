@@ -170,6 +170,7 @@ func sync_loose_bones():
 	elif not is_multiplayer_authority():
 		return
 	
+	#rpc_set_bone_physics.rpc(rootBone.get_path(), rootBone.transform, rootBone.linear_velocity)
 	for bone : PhysicalBone3D in physicalBones:	
 		var path = bone.get_path()
 		rpc_set_bone_physics.rpc(path, bone.transform, bone.linear_velocity)
@@ -180,7 +181,7 @@ func rpc_set_bone_physics(bone_path : NodePath, new_transform : Transform3D, new
 	
 	var bone : PhysicsBody3D = get_node(bone_path)
 	bone.transform = bone.transform.interpolate_with(new_transform, 0.25)
-	bone.linear_velocity = bone.linear_velocity.move_toward(new_velocity, 0.5)
+	bone.linear_velocity = bone.linear_velocity.move_toward(new_velocity, 1)
 		
 	
 	

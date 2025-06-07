@@ -35,12 +35,9 @@ grow_amount = 0.07
 properties/0/path = NodePath(".:radius")
 properties/0/spawn = true
 properties/0/replication_mode = 2
-properties/1/path = NodePath(".:freeze")
+properties/1/path = NodePath(".:HAIR_COLOR")
 properties/1/spawn = true
 properties/1/replication_mode = 2
-properties/2/path = NodePath(".:HAIR_COLOR")
-properties/2/spawn = true
-properties/2/replication_mode = 2
 
 [node name="Wig" type="RigidBody3D"]
 collision_layer = 8

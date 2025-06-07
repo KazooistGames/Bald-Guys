@@ -1,16 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://c1uj8nhliop8j"]
+[gd_scene load_steps=4 format=3 uid="uid://c1uj8nhliop8j"]
 
-[ext_resource type="Script" path="res://Scenes/session/levels/room.gd" id="1_jnaim"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/session/levels/Spawn/spawn.tscn" id="3_m4ih7"]
+[ext_resource type="Script" path="res://Scenes/levels/room.gd" id="1_jnaim"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="3_m4ih7"]
 [ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/geometry_static/Wall/wall.tscn" id="3_siirb"]
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_8jjgx"]
-properties/0/path = NodePath(".:Resizing")
-properties/0/spawn = true
-properties/0/replication_mode = 2
-properties/1/path = NodePath(".:Current_Size")
-properties/1/spawn = true
-properties/1/replication_mode = 2
 
 [node name="room" type="Node3D"]
 script = ExtResource("1_jnaim")
@@ -68,6 +60,3 @@ skeleton = NodePath("../..")
 [node name="spawn8" parent="spawns" instance=ExtResource("3_m4ih7")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 10, 0)
 skeleton = NodePath("../..")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_8jjgx")

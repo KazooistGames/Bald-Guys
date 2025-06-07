@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://cwp67bx2skp2m"]
 
-[ext_resource type="Script" path="res://Scenes/session/games/Wig_KOTH/Wig_KOTH.gd" id="1_kxid3"]
+[ext_resource type="Script" path="res://Scenes/games/Wig_KOTH/Wig_KOTH.gd" id="1_kxid3"]
 [ext_resource type="Shader" path="res://shaders/perlin.gdshader" id="2_wuqr4"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_s6hjp"]

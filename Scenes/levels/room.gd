@@ -28,24 +28,15 @@ func _ready() -> void:
 	
 	adjust_room_to_size(Next_Size)	
 	wall_collider.size = Vector3(Max_Size, 1.0, Max_Size)
-	
-	if not is_multiplayer_authority():
-		synchronizer.delta_synchronized.connect(func() : adjust_room_to_size(Current_Size))
 
 
 func _process(delta:float) -> void:
-	
-	if not multiplayer.has_multiplayer_peer():
-		pass
-	elif not is_multiplayer_authority():
-		return	
 		
 	if not Resizing:
 		pass
 	
 	elif Current_Size == Next_Size or resize_timer == resize_period:
 		Resizing = false
-		
 		if Current_Size > Last_Size:
 			finished_growing.emit()
 			
@@ -66,6 +57,7 @@ func _process(delta:float) -> void:
 func request_size(new_size : float) -> void:
 	
 	if new_size <= 0:
+
 		return
 		
 	elif new_size == Next_Size:

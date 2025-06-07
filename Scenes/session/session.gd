@@ -94,7 +94,7 @@ func _physics_process(delta):
 		elif countDown_timer > 1:
 			countDown_timer = 0
 			countDown_value -= 1
-			HUD.set_psa.rpc(str(countDown_value))
+			HUD.set_psa.rpc(str(countDown_value), 1.1)
 		
 		else:
 			countDown_timer += delta
@@ -253,9 +253,9 @@ func rpc_CommissionSession(Seed):
 	
 	match unique_round_id:
 		0:
-			load_game("res://Scenes/session/games/Wig_FFA/Wig_FFA.tscn")			
-			load_game("res://Scenes/session/games/Wig_KOTH/Wig_KOTH.tscn")
-			load_game("res://Scenes/session/games/Wig_LMS/Wig_LMS.tscn")
+			load_game("res://Scenes/games/Wig_FFA/Wig_FFA.tscn")			
+			load_game("res://Scenes/games/Wig_KOTH/Wig_KOTH.tscn")
+			load_game("res://Scenes/games/Wig_LMS/Wig_LMS.tscn")
 			
 	Level.seed_procedural_generators(hash(session_rng.randi()))
 	Commissioned = true
@@ -362,8 +362,6 @@ func local_screenname():
 	
 	if not multiplayer.has_multiplayer_peer():
 		return
-	elif not is_multiplayer_authority():
-		return	
 		
 	var local_id = int(str(multiplayer.get_unique_id()))
 	

@@ -291,7 +291,7 @@ func rpc_play():
 	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
 	
 	if is_multiplayer_authority(): 	
-		session.HUD.set_psa.rpc("Capture the Wig!")
+		session.HUD.set_psa.rpc("Capture the Wig!", 3)
 		rpc_spawn_new_wig.rpc()
 		State = GameState.playing	
 		

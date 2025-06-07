@@ -1,5 +1,7 @@
 extends Node3D
 
+const damage_scalar = 25
+
 enum GameState {
 	reset,
 	playing,
@@ -26,7 +28,9 @@ func _ready():
 	pass
 
 func _process(delta):
-	pass
+	
+	if State == GameState.playing:
+		session.HUD.find_child("Progress").visible = player_is_alive(session.local_humanoid())
 	
 	
 func _physics_process(delta):
@@ -41,11 +45,14 @@ func _physics_process(delta):
 		GameState.reset:
 			pass	
 	
-		GameState.playing:
+		GameState.playing:	
 			
+			if session.bearers.size() == 0:
+				GameOver.emit()
+					
 			var surviving_players : Array = session.bearers.filter(player_is_alive)
-			
-			if surviving_players.size() == 1:
+
+			if surviving_players.size() <= 1:
 				GameOver.emit()
 		
 		GameState.finished:			
@@ -67,17 +74,19 @@ func rpc_reset():
 func rpc_play():
 	
 	if is_multiplayer_authority(): 
-		session.HUD.set_psa.rpc("Grow your Hair!")
+		session.HUD.set_psa.rpc("Shave your foes!", 3)
 		State = GameState.playing
 		
 		for value in session.Client_Screennames.values():
-			Scores[value] = 0
+			Scores[value] = -1
 			
 		for bearer in session.bearers:
 			
 			if bearer != null: #TODO: add listener to ragdoll to chip away health
-				pass
-				
+				bearer.ragdolled.connect(damage_player)
+				var screenname : String = session.Client_Screennames[int(str(bearer.name))]
+				Scores[screenname] = 100
+	
 	
 @rpc("call_local", "reliable")
 func rpc_finish():
@@ -92,20 +101,27 @@ func rpc_finish():
 		for bearer in session.bearers:
 		
 			if bearer != null: #TODO: remove listener to ragdoll to chip away health
-				pass
+				bearer.ragdolled.disconnect(damage_player)
 
 
 func player_is_alive(player):
 	
-	var screenname : String = session.Client_Screennames[int(player.name)]
+	var screenname : String = session.Client_Screennames[int(str(player.name))]
 	return Scores[screenname] > 0
 
 
-func handle_player_joining(client_id) -> void:
-
-	pass
+func damage_player(player):
 	
+	var screenname : String = session.Client_Screennames[int(str(player.name))]
+	Scores[screenname] -= damage_scalar
+
+
+func handle_player_joining(client_id) -> void:
+	
+	pass
+
 
 func handle_player_leaving(client_id) -> void:
 	
 	pass
+	

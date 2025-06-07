@@ -54,9 +54,12 @@ func _process(_delta):
 	room.request_size(Map_Size)	
 	hoverboard_stager.Map_Size = room.Current_Size
 	
-	if room.Current_Size != 50:
-		item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
-		item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
+	
+	if is_multiplayer_authority():
+		
+		if room.Current_Size != 50:
+			item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
+			item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
 
 
 func _physics_process(delta) -> void:

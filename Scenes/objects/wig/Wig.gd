@@ -47,7 +47,7 @@ func _ready():
 		return
 		
 	getRandomHairColor()
-	material.emission_energy_multiplier = 1
+
 
 func _process(delta):
 	

@@ -133,9 +133,9 @@ func join_lobby():
 		display_popup("Choose a screen name first!", null)
 		return
 		
-	elif address_entry.text == "":
-		display_popup("Enter Host Address!", null)
-		return
+	#elif address_entry.text == "":
+		#display_popup("Enter Host Address!", null)
+		#return
 	
 	var enet_peer = ENetMultiplayerPeer.new()
 	main_menu.hide()

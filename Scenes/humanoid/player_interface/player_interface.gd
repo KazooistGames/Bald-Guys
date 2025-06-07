@@ -42,7 +42,7 @@ func _ready():
 func _process(_delta):
 	
 	var ragdoll_speed = humanoid.find_child("*lowerBody", true, false).linear_velocity.length()
-	recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)
+	recovery_minigame.difficulty = pow(max(1.0, ragdoll_speed), 0.5)
 	recovery_minigame.progress = humanoid.ragdoll_recovery_progress
 	
 	
@@ -153,9 +153,6 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 		
 	if action_committed: #ROLLBACK		
 		
-		#if not humanoid.ON_FLOOR:
-			#blacklist.append('ON_FLOOR')
-			
 		humanoid.rollback(rollback_lag, blacklist, [])	
 		force.rollback(rollback_lag)
 	
@@ -170,8 +167,6 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	
 	if just_pressed('recover', inputs): 
 		
-		var ragdoll_speed = humanoid.ragdoll_rectifier.get_rollback_state(rollback_lag)["linear_velocity"].length()
-		recovery_minigame.difficulty = pow(max(humanoid.ragdoll_recovery_default_duration, ragdoll_speed), 0.5)	
 		recovery_minigame.attempt_early_recovery(timestamp)
 			
 	if just_pressed('secondary', inputs):

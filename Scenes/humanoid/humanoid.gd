@@ -366,7 +366,7 @@ func step_movement(delta):
 		var walk_speed = TOPSPEED * TOPSPEED_MOD
 		
 		if not ON_FLOOR:
-			floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 3.0) * delta)
+			floor_velocity = floor_velocity.move_toward(Vector3.ZERO, (9.8 / 5.0) * delta)
 			
 		if ON_FLOOR or WALK_VECTOR:
 			transversal_walk_target = WALK_VECTOR.normalized() * walk_speed
