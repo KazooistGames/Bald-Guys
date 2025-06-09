@@ -34,6 +34,7 @@ signal constrained(board : Node3D)
 
 func _physics_process(delta):
 	
+	#print(configuration)
 	sync_cooldown_progress += delta * sync_cooldown_rate
 	delta *= unlagger.delta_scalar(delta)
 	
@@ -143,9 +144,13 @@ func spawn_board(size):
 func introduce_boards():
 	
 	if configuration != Configuration.introducing:
+		print('boards being introduced')
 		configuration = Configuration.introducing
 		all_boards_in_position = false
 		unlagger.reset()
+		
+		if boards.size() == 0:
+			finished_introducing.emit()
 		
 		for board in boards:
 			board.collider.disabled = false
@@ -154,15 +159,22 @@ func introduce_boards():
 			board.status = 2
 			board.disable_bounce = true
 			board.disable_constrain = true
+			
+	else:
+		finished_introducing.emit()
 		
 		
 @rpc("call_local", "reliable")	
 func retreat_boards():
 	
 	if configuration != Configuration.retreating:
+		print('boards being retreated')
 		configuration = Configuration.retreating
 		all_boards_in_position = false
 		unlagger.reset()
+		
+		if boards.size() == 0:
+			finished_retreating.emit()
 		
 		for board in boards:
 			board.trajectory = Vector3.DOWN
@@ -171,6 +183,9 @@ func retreat_boards():
 			board.disable_bounce = true
 			board.disable_constrain = true
 			board.disable_depenetration = true
+			
+	else:
+		finished_retreating.emit()
 		
 		
 @rpc("call_local", "reliable")	
@@ -197,6 +212,7 @@ func bounce_boards():
 func stop_boards():
 	
 	if configuration != Configuration.inert:
+		print('boards stopped')
 		configuration = Configuration.inert
 		unlagger.reset()	
 		

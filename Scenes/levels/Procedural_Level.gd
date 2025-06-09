@@ -1,6 +1,6 @@
 extends Node3D
 
-@export var Map_Size : int = 25
+@export var Map_Size : int = 25 
 
 @onready var room : Node3D = $room
 @onready var hoverboard_stager : Node3D = $Hoverboard_Stager
@@ -34,24 +34,9 @@ func _ready() -> void:
 	item_dropper.spawn_field(0, 5, 5, 5, Vector3.UP * Map_Size / 2.0)
 	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * Map_Size / 2.0)
 	
-	#arena going up
-	room.finished_growing.connect(stage_boards)
-	hoverboard_stager.finished_introducing.connect(stage_mesas)
-	mesa_grower.finished_extending.connect(stage_ramps)
-	ramparter.finished_lifting.connect(stage_limbs)
-	limb_grower.finished_extending.connect(func(): generated.emit())
-	
-	#arena going down
-	limb_grower.finished_retracting.connect(unstage_ramps) #unstage the limbs to kick everything off
-	ramparter.finished_collapsing.connect(unstage_mesas)
-	mesa_grower.finished_retracting.connect(unstage_boards) 
-	hoverboard_stager.finished_retreating.connect(reset_map)
-	room.finished_shrinking.connect(func(): demolished.emit())
-	
 	
 func _process(_delta):
 
-	room.request_size(Map_Size)	
 	hoverboard_stager.Map_Size = room.Current_Size
 	
 	if is_multiplayer_authority():
@@ -63,17 +48,93 @@ func _process(_delta):
 		
 func generate() -> void:
 	
+	finish_demolish()
 	print('generating level...')
+	
+	if not room.finished_resizing.is_connected(stage_boards):
+		room.finished_resizing.connect(stage_boards)
+		
+	if not hoverboard_stager.finished_introducing.is_connected(stage_mesas):
+		hoverboard_stager.finished_introducing.connect(stage_mesas)
+		
+	if not mesa_grower.finished_extending.is_connected(stage_ramps):
+		mesa_grower.finished_extending.connect(stage_ramps)
+		
+	if not ramparter.finished_lifting.is_connected(stage_limbs):
+		ramparter.finished_lifting.connect(stage_limbs)
+		
+	if not limb_grower.finished_extending.is_connected(finish_generate):
+		limb_grower.finished_extending.connect(finish_generate)
+		
 	Map_Size = 50
+	room.request_size(Map_Size)	
 
+
+func finish_generate() -> void:
+	
+	print('finished generating level.')
+	
+	if room.finished_resizing.is_connected(stage_boards):
+		room.finished_resizing.disconnect(stage_boards)
+		
+	if hoverboard_stager.finished_introducing.is_connected(stage_mesas):
+		hoverboard_stager.finished_introducing.disconnect(stage_mesas)
+		
+	if mesa_grower.finished_extending.is_connected(stage_ramps):
+		mesa_grower.finished_extending.disconnect(stage_ramps)
+		
+	if ramparter.finished_lifting.is_connected(stage_limbs):
+		ramparter.finished_lifting.disconnect(stage_limbs)
+		
+	if limb_grower.finished_extending.is_connected(finish_generate):
+		limb_grower.finished_extending.disconnect(finish_generate)
 
 
 func demolish() -> void:
 	
+	finish_generate()
 	print('demolishing level...')
+	
+	if not limb_grower.finished_retracting.is_connected(unstage_ramps):
+		limb_grower.finished_retracting.connect(unstage_ramps) 
+		
+	if not ramparter.finished_collapsing.is_connected(unstage_mesas):
+		ramparter.finished_collapsing.connect(unstage_mesas)
+		
+	if not mesa_grower.finished_retracting.is_connected(unstage_boards):
+		mesa_grower.finished_retracting.connect(unstage_boards) 
+	
+	if not hoverboard_stager.finished_retreating.is_connected(reset_map):
+		hoverboard_stager.finished_retreating.connect(reset_map)
+		
+	if not room.finished_resizing.is_connected(finish_demolish):
+		room.finished_resizing.connect(finish_demolish)
+	
 	limb_grower.retract_limbs.rpc()
-	hoverboard_stager.stop_boards.rpc()
+	#hoverboard_stager.stop_boards.rpc()
 
+
+func finish_demolish() -> void:
+	
+	print('finished demolishing level.' )
+	
+	if limb_grower.finished_retracting.is_connected(unstage_ramps):
+		limb_grower.finished_retracting.disconnect(unstage_ramps) 
+		
+	if ramparter.finished_collapsing.is_connected(unstage_mesas):
+		ramparter.finished_collapsing.disconnect(unstage_mesas)
+		
+	if mesa_grower.finished_retracting.is_connected(unstage_boards):
+		mesa_grower.finished_retracting.disconnect(unstage_boards) 
+	
+	if hoverboard_stager.finished_retreating.is_connected(reset_map):
+		hoverboard_stager.finished_retreating.disconnect(reset_map)
+		
+	if room.finished_resizing.is_connected(finish_demolish):
+		room.finished_resizing.disconnect(finish_demolish)
+		
+	demolished.emit()
+	
 	
 func reset_map() -> void:
 	
@@ -82,11 +143,11 @@ func reset_map() -> void:
 	ramparter.clear_ramps.rpc()
 	limb_grower.clear_limbs.rpc()
 	Map_Size = 25	
+	room.request_size(Map_Size)	
 	
 	
 func stage_boards() -> void:
 	
-	print('staging boards.')
 	item_dropper.disperse_items.rpc(0)
 	item_dropper.disperse_items.rpc(2, 6.0)
 	hoverboard_stager.clear_boards.rpc()
@@ -98,7 +159,6 @@ func stage_boards() -> void:
 
 func stage_mesas() -> void:
 
-	print('staging mesas.')
 	mesa_grower.Map_Size = room.Current_Size
 	hoverboard_stager.bounce_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
@@ -108,7 +168,6 @@ func stage_mesas() -> void:
 
 func stage_ramps() -> void:
 	
-	print('staging ramps.')
 	ramparter.Map_Size = room.Current_Size
 	mesa_grower.stop.rpc()
 	ramparter.clear_ramps.rpc()
@@ -118,7 +177,6 @@ func stage_ramps() -> void:
 	
 func stage_limbs() -> void:
 	
-	print('staging limbs.')
 	limb_grower.Map_Size = room.Current_Size
 	mesa_grower.stop.rpc()
 	ramparter.stop.rpc()	
@@ -130,13 +188,11 @@ func stage_limbs() -> void:
 			
 func unstage_limbs() -> void:
 	
-	print('unstaging limbs.')
 	limb_grower.retract_limbs.rpc()
 		
 	
 func unstage_ramps() -> void:
 	
-	print('unstaging ramps.')
 	limb_grower.stop.rpc()
 	limb_grower.clear_limbs.rpc()
 	ramparter.collapse.rpc()
@@ -144,7 +200,6 @@ func unstage_ramps() -> void:
 	
 func unstage_mesas() -> void:
 
-	print('unstaging mesas.')
 	ramparter.stop.rpc()
 	ramparter.clear_ramps.rpc()
 	mesa_grower.retract_mesas.rpc()
@@ -152,7 +207,6 @@ func unstage_mesas() -> void:
 	
 func unstage_boards() -> void:
 	
-	print('unstaging boards.')
 	mesa_grower.stop.rpc()
 	mesa_grower.clear_mesas.rpc()
 	hoverboard_stager.retreat_boards.rpc()

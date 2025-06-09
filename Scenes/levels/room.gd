@@ -19,9 +19,7 @@ extends Node3D
 var resize_period : float = 3.0
 var resize_timer : float = 0.0
 
-signal finished_shrinking
-signal finished_growing
-
+signal finished_resizing
 
 func _ready() -> void:
 	
@@ -34,37 +32,33 @@ func _process(delta:float) -> void:
 	if not Resizing:
 		pass
 	
-	elif Current_Size == Next_Size or resize_timer == resize_period:
+	elif Current_Size == Next_Size or resize_timer == resize_period:	
 		Resizing = false
-		if Current_Size > Last_Size:
-			finished_growing.emit()
-			
-		elif Current_Size < Last_Size:
-			finished_shrinking.emit()
-			
-		Last_Size = Next_Size
 		resize_timer = 0.0
+		finished_resizing.emit()
 		
 	else:
 		resize_timer = move_toward(resize_timer, resize_period, delta)
 		var tween_range : float = Next_Size - Last_Size
-		var desired_size = Tween.interpolate_value(Last_Size, tween_range, resize_timer, resize_period, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
+		var desired_size = Tween.interpolate_value(
+			Last_Size, tween_range, resize_timer, resize_period, Tween.TRANS_QUAD, Tween.EASE_IN_OUT)
 		adjust_room_to_size(desired_size)
 	
 	
 @rpc("call_local", "reliable")
 func request_size(new_size : float) -> void:
-	
-	if new_size <= 0:
 
+	if new_size <= 0:
 		return
 		
-	elif new_size == Next_Size:
+	elif new_size ==  Current_Size:
+		finished_resizing.emit()
 		return
 		
 	elif new_size > Max_Size:
 		new_size = Max_Size
 	
+	Last_Size = Next_Size
 	Resizing = true
 	Next_Size = new_size
 	print("resizing room to ", Next_Size)

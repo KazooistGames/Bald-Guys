@@ -149,40 +149,38 @@ func clear_ramps():
 @rpc("call_local", "reliable")	
 func stop():
 	
-	if configuration == Configuration.inert:
-		return
-	else:
+	if configuration != Configuration.inert:
 		configuration = Configuration.inert
 		
 		
 @rpc("call_local", "reliable")	
 func lift():
-	
-	unlagger.reset()
-	
-	if configuration == Configuration.lifting:
-		finished_lifting.emit()
-	
-	else:
+		
+	if configuration != Configuration.lifting:
+		print('ramps lifting')
 		configuration = Configuration.lifting
+		unlagger.reset()
 		
 		if ramps.size() == 0:
 			finished_lifting.emit()
+			
+	else:
+		finished_lifting.emit()
 	
 	
 @rpc("call_local", "reliable")	
 func collapse():
 	
-	unlagger.reset()
-	
-	if configuration == Configuration.collapsing:
-		finished_collapsing.emit()
-		
-	else:
+	if configuration != Configuration.collapsing:
+		print('ramps collapsing')
 		configuration = Configuration.collapsing
+		unlagger.reset()
 		
 		if ramps.size() == 0:
 			finished_collapsing.emit()
+			
+	else:
+		finished_collapsing.emit()
 			
 
 func get_ramps():

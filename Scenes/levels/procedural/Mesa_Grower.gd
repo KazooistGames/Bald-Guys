@@ -18,7 +18,7 @@ enum Configuration
 @onready var previous_rng_state = rng.state
 @onready var unlagger = $LagCompensator
 
-var extend_speed = 0.5
+var extend_speed = 0.75
 var retract_speed = 2.0
 var in_position = false
 var mesas = []
@@ -30,8 +30,7 @@ signal finished_retracting
 
 func _physics_process(delta):
 	
-	delta *= unlagger.delta_scalar(delta)
-	
+	delta *= unlagger.delta_scalar(delta)	
 	in_position = true
 	
 	if configuration == Configuration.inert or mesas.size() == 0:
@@ -66,11 +65,11 @@ func _physics_process(delta):
 
 @rpc("call_local", "reliable")
 func extend_mesas():
-	
-	unlagger.reset()
-	
+		
 	if configuration != Configuration.extending:
+		print('mesas extending')
 		configuration = Configuration.extending
+		unlagger.reset()
 		
 		if mesas.size() == 0:
 			finished_extending.emit()	
@@ -82,10 +81,10 @@ func extend_mesas():
 @rpc("call_local", "reliable")
 func retract_mesas():
 	
-	unlagger.reset()
-	
 	if configuration != Configuration.retracting:
+		print('mesas retracting')
 		configuration = Configuration.retracting
+		unlagger.reset()
 		
 		if mesas.size() == 0:
 			finished_retracting.emit()	

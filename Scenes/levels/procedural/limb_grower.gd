@@ -112,9 +112,10 @@ func clear_limbs():
 func extend_limbs():
 	
 	if configuration != Configuration.extending:
-		unlagger.reset()
+		print('limbs extending')
 		configuration = Configuration.extending
 		in_position = false
+		unlagger.reset()
 		
 		if limbs.size() == 0:
 			finished_extending.emit()	
@@ -127,6 +128,7 @@ func extend_limbs():
 func retract_limbs():
 	
 	if configuration != Configuration.retracting:
+		print('limbs retracting')
 		configuration = Configuration.retracting
 		in_position = false
 		unlagger.reset()

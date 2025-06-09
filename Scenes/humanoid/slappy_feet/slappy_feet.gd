@@ -2,7 +2,7 @@ extends AudioStreamPlayer3D
 
 const base_db = -40.0
 const speed_threshold = 1.0
-const dot_threshold = 0.25
+const dot_threshold = 0.0
 const squeek_duration = 0.25
 const squeek_deadband = 0.5
 const squeek_seek_locations : Array[float] = [
@@ -15,6 +15,9 @@ const squeek_seek_locations : Array[float] = [
 	14.5,
 	17.3,
 	20,
+	22.65,
+	24.05,
+	26.05
 	]
 
 @onready var raycast = $RayCast3D
@@ -88,7 +91,6 @@ func check_squeek():
 	
 func squeek():
 
-	print('squeek')
 	squeek_timer = 0.0
 	var seek_to = squeek_seek_locations.pick_random()
 	squeek_sound.stream_paused = false
