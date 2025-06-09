@@ -59,30 +59,19 @@ func _process(_delta):
 		if room.Current_Size != 50:
 			item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
 			item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
-
-
-func _physics_process(delta) -> void:
-	
-	if not multiplayer.has_multiplayer_peer():
-		multiplayer_permissive = false
-	elif is_multiplayer_authority():
-		multiplayer_permissive = true
-	else:
-		multiplayer_permissive = false
-
-	if not multiplayer_permissive:
-		pass
-			
+		
 		
 func generate() -> void:
 	
+	print('generating level...')
 	Map_Size = 50
 
 
 
 func demolish() -> void:
 	
-	limb_grower.retract_limbs()
+	print('demolishing level...')
+	limb_grower.retract_limbs.rpc()
 	hoverboard_stager.stop_boards.rpc()
 
 	
@@ -97,6 +86,7 @@ func reset_map() -> void:
 	
 func stage_boards() -> void:
 	
+	print('staging boards.')
 	item_dropper.disperse_items.rpc(0)
 	item_dropper.disperse_items.rpc(2, 6.0)
 	hoverboard_stager.clear_boards.rpc()
@@ -108,6 +98,7 @@ func stage_boards() -> void:
 
 func stage_mesas() -> void:
 
+	print('staging mesas.')
 	mesa_grower.Map_Size = room.Current_Size
 	hoverboard_stager.bounce_boards.rpc()
 	mesa_grower.clear_mesas.rpc()
@@ -117,6 +108,7 @@ func stage_mesas() -> void:
 
 func stage_ramps() -> void:
 	
+	print('staging ramps.')
 	ramparter.Map_Size = room.Current_Size
 	mesa_grower.stop.rpc()
 	ramparter.clear_ramps.rpc()
@@ -126,30 +118,25 @@ func stage_ramps() -> void:
 	
 func stage_limbs() -> void:
 	
+	print('staging limbs.')
 	limb_grower.Map_Size = room.Current_Size
 	mesa_grower.stop.rpc()
 	ramparter.stop.rpc()	
 	limb_grower.clear_limbs.rpc()
 	limb_grower.create_limbs.rpc()		
 	limb_grower.extend_limbs.rpc()
-	hoverboard_stager.synchronize_all_peers()
-			
-			
-#func start_reconfigure_timer(preset : float = 0.0) -> void:
-	#
-	#item_dropper.disperse_items.rpc(0)
-	#item_dropper.disperse_items.rpc(2, 6.0)
-	#limb_grower.stop.rpc()
-	#autocycle_timer = preset			
+	hoverboard_stager.synchronize_all_peers()		
 	
 			
 func unstage_limbs() -> void:
 	
+	print('unstaging limbs.')
 	limb_grower.retract_limbs.rpc()
 		
 	
 func unstage_ramps() -> void:
 	
+	print('unstaging ramps.')
 	limb_grower.stop.rpc()
 	limb_grower.clear_limbs.rpc()
 	ramparter.collapse.rpc()
@@ -157,6 +144,7 @@ func unstage_ramps() -> void:
 	
 func unstage_mesas() -> void:
 
+	print('unstaging mesas.')
 	ramparter.stop.rpc()
 	ramparter.clear_ramps.rpc()
 	mesa_grower.retract_mesas.rpc()
@@ -164,6 +152,7 @@ func unstage_mesas() -> void:
 	
 func unstage_boards() -> void:
 	
+	print('unstaging boards.')
 	mesa_grower.stop.rpc()
 	mesa_grower.clear_mesas.rpc()
 	hoverboard_stager.retreat_boards.rpc()

@@ -64,9 +64,8 @@ func _process(delta):
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
 		
-	#if Games.size() >= 1:
-		#wigs = Games[0].wigs
-		#bearers = Games[0].bearers
+	for game in Games:
+		game.map_size = Level.room.Current_Size
 
 
 func _physics_process(delta):
@@ -152,8 +151,13 @@ func Try_Finish_Round():
 	
 func Try_Reset_Session():
 	
+	Level.demolish()
 	State = SessionState.Lobby
-	Level.demolish()	
+	Round = 0
+	
+	for game in Games:
+		game.rpc_reset.rpc()
+	
 
 
 func add_player(peer_id):

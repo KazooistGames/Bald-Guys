@@ -15,7 +15,6 @@ extends Node3D
 @onready var spawns : Array[Node] = $spawns.get_children()
 @onready var wall_mesh : PlaneMesh = preload("res://Scenes/geometry_static/Wall/wall_mesh.tres")
 @onready var wall_collider : BoxShape3D = preload("res://Scenes/geometry_static/Wall/wall_collider.tres")
-@onready var synchronizer : MultiplayerSynchronizer = $MultiplayerSynchronizer
 
 var resize_period : float = 3.0
 var resize_timer : float = 0.0

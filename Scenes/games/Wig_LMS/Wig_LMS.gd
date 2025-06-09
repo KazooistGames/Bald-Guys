@@ -14,7 +14,6 @@ enum GameState {
 @export var Goal : float = 100
 
 @onready var session = get_parent()
-@onready var synchronizer = $MultiplayerSynchronizer
 
 var wig_radii : Vector2 = Vector2(0.15, 0.45)
 var wig_start_offset = Vector3(0, 0.2, -0.025)
@@ -27,13 +26,13 @@ signal GameOver
 func _ready():
 	pass
 
-func _process(delta):
+func _process(_delta):
 	
 	if State == GameState.playing:
 		session.HUD.find_child("Progress").visible = player_is_alive(session.local_humanoid())
 	
 	
-func _physics_process(delta):
+func _physics_process(_delta):
 		
 	if not multiplayer.has_multiplayer_peer():
 		pass
@@ -49,6 +48,7 @@ func _physics_process(delta):
 			
 			if session.bearers.size() == 0:
 				GameOver.emit()
+				return
 					
 			var surviving_players : Array = session.bearers.filter(player_is_alive)
 
@@ -106,6 +106,9 @@ func rpc_finish():
 
 func player_is_alive(player):
 	
+	if player == null:
+		return false
+		
 	var screenname : String = session.Client_Screennames[int(str(player.name))]
 	return Scores[screenname] > 0
 
