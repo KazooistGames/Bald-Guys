@@ -1,7 +1,7 @@
 
 extends StaticBody3D
 
-const debounce_period = 0.2 #limit rate that we re-generate a convex mesh
+const debounce_period = 0.15 #limit rate that we re-generate a convex mesh
 
 @export var dimensions = Vector3(1.0, 1.0, 1.0)
 
@@ -9,11 +9,8 @@ const debounce_period = 0.2 #limit rate that we re-generate a convex mesh
 @onready var collider = $CollisionShape3D
 
 var cached_dimensions = Vector3.ZERO
-
 var debounce_timer = 0.0
-
 var need_new_collider = false
-
 var slope = 0.0
 
 

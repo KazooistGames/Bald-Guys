@@ -19,7 +19,7 @@ enum Configuration
 @onready var unlagger = $LagCompensator
 
 var extend_speed = 0.75
-var retract_speed = 2.0
+var retract_speed = 3.0
 var in_position = false
 var mesas = []
 var count = 30

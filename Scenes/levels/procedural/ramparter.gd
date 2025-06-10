@@ -21,7 +21,7 @@ enum Configuration
 var ramps = []
 var heights = []
 
-var lift_speed = 3.0
+var lift_speed = 5.0
 var collapse_speed = 5.0
 
 var in_position = false

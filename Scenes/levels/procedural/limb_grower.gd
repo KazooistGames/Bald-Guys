@@ -4,8 +4,8 @@ const prefab = preload("res://Scenes/geometry/pillar/pillar.tscn")
 
 @export var Map_Size = 50
 
-const extend_period = 2.0
-const retract_period = 2.0
+const extend_period = 3.0
+const retract_period = 3.0
 
 enum Configuration 
 {

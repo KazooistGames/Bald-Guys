@@ -55,7 +55,7 @@ func _physics_process(delta):
 			#var lower_lim = board.lower_limits.y + board.girth / 2.0
 			var upper_lim = board.upper_limits.y - board.girth / 2.0
 			var clamped_target = upper_lim #clampf(Map_Size/2.0, lower_lim, upper_lim)
-			
+			board.disable_depenetration = true
 			if board.position.y > clamped_target:
 				all_boards_in_position = false
 				
@@ -159,6 +159,7 @@ func introduce_boards():
 			board.status = 2
 			board.disable_bounce = true
 			board.disable_constrain = true
+			board.disable_depenetration = true
 			
 	else:
 		finished_introducing.emit()
