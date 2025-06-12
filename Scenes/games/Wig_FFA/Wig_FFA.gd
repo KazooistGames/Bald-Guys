@@ -146,9 +146,12 @@ func drop_wig(humanoid):
 		humanoid.ragdolled.disconnect(drop_wig)	
 			
 	var wig_index = session.bearers.find(humanoid)
-	var bearer_velocity = session.bearers[wig_index].linear_velocity * 1.5
-	var offset_velocity = Vector3(randi_range(-1, 1), 3, randi_range(-1, 1))
-	session.wigs[wig_index].linear_velocity =  bearer_velocity + offset_velocity
+	var this_bearer = session.bearers[wig_index]
+	
+	if this_bearer != null:
+		var bearer_velocity = this_bearer.linear_velocity * 1.5
+		var offset_velocity = Vector3(randi_range(-1, 1), 3, randi_range(-1, 1))
+		session.wigs[wig_index].linear_velocity =  bearer_velocity + offset_velocity
 		
 	session.wigs[wig_index].interactable.gained_interaction.connect(dawn_active_wig)
 	rpc_put_wig_on_head.rpc(session.wigs[wig_index].get_path(), null)
@@ -267,20 +270,37 @@ func rpc_reset():
 	session.HUD.remove_nameplate("WIG")
 	session.HUD.find_child("Progress").visible = false		
 	theme.seek(beas_mote_transition)
-	
-	for wig in session.wigs:
-		wig.queue_free()
-	
-	session.wigs.clear()
-	session.bearers.clear()
-	
+
 	if is_multiplayer_authority(): 	
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
 			
 		State = GameState.reset
+		
+		if session.bearers.back() != null:
+			session.bearers.back().ragdolled.disconnect(drop_wig)
 
+	for index in session.wigs.size():	
+		var bearer = session.bearers[index]
+		var wig = session.wigs[index]
+		
+		if wig == null:
+			continue
+			
+		elif bearer == null:
+			rpc_destroy_wig.rpc(wig.get_path())
+			
+		elif bearer.ragdolled.is_connected(drop_wig):
+			bearer.ragdolled.disconnect(drop_wig)		
+			session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
+			session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
+			
+		wig.queue_free()
+		
+	session.wigs.clear()
+	session.bearers.clear()
+	
 	
 @rpc("call_local", "reliable")
 func rpc_play():
@@ -315,10 +335,18 @@ func rpc_finish():
 			
 			if wig == null:
 				pass
+				
 			elif bearer == null:
 				rpc_destroy_wig.rpc(wig.get_path())
+				
 			else:
+
+				if bearer.ragdolled.is_connected(drop_wig):
+					bearer.ragdolled.disconnect(drop_wig)
+					
 				rpc_fuse_wig_to_head.rpc(wig.get_path(), bearer.get_path())
+				session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
+				session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 
 
 func handle_player_joining(client_id) -> void:

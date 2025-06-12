@@ -47,7 +47,7 @@ func process_slap(delta):
 	direction = humanoid.WALK_VECTOR
 	velocity = humanoid.linear_velocity
 	
-	var floor = raycast.get_collider()
+	var floor_collider = raycast.get_collider()
 	
 	if squeek_deadband_timer < squeek_deadband: #deadband for repeat squeeks
 		squeek_deadband_timer += delta
@@ -57,7 +57,7 @@ func process_slap(delta):
 	else:
 		squeek_timer += delta
 	
-	if not floor:
+	if not floor_collider:
 		triggered = false
 
 	elif not triggered:

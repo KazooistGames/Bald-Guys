@@ -53,7 +53,7 @@ func _physics_process(delta):
 	
 	if is_local_camera:
 		reticle.expand_mode = 1
-		reticle.size = Vector2.ONE * 4	
+		reticle.set_deferred('size', Vector2.ONE * 4)
 		reticle.position = get_center_of_screen() - reticle.size / 2.0
 	
 	if humanoid.RAGDOLLED:
@@ -124,7 +124,7 @@ func get_center_of_screen():
 	return screenCenter
 	
 	
-func corrected_draw(pivot_position) -> Vector3:
+func corrected_draw(simulated_pivot_position) -> Vector3:
 	
 	var movement_scalar = 1
 	
@@ -134,22 +134,22 @@ func corrected_draw(pivot_position) -> Vector3:
 		movement_scalar = 0.5
 		
 	var standard_draw : Vector3 = humanoid.LOOK_VECTOR.normalized().rotated(Vector3.UP, PI) * DRAW_STRENGTH * movement_scalar
-	var obstruction : Dictionary = get_obstruction(pivot_position, pivot_position+standard_draw)
+	var obstruction : Dictionary = get_obstruction(simulated_pivot_position, simulated_pivot_position+standard_draw)
 	
 	if obstruction.size() > 0:
 		var collision_position : Vector3 = humanoid.to_local(obstruction['position'])
-		var collision_draw : Vector3 = collision_position - pivot_position		
+		var collision_draw : Vector3 = collision_position - simulated_pivot_position		
 		return collision_draw
-		return standard_draw.move_toward(collision_draw, 1.0)
+		#return standard_draw.move_toward(collision_draw, 1.0)
 				
 	return standard_draw
 	
 
-func get_obstruction(pivot_position, draw_position) -> Dictionary:
+func get_obstruction(simulated_pivot_position, draw_position) -> Dictionary:
 	
 	var space_state = get_world_3d().direct_space_state
 	var query : PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
-	query.from = humanoid.to_global(pivot_position)
+	query.from = humanoid.to_global(simulated_pivot_position)
 	query.to = humanoid.to_global(draw_position)
 	query.collision_mask = 0b0001
 	query.exclude = [self, humanoid]

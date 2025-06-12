@@ -52,7 +52,7 @@ func _ready():
 	#Ended_Round.connect(Level.demolish)
 
 
-func _process(delta):
+func _process(_delta):
 		
 	Humanoids = get_tree().get_nodes_in_group("humanoids")
 	

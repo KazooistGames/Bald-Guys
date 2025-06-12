@@ -22,7 +22,7 @@ func _ready():
 	visible = false
 
 
-func _process(delta):
+func _process(_delta):
 	
 	if progress >= 1.0:
 		early_succeed()
@@ -50,10 +50,10 @@ func start_game():
 	locked = false
 			
 			
-func lever_on_target(timestamp, difficulty = 1.0):
+func lever_on_target(timestamp, simulated_difficulty = 1.0):
 	
 	var simulated_position = sin(lever_speed * timestamp) * backdrop.size.x / 2.0
-	return abs(simulated_position) <= base_target_size / (2.0 * difficulty)
+	return abs(simulated_position) <= base_target_size / (2.0 * simulated_difficulty)
 	
 	
 func attempt_early_recovery(unix_time):

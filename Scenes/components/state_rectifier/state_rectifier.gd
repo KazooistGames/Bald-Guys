@@ -13,10 +13,10 @@ var previous_states : Array[Dictionary]
 	
 func _ready():
 	
-	previous_states.resize( 1 / get_physics_process_delta_time())
+	previous_states.resize(floor(1.0 / get_physics_process_delta_time()))
 	
 	
-func _physics_process(delta):
+func _physics_process(_delta):
 
 	if not multiplayer.has_multiplayer_peer():
 		return
@@ -32,7 +32,7 @@ func _physics_process(delta):
 	previous_states.pop_back()
 	
 	
-func update_cache(age = 0, blacklist : Array = [], whitelist : Array = [], debug = false):
+func update_cache(age = 0, blacklist : Array = [], whitelist : Array = []):
 
 	var index = get_rollback_index(age)
 	
@@ -52,7 +52,7 @@ func update_cache(age = 0, blacklist : Array = [], whitelist : Array = [], debug
 			
 		
 	
-func perform_rollback(time_to_rollback, blacklist : Array = [], whitelist : Array = [], debug = false):
+func perform_rollback(time_to_rollback, blacklist : Array = [], whitelist : Array = []):
 	
 	var index = get_rollback_index(time_to_rollback)
 	

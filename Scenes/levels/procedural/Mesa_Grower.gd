@@ -109,7 +109,7 @@ func create_mesas(hidden : bool = true):
 	previous_rng_state = rng.state
 	#print(multiplayer.get_unique_id(), " ", name, " seed is ", rng.seed, " state is ", rng.state)
 	for index in range(count):
-		var tier = index/10
+		var tier = floor(index/10.0)
 		var min_size = 12 - tier * 3
 		var max_size = 18 - tier * 3
 		var random_size = rng.randi_range(min_size, max_size) * 0.5	
