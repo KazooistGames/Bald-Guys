@@ -278,7 +278,9 @@ func rpc_reset():
 			
 		State = GameState.reset
 		
-		if session.bearers.back() != null:
+		if session.bearers.size() == 0:
+			pass
+		elif session.bearers.back() != null:
 			session.bearers.back().ragdolled.disconnect(drop_wig)
 
 	for index in session.wigs.size():	

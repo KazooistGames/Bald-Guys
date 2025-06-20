@@ -67,7 +67,7 @@ func generate() -> void:
 		limb_grower.finished_extending.connect(finish_generate)
 		
 	Map_Size = 50
-	room.request_size(Map_Size)	
+	room.request_size.rpc(Map_Size)	
 
 
 func finish_generate() -> void:
@@ -143,7 +143,7 @@ func reset_map() -> void:
 	ramparter.clear_ramps.rpc()
 	limb_grower.clear_limbs.rpc()
 	Map_Size = 25	
-	room.request_size(Map_Size)	
+	room.request_size.rpc(Map_Size)	
 	
 	
 func stage_boards() -> void:
