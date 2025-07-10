@@ -18,63 +18,63 @@ const coyote_duration = 0.15
 		material.albedo_color = value
 		model.set_surface_override_material(0, material)
 	
-@export var LUNGING = false
-@export var RAGDOLLED = false
-@export var ON_FLOOR = true
-@export var REACHING = 0
+@export var LUNGING := false
+@export var RAGDOLLED := false
+@export var ON_FLOOR := true
+@export var REACHING := 0
 @export var LOOK_VECTOR : Vector3 = Vector3(0,0,0)
 @export var WALK_VECTOR : Vector3 = Vector3(0,0,0)
 @export var FACING_VECTOR : Vector3 = Vector3(0,0,0)
 @export var SPEED_GEARS : Vector2 = Vector2(3.5, 7.0)
-@export var JUMP_SPEED = 5.5
-@export var RUNNING = false
-@export var DOUBLE_JUMP_CHARGES = 1
-@export var floor_velocity : Vector3= Vector3(0,0,0)
+@export var JUMP_SPEED := 5.5
+@export var RUNNING := false
+@export var DOUBLE_JUMP_CHARGES := 1
+@export var floor_velocity : Vector3 = Vector3(0,0,0)
 @export var walk_velocity : Vector3 = Vector3.ZERO
 
-@onready var skeleton = $Skeleton3D
-@onready var animation = $AnimationTree
-@onready var leg_collider = $CollisionShapeLegs
-@onready var chest_collider = $CollisionShapeChest
-@onready var head_collider = $CollisionShapeHead
+@onready var skeleton : Skeleton3D = $Skeleton3D
+@onready var animation : AnimationTree = $AnimationTree
+@onready var leg_collider : CollisionShape3D = $CollisionShapeLegs
+@onready var chest_collider : CollisionShape3D  = $CollisionShapeChest
+@onready var head_collider : CollisionShape3D = $CollisionShapeHead
 @onready var floorcast : RayCast3D = $FloorCast3D
-@onready var boofFX = $RagdollAudio
-@onready var impactFX = $StaticImpactAudio
-@onready var jumpFX = $JumpAudio
-@onready var force = $Force
-@onready var synchronizer = $MultiplayerSynchronizer
-@onready var rectifier = $StateRectifier
-@onready var ragdoll_rectifier = $"Skeleton3D/Ragdoll/Physical Bone lowerBody/StateRectifier"
+@onready var boofFX : AudioStreamPlayer3D = $RagdollAudio
+@onready var impactFX  : AudioStreamPlayer3D = $StaticImpactAudio
+@onready var jumpFX  : AudioStreamPlayer3D = $JumpAudio
+@onready var force : Area3D = $Force
+@onready var synchronizer : MultiplayerSynchronizer = $MultiplayerSynchronizer
+@onready var rectifier : Node = $StateRectifier
+@onready var ragdoll_rectifier : Node = $"Skeleton3D/Ragdoll/Physical Bone lowerBody/StateRectifier"
 
-var multiplayer_permissive = false
+var multiplayer_permissive := false
 
-var TOPSPEED = 0
-var TOPSPEED_MOD = 1
+var TOPSPEED := 0
+var TOPSPEED_MOD := 1
 
-var RAGDOLL_THRESHOLD =  6.5
-var ragdoll_cooldown_period_seconds = 0.5
-var ragdoll_cooldown_timer_seconds = 0
+var RAGDOLL_THRESHOLD :=  6.5
+var ragdoll_cooldown_period_seconds := 0.5
+var ragdoll_cooldown_timer_seconds := 0
 
-var ragdoll_recovery_progress = 0.0
-var ragdoll_recovery_default_duration = 3.0
-var ragdoll_recovery_default_boost = 0.1
+var ragdoll_recovery_progress := 0.0
+var ragdoll_recovery_default_duration := 3.0
+var ragdoll_recovery_default_boost := 0.1
 
-var coyote_timer = 0.0
-var reverse_coyote_timer = 0.0
+var coyote_timer := 0.0
+var reverse_coyote_timer := 0.0
 
 var floor_object = null
 var cached_floor_obj = null
-var cached_floor_pos = Vector3.ZERO
+var cached_floor_pos := Vector3.ZERO
 
-var just_jumped_timer = 0.0
-var just_jumped_period = 1.0/3.0
+var just_jumped_timer := 0.0
+var just_jumped_period := 1.0/3.0
 
-var lunge_timer = 0.0
-var lunge_duration = 1.0
+var lunge_timer := 0.0
+var lunge_duration := 1.0
 
 var depen_query : PhysicsShapeQueryParameters3D
 
-var wall_jump_ons = true
+var wall_jump_ons := true
 var collision_ons : Array = []
 
 signal ragdoll_change(new_state)
@@ -447,8 +447,8 @@ func head_position():
 	
 func bone_position(bone_name):
 	
-	var bone_position = skeleton.bone_position(bone_name)
-	var adjustedPosition = bone_position.rotated(Vector3.UP, skeleton.rotation.y ) 
+	var bonePosition = skeleton.bone_position(bone_name)
+	var adjustedPosition = bonePosition.rotated(Vector3.UP, skeleton.rotation.y ) 
 	return adjustedPosition	
 
 

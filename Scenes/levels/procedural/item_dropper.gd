@@ -77,7 +77,7 @@ func collect_items(item_index, collection_point, speed = 2.0):
 		item.apply_central_force(disposition.normalized() * speed * item.mass)
 		
 		
-@rpc("authority", "call_local")
+@rpc("authority", "call_local", "reliable")
 func disperse_items(item_index, magnitude = 12.0):
 	
 	var items = get_items(item_index)

@@ -6,8 +6,8 @@ const WalkState = {
 }
 @export var WALK_STATE = WalkState.WALKING
 
-@export var walkAnimPlaybackScalar = 1.65
-@export var walkAnimBlendScalar = 2.0
+@export var walkAnimPlaybackScalar := 1.65
+@export var walkAnimBlendScalar := 2.0
 
 var maxBlendVal = 1
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")

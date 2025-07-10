@@ -13,7 +13,7 @@ const perfect_match = true
 @export var head_displacement = 0.0
 
 var bone_modifiers = {
-	"head":1.0,
+	"head":1.1,
 	"upperBody":0.75,
 	"upperArm.r":0.5,
 	"upperArm.l":0.5,
@@ -39,6 +39,7 @@ var bone_modifiers = {
 
 var correct_physical_bones_trigger
 
+
 func _ready():
 	
 	physical_bones_start_simulation()	
@@ -54,9 +55,16 @@ func _ready():
 			
 			if indexToRemove >= 0:
 				mockBoneIndices.remove_at(indexToRemove)
+
+
+func _process(delta : float) -> void:
+	
+	for physical_bone in physicalBones:	
+		if physical_bone.global_position.y < -.25:
+			correct_physical_bone(physical_bone)
+		
 				
-				
-func animate_physical_bones(delta):
+func animate_physical_bones(delta : float):
 	
 	for boneIndex in mockBoneIndices:
 		instantly_match_animated_bone(boneIndex)
@@ -144,6 +152,15 @@ func instantly_match_animated_bone(boneIndex):
 	if mockBoneIndices.has(boneIndex):
 		set_bone_pose_position(boneIndex, Animated_Skeleton.get_bone_pose_position(boneIndex))
 		set_bone_pose_rotation(boneIndex, Animated_Skeleton.get_bone_pose_rotation(boneIndex))
+
+
+func correct_physical_bone(physical_bone):
+	
+	physical_bone.linear_velocity = Vector3.ZERO
+	physical_bone.angular_velocity = Vector3.ZERO
+	var animated_transform = get_animated_transform(physical_bone)	
+	physical_bone.position = physical_bone.position.lerp(animated_transform.origin, 1)
+	physical_bone.rotation = physical_bone.rotation.lerp(animated_transform.basis.get_euler(), 1)
 		
 			
 func reset_skeleton():

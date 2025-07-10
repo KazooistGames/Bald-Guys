@@ -255,7 +255,7 @@ func synchronize_all_peers():
 @rpc("call_remote", "authority", "reliable")	
 func sync_board_positions(server_positions : PackedVector3Array, server_trajectories : PackedVector3Array):
 	
-	for index in range(boards.size()-1):
+	for index in range(boards.size()):
 		boards[index].position = server_positions[index] + unlagger.SERVER_PING / 2000.0 * server_trajectories[index]
 		boards[index].trajectory = server_trajectories[index]
 	unlagger.reset()

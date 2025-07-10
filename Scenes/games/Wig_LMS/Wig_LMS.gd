@@ -75,6 +75,7 @@ func rpc_play():
 	
 	if is_multiplayer_authority(): 
 		session.HUD.set_psa.rpc("Shave your foes!", 3)
+		session.HUD.set_progress_label("Follicle Stability:")
 		State = GameState.playing
 		
 		for value in session.Client_Screennames.values():
@@ -82,7 +83,7 @@ func rpc_play():
 			
 		for bearer in session.bearers:
 			
-			if bearer != null: #TODO: add listener to ragdoll to chip away health
+			if bearer != null:
 				bearer.ragdolled.connect(damage_player)
 				var screenname : String = session.Client_Screennames[int(str(bearer.name))]
 				Scores[screenname] = 100
@@ -100,7 +101,7 @@ func rpc_finish():
 		
 		for bearer in session.bearers:
 		
-			if bearer != null: #TODO: remove listener to ragdoll to chip away health
+			if bearer != null:
 				bearer.ragdolled.disconnect(damage_player)
 
 

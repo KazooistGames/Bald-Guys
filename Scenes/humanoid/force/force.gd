@@ -145,7 +145,11 @@ func process_charging(delta):
 	if charge_armed:
 		
 		for node in contained_bodies:
-			rpc_push_object.rpc(node.get_path())
+			
+			if is_multiplayer_authority():
+				rpc_push_object.rpc(node.get_path())
+			else:
+				rpc_push_object(node.get_path())
 	
 	
 func process_inert(delta):
@@ -185,7 +189,11 @@ func process_cooldown(delta):
 	if charge_armed:
 		
 		for node in contained_bodies:
-			rpc_push_object.rpc(node.get_path())
+			
+			if is_multiplayer_authority():
+				rpc_push_object.rpc(node.get_path())
+			else:
+				rpc_push_object(node.get_path())
 	
 	if not multiplayer_permissive:
 		pass	
@@ -279,7 +287,11 @@ func rpc_trigger():
 	elif action == Action.charging:
 		
 		for node in contained_bodies:
-			rpc_push_object.rpc(node.get_path())
+			
+			if is_multiplayer_authority():
+				rpc_push_object.rpc(node.get_path())
+			else:
+				rpc_push_object(node.get_path())
 			
 	collision_mask = 0
 	linear_damp_space_override = Area3D.SPACE_OVERRIDE_DISABLED

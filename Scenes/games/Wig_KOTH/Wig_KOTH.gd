@@ -56,7 +56,7 @@ func _ready():
 func _process(delta):
 	
 	resize_hill(Hill_Size, delta)	
-	session.HUD.update_nameplate("HILL", Hill.global_position, "HILL")	
+	session.HUD.update_nameplate("HILL", Hill.global_position, "GEL")	
 	var scoring_players : Array[Node3D] = get_players_in_hill()
 	var indicator_color = Color.GREEN_YELLOW if scoring_players.size() == 0 else Color.ORANGE_RED
 	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", indicator_color)
@@ -197,10 +197,10 @@ func rpc_play():
 	
 	Hill.visible = true
 	hill_collider.disabled = false
-	session.HUD.add_nameplate("HILL", "HILL")
+	session.HUD.add_nameplate("HILL", "GEL")
 	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
 	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
-	session.HUD.set_progress_label("Growing Hair...")
+	session.HUD.set_progress_label("Irrigating Scalp...")
 	
 	if is_multiplayer_authority(): 
 		session.HUD.set_psa.rpc("Grow your Hair!", 3)

@@ -1,6 +1,7 @@
 extends Node3D
 
-const Humanoid_Prefab = preload("res://Scenes/humanoid/humanoid.tscn")
+const Humanoid_Prefab : PackedScene = preload("res://Scenes/humanoid/humanoid.tscn")
+const DEBUG := false
 
 const SessionState = {
 	Lobby = 0,
@@ -11,18 +12,18 @@ const SessionState = {
 @export var Client_Screennames : Dictionary = {}
 @export var State = SessionState.Lobby
 @export var Commissioned = false
-@export var Humanoids = []
+@export var Humanoids : Array[Node] = []
 @export var Games : Array = []
 @export var Round : int = 0
 
 
 @onready var session_rng = RandomNumberGenerator.new()
 @onready var Level : Node3D = $Procedural_Level
-@onready var HUD = $HUD
-@onready var humanoidSpawner = $HumanoidSpawner
-@onready var raycast = $RayCast3D
-@onready var pinger = $PingTimer
-@onready var unlagger = $LagCompensator
+@onready var HUD : CanvasLayer = $HUD
+@onready var humanoidSpawner : MultiplayerSpawner = $HumanoidSpawner
+@onready var raycast : RayCast3D = $RayCast3D
+@onready var pinger : Node = $PingTimer
+@onready var unlagger : Node= $LagCompensator
 
 signal Created_Humanoid
 signal Destroying_Humanoid
