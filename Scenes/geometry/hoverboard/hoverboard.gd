@@ -5,9 +5,13 @@ enum HoverStatus {
 	flying = 1,
 	manual = 2,
 }
-@export var status : HoverStatus = HoverStatus.idle
 
-@export var size  : float = 3.0 :
+@onready var mesh : MeshInstance3D = $MeshInstance3D
+@onready var collider : CollisionShape3D = $CollisionShape3D
+@onready var area : Area3D = $Area3D
+@onready var area_collider : CollisionShape3D = $Area3D/CollisionShape3D
+
+var size  : float = 3.0 :
 	get:
 		return size
 	set(value):	
@@ -16,29 +20,25 @@ enum HoverStatus {
 		collider.shape.size.x = value
 		collider.shape.size.z = value
 		
-@export var girth : float = 0.25 : 
+var girth : float = 0.25 : 
 	get:
 		return size
 	set(value):	
 		mesh.mesh.size.y = value
 		collider.shape.size.y = value
-				
-@export var upper_limits : Vector3 = Vector3(50, 50, 50)
-@export var lower_limits : Vector3 = Vector3(-50, -50, -50)
-@export var trajectory : Vector3 = Vector3.ZERO
-@export var speed : float = 0.0
-@export var throttle : float = 0.0
-@export var external_speed : float = 0.0
-@export var disable_constrain : bool = false
-@export var disable_bounce : bool = false
-@export var disable_depenetration : bool = false
-
-@onready var mesh : MeshInstance3D = $MeshInstance3D
-@onready var collider : CollisionShape3D = $CollisionShape3D
-
+	
+var status : HoverStatus = HoverStatus.idle		
+var upper_limits : Vector3 = Vector3(50, 50, 50)
+var lower_limits : Vector3 = Vector3(-50, -50, -50)
+var trajectory : Vector3 = Vector3.ZERO
+var speed : float = 0.0
+var throttle : float = 0.0
+var external_speed : float = 0.0
+var disable_constrain : bool = false
+var disable_bounce : bool = false
+var disable_depenetration : bool = false
 var target_speed : float
 var query : PhysicsShapeQueryParameters3D
-
 var delay_collider_by_one_frame_latch : bool = true
 
 signal bounced()
@@ -56,12 +56,12 @@ func _ready():
 	mesh.mesh.size.z = size 	
 	collider.shape.size.x = size
 	collider.shape.size.y = girth
-	collider.shape.size.z = size
-	
+	collider.shape.size.z = size	
 	depenetrate_geometry()
 	collider.disabled = true
 	delay_collider_by_one_frame_latch = true
-
+	area_collider.shape.size = Vector3(size, 1, size)
+	area.position.y = girth / 2.0 + .5
 
 func _physics_process(delta):
 	

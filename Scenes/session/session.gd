@@ -6,7 +6,7 @@ const DEBUG := false
 const SessionState = {
 	Lobby = 0,
 	Round = 1,
-	Intermission = 2,
+	Reconfiguring = 2,
 	Vote = 3,
 }
 
@@ -40,6 +40,7 @@ var countDown_value = 0
 var wigs : Array[Node] = []
 var bearers : Array = []
 
+var game_vote_options : Array[Game] = []
 
 func _ready():
 		
@@ -90,10 +91,11 @@ func _physics_process(delta):
 	if State == SessionState.Lobby:
 		pass
 		
-	elif State == SessionState.Intermission:
+	elif State == SessionState.Vote:
 		
 		if countDown_value <= 0:
-			Try_Start_Round()
+			#Try_Get_Vote()
+			Level.get_vote()
 		
 		elif countDown_timer > 1:
 			countDown_timer = 0
@@ -118,8 +120,9 @@ func _unhandled_key_input(event):
 		if State == SessionState.Lobby:
 			Try_Start_Session()
 			
-		elif State == SessionState.Intermission:
-			Try_Start_Round()
+		elif State == SessionState.Vote:
+			#Try_Get_Vote()
+			Level.get_vote()
 			
 		elif State == SessionState.Round:	
 			Try_Finish_Round()
@@ -127,23 +130,48 @@ func _unhandled_key_input(event):
 
 func Try_Start_Session():
 	
-	State = SessionState.Intermission
-	countDown_timer = 0
-	countDown_value = 30
-	HUD.set_psa.rpc(str(countDown_value))
+	Try_Vote()
 	
 
-func Try_Start_Round():
+func Try_Vote():
+	
+	game_vote_options = []
+	game_vote_options.append(All_Games.pick_random())
+	game_vote_options.append(All_Games.pick_random())
+	
+	print(game_vote_options)
+	
+	Level.vote()
+	countDown_timer = 0
+	countDown_value = 60
+	HUD.set_psa.rpc(str(countDown_value))
+	State = SessionState.Vote
+	
+	if not Level.voted.is_connected(Try_Get_Vote):
+		Level.voted.connect(Try_Get_Vote)
+
+
+func Try_Get_Vote(game_index):
 	
 	if Level.demolished.is_connected(Level.vote):
 		Level.demolished.disconnect(Level.vote)
+		
+	print(game_index)
 	
-	Active_Game = All_Games.pick_random()
+	State = SessionState.Reconfiguring
+	Active_Game = game_vote_options.pick_random() if game_index == -1 else game_vote_options[game_index]
+	Level.generate()
+	
+	if not Level.generated.is_connected(Try_Start_Round):
+		Level.generated.connect(Try_Start_Round)
+
+
+func Try_Start_Round():
+	
 	Active_Game.rpc_play.rpc()
 	Active_Game.GameOver.connect(Try_Finish_Round)
 	State = SessionState.Round	
 	Started_Round.emit()
-	Level.generate()
 	
 	
 func Try_Finish_Round():
@@ -152,17 +180,11 @@ func Try_Finish_Round():
 	Active_Game.rpc_finish.rpc()
 	Round += 1		
 	Ended_Round.emit()	
-	
-	State = SessionState.Intermission
-	countDown_timer = 0
-	countDown_value = 60
-	HUD.set_psa.rpc(str(countDown_value))
+	State = SessionState.Reconfiguring
 	Level.demolish()
-	Level.demolished.connect(Level.vote)
-
-#func Try_Vote():
-	#
-	#Level.vote()
+	
+	if not Level.demolished.is_connected(Try_Vote):
+		Level.demolished.connect(Try_Vote)
 
 	
 func Try_Reset_Session():
@@ -185,15 +207,12 @@ func add_player(peer_id):
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
+	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
 	Humanoids.append(new_peer_humanoid)
 	add_child(new_peer_humanoid)
-	
 	rpc_respawn_player.rpc(new_peer_humanoid.get_path())
-
 	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name)
-	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
-	Created_Humanoid.emit(new_peer_humanoid)
-	
+	Created_Humanoid.emit(new_peer_humanoid)	
 	rpc_CommissionSession.rpc_id(peer_id, session_rng.seed)
 	Level.init_for_new_client(peer_id)
 	

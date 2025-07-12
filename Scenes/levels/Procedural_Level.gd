@@ -5,7 +5,8 @@ enum level_state{
 	demolished,
 	generating,
 	generated,
-	demolishing
+	demolishing,
+	voting
 }
 var state : level_state = level_state.demolished
 
@@ -46,13 +47,14 @@ func _ready() -> void:
 	item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
 	item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
 	
+	
 func _process(_delta):
 
 	hoverboard_stager.Map_Size = room.Current_Size
 	
 	if is_multiplayer_authority():
 		
-		if state == level_state.demolishing:
+		if state == level_state.demolishing or state == level_state.demolished:
 			item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
 			item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
 	
@@ -66,6 +68,23 @@ func vote():
 	hoverboard_stager.boards[1].position.x = -5
 	hoverboard_stager.boards[1].position.z = -5
 	hoverboard_stager.introduce_boards.rpc()
+	state = level_state.voting
+
+
+func get_vote():
+	
+	state = level_state.demolished
+	var winning_board_index = -1
+	var highest_votes = 0
+	
+	for index in range(hoverboard_stager.boards.size()):
+		var board = hoverboard_stager.boards[index]
+		
+		if board.area.get_overlapping_bodies().size() > highest_votes:
+			winning_board_index = index
+			
+	voted.emit(winning_board_index)
+			
 	
 		
 func generate() -> void:
@@ -113,6 +132,10 @@ func finish_generate() -> void:
 	if limb_grower.finished_extending.is_connected(finish_generate):
 		limb_grower.finished_extending.disconnect(finish_generate)
 
+	item_dropper.disperse_items.rpc(0)
+	item_dropper.disperse_items.rpc(2, 6.0)
+	generated.emit()
+	
 
 func demolish() -> void:
 	
@@ -173,8 +196,6 @@ func reset_map() -> void:
 	
 func stage_boards() -> void:
 	
-	item_dropper.disperse_items.rpc(0)
-	item_dropper.disperse_items.rpc(2, 6.0)
 	hoverboard_stager.clear_boards.rpc()
 	hoverboard_stager.create_boards.rpc(1, 12, 1, Vector2(18, 25))
 	hoverboard_stager.create_boards.rpc(3, 6, 2, Vector2(12, 20))
