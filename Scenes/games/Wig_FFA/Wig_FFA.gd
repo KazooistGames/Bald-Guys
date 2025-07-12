@@ -1,19 +1,9 @@
-extends Node3D
+extends Game
 
 const wig_prefab = preload("res://Scenes/objects/wig/Wig.tscn")
 const beas_mote_transition = 54.66
 const beas_mote_end = 162.0
 
-enum GameState {
-	reset,
-	playing,
-	finished
-}
-
-@export var map_size = 50
-@export var State = GameState.reset
-@export var Goal = 30 #107.34
-@export var Scores = {}
 @export var wig_remotes : Array = []
 
 @onready var whispers = $Whispers
@@ -21,18 +11,12 @@ enum GameState {
 @onready var session = get_parent()
 @onready var wig_remote = $RemoteTransform3D
 
-signal GameOver
-
-#var wigs : Array[Node] = []
-#var bearers : Array = []
-#var active_index = -1
-
-
 func _ready():
 
 	whispers.stream_paused = false
 	theme.stream_paused = true
-	
+	Goal = 30
+	Players = 2
 	
 func _process(_delta):
 

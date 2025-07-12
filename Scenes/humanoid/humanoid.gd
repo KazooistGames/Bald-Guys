@@ -67,7 +67,7 @@ var cached_floor_obj = null
 var cached_floor_pos := Vector3.ZERO
 
 var just_jumped_timer := 0.0
-var just_jumped_period := 1.0/3.0
+var just_jumped_period := 0.35
 
 var lunge_timer := 0.0
 var lunge_duration := 1.0

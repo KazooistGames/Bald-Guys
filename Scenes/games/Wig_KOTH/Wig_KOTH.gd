@@ -17,7 +17,7 @@ enum GameState {
 @export var State = GameState.reset
 @export var map_size : float = 50
 @export var Scores : Dictionary = {}
-@export var Goal : float = 10
+@export var Goal : float = 30
 @export var Hill_Size : float = 4.0 
 
 @onready var Hill = $Hill
