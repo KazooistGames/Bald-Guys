@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://b5fc4lv4wybum"]
 
-[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/room.tscn" id="1_halqj"]
+[ext_resource type="PackedScene" uid="uid://c1uj8nhliop8j" path="res://Scenes/levels/Room/room.tscn" id="1_halqj"]
 [ext_resource type="Script" path="res://Scenes/levels/Procedural_Level.gd" id="2_lukeg"]
 [ext_resource type="PackedScene" uid="uid://bfj6oao2wp4ge" path="res://Scenes/levels/procedural/hoverboard_stager.tscn" id="3_3d4pj"]
 [ext_resource type="PackedScene" uid="uid://bihhmgl2g08o3" path="res://Scenes/levels/procedural/mesa_grower.tscn" id="5_aojpy"]

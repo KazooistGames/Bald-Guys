@@ -16,25 +16,25 @@ func _ready():
 	whispers.stream_paused = false
 	theme.stream_paused = true
 	Goal = 30
-	Players = 2
+	Players = 1
 	
 func _process(_delta):
 
-	#active_index = session.wigs.size() - 1
-	session.wigs = get_tree().get_nodes_in_group("wigs")
+	#active_index = session.wig_manager.wigs.size() - 1
+	session.wig_manager.wigs = get_tree().get_nodes_in_group("wigs")
 	
-	if session.wigs.size() == 0 or State != GameState.playing:
+	if session.wig_manager.wigs.size() == 0 or State != GameState.playing:
 		whispers.stream_paused = true
 		theme.stream_paused = true
 		
 	else:
 		session.HUD.find_child("Progress").visible = active_bearer_is_local_player()
-		session.HUD.update_nameplate("WIG", session.wigs.back().global_position, "WIG")
-		whispers.global_position = session.wigs.back().global_position
+		session.HUD.update_nameplate("WIG", session.wig_manager.wigs.back().global_position, "WIG")
+		whispers.global_position = session.wig_manager.wigs.back().global_position
 		whispers.stream_paused = active_bearer_is_local_player()
 		theme.stream_paused = not whispers.stream_paused
 		
-		if session.bearers.back() != null:
+		if session.wig_manager.bearers.back() != null:
 			session.HUD.modify_nameplate("WIG", "visible", false)	
 		
 	if whispers.get_playback_position() >= beas_mote_transition:
@@ -58,14 +58,14 @@ func _physics_process(delta):
 	
 		GameState.playing:
 		
-			if session.wigs.size() == 0:
+			if session.wig_manager.wigs.size() == 0:
 				rpc_spawn_new_wig.rpc()
 				return
 				
-			if session.bearers.back() == null:
+			if session.wig_manager.bearers.back() == null:
 				return
 				
-			var bearer_name = session.get_humanoids_screenname(session.bearers.back())
+			var bearer_name = session.get_humanoids_screenname(session.wig_manager.bearers.back())
 			
 			if not Scores.has(bearer_name):
 				Scores[bearer_name] = delta
@@ -73,13 +73,13 @@ func _physics_process(delta):
 			elif Scores[bearer_name] < Goal:
 				Scores[bearer_name] += delta
 	
-			elif session.wigs.size() < ceil(session.Client_Screennames.size() / 2.0):	
-				session.bearers.back().ragdolled.disconnect(drop_wig)
-				rpc_fuse_wig_to_head.rpc(session.wigs.back().get_path(), session.bearers.back().get_path())
+			elif session.wig_manager.wigs.size() < ceil(session.Client_Screennames.size() / 2.0):	
+				session.wig_manager.bearers.back().ragdolled.disconnect(drop_wig)
+				rpc_fuse_wig_to_head.rpc(session.wig_manager.wigs.back().get_path(), session.wig_manager.bearers.back().get_path())
 				rpc_spawn_new_wig.rpc()
 				
 			else:
-				session.bearers.back().ragdolled.disconnect(drop_wig)
+				session.wig_manager.bearers.back().ragdolled.disconnect(drop_wig)
 				GameOver.emit()
 			
 		GameState.finished:			
@@ -88,11 +88,11 @@ func _physics_process(delta):
 		
 func active_bearer_is_local_player():
 	
-	if session.bearers.back() == null:
+	if session.wig_manager.bearers.back() == null:
 		return false
 		
 	else:	
-		return str(multiplayer.get_unique_id()) == session.bearers.back().name
+		return str(multiplayer.get_unique_id()) == session.wig_manager.bearers.back().name
 
 
 func dawn_active_wig(humanoid):
@@ -103,20 +103,20 @@ func dawn_active_wig(humanoid):
 	if not humanoid.is_in_group("humanoids"): #this node is not a humanoid
 		pass
 		
-	elif session.bearers.back() != null: #this wig already has a bearer
+	elif session.wig_manager.bearers.back() != null: #this wig already has a bearer
 		pass
 	
-	elif session.bearers.has(humanoid): #this guy already has a wig
+	elif session.wig_manager.bearers.has(humanoid): #this guy already has a wig
 		pass
 		
 	elif humanoid.RAGDOLLED: #this humanoid is unable to dawn the wig
 		pass
 		
 	else:
-		#session.bearers[active_index] = humanoid
-		session.wigs.back().interactable.gained_interaction.disconnect(dawn_active_wig)
+		#session.wig_manager.bearers[active_index] = humanoid
+		session.wig_manager.wigs.back().interactable.gained_interaction.disconnect(dawn_active_wig)
 		humanoid.ragdolled.connect(drop_wig)
-		rpc_put_wig_on_head.rpc(session.wigs.back().get_path(), humanoid.get_path())
+		rpc_put_wig_on_head.rpc(session.wig_manager.wigs.back().get_path(), humanoid.get_path())
 
 		
 func drop_wig(humanoid):
@@ -129,35 +129,35 @@ func drop_wig(humanoid):
 	if humanoid.ragdolled.is_connected(drop_wig):
 		humanoid.ragdolled.disconnect(drop_wig)	
 			
-	var wig_index = session.bearers.find(humanoid)
-	var this_bearer = session.bearers[wig_index]
+	var wig_index = session.wig_manager.bearers.find(humanoid)
+	var this_bearer = session.wig_manager.bearers[wig_index]
 	
 	if this_bearer != null:
 		var bearer_velocity = this_bearer.linear_velocity * 1.5
 		var offset_velocity = Vector3(randi_range(-1, 1), 3, randi_range(-1, 1))
-		session.wigs[wig_index].linear_velocity =  bearer_velocity + offset_velocity
+		session.wig_manager.wigs[wig_index].linear_velocity =  bearer_velocity + offset_velocity
 		
-	session.wigs[wig_index].interactable.gained_interaction.connect(dawn_active_wig)
-	rpc_put_wig_on_head.rpc(session.wigs[wig_index].get_path(), null)
+	session.wig_manager.wigs[wig_index].interactable.gained_interaction.connect(dawn_active_wig)
+	rpc_put_wig_on_head.rpc(session.wig_manager.wigs[wig_index].get_path(), null)
 
 
 func handle_player_leaving(client_id):
 	
 		var humanoid = session.get_node_or_null(str(client_id))
 	
-		if session.bearers.size() == 0:
+		if session.wig_manager.bearers.size() == 0:
 			return
-		elif session.bearers.back() == null:
+		elif session.wig_manager.bearers.back() == null:
 			return
 			
 		if humanoid == null:
 			pass
-		elif not session.bearers.has(humanoid):
+		elif not session.wig_manager.bearers.has(humanoid):
 			pass
-		elif humanoid == session.bearers.back() and State == GameState.playing: #this is the active wig
+		elif humanoid == session.wig_manager.bearers.back() and State == GameState.playing: #this is the active wig
 			drop_wig(humanoid)
 		else: #we either arent playing, or this wig is already fused - either way, destroy it
-			var wig = session.wigs[session.bearers.find(humanoid)]
+			var wig = session.wig_manager.wigs[session.wig_manager.bearers.find(humanoid)]
 			rpc_destroy_wig.rpc(wig.get_path())
 
 
@@ -174,8 +174,8 @@ func rpc_spawn_new_wig():
 	new_wig.global_position = random_position
 	new_wig.toggle_strobing(true)
 	new_wig.radius = 0.15
-	session.wigs.append(new_wig)
-	session.bearers.append(null)
+	session.wig_manager.wigs.append(new_wig)
+	session.wig_manager.bearers.append(null)
 	new_wig.interactable.gained_interaction.connect(dawn_active_wig)
 	return new_wig
 
@@ -202,7 +202,7 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 			session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
 			session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 			bearer.remove_child(wig_remote)
-			session.bearers[session.wigs.find(wig)] = null
+			session.wig_manager.bearers[session.wig_manager.wigs.find(wig)] = null
 			
 		add_child(wig_remote)
 		wig_remote.remote_path = ""
@@ -223,9 +223,9 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 		wig.freeze = true
 		session.HUD.modify_nameplate(new_bearer.name, "theme_override_colors/font_color", Color.ORANGE_RED)
 		session.HUD.modify_nameplate(new_bearer.name, "theme_override_font_sizes/font_size", 24)
-		var wig_index = session.wigs.find(wig)
-		session.bearers[wig_index] = new_bearer
-		print(session.wigs, session.bearers)
+		var wig_index = session.wig_manager.wigs.find(wig)
+		session.wig_manager.bearers[wig_index] = new_bearer
+		print(session.wig_manager.wigs, session.wig_manager.bearers)
 	
 	
 @rpc("call_local", "reliable")
@@ -236,8 +236,8 @@ func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
 	
 	var wig = get_node(path_to_wig)
 	var bearer = get_node(path_to_bearer)
-	var wig_index = session.wigs.find(wig)
-	session.bearers[wig_index] = bearer
+	var wig_index = session.wig_manager.wigs.find(wig)
+	session.wig_manager.bearers[wig_index] = bearer
 	
 	if wig == null or bearer == null:
 		return
@@ -262,14 +262,16 @@ func rpc_reset():
 			
 		State = GameState.reset
 		
-		if session.bearers.size() == 0:
+		if session.wig_manager.bearers.size() == 0:
 			pass
-		elif session.bearers.back() != null:
-			session.bearers.back().ragdolled.disconnect(drop_wig)
+		elif session.wig_manager.bearers.back() == null:
+			pass
+		elif session.wig_manager.bearers.back().ragdolled.is_connected(drop_wig):
+			session.wig_manager.bearers.back().ragdolled.disconnect(drop_wig)
 
-	for index in session.wigs.size():	
-		var bearer = session.bearers[index]
-		var wig = session.wigs[index]
+	for index in session.wig_manager.wigs.size():	
+		var bearer = session.wig_manager.bearers[index]
+		var wig = session.wig_manager.wigs[index]
 		
 		if wig == null:
 			continue
@@ -284,8 +286,8 @@ func rpc_reset():
 			
 		wig.queue_free()
 		
-	session.wigs.clear()
-	session.bearers.clear()
+	session.wig_manager.wigs.clear()
+	session.wig_manager.bearers.clear()
 	
 	
 @rpc("call_local", "reliable")
@@ -314,10 +316,10 @@ func rpc_finish():
 	if is_multiplayer_authority(): 
 		State = GameState.finished	
 		
-		for index in session.wigs.size():
+		for index in session.wig_manager.wigs.size():
 			
-			var bearer = session.bearers[index]
-			var wig = session.wigs[index]
+			var bearer = session.wig_manager.bearers[index]
+			var wig = session.wig_manager.wigs[index]
 			
 			if wig == null:
 				pass
@@ -337,17 +339,17 @@ func rpc_finish():
 
 func handle_player_joining(client_id) -> void:
 	
-	for index in range(session.wigs.size()):
+	for index in range(session.wig_manager.wigs.size()):
 		rpc_spawn_new_wig.rpc_id(client_id)
-		var wig_path = session.wigs[index].get_path()
+		var wig_path = session.wig_manager.wigs[index].get_path()
 		var bearer_path = null 
 		
-		if index < session.bearers.size():
-			bearer_path = null if session.bearers[index] == null else session.bearers[index].get_path()
+		if index < session.wig_manager.bearers.size():
+			bearer_path = null if session.wig_manager.bearers[index] == null else session.wig_manager.bearers[index].get_path()
 		
 		rpc_put_wig_on_head.rpc_id(client_id, wig_path, bearer_path)
 		
-		if State == GameState.finished or index < session.wigs.size()-1: #fuse wig if not active or game is finished
+		if State == GameState.finished or index < session.wig_manager.wigs.size()-1: #fuse wig if not active or game is finished
 			rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
 	
 	

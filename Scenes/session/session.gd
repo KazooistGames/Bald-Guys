@@ -25,6 +25,7 @@ var Active_Game : Game
 @onready var raycast : RayCast3D = $RayCast3D
 @onready var pinger : Node = $PingTimer
 @onready var unlagger : Node= $LagCompensator
+@onready var wig_manager : WigManager = $wig_manager
 
 signal Created_Humanoid
 signal Destroying_Humanoid
@@ -37,8 +38,7 @@ var local_ping_ms = 0.0
 var countDown_timer = 0
 var countDown_value = 0
 
-var wigs : Array[Node] = []
-var bearers : Array = []
+
 
 var game_vote_options : Array[Game] = []
 
@@ -94,7 +94,6 @@ func _physics_process(delta):
 	elif State == SessionState.Vote:
 		
 		if countDown_value <= 0:
-			#Try_Get_Vote()
 			Level.get_vote()
 		
 		elif countDown_timer > 1:
@@ -136,10 +135,8 @@ func Try_Start_Session():
 func Try_Vote():
 	
 	game_vote_options = []
-	game_vote_options.append(All_Games.pick_random())
-	game_vote_options.append(All_Games.pick_random())
-	
-	print(game_vote_options)
+	game_vote_options.append(get_eligible_game())
+	game_vote_options.append(get_eligible_game())
 	
 	Level.vote()
 	countDown_timer = 0
@@ -149,14 +146,15 @@ func Try_Vote():
 	
 	if not Level.voted.is_connected(Try_Get_Vote):
 		Level.voted.connect(Try_Get_Vote)
+		
+	if Active_Game:
+		Active_Game.rpc_reset.rpc()
 
 
 func Try_Get_Vote(game_index):
 	
 	if Level.demolished.is_connected(Level.vote):
 		Level.demolished.disconnect(Level.vote)
-		
-	print(game_index)
 	
 	State = SessionState.Reconfiguring
 	Active_Game = game_vote_options.pick_random() if game_index == -1 else game_vote_options[game_index]
@@ -168,11 +166,14 @@ func Try_Get_Vote(game_index):
 
 func Try_Start_Round():
 	
-	Active_Game.rpc_play.rpc()
-	Active_Game.GameOver.connect(Try_Finish_Round)
+	Level.generated.disconnect(Try_Start_Round)
+	Active_Game.rpc_play.rpc()		
 	State = SessionState.Round	
 	Started_Round.emit()
 	
+	if not Active_Game.GameOver.is_connected(Try_Finish_Round):
+		Active_Game.GameOver.connect(Try_Finish_Round)
+		
 	
 func Try_Finish_Round():
 	
@@ -185,7 +186,7 @@ func Try_Finish_Round():
 	
 	if not Level.demolished.is_connected(Try_Vote):
 		Level.demolished.connect(Try_Vote)
-
+		
 	
 func Try_Reset_Session():
 	
@@ -431,3 +432,23 @@ func get_humanoids_screenname(humanoid : Node3D) -> String:
 	else:
 		return ''
 		
+		
+func get_eligible_game() -> Game:
+	
+	var eligable_games : Array[Game] = []
+	
+	for game : Game in All_Games:
+		
+		if game_vote_options.has(game):
+			continue
+		elif game.Players > Humanoids.size():
+			continue
+		else:
+			eligable_games.append(game)
+			
+	if eligable_games.size() > 0:
+		return eligable_games.pick_random()
+	elif game_vote_options.size() > 0:
+		return game_vote_options[0]
+	else:
+		return null

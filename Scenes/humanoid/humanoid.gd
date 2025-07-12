@@ -6,7 +6,7 @@ const Lunge_Speed = 35
 const lunge_duration_scale = 5.0
 const coyote_duration = 0.15
 
-@export var SKIN_COLOR : Color:
+var SKIN_COLOR : Color:
 	
 	get:
 		return SKIN_COLOR
@@ -18,19 +18,19 @@ const coyote_duration = 0.15
 		material.albedo_color = value
 		model.set_surface_override_material(0, material)
 	
-@export var LUNGING := false
-@export var RAGDOLLED := false
-@export var ON_FLOOR := true
-@export var REACHING := 0
-@export var LOOK_VECTOR : Vector3 = Vector3(0,0,0)
-@export var WALK_VECTOR : Vector3 = Vector3(0,0,0)
-@export var FACING_VECTOR : Vector3 = Vector3(0,0,0)
-@export var SPEED_GEARS : Vector2 = Vector2(3.5, 7.0)
-@export var JUMP_SPEED := 5.5
-@export var RUNNING := false
-@export var DOUBLE_JUMP_CHARGES := 1
-@export var floor_velocity : Vector3 = Vector3(0,0,0)
-@export var walk_velocity : Vector3 = Vector3.ZERO
+var LUNGING := false
+var RAGDOLLED := false
+var ON_FLOOR := true
+var REACHING := 0
+var LOOK_VECTOR : Vector3 = Vector3(0,0,0)
+var WALK_VECTOR : Vector3 = Vector3(0,0,0)
+var FACING_VECTOR : Vector3 = Vector3(0,0,0)
+var SPEED_GEARS : Vector2 = Vector2(3.5, 7.0)
+var JUMP_SPEED := 5.5
+var RUNNING := false
+var DOUBLE_JUMP_CHARGES := 1
+var floor_velocity : Vector3 = Vector3(0,0,0)
+var walk_velocity : Vector3 = Vector3.ZERO
 
 @onready var skeleton : Skeleton3D = $Skeleton3D
 @onready var animation : AnimationTree = $AnimationTree

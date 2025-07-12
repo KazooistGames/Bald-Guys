@@ -146,7 +146,7 @@ func get_players_in_hill() -> Array[Node3D]:
 	var all_bodies : Array[Node3D] = Hill.get_overlapping_bodies()
 	var players : Array[Node3D] = []
 	
-	for bearer in session.bearers:
+	for bearer in session.wig_manager.bearers:
 		
 		if all_bodies.has(bearer):
 			players.append(bearer)

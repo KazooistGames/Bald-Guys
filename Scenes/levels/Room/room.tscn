@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c1uj8nhliop8j"]
 
-[ext_resource type="Script" path="res://Scenes/levels/room.gd" id="1_jnaim"]
-[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Spawn/spawn.tscn" id="3_m4ih7"]
+[ext_resource type="Script" path="res://Scenes/levels/Room/room.gd" id="1_jnaim"]
+[ext_resource type="PackedScene" uid="uid://cdpxkq752u0vl" path="res://Scenes/levels/Room/spawn.tscn" id="3_m4ih7"]
 [ext_resource type="PackedScene" uid="uid://1v5p2mj7bl3y" path="res://Scenes/geometry_static/Wall/wall.tscn" id="3_siirb"]
 
 [node name="room" type="Node3D"]

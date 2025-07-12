@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cdpxkq752u0vl"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_n32i3"]
+height = 0.5
+
+[node name="spawn" type="MeshInstance3D" groups=["spawns"]]
+visible = false
+mesh = SubResource("CylinderMesh_n32i3")
