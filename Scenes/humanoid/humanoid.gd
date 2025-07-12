@@ -48,8 +48,8 @@ const coyote_duration = 0.15
 
 var multiplayer_permissive := false
 
-var TOPSPEED := 0
-var TOPSPEED_MOD := 1
+var TOPSPEED := 0.0
+var TOPSPEED_MOD := 1.0
 
 var RAGDOLL_THRESHOLD :=  6.5
 var ragdoll_cooldown_period_seconds := 0.5

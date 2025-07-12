@@ -57,9 +57,10 @@ func _ready():
 				mockBoneIndices.remove_at(indexToRemove)
 
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
 	
 	for physical_bone in physicalBones:	
+		
 		if physical_bone.global_position.y < -.25:
 			correct_physical_bone(physical_bone)
 		

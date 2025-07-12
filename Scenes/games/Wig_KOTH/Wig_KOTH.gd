@@ -1,4 +1,4 @@
-extends Node3D
+extends Game
 
 enum HillState {
 	idle,
@@ -7,17 +7,6 @@ enum HillState {
 	falling
 }
 @export var hill_state : HillState = HillState.idle
-
-enum GameState {
-	reset,
-	playing,
-	finished
-}
-
-@export var State = GameState.reset
-@export var map_size : float = 50
-@export var Scores : Dictionary = {}
-@export var Goal : float = 30
 @export var Hill_Size : float = 4.0 
 
 @onready var Hill = $Hill
@@ -38,7 +27,6 @@ var wig_radii : Vector2 = Vector2(0.15, 0.45)
 var wig_start_offset = Vector3(0, 0.2, -0.025)
 var wig_end_offset = Vector3(0, 0.5, -0.075)
 
-signal GameOver
 
 func _ready():
 
@@ -137,6 +125,7 @@ func _physics_process(delta):
 func resize_hill(new_radius, time_elapsed):
 	
 	if hill_collider.shape.radius != new_radius:
+		new_radius = max(new_radius, 0.00001)
 		hill_collider.shape.radius = move_toward(hill_collider.shape.radius, new_radius, time_elapsed)
 		hill_mesh.mesh.radius = hill_collider.shape.radius
 		hill_mesh.mesh.height = hill_collider.shape.radius * 2.0
@@ -219,13 +208,3 @@ func rpc_finish():
 		session.HUD.find_child("Progress").visible = false
 		State = GameState.finished
 		session.HUD.remove_nameplate("HILL")
-
-
-func handle_player_joining(client_id) -> void:
-	
-	pass
-	
-
-func handle_player_leaving(client_id) -> void:
-	
-	pass

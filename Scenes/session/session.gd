@@ -7,15 +7,16 @@ const SessionState = {
 	Lobby = 0,
 	Round = 1,
 	Intermission = 2,
+	Vote = 3,
 }
 
-@export var Client_Screennames : Dictionary = {}
-@export var State = SessionState.Lobby
-@export var Commissioned = false
-@export var Humanoids : Array[Node] = []
-@export var Games : Array = []
-@export var Round : int = 0
-
+var Client_Screennames : Dictionary = {}
+var State = SessionState.Lobby
+var Commissioned = false
+var Humanoids : Array[Node] = []
+var All_Games : Array[Game] = []
+var Round : int = 0
+var Active_Game : Game
 
 @onready var session_rng = RandomNumberGenerator.new()
 @onready var Level : Node3D = $Procedural_Level
@@ -49,8 +50,16 @@ func _ready():
 	
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
 	humanoidSpawner.despawned.connect( func (node): HUD.remove_nameplate(node.name))
-	#Started_Round.connect(Level.generate)
-	#Ended_Round.connect(Level.demolish)
+	
+	var game_nodes = get_tree().get_nodes_in_group("Game")
+	
+	for node in game_nodes:
+		
+		if node == null:
+			pass
+		elif node is Game:
+			All_Games.append(node)
+			
 
 
 func _process(_delta):
@@ -65,7 +74,7 @@ func _process(_delta):
 			var screenname = Client_Screennames[peer_id]
 			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
 		
-	for game in Games:
+	for game : Game in All_Games:
 		game.map_size = Level.room.Current_Size
 
 
@@ -77,11 +86,6 @@ func _physics_process(delta):
 	elif not is_multiplayer_authority():
 		return	
 		
-	if Round >= Games.size():
-		return
-		
-	HUD.Scores = Games[Round].Scores
-	HUD.Goal = Games[Round].Goal
 	
 	if State == SessionState.Lobby:
 		pass
@@ -98,6 +102,10 @@ func _physics_process(delta):
 		
 		else:
 			countDown_timer += delta
+			
+	elif State == SessionState.Round:
+		HUD.Scores = Active_Game.Scores
+		HUD.Goal = Active_Game.Goal
 	
 
 func _unhandled_key_input(event):
@@ -123,31 +131,38 @@ func Try_Start_Session():
 	countDown_timer = 0
 	countDown_value = 30
 	HUD.set_psa.rpc(str(countDown_value))
-	Level.generate()
 	
 
 func Try_Start_Round():
 	
-	Games[Round].GameOver.connect(Try_Finish_Round)
-	Games[Round].rpc_play.rpc()
+	if Level.demolished.is_connected(Level.vote):
+		Level.demolished.disconnect(Level.vote)
+	
+	Active_Game = All_Games.pick_random()
+	Active_Game.rpc_play.rpc()
+	Active_Game.GameOver.connect(Try_Finish_Round)
 	State = SessionState.Round	
 	Started_Round.emit()
+	Level.generate()
 	
 	
 func Try_Finish_Round():
 	
-	Games[Round].GameOver.disconnect(Try_Finish_Round)
-	Games[Round].rpc_finish.rpc()
+	Active_Game.GameOver.disconnect(Try_Finish_Round)
+	Active_Game.rpc_finish.rpc()
 	Round += 1		
 	Ended_Round.emit()	
 	
-	if Round >= Games.size():
-		Try_Reset_Session()
-	else:
-		State = SessionState.Intermission
-		countDown_timer = 0
-		countDown_value = 30
-		HUD.set_psa.rpc(str(countDown_value))
+	State = SessionState.Intermission
+	countDown_timer = 0
+	countDown_value = 60
+	HUD.set_psa.rpc(str(countDown_value))
+	Level.demolish()
+	Level.demolished.connect(Level.vote)
+
+#func Try_Vote():
+	#
+	#Level.vote()
 
 	
 func Try_Reset_Session():
@@ -156,10 +171,9 @@ func Try_Reset_Session():
 	State = SessionState.Lobby
 	Round = 0
 	
-	for game in Games:
+	for game : Game in All_Games:
 		game.rpc_reset.rpc()
 	
-
 
 func add_player(peer_id):
 	
@@ -183,7 +197,7 @@ func add_player(peer_id):
 	rpc_CommissionSession.rpc_id(peer_id, session_rng.seed)
 	Level.init_for_new_client(peer_id)
 	
-	for game in Games:	
+	for game : Game in All_Games:	
 			
 		if game.State == game.GameState.reset:
 			game.rpc_reset.rpc_id(peer_id)
@@ -214,7 +228,7 @@ func remove_player(peer_id):
 	if players_humanoid:
 		Destroying_Humanoid.emit(players_humanoid.get_path())
 		
-		for game in Games:
+		for game : Game in All_Games:
 			game.handle_player_leaving(peer_id)
 			
 		Humanoids.erase(players_humanoid)
@@ -254,42 +268,42 @@ func rpc_CommissionSession(Seed):
 	
 	session_rng.seed = Seed
 	print(multiplayer.get_unique_id(), " session seed: ", session_rng.seed)
-	var unique_round_id = session_rng.randi_range(0, 0)
-	
-	match unique_round_id:
-		0:
-			load_game("res://Scenes/games/Wig_FFA/Wig_FFA.tscn")			
-			load_game("res://Scenes/games/Wig_KOTH/Wig_KOTH.tscn")
-			load_game("res://Scenes/games/Wig_LMS/Wig_LMS.tscn")
+	#var unique_round_id = session_rng.randi_range(0, 0)
+	#
+	#match unique_round_id:
+		#0:
+			#load_game("res://Scenes/games/Wig_FFA/Wig_FFA.tscn")			
+			#load_game("res://Scenes/games/Wig_KOTH/Wig_KOTH.tscn")
+			#load_game("res://Scenes/games/Wig_LMS/Wig_LMS.tscn")
 			
 	Level.seed_procedural_generators(hash(session_rng.randi()))
 	Commissioned = true
 	
 		
-var last_prefab
-func load_game(path):
-	
-	var prefab = load(path)
-	var return_val
-	
-	if prefab == null:	
-		print(multiplayer.get_unique_id(), " could not load game at path: ", path)
-		return_val = null
-		
-	elif last_prefab == prefab:	
-		print(multiplayer.get_unique_id(), " duplicating round of ", path)	
-		Games.append(Games.back())
-		return_val = Games.back()
-		
-	else:
-		print(multiplayer.get_unique_id(), " commissioning a round of ", path)
-		var new_game = prefab.instantiate()
-		add_child(new_game, true)	
-		Games.append(new_game)
-		return_val = new_game
-		
-	last_prefab = prefab
-	return return_val
+#var last_prefab
+#func load_game(path):
+	#
+	#var prefab = load(path)
+	#var return_val
+	#
+	#if prefab == null:	
+		#print(multiplayer.get_unique_id(), " could not load game at path: ", path)
+		#return_val = null
+		#
+	#elif last_prefab == prefab:	
+		#print(multiplayer.get_unique_id(), " duplicating round of ", path)	
+		#Games.append(Games.back())
+		#return_val = Games.back()
+		#
+	#else:
+		#print(multiplayer.get_unique_id(), " commissioning a round of ", path)
+		#var new_game = prefab.instantiate()
+		#add_child(new_game, true)	
+		#Games.append(new_game)
+		#return_val = new_game
+		#
+	#last_prefab = prefab
+	#return return_val
 			
 	  
 func ping_clients():
@@ -397,3 +411,4 @@ func get_humanoids_screenname(humanoid : Node3D) -> String:
 		
 	else:
 		return ''
+		

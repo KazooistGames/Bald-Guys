@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://Scenes/games/Wig_LMS/Wig_LMS.gd" id="1_4tp8r"]
 
-[node name="WigLMS" type="Node3D"]
+[node name="WigLMS" type="Node3D" groups=["Game"]]
 script = ExtResource("1_4tp8r")

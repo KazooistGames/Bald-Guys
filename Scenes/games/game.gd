@@ -35,11 +35,12 @@ func rpc_finish():
 	pass
 
 
-func handle_player_joining(client_id) -> void:
+func handle_player_joining(_client_id) -> void:
 	
 	pass	
 	
 	
-func handle_player_leaving(client_id) -> void:	
+func handle_player_leaving(_client_id) -> void:	
 	
 	pass
+

@@ -1,26 +1,13 @@
-extends Node3D
+extends Game
 
 const damage_scalar = 25
 
-enum GameState {
-	reset,
-	playing,
-	finished
-}
-
-@export var State = GameState.reset
-@export var map_size : float = 50
-@export var Scores : Dictionary = {}
-@export var Goal : float = 100
 
 @onready var session = get_parent()
 
 var wig_radii : Vector2 = Vector2(0.15, 0.45)
 var wig_start_offset = Vector3(0, 0.2, -0.025)
 var wig_end_offset = Vector3(0, 0.5, -0.075)
-
-
-signal GameOver
 
 
 func _ready():
@@ -119,13 +106,4 @@ func damage_player(player):
 	var screenname : String = session.Client_Screennames[int(str(player.name))]
 	Scores[screenname] -= damage_scalar
 
-
-func handle_player_joining(client_id) -> void:
-	
-	pass
-
-
-func handle_player_leaving(client_id) -> void:
-	
-	pass
 	

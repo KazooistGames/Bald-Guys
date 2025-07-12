@@ -1,6 +1,15 @@
 extends Node3D
 
-@export var Map_Size : int = 25 
+
+enum level_state{
+	demolished,
+	generating,
+	generated,
+	demolishing
+}
+var state : level_state = level_state.demolished
+
+var Map_Size : int = 25 
 
 @onready var room : Node3D = $room
 @onready var hoverboard_stager : Node3D = $Hoverboard_Stager
@@ -15,6 +24,7 @@ var level_rng : RandomNumberGenerator = RandomNumberGenerator.new()
 
 signal generated
 signal demolished
+signal voted(winning_board_index : int)
 
 		
 func _ready() -> void:
@@ -33,7 +43,8 @@ func _ready() -> void:
 	
 	item_dropper.spawn_field(0, 5, 5, 5, Vector3.UP * Map_Size / 2.0)
 	item_dropper.spawn_field(2, 3, 3, 5, Vector3.UP * Map_Size / 2.0)
-	
+	item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
+	item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
 	
 func _process(_delta):
 
@@ -41,10 +52,21 @@ func _process(_delta):
 	
 	if is_multiplayer_authority():
 		
-		if room.Current_Size != 50:
+		if state == level_state.demolishing:
 			item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
 			item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
-		
+	
+	
+func vote():
+	
+	hoverboard_stager.clear_boards.rpc()
+	hoverboard_stager.create_boards.rpc(2, 5, 1, Vector2(0, 5))
+	hoverboard_stager.boards[0].position.x = 5
+	hoverboard_stager.boards[0].position.z = 5
+	hoverboard_stager.boards[1].position.x = -5
+	hoverboard_stager.boards[1].position.z = -5
+	hoverboard_stager.introduce_boards.rpc()
+	
 		
 func generate() -> void:
 	
@@ -68,10 +90,12 @@ func generate() -> void:
 		
 	Map_Size = 50
 	room.request_size.rpc(Map_Size)	
-
+	hoverboard_stager.retreat_boards.rpc()
+	
 
 func finish_generate() -> void:
 	
+	state = level_state.generated
 	print('finished generating level.')
 	
 	if room.finished_resizing.is_connected(stage_boards):
@@ -93,6 +117,7 @@ func finish_generate() -> void:
 func demolish() -> void:
 	
 	finish_generate()
+	state = level_state.demolishing
 	print('demolishing level...')
 	
 	if not limb_grower.finished_retracting.is_connected(unstage_ramps):
@@ -117,7 +142,7 @@ func demolish() -> void:
 func finish_demolish() -> void:
 	
 	print('finished demolishing level.' )
-	
+	state = level_state.demolished
 	if limb_grower.finished_retracting.is_connected(unstage_ramps):
 		limb_grower.finished_retracting.disconnect(unstage_ramps) 
 		
@@ -251,5 +276,4 @@ func seed_procedural_generators(new_seed):
 	limb_grower.rpc_set_rng(hash(level_rng.randi()), null)
 	
 
-	
 

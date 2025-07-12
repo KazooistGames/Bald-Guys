@@ -14,7 +14,7 @@ properties/2/path = NodePath(".:Goal")
 properties/2/spawn = true
 properties/2/replication_mode = 2
 
-[node name="Wig_FFA" type="Node3D"]
+[node name="Wig_FFA" type="Node3D" groups=["Game"]]
 script = ExtResource("1_2sjt2")
 
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="."]

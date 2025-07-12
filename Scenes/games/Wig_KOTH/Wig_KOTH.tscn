@@ -56,7 +56,7 @@ properties/4/path = NodePath(".:Hill_Size")
 properties/4/spawn = true
 properties/4/replication_mode = 1
 
-[node name="WigKoth" type="Node3D"]
+[node name="WigKoth" type="Node3D" groups=["Game"]]
 script = ExtResource("1_kxid3")
 
 [node name="Hill" type="Area3D" parent="."]

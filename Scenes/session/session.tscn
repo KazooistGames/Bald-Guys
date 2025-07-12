@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://by3wuudn8soe"]
+[gd_scene load_steps=11 format=3 uid="uid://by3wuudn8soe"]
 
 [ext_resource type="Script" path="res://Scenes/session/session.gd" id="1_yhshl"]
 [ext_resource type="PackedScene" uid="uid://dy3scco4yt1a4" path="res://Scenes/levels/borealis/borealis.tscn" id="2_ywwqv"]
@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://4lgyaxekgwqy" path="res://Scenes/session/ambience/ambience.tscn" id="5_opotq"]
 [ext_resource type="PackedScene" uid="uid://b5fc4lv4wybum" path="res://Scenes/levels/Procedural_Level.tscn" id="5_xlqqg"]
 [ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="6_qr0l4"]
+[ext_resource type="PackedScene" uid="uid://mck1hn3g3l44" path="res://Scenes/games/Wig_LMS/Wig_LMS.tscn" id="7_oy1g0"]
+[ext_resource type="PackedScene" uid="uid://cwp67bx2skp2m" path="res://Scenes/games/Wig_KOTH/Wig_KOTH.tscn" id="8_t3wo1"]
+[ext_resource type="PackedScene" uid="uid://cupu0kavdlrc4" path="res://Scenes/games/Wig_FFA/Wig_FFA.tscn" id="9_l3yvs"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_gpd36"]
 properties/0/path = NodePath(".:State")
@@ -46,3 +49,9 @@ wait_time = 0.5
 autostart = true
 
 [node name="LagCompensator" parent="." instance=ExtResource("6_qr0l4")]
+
+[node name="WigLMS" parent="." instance=ExtResource("7_oy1g0")]
+
+[node name="WigKoth" parent="." instance=ExtResource("8_t3wo1")]
+
+[node name="Wig_FFA" parent="." instance=ExtResource("9_l3yvs")]

@@ -143,7 +143,7 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 @rpc("any_peer", "call_local", "reliable")
 func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	
-	var sender_id = multiplayer.get_remote_sender_id()
+	#var sender_id = multiplayer.get_remote_sender_id()
 	
 	if not is_multiplayer_authority():
 		return
@@ -164,7 +164,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	
 	if just_pressed('jump', inputs):	
 	
-		var jump_available = humanoid.ON_FLOOR or humanoid.DOUBLE_JUMP_CHARGES > 0
+		#var jump_available = humanoid.ON_FLOOR or humanoid.DOUBLE_JUMP_CHARGES > 0
 
 		if humanoid.ON_FLOOR:
 			humanoid.jump.rpc()
