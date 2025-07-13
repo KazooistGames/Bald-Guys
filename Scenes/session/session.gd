@@ -159,7 +159,8 @@ func Try_Get_Vote(game_index):
 	if Level.demolished.is_connected(Level.vote):
 		Level.demolished.disconnect(Level.vote)
 	
-	wig_manager.rpc_clear_wigs.rpc()
+	#wig_manager.rpc_clear_wigs.rpc()
+	wig_manager.clear_wigs()
 	Active_Game = game_vote_options.pick_random() if game_index == -1 else game_vote_options[game_index]
 	Level.generate()
 	State = SessionState.Reconfiguring

@@ -161,8 +161,6 @@ func rpc_adjust_wig_size(path_to_bearer, progress : float):
 	var index = session.bearers.find(bearer)
 	var wig = session.wigs[index]
 	wig.radius = lerp(wig_radii.x, wig_radii.y, progress)
-	var remote = bearer.find_child("*RemoteTransform*", true, false)
-	remote.position = lerp(wig_start_offset, wig_end_offset, progress)
 	
 
 @rpc("call_local", "reliable")

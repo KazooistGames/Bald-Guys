@@ -62,7 +62,7 @@ func _process(_delta):
 func vote():
 	
 	hoverboard_stager.clear_boards.rpc()
-	hoverboard_stager.create_boards.rpc(2, 5, 1, Vector2(0, 5))
+	hoverboard_stager.create_boards.rpc(2, 5, 1, Vector2(0, 6))
 	hoverboard_stager.boards[0].position.x = 5
 	hoverboard_stager.boards[0].position.z = 5
 	hoverboard_stager.boards[1].position.x = -5

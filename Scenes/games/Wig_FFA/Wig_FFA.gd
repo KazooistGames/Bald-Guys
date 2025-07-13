@@ -1,6 +1,5 @@
 extends Game
 
-const wig_prefab = preload("res://Scenes/objects/wig/Wig.tscn")
 const beas_mote_transition = 54.66
 const beas_mote_end = 162.0
 
@@ -12,6 +11,7 @@ const beas_mote_end = 162.0
 @onready var wig_remote = $RemoteTransform3D
 
 var active_wig : RigidBody3D = null
+var acitve_bearer : RigidBody3D = null
 
 func _ready():
 
@@ -23,20 +23,18 @@ func _ready():
 	
 func _process(_delta):
 
-	session.wig_manager.wigs = get_tree().get_nodes_in_group("wigs")
-	
 	if session.wig_manager.wigs.size() == 0 or State != GameState.playing:
 		whispers.stream_paused = true
 		theme.stream_paused = true
 		
-	else:
+	elif active_wig != null:
 		session.HUD.find_child("Progress").visible = active_bearer_is_local_player()
-		session.HUD.update_nameplate("WIG", session.wig_manager.wigs.back().global_position, "WIG")
-		whispers.global_position = session.wig_manager.wigs.back().global_position
+		session.HUD.update_nameplate("WIG", active_wig.global_position, "WIG")
+		whispers.global_position = active_wig.global_position
 		whispers.stream_paused = active_bearer_is_local_player()
 		theme.stream_paused = not whispers.stream_paused
 		
-		if session.wig_manager.bearers.back() != null:
+		if acitve_bearer != null:
 			session.HUD.modify_nameplate("WIG", "visible", false)	
 		
 	if whispers.get_playback_position() >= beas_mote_transition:
@@ -60,14 +58,19 @@ func _physics_process(delta):
 	
 		GameState.playing:
 		
-			if session.wig_manager.wigs.size() == 0:
+			if get_tree().get_nodes_in_group("wigs").size() == 0:
 				_init_wig()
 				return
+			elif not active_wig:
+				active_wig = get_tree().get_nodes_in_group("wigs")[0]
 				
-			if session.wig_manager.bearers.back() == null:
+			else:
+				acitve_bearer = session.wig_manager.get_bearer(active_wig)
+				
+			if acitve_bearer == null:
 				return
 				
-			var bearer_name = session.get_humanoids_screenname(session.wig_manager.bearers.back())
+			var bearer_name = session.get_humanoids_screenname(acitve_bearer)
 			
 			if not Scores.has(bearer_name):
 				Scores[bearer_name] = delta
@@ -82,13 +85,12 @@ func _physics_process(delta):
 			pass
 		
 		
-func active_bearer_is_local_player():
+func active_bearer_is_local_player() -> bool:
 	
-	if session.wig_manager.bearers.back() == null:
+	if acitve_bearer:	
+		return str(multiplayer.get_unique_id()) == acitve_bearer.name
+	else:
 		return false
-		
-	else:	
-		return str(multiplayer.get_unique_id()) == session.wig_manager.bearers.back().name
 
 
 func handle_player_leaving(client_id):
@@ -141,14 +143,14 @@ func rpc_reset():
 		if wig == null:
 			continue
 			
-		elif bearer == null:
-			session.wig_manager.rpc_destroy_wig.rpc(wig.get_path())
+		#elif bearer == null:
+			#session.wig_manager.rpc_destroy_wig.rpc(wig.get_path())
 			
 		else:	
 			session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
 			session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 			
-		wig.queue_free()
+		#wig.queue_free()
 		
 
 @rpc("call_local", "reliable")
@@ -158,6 +160,7 @@ func rpc_play():
 	session.HUD.add_nameplate("WIG", "WIG")
 	session.HUD.modify_nameplate("WIG", "theme_override_colors/font_color", Color.GREEN_YELLOW)
 	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
+	theme.seek(beas_mote_transition)
 	
 	if is_multiplayer_authority(): 	
 		session.HUD.set_psa.rpc("Capture the Wig!", 3)
