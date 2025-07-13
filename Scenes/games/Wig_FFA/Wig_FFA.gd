@@ -151,8 +151,6 @@ func rpc_reset():
 		wig.queue_free()
 		
 
-	
-	
 @rpc("call_local", "reliable")
 func rpc_play():
 	
@@ -167,6 +165,9 @@ func rpc_play():
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
+			
+	session.wig_manager.dawned.connect(handle_mount)
+	session.wig_manager.dropped.connect(handle_dismount)
 	
 	
 @rpc("call_local", "reliable")
@@ -194,6 +195,9 @@ func rpc_finish():
 				session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
 				session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 
+	session.wig_manager.dawned.disconnect(handle_mount)
+	session.wig_manager.dropped.disconnect(handle_dismount)
+
 
 func handle_player_joining(client_id) -> void:
 	
@@ -210,7 +214,17 @@ func handle_player_joining(client_id) -> void:
 		if State == GameState.finished or index < session.wig_manager.wigs.size()-1:
 			session.wig_manager.rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
 	
+
+func handle_mount(wig, bearer):
 	
+	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.ORANGE_RED)
+	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 24)
+	
+	
+func handle_dismount(wig, bearer):
+	
+	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
+	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 	
 
 		

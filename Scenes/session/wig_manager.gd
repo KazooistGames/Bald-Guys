@@ -15,8 +15,8 @@ var interactivity : Array[bool] = []
 
 signal spawned(wig : RigidBody3D)
 signal destroying(wig : RigidBody3D)
-signal mounted(wig : RigidBody3D, humanoid : RigidBody3D)
-signal dismounted(wig : RigidBody3D, humanoid : RigidBody3D)
+signal dawned(wig : RigidBody3D, humanoid : RigidBody3D)
+signal dropped(wig : RigidBody3D, humanoid : RigidBody3D)
 signal fused(wig : RigidBody3D, humanoid : RigidBody3D)
 
 
@@ -119,6 +119,7 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 		wig.Drop.play()
 		wig.collider.disabled = false
 		wig.freeze = false
+
 		return	
 	
 
@@ -152,6 +153,8 @@ func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
 	var wig_index = wigs.find(wig)
 	bearers[wig_index] = bearer
 	
+	if bearer.ragdolled.is_connected(drop_wig):
+		bearer.ragdolled.disconnect(drop_wig)	
 	
 	
 func dawn_wig(wig, humanoid):
@@ -162,20 +165,18 @@ func dawn_wig(wig, humanoid):
 	if not humanoid.is_in_group("humanoids"): #this node is not a humanoid
 		pass
 		
-	elif bearers.back() != null: #this wig already has a bearer
-		pass
-	
-	elif bearers.has(humanoid): #this guy already has a wig
-		pass
-		
 	elif humanoid.RAGDOLLED: #this humanoid is unable to dawn the wig
 		pass
 		
+	elif bearers.has(humanoid): #this guy already has a wig
+		pass
+			
 	else:
 		#session.wig_manager.bearers[active_index] = humanoid
 		wig.interactable.gained_interaction.disconnect(dawn_wig)
 		humanoid.ragdolled.connect(drop_wig)
 		rpc_put_wig_on_head.rpc(wig.get_path(), humanoid.get_path())
+		dawned.emit(wig, humanoid)
 
 
 func drop_wig(humanoid):
@@ -189,14 +190,16 @@ func drop_wig(humanoid):
 		humanoid.ragdolled.disconnect(drop_wig)	
 			
 	var index = bearers.find(humanoid)
+	var wig = wigs[index]
 	bearers[index] = null
 	var bearer_velocity = humanoid.linear_velocity * 1.5
 	var offset_velocity = Vector3(randi_range(-1, 1), 3, randi_range(-1, 1))
-	wigs[index].linear_velocity = bearer_velocity + offset_velocity
+	wig.linear_velocity = bearer_velocity + offset_velocity
 		
-	wigs[index].interactable.gained_interaction.connect(dawn_wig)
-	var wig_path =wigs[index].get_path()
+	wig.interactable.gained_interaction.connect(dawn_wig)
+	var wig_path = wig.get_path()
 	rpc_put_wig_on_head.rpc(wig_path, null)
+	dropped.emit(wig, humanoid)
 	
 	
 func fuse_wig(wig, humanoid):
