@@ -59,5 +59,3 @@ spawn_path = NodePath("..")
 
 [node name="wig_manager" type="Node" parent="."]
 script = ExtResource("10_6bnr4")
-
-[node name="RemoteTransform3D" type="RemoteTransform3D" parent="wig_manager"]

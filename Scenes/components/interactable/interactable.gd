@@ -1,21 +1,20 @@
 extends Area3D
 
-signal gained_interaction(node)
+signal gained_interaction(me, other_node)
 
-signal lost_interaction(node)
+signal lost_interaction(me, other_node)
 
-@export var DEBUG = false
-
-@export var available_interactions = []
-
-@export var radius = 1.0
-
-@onready var collider = $CollisionShape3D
-
-var space_state
+var DEBUG = false
+var available_interactions = []
+var radius = 1.0
 
 @onready var debug_box = $DebugBox
 @onready var debug_sphere = $DebugSphere
+@onready var collider = $CollisionShape3D
+@onready var parent = get_parent()
+
+var space_state
+
 
 func _ready():
 	
@@ -75,7 +74,7 @@ func _physics_process(_delta):
 			pass
 			
 		else:
-			gained_interaction.emit(node)
+			gained_interaction.emit(parent, node)
 			available_interactions.append(node)
 
 			if DEBUG:
@@ -89,7 +88,7 @@ func _physics_process(_delta):
 		elif instantaneous_interactions.find(node) < 0:
 
 			available_interactions.remove_at(available_interactions.find(node))
-			lost_interaction.emit(node)
+			lost_interaction.emit(self, node)
 
 			if DEBUG:
 				print(self, " lost: ", node)

@@ -1,4 +1,4 @@
-extends Node3D
+class_name Session extends Node3D
 
 const Humanoid_Prefab : PackedScene = preload("res://Scenes/humanoid/humanoid.tscn")
 const DEBUG := false
@@ -134,6 +134,9 @@ func Try_Start_Session():
 
 func Try_Vote():
 	
+	if Level.demolished.is_connected(Try_Vote):
+		Level.demolished.disconnect(Try_Vote)
+	
 	game_vote_options = []
 	game_vote_options.append(get_eligible_game())
 	game_vote_options.append(get_eligible_game())
@@ -156,10 +159,11 @@ func Try_Get_Vote(game_index):
 	if Level.demolished.is_connected(Level.vote):
 		Level.demolished.disconnect(Level.vote)
 	
-	State = SessionState.Reconfiguring
+	wig_manager.rpc_clear_wigs.rpc()
 	Active_Game = game_vote_options.pick_random() if game_index == -1 else game_vote_options[game_index]
 	Level.generate()
-	
+	State = SessionState.Reconfiguring
+
 	if not Level.generated.is_connected(Try_Start_Round):
 		Level.generated.connect(Try_Start_Round)
 
@@ -251,6 +255,7 @@ func remove_player(peer_id):
 		for game : Game in All_Games:
 			game.handle_player_leaving(peer_id)
 			
+		wig_manager.handle_player_leaving(peer_id)
 		Humanoids.erase(players_humanoid)
 		HUD.remove_nameplate(str(peer_id))
 		players_humanoid.ragdoll_change.disconnect(update_nameplate_for_ragdoll)
