@@ -3,9 +3,9 @@ extends CanvasLayer
 const progress_bar_length = 1000
 const progress_bar_width = 75
 
-@export var Scores : Dictionary = {}
-@export var Goal : float = 0.0
-@export var ProgressPercent = 0
+var Scores : Dictionary = {}
+var Goal : float = 0.0
+var ProgressPercent = 0
 
 @onready var scoreboard = $Scoreboard
 @onready var names_text = $Scoreboard/Names/Rows/Values

@@ -1,5 +1,6 @@
 class_name Game extends Node
 
+@onready var session : Session = get_parent()
 
 enum GameState {
 	reset,
@@ -7,9 +8,8 @@ enum GameState {
 	finished
 }
 
-@export var State = GameState.reset
-
-var map_size = 50
+var State = GameState.reset
+var map_size = 50.0
 var Goal := 0.0 #107.34
 var Scores := {}
 var Players := 2

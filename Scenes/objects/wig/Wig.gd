@@ -1,7 +1,7 @@
 
 extends RigidBody3D
 
-const radius_speed = 0.25
+const radius_speed = 0.05
 
 @export var HAIR_COLOR : Color:
 	
@@ -17,9 +17,10 @@ const radius_speed = 0.25
 		material.emission = value
 		mesh.set_surface_override_material(0, material)
 		
-@export var AUTHORITY_POSITION = Vector3.ZERO
-@export var radius = 0.15
-	
+var AUTHORITY_POSITION := Vector3.ZERO
+var radius := 0.15
+var actual_radius := 0.15	
+
 @onready var Dawn = $Dawn
 @onready var Drop = $Drop
 @onready var mesh = $MeshInstance3D
@@ -39,6 +40,7 @@ func _enter_tree():
 	add_to_group("wigs")
 	contact_monitor = true
 	max_contacts_reported = 10
+	actual_radius = radius
 	
 	
 func _ready():
@@ -52,13 +54,18 @@ func _ready():
 func _process(delta):
 	
 	light.light_color = HAIR_COLOR
-	material.emission_energy_multiplier = 1 + radius
-	light.light_energy = radius * 2
+	material.emission_energy_multiplier = 1 + actual_radius
+	light.light_energy = actual_radius * 2
 	
 	if mesh.mesh.radius != radius:
-		mesh.mesh.radius = move_toward(mesh.mesh.radius, radius, delta * radius_speed)
-		mesh.mesh.height = mesh.mesh.radius * 2
-		collider.shape.radius = mesh.mesh.radius
+		var updated_radius = move_toward(mesh.mesh.radius, radius, delta * radius_speed)
+		
+		if updated_radius >= 0.0:
+			mesh.mesh.radius = updated_radius
+			mesh.mesh.height = updated_radius * 2
+			collider.shape.radius = updated_radius
+			
+		actual_radius = updated_radius
 		
 	#if strobing_enabled:
 #

@@ -7,7 +7,6 @@ const beas_mote_end = 162.0
 
 @onready var whispers = $Whispers
 @onready var theme = $Theme
-@onready var session : Session = get_parent()
 @onready var wig_remote = $RemoteTransform3D
 
 var active_wig : RigidBody3D = null
@@ -18,7 +17,7 @@ func _ready():
 	whispers.stream_paused = false
 	theme.stream_paused = true
 	Goal = 30
-	Players = 1
+	Players = 2
 	
 	
 func _process(_delta):
@@ -118,8 +117,8 @@ func _init_wig():
 	
 	var extents : float = map_size / 2.25
 	var random_position := Vector3(randi_range(-extents, extents), extents, randi_range(-extents, extents))
-	var radius := 0.25
-	session.wig_manager.rpc_spawn_new_wig.rpc(radius, random_position)
+	var wig_radius := 0.25
+	session.wig_manager.rpc_spawn_new_wig.rpc(wig_radius, wig_radius, random_position)
 	
 
 @rpc("call_local", "reliable")
@@ -194,7 +193,7 @@ func rpc_finish():
 				session.wig_manager.rpc_destroy_wig.rpc(wig.get_path())
 				
 			else:			
-				session.wig_manager.rpc_fuse_wig_to_head.rpc(wig.get_path(), bearer.get_path())
+				session.wig_manager.fuse_wig(bearer)
 				session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
 				session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
 
@@ -218,13 +217,13 @@ func handle_player_joining(client_id) -> void:
 			session.wig_manager.rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
 	
 
-func handle_mount(wig, bearer):
+func handle_mount(_wig, bearer):
 	
 	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.ORANGE_RED)
 	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 24)
 	
 	
-func handle_dismount(wig, bearer):
+func handle_dismount(_wig, bearer):
 	
 	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
 	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)

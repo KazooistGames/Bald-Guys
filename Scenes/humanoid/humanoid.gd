@@ -31,6 +31,7 @@ var RUNNING := false
 var DOUBLE_JUMP_CHARGES := 1
 var floor_velocity : Vector3 = Vector3(0,0,0)
 var walk_velocity : Vector3 = Vector3.ZERO
+var recover_disabled := false
 
 @onready var skeleton : Skeleton3D = $Skeleton3D
 @onready var animation : AnimationTree = $AnimationTree
@@ -459,7 +460,7 @@ func get_ragdoll_ready():
 	
 func get_ragdoll_recovered():
 	
-	return ragdoll_recovery_progress >= 1.0
+	return ragdoll_recovery_progress >= 1.0 and not recover_disabled
 	
 
 @rpc("call_local", "reliable")

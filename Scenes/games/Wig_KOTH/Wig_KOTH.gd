@@ -15,7 +15,6 @@ enum HillState {
 @onready var core_mesh : MeshInstance3D = $Hill/MeshInstance3D2
 @onready var floorCast : RayCast3D = $Hill/floorCast
 @onready var wallCast : RayCast3D = $Hill/wallCast
-@onready var session = get_parent()
 @onready var synchronizer = $MultiplayerSynchronizer
 
 var hill_speed : float = 0.75
@@ -39,6 +38,8 @@ func _ready():
 	core_mesh.mesh.height = 0.01
 	Hill.position = Vector3(0, map_size / 2.0, 0)
 	hill_phase = randi()
+	Players = 2
+	Goal = 60
 
 
 func _process(delta):
@@ -158,8 +159,7 @@ func get_players_in_hill() -> Array[Node3D]:
 func rpc_adjust_wig_size(path_to_bearer, progress : float):
 	
 	var bearer = get_node(path_to_bearer)
-	var index = session.bearers.find(bearer)
-	var wig = session.wigs[index]
+	var wig = session.wig_manager.get_wig(bearer)
 	wig.radius = lerp(wig_radii.x, wig_radii.y, progress)
 	
 
@@ -195,6 +195,9 @@ func rpc_play():
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
+			
+		for humanoid : RigidBody3D in session.Humanoids:
+			session.wig_manager.give_wig(humanoid)
 				
 	
 @rpc("call_local", "reliable")
@@ -206,3 +209,5 @@ func rpc_finish():
 		session.HUD.find_child("Progress").visible = false
 		State = GameState.finished
 		session.HUD.remove_nameplate("HILL")
+		
+	

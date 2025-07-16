@@ -4,7 +4,6 @@ const wig_prefab = preload("res://Scenes/objects/wig/Wig.tscn")
 const wig_start_offset = Vector3(0, 0.2, -0.025)
 const wig_end_offset = Vector3(0, 0.5, -0.075)
 const wig_radii : Vector2 = Vector2(0.15, 0.45)
-const wig_resize_rate := 0.1
 
 @onready var session = get_parent()
 
@@ -13,8 +12,6 @@ var wigs : Array[Node] = []
 var wig_remotes : Array = []
 var bearers : Array = []
 var interactivity : Array[bool] = []
-var resizing_wigs := false
-var target_radius := 0.0
 
 signal spawned(wig : RigidBody3D)
 signal destroying(wig : RigidBody3D)
@@ -25,8 +22,6 @@ signal fused(wig : RigidBody3D, humanoid : RigidBody3D)
 
 func _process(delta : float) -> void:
 	
-	var still_need_to_resize = false
-	
 	for index in range(wigs.size()):
 	
 		var wig = wigs[index]
@@ -35,24 +30,18 @@ func _process(delta : float) -> void:
 			continue
 			
 		if bearers[index]:
-			var ratio = (wigs[index].radius - wig_radii.x) / (wig_radii.y - wig_radii.x)
+			var ratio = (wigs[index].actual_radius - wig_radii.x) / (wig_radii.y - wig_radii.x)
 			wig_remotes[index].position = lerp(wig_start_offset, wig_end_offset, ratio)
 		
-		if wig.radius <= 0.0:
+		if wig.actual_radius < 0.0:
 			rpc_destroy_wig.rpc(wig.get_path())
-			
-		if not resizing_wigs:
-			pass
-		elif wig.radius != target_radius:
-			wig.radius = move_toward(wig.radius, target_radius, wig_resize_rate * delta)
-			still_need_to_resize = true
-			
-	resizing_wigs = still_need_to_resize
 	
 
 func handle_player_leaving(client_id):
 	
-	var humanoid = session.get_node_or_null(str(client_id))
+	pass
+	
+	#var humanoid = session.get_node_or_null(str(client_id))
 
 	#if bearers.has(humanoid) and humanoid != null:
 		#var bearer_index = bearers.find(humanoid)
@@ -86,20 +75,27 @@ func rpc_clear_wigs():
 
 
 @rpc("call_local", "reliable")
-func rpc_spawn_new_wig(radius : float, spawn_position : Vector3 = Vector3.ZERO):
+func rpc_spawn_new_wig(start_radius : float, target_radius : float, spawn_position : Vector3 = Vector3.ZERO, starting_bearer : RigidBody3D = null):
 				
 	var new_wig = wig_prefab.instantiate()
 	add_child(new_wig, true)
 	new_wig.global_position = spawn_position
 	new_wig.toggle_strobing(true)
-	new_wig.radius = radius
+	new_wig.radius = target_radius
+	new_wig.mesh.mesh.radius = start_radius
+	new_wig.mesh.mesh.height = start_radius * 2
+	new_wig.collider.shape.radius = start_radius
 	wigs.append(new_wig)
 	bearers.append(null)
 	var new_remote : RemoteTransform3D = RemoteTransform3D.new()
 	add_child(new_remote)
 	wig_remotes.append(new_remote)
 	spawned.emit(new_wig)
-	new_wig.interactable.gained_interaction.connect(dawn_wig)
+	
+	if starting_bearer == null:
+		new_wig.interactable.gained_interaction.connect(dawn_wig)
+	else:
+		rpc_put_wig_on_head(new_wig.get_path(), starting_bearer.get_path())
 	
 
 @rpc("call_local", "reliable")
@@ -120,6 +116,10 @@ func rpc_destroy_wig(path_to_wig : NodePath):
 		wig_remotes[index].queue_free()
 		destroying.emit(wig)
 		wig.queue_free()
+		
+		wigs.remove_at(index)
+		bearers.remove_at(index)
+		wig_remotes.remove_at(index)
 
 
 @rpc("call_local", "reliable")
@@ -144,7 +144,6 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 
 		return	
 	
-
 	var current_bearer = bearers[wig_index]
 	var new_bearer = get_node(path_to_bearer)
 	
@@ -160,23 +159,24 @@ func rpc_put_wig_on_head(path_to_wig, path_to_bearer):
 		bearers[wig_index] = new_bearer
 		return
 	
-@rpc("call_local", "reliable")
-func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
-			
-	if path_to_wig == null or path_to_bearer == null:
-		return
 	
-	var wig = get_node(path_to_wig)
-	var bearer = get_node(path_to_bearer)
-
-	if wig == null or bearer == null:
-		return
-		
-	var wig_index = wigs.find(wig)
-	bearers[wig_index] = bearer
-	
-	if bearer.ragdolled.is_connected(drop_wig):
-		bearer.ragdolled.disconnect(drop_wig)	
+#@rpc("call_local", "reliable")
+#func rpc_fuse_wig_to_head(path_to_wig, path_to_bearer):
+			#
+	#if path_to_wig == null or path_to_bearer == null:
+		#return
+	#
+	#var wig = get_node(path_to_wig)
+	#var bearer = get_node(path_to_bearer)
+#
+	#if wig == null or bearer == null:
+		#return
+		#
+	#var wig_index = wigs.find(wig)
+	#bearers[wig_index] = bearer
+	#
+	#if bearer.ragdolled.is_connected(drop_wig):
+		#bearer.ragdolled.disconnect(drop_wig)	
 	
 	
 func dawn_wig(wig, humanoid):
@@ -224,24 +224,62 @@ func drop_wig(humanoid):
 	dropped.emit(wig, humanoid)
 	
 	
-func fuse_wig(wig, humanoid):
+func fuse_wig(humanoid):
+	
+	if not is_multiplayer_authority():
+		return
 	
 	if humanoid.ragdolled.is_connected(drop_wig):
 		humanoid.ragdolled.disconnect(drop_wig)	
 		
+		
+func loosen_wig(humanoid):
+	
+	if not is_multiplayer_authority():
+		return
+	
+	if not humanoid.ragdolled.is_connected(drop_wig):
+		humanoid.ragdolled.connect(drop_wig)	
+
 
 func clear_wigs():
 	
-	target_radius = 0.0
-	resizing_wigs = true
+	if not is_multiplayer_authority():
+		return
+	
+	for wig in wigs:
+		wig.radius = -1
 	
 	
-func get_bearer(wig) -> RigidBody3D:
+func get_bearer(wig : RigidBody3D) -> RigidBody3D:
 	
 	if wig == null:
 		return null
 	else:
 		var index = wigs.find(wig)
 		return bearers[index]
+		
+		
+func get_wig(bearer : RigidBody3D) -> RigidBody3D:
+	
+	if bearer == null:
+		return null
+	elif not bearers.has(bearer):
+		return null
+	else:
+		var index = bearers.find(bearer)
+		return wigs[index]
+	
+		
+func give_wig(bearer : RigidBody3D):
+	
+	if not is_multiplayer_authority():
+		return
+	elif bearer == null:
+		return
+		
+	rpc_spawn_new_wig.rpc(0.01, 0.15, Vector3.ZERO, bearer)
+		
+		
 		
 	
