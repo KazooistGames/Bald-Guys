@@ -67,6 +67,9 @@ func _process(delta):
 			
 		actual_radius = updated_radius
 		
+	else:
+		actual_radius = radius
+		
 	#if strobing_enabled:
 #
 		#strobing_phase += delta

@@ -12,9 +12,11 @@
 bounce = 0.5
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_k7sog"]
+resource_local_to_scene = true
 radius = 0.25
 
 [sub_resource type="SphereMesh" id="SphereMesh_rd2a8"]
+resource_local_to_scene = true
 radius = 0.25
 height = 0.5
 
@@ -63,7 +65,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_omnyi")
 
 [node name="Interactable" parent="." instance=ExtResource("3_mbq86")]
 collision_mask = 10
-radius = 0.75
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_kblqd")

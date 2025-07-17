@@ -69,10 +69,10 @@ func _physics_process(delta):
 	
 		GameState.playing:
 			Hill_Size = 4.0
-			var scoring_players = get_players_in_hill()
 			hill_phase += delta / 100.0
 			Hill.rotation.y = sin(5 * hill_phase) + sin(hill_phase * PI)
-
+			var scoring_players = get_players_in_hill()
+			
 			for humanoid in scoring_players:
 				
 				var screenname = session.get_humanoids_screenname(humanoid)
@@ -204,10 +204,18 @@ func rpc_play():
 func rpc_finish():
 	
 	session.HUD.remove_nameplate("HILL")
-	
+	session.HUD.find_child("Progress").visible = false
+		
 	if is_multiplayer_authority(): 
-		session.HUD.find_child("Progress").visible = false
 		State = GameState.finished
-		session.HUD.remove_nameplate("HILL")
+
 		
 	
+func handle_player_joining(client_id):
+	
+	if State != GameState.playing:
+		return
+	
+	var new_players_humanoid = session.get_node_or_null(str(client_id))
+	print('giving wig to ', new_players_humanoid)
+	session.wig_manager.give_wig(new_players_humanoid)

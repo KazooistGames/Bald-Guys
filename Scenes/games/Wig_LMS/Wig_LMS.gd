@@ -10,7 +10,7 @@ var wig_end_offset = Vector3(0, 0.5, -0.075)
 
 func _ready():
 	
-	Players = 1
+	Players = 2
 	Goal = 100
 	
 
@@ -61,14 +61,15 @@ func rpc_reset():
 @rpc("call_local", "reliable")
 func rpc_play():
 	
+	State = GameState.playing
+	session.HUD.set_progress_label("Follicle Integrity:")
+	
 	if is_multiplayer_authority(): 
-		session.HUD.set_psa.rpc("Shave your foes!", 3)
-		session.HUD.set_progress_label("Follicle Integrity:")
-		State = GameState.playing
-				
+		
+		session.HUD.set_psa.rpc("Shave your foes!", 3)				
 		for humanoid : RigidBody3D in session.Humanoids:
 
-			session.wig_manager.give_wig(humanoid)
+			session.wig_manager.give_wig(humanoid, 0.45)
 			humanoid.ragdolled.connect(damage_player)
 			var screenname : String = session.get_humanoids_screenname(humanoid)
 			Scores[screenname] = 100
@@ -78,16 +79,16 @@ func rpc_play():
 @rpc("call_local", "reliable")
 func rpc_finish():
 	
-	session.HUD.remove_nameplate("HILL")
+	session.HUD.find_child("Progress").visible = false
 	
 	if is_multiplayer_authority(): 
-		session.HUD.find_child("Progress").visible = false
+
 		State = GameState.finished
-		session.HUD.remove_nameplate("HILL")
 		
 		for humanoid in session.Humanoids:
-			humanoid.ragdolled.disconnect(damage_player)
-			humanoid.recover_disabled = false
+			if humanoid != null:
+				humanoid.ragdolled.disconnect(damage_player)
+				humanoid.recover_disabled = false
 
 
 func humanoid_is_alive(humanoid):
@@ -111,5 +112,14 @@ func damage_player(player):
 	if Scores[screenname] <= 0:
 		session.wig_manager.loosen_wig(player)
 
+	
+func handle_player_joining(client_id):
+	
+	if State != GameState.playing:
+		return
+	
+	var new_players_humanoid = session.get_node_or_null(str(client_id))
+	print('giving wig to ', new_players_humanoid)
+	session.wig_manager.give_wig(new_players_humanoid, 0.45)
 
 	

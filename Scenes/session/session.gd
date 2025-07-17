@@ -104,7 +104,7 @@ func _physics_process(delta):
 		else:
 			countDown_timer += delta
 			
-	elif State == SessionState.Round:
+	elif State == SessionState.Round and Active_Game:
 		HUD.Scores = Active_Game.Scores
 		HUD.Goal = Active_Game.Goal
 	
@@ -140,6 +140,7 @@ func Try_Vote():
 	game_vote_options = []
 	game_vote_options.append(get_eligible_game())
 	game_vote_options.append(get_eligible_game())
+	print("vote options: ", game_vote_options)
 	
 	Level.vote()
 	countDown_timer = 0
@@ -172,6 +173,11 @@ func Try_Get_Vote(game_index):
 func Try_Start_Round():
 	
 	Level.generated.disconnect(Try_Start_Round)
+	
+	if not Active_Game:
+		Try_Finish_Round()
+		return
+		
 	Active_Game.rpc_play.rpc()		
 	State = SessionState.Round	
 	Started_Round.emit()
@@ -182,8 +188,9 @@ func Try_Start_Round():
 	
 func Try_Finish_Round():
 	
-	Active_Game.GameOver.disconnect(Try_Finish_Round)
-	Active_Game.rpc_finish.rpc()
+	if Active_Game:
+		Active_Game.GameOver.disconnect(Try_Finish_Round)
+		Active_Game.rpc_finish.rpc()
 	Round += 1		
 	Ended_Round.emit()	
 	State = SessionState.Reconfiguring
@@ -219,8 +226,10 @@ func add_player(peer_id):
 	rpc_respawn_player.rpc(new_peer_humanoid.get_path())
 	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name)
 	Created_Humanoid.emit(new_peer_humanoid)	
+	
 	rpc_CommissionSession.rpc_id(peer_id, session_rng.seed)
 	Level.init_for_new_client(peer_id)
+	wig_manager.handle_player_joining(peer_id)
 	
 	for game : Game in All_Games:	
 			

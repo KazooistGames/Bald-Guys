@@ -10,7 +10,7 @@ const beas_mote_end = 162.0
 @onready var wig_remote = $RemoteTransform3D
 
 var active_wig : RigidBody3D = null
-var acitve_bearer : RigidBody3D = null
+var active_bearer : RigidBody3D = null
 
 func _ready():
 
@@ -26,14 +26,14 @@ func _process(_delta):
 		whispers.stream_paused = true
 		theme.stream_paused = true
 		
-	elif active_wig != null:
+	elif active_wig:
 		session.HUD.find_child("Progress").visible = active_bearer_is_local_player()
 		session.HUD.update_nameplate("WIG", active_wig.global_position, "WIG")
 		whispers.global_position = active_wig.global_position
 		whispers.stream_paused = active_bearer_is_local_player()
-		theme.stream_paused = not whispers.stream_paused
+		theme.stream_paused = not active_bearer_is_local_player()
 		
-		if acitve_bearer != null:
+		if active_bearer != null:
 			session.HUD.modify_nameplate("WIG", "visible", false)	
 		
 	if whispers.get_playback_position() >= beas_mote_transition:
@@ -44,6 +44,13 @@ func _process(_delta):
 
 
 func _physics_process(delta):
+	
+	if session.wig_manager.wigs.size() > 0:
+		active_wig = session.wig_manager.wigs.back()
+		active_bearer = session.wig_manager.bearers.back()
+	else:
+		active_wig = null
+		active_bearer = null
 		
 	if not multiplayer.has_multiplayer_peer():
 		pass
@@ -57,19 +64,14 @@ func _physics_process(delta):
 	
 		GameState.playing:
 		
-			if get_tree().get_nodes_in_group("wigs").size() == 0:
+			if session.wig_manager.wigs.size() == 0:
 				_init_wig()
 				return
-			elif not active_wig:
-				active_wig = get_tree().get_nodes_in_group("wigs")[0]
 				
-			else:
-				acitve_bearer = session.wig_manager.get_bearer(active_wig)
-				
-			if acitve_bearer == null:
+			elif not active_wig or not active_bearer:				
 				return
 				
-			var bearer_name = session.get_humanoids_screenname(acitve_bearer)
+			var bearer_name = session.get_humanoids_screenname(active_bearer)
 			
 			if not Scores.has(bearer_name):
 				Scores[bearer_name] = delta
@@ -86,8 +88,8 @@ func _physics_process(delta):
 		
 func active_bearer_is_local_player() -> bool:
 	
-	if acitve_bearer:	
-		return str(multiplayer.get_unique_id()) == acitve_bearer.name
+	if active_bearer:	
+		return str(multiplayer.get_unique_id()) == active_bearer.name
 	else:
 		return false
 
@@ -147,7 +149,7 @@ func rpc_reset():
 			
 		else:	
 			session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
-			session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
+			session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 20)
 			
 		#wig.queue_free()
 		
@@ -155,11 +157,14 @@ func rpc_reset():
 @rpc("call_local", "reliable")
 func rpc_play():
 	
+	
 	session.HUD.set_progress_label("Installing Wig...")
 	session.HUD.add_nameplate("WIG", "WIG")
 	session.HUD.modify_nameplate("WIG", "theme_override_colors/font_color", Color.GREEN_YELLOW)
 	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
-	theme.seek(beas_mote_transition)
+	theme.seek(beas_mote_transition)		
+	session.wig_manager.dawned.connect(handle_mount)
+	session.wig_manager.dropped.connect(handle_dismount)
 	
 	if is_multiplayer_authority(): 	
 		session.HUD.set_psa.rpc("Capture the Wig!", 3)
@@ -167,10 +172,7 @@ func rpc_play():
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
-			
-	session.wig_manager.dawned.connect(handle_mount)
-	session.wig_manager.dropped.connect(handle_dismount)
-	
+
 	
 @rpc("call_local", "reliable")
 func rpc_finish():
@@ -178,24 +180,17 @@ func rpc_finish():
 	session.HUD.find_child("Progress").visible = false
 	session.HUD.remove_nameplate("WIG")
 	
+	if active_bearer:			
+		session.HUD.modify_nameplate(active_bearer.name, "theme_override_colors/font_color", Color.WHITE)
+		session.HUD.modify_nameplate(active_bearer.name, "theme_override_font_sizes/font_size", 20)
+		
 	if is_multiplayer_authority(): 
 		State = GameState.finished	
 		
-		for index in session.wig_manager.wigs.size():
+		if active_bearer == null:
+			session.wig_manager.rpc_destroy_wig.rpc(active_wig.get_path())
 			
-			var bearer = session.wig_manager.bearers[index]
-			var wig = session.wig_manager.wigs[index]
-			
-			if wig == null:
-				pass
-				
-			elif bearer == null:
-				session.wig_manager.rpc_destroy_wig.rpc(wig.get_path())
-				
-			else:			
-				session.wig_manager.fuse_wig(bearer)
-				session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
-				session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
+		session.wig_manager.fuse_wig(active_bearer)
 
 	session.wig_manager.dawned.disconnect(handle_mount)
 	session.wig_manager.dropped.disconnect(handle_dismount)
@@ -203,18 +198,21 @@ func rpc_finish():
 
 func handle_player_joining(client_id) -> void:
 	
-	for index in range(session.wig_manager.wigs.size()):
-		session.wig_manager.rpc_spawn_new_wig.rpc_id(client_id)
-		var wig_path = session.wig_manager.wigs[index].get_path()
-		var bearer_path = null 
-		
-		if index < session.wig_manager.bearers.size():
-			bearer_path = null if session.wig_manager.bearers[index] == null else session.wig_manager.bearers[index].get_path()
-		
-		session.wig_manager.rpc_put_wig_on_head.rpc_id(client_id, wig_path, bearer_path)
-		
-		if State == GameState.finished or index < session.wig_manager.wigs.size()-1:
-			session.wig_manager.rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
+	if State != GameState.playing:
+		return
+	#for index in range(session.wig_manager.wigs.size()):
+		#session.wig_manager.rpc_spawn_new_wig.rpc_id(client_id)
+		#var wig_path = session.wig_manager.wigs[index].get_path()
+		#var bearer_path = null 
+		#
+		#if index < session.wig_manager.bearers.size():
+			#bearer_path = null if session.wig_manager.bearers[index] == null else session.wig_manager.bearers[index].get_path()
+		#
+		#session.wig_manager.rpc_put_wig_on_head.rpc_id(client_id, wig_path, bearer_path)
+		#
+		#if State == GameState.finished:
+			#session.wig_manager.rpc_fuse_wig_to_head.rpc_id(client_id, wig_path, bearer_path)		
+	pass
 	
 
 func handle_mount(_wig, bearer):
@@ -226,7 +224,7 @@ func handle_mount(_wig, bearer):
 func handle_dismount(_wig, bearer):
 	
 	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
-	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 16)
+	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 20)
 	
 
 		

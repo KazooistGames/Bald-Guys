@@ -256,6 +256,8 @@ func synchronize_all_peers():
 func sync_board_positions(server_positions : PackedVector3Array, server_trajectories : PackedVector3Array):
 	
 	for index in range(boards.size()):
+		if index >= server_positions.size() or index >= server_trajectories.size():
+			continue
 		boards[index].position = server_positions[index] + unlagger.SERVER_PING / 2000.0 * server_trajectories[index]
 		boards[index].trajectory = server_trajectories[index]
 	unlagger.reset()

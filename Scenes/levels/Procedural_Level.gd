@@ -260,6 +260,17 @@ func unstage_boards() -> void:
 	
 func init_for_new_client(client_id) -> void:
 	
+	rpc_set_map_size.rpc_id(client_id, Map_Size)	
+	
+	if state == level_state.voting:
+		hoverboard_stager.create_boards.rpc_id(client_id, 2, 5, 1, Vector2(0, 6))
+		hoverboard_stager.boards[0].position.x = 5
+		hoverboard_stager.boards[0].position.z = 5
+		hoverboard_stager.boards[1].position.x = -5
+		hoverboard_stager.boards[1].position.z = -5
+		hoverboard_stager.introduce_boards.rpc()
+		return
+	
 	if hoverboard_stager.boards.size() > 0:
 		hoverboard_stager.rpc_set_rng.rpc_id(client_id, null, hoverboard_stager.previous_rng_state)
 		hoverboard_stager.clear_boards.rpc_id(client_id)
@@ -295,6 +306,17 @@ func seed_procedural_generators(new_seed):
 	mesa_grower.rpc_set_rng(hash(level_rng.randi()), null)
 	ramparter.rpc_set_rng(hash(level_rng.randi()), null)
 	limb_grower.rpc_set_rng(hash(level_rng.randi()), null)
+	
+	
+@rpc("call_remote", "reliable")
+func rpc_set_map_size(new_map_size):
+	
+	ramparter.Map_Size = new_map_size
+	mesa_grower.Map_Size = new_map_size
+	limb_grower.Map_Size = new_map_size
+	hoverboard_stager.Map_Size = new_map_size
+	Map_Size = new_map_size
+	room.request_size(new_map_size)
 	
 
 
