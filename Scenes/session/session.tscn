@@ -26,10 +26,18 @@ properties/2/replication_mode = 2
 script = ExtResource("1_yhshl")
 
 [node name="WigLMS" parent="." instance=ExtResource("7_oy1g0")]
+classification = 2
+Title = "Last Wig Standing"
+Goal = 100.0
 
 [node name="WigKoth" parent="." instance=ExtResource("8_t3wo1")]
+classification = 1
+Title = "King of Gel"
+Goal = 60.0
 
 [node name="Wig_FFA" parent="." instance=ExtResource("9_l3yvs")]
+Title = "Wig Hunt"
+Goal = 60.0
 
 [node name="Procedural_Level" parent="." instance=ExtResource("5_xlqqg")]
 

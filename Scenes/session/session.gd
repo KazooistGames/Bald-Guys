@@ -20,7 +20,7 @@ var Active_Game : Game
 
 @onready var session_rng = RandomNumberGenerator.new()
 @onready var Level : Node3D = $Procedural_Level
-@onready var HUD : CanvasLayer = $HUD
+@onready var HUD : Hud = $HUD
 @onready var humanoidSpawner : MultiplayerSpawner = $HumanoidSpawner
 @onready var raycast : RayCast3D = $RayCast3D
 @onready var pinger : Node = $PingTimer
@@ -140,7 +140,7 @@ func Try_Vote():
 	game_vote_options = []
 	game_vote_options.append(get_eligible_game())
 	game_vote_options.append(get_eligible_game())
-	print("vote options: ", game_vote_options)
+
 	
 	Level.vote()
 	countDown_timer = 0
@@ -160,7 +160,6 @@ func Try_Get_Vote(game_index):
 	if Level.demolished.is_connected(Level.vote):
 		Level.demolished.disconnect(Level.vote)
 	
-	#wig_manager.rpc_clear_wigs.rpc()
 	wig_manager.clear_wigs()
 	Active_Game = game_vote_options.pick_random() if game_index == -1 else game_vote_options[game_index]
 	Level.generate()
@@ -191,6 +190,7 @@ func Try_Finish_Round():
 	if Active_Game:
 		Active_Game.GameOver.disconnect(Try_Finish_Round)
 		Active_Game.rpc_finish.rpc()
+		
 	Round += 1		
 	Ended_Round.emit()	
 	State = SessionState.Reconfiguring
@@ -302,43 +302,9 @@ func get_random_spawn(parent):
 func rpc_CommissionSession(Seed):
 	
 	session_rng.seed = Seed
-	print(multiplayer.get_unique_id(), " session seed: ", session_rng.seed)
-	#var unique_round_id = session_rng.randi_range(0, 0)
-	#
-	#match unique_round_id:
-		#0:
-			#load_game("res://Scenes/games/Wig_FFA/Wig_FFA.tscn")			
-			#load_game("res://Scenes/games/Wig_KOTH/Wig_KOTH.tscn")
-			#load_game("res://Scenes/games/Wig_LMS/Wig_LMS.tscn")
-			
+	print(multiplayer.get_unique_id(), " session seed: ", session_rng.seed)			
 	Level.seed_procedural_generators(hash(session_rng.randi()))
 	Commissioned = true
-	
-		
-#var last_prefab
-#func load_game(path):
-	#
-	#var prefab = load(path)
-	#var return_val
-	#
-	#if prefab == null:	
-		#print(multiplayer.get_unique_id(), " could not load game at path: ", path)
-		#return_val = null
-		#
-	#elif last_prefab == prefab:	
-		#print(multiplayer.get_unique_id(), " duplicating round of ", path)	
-		#Games.append(Games.back())
-		#return_val = Games.back()
-		#
-	#else:
-		#print(multiplayer.get_unique_id(), " commissioning a round of ", path)
-		#var new_game = prefab.instantiate()
-		#add_child(new_game, true)	
-		#Games.append(new_game)
-		#return_val = new_game
-		#
-	#last_prefab = prefab
-	#return return_val
 			
 	  
 func ping_clients():
@@ -456,7 +422,7 @@ func get_eligible_game() -> Game:
 		
 		if game_vote_options.has(game):
 			continue
-		elif game.Players > Humanoids.size():
+		elif game.Players > Humanoids.size() and Humanoids.size() != 1:
 			continue
 		else:
 			eligable_games.append(game)

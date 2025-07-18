@@ -28,7 +28,7 @@ const ClientState = {
 
 @onready var music = $Music
 
-var session
+var session : Session
 
 
 func _ready():
@@ -122,7 +122,7 @@ func start_host_lobby():
 	session = session_Prefab.instantiate()
 	viewPort.add_child(session)
 	
-	multiplayer.peer_connected.connect(session.add_player)
+	#multiplayer.peer_connected.connect(session.add_player)
 	multiplayer.peer_disconnected.connect(session.remove_player)
 	session.Client_Screennames[1] = get_screenname_entry()
 
@@ -166,7 +166,7 @@ func leave_session():
 		pass	
 		
 	elif multiplayer.is_server():
-		multiplayer.peer_connected.disconnect(session.add_player)
+		#multiplayer.peer_connected.disconnect(session.add_player)
 		multiplayer.peer_disconnected.disconnect(session.remove_player)
 		
 	else:
@@ -235,5 +235,8 @@ func rpc_set_client_screenname(player_name):
 		
 	var id = multiplayer.get_remote_sender_id()
 	session.Client_Screennames[id] = player_name
+	
+	if is_multiplayer_authority():
+		session.add_player(id)
 
 

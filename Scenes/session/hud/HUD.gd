@@ -1,4 +1,4 @@
-extends CanvasLayer
+class_name Hud extends CanvasLayer
 
 const progress_bar_length = 1000
 const progress_bar_width = 75

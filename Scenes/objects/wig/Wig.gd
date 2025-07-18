@@ -1,7 +1,7 @@
 
 extends RigidBody3D
 
-const radius_speed = 0.05
+const radius_speed = 0.075
 
 @export var HAIR_COLOR : Color:
 	

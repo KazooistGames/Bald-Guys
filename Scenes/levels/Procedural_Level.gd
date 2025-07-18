@@ -18,7 +18,7 @@ var Map_Size : int = 25
 @onready var item_dropper : Node3D = $Item_Dropper
 @onready var ramparter : Node3D = $Ramparter
 @onready var limb_grower : Node3D = $Limb_Grower
-@onready var session : Node3D = get_parent()
+@onready var session : Session = get_parent()
 	
 var multiplayer_permissive : bool = false
 var level_rng : RandomNumberGenerator = RandomNumberGenerator.new()
@@ -57,7 +57,13 @@ func _process(_delta):
 		if state == level_state.demolishing or state == level_state.demolished:
 			item_dropper.collect_items.rpc(0, Vector3.UP * Map_Size / 2.0)
 			item_dropper.collect_items.rpc(2, Vector3.UP * Map_Size / 2.0)
-	
+			
+		elif state == level_state.voting:
+			
+			for index in range(hoverboard_stager.boards.size()):
+				var game : Game = session.game_vote_options[index]
+				var board = hoverboard_stager.boards[index]
+				session.HUD.update_nameplate(game.Title, board.position, game.Title)
 	
 func vote():
 	
@@ -69,6 +75,11 @@ func vote():
 	hoverboard_stager.boards[1].position.z = -5
 	hoverboard_stager.introduce_boards.rpc()
 	state = level_state.voting
+	
+	for game : Game in session.game_vote_options:	
+		session.HUD.add_nameplate(game.Title, game.Title)
+		session.HUD.modify_nameplate(game.Title, "theme_override_colors/font_color", game.rarity_color())
+		session.HUD.modify_nameplate(game.Title, "theme_override_font_sizes/font_size", 48)
 
 
 func get_vote():
@@ -76,6 +87,9 @@ func get_vote():
 	state = level_state.demolished
 	var winning_board_index = -1
 	var highest_votes = 0
+	
+	for game : Game in session.game_vote_options:	
+		session.HUD.remove_nameplate(game.Title)
 	
 	for index in range(hoverboard_stager.boards.size()):
 		var board = hoverboard_stager.boards[index]
@@ -308,7 +322,7 @@ func seed_procedural_generators(new_seed):
 	limb_grower.rpc_set_rng(hash(level_rng.randi()), null)
 	
 	
-@rpc("call_remote", "reliable")
+@rpc("call_local", "reliable")
 func rpc_set_map_size(new_map_size):
 	
 	ramparter.Map_Size = new_map_size

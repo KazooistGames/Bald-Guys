@@ -12,6 +12,7 @@ const beas_mote_end = 162.0
 var active_wig : RigidBody3D = null
 var active_bearer : RigidBody3D = null
 
+
 func _ready():
 
 	whispers.stream_paused = false

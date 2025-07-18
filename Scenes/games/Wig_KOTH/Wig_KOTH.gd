@@ -6,8 +6,6 @@ enum HillState {
 	climbing,
 	falling
 }
-@export var hill_state : HillState = HillState.idle
-@export var Hill_Size : float = 4.0 
 
 @onready var Hill = $Hill
 @onready var hill_collider : CollisionShape3D = $Hill/CollisionShape3D
@@ -17,6 +15,8 @@ enum HillState {
 @onready var wallCast : RayCast3D = $Hill/wallCast
 @onready var synchronizer = $MultiplayerSynchronizer
 
+var hill_state : HillState = HillState.idle
+var Hill_Size : float = 4.0 
 var hill_speed : float = 0.75
 var hill_velocity : Vector3 = Vector3.ZERO
 var hill_acceleration : float = 2.0
@@ -39,8 +39,7 @@ func _ready():
 	Hill.position = Vector3(0, map_size / 2.0, 0)
 	hill_phase = randi()
 	Players = 2
-	Goal = 60
-
+	Goal = 30
 
 func _process(delta):
 	
@@ -72,6 +71,7 @@ func _physics_process(delta):
 			hill_phase += delta / 100.0
 			Hill.rotation.y = sin(5 * hill_phase) + sin(hill_phase * PI)
 			var scoring_players = get_players_in_hill()
+			
 			
 			for humanoid in scoring_players:
 				
@@ -188,7 +188,7 @@ func rpc_play():
 	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
 	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
 	session.HUD.set_progress_label("Irrigating Scalp...")
-	
+		
 	if is_multiplayer_authority(): 
 		session.HUD.set_psa.rpc("Grow your Hair!", 3)
 		State = GameState.playing
@@ -198,7 +198,9 @@ func rpc_play():
 			
 		for humanoid : RigidBody3D in session.Humanoids:
 			session.wig_manager.give_wig(humanoid)
-				
+			var screenname = session.get_humanoids_screenname(humanoid)
+			rpc_adjust_wig_size.rpc(humanoid.get_path(), Scores[screenname]/Goal)
+	
 	
 @rpc("call_local", "reliable")
 func rpc_finish():
@@ -219,3 +221,7 @@ func handle_player_joining(client_id):
 	var new_players_humanoid = session.get_node_or_null(str(client_id))
 	print('giving wig to ', new_players_humanoid)
 	session.wig_manager.give_wig(new_players_humanoid)
+	
+	for humanoid : RigidBody3D in session.Humanoids:
+		var screenname = session.get_humanoids_screenname(humanoid)
+		rpc_adjust_wig_size.rpc(humanoid.get_path(), Scores[screenname]/Goal)

@@ -28,7 +28,7 @@ const new_time_sig_chance = 0.25
 func _ready():
 	
 	radiation.play()
-	cycle_timer = cycle_period / 2.0
+	cycle_timer = cycle_period * 0.75
 	
 func _process(delta):
 	

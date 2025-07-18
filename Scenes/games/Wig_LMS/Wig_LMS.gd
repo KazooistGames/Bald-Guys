@@ -8,12 +8,6 @@ var wig_start_offset = Vector3(0, 0.2, -0.025)
 var wig_end_offset = Vector3(0, 0.5, -0.075)
 
 
-func _ready():
-	
-	Players = 2
-	Goal = 100
-	
-
 func _process(_delta):
 	
 	if State == GameState.playing:
