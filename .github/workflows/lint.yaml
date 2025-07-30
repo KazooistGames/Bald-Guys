@@ -1,0 +1,43 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: "ubuntu-latest"
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.13
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        python-version: 3.13
+    - name: Install codespell and gdtoolkit
+      run: |
+        uv pip install --system codespell gdtoolkit
+    - name: Check for typos with codespell
+      run: |
+        codespell .
+    - name: Lint with gdlint, ignoring some errors we don't care about
+      if: always()
+      run: |
+        uv run gdlint . 2>&1 | \
+          grep -v "trailing-whitespace" | \
+          grep -v "class-definitions-order" | \
+          grep -v "max-line-length" | \
+          grep -v "max-public-methods"
+
+permissions:
+  contents: read
+  pull-requests: read
