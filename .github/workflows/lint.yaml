@@ -32,11 +32,14 @@ jobs:
     - name: Lint with gdlint, ignoring some errors we don't care about
       if: always()
       run: |
-        uv run gdlint . 2>&1 | \
-          grep -v "trailing-whitespace" | \
-          grep -v "class-definitions-order" | \
-          grep -v "max-line-length" | \
-          grep -v "max-public-methods"
+        IGNORE_PATTERNS="trailing-whitespace|class-definitions-order|max-line-length|max-public-methods|Failure"
+        ERROR_COUNT=$(uv run gdlint . 2>&1 | grep -vE "$IGNORE_PATTERNS" | wc -l)
+        echo "Found $ERROR_COUNT gdlint errors:"
+        if [ "$ERROR_COUNT" -gt 0 ]; then
+          echo "Errors found:"
+          uv run gdlint . 2>&1 | grep -vE "$IGNORE_PATTERNS"
+          exit 1
+        fi
 
 permissions:
   contents: read
