@@ -5663,12 +5663,6 @@ transform = Transform3D(0.949275, 0.0791056, 0.0553646, 0.090977, -0.245432, -0.
 shape = SubResource("BoxShape3D_a18lv")
 disabled = true
 
-[node name="Cube" type="MeshInstance3D" parent="Skeleton3D"]
-layers = 3
-mesh = ExtResource("5_b5sbe")
-skin = SubResource("Skin_vic1c")
-surface_material_override/0 = ExtResource("6_5scnh")
-
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 "": SubResource("AnimationLibrary_l8k7m")
