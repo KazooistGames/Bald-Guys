@@ -10,7 +10,7 @@ extends MultiplayerSynchronizer
 
 @onready var unlagger = $LagCompensator
 
-var parent
+var parent : RigidBody3D
 
 
 func _ready():
@@ -30,6 +30,7 @@ func _physics_process(_delta):
 		
 	elif not multiplayer.has_multiplayer_peer():
 		pass
+
 		
 	elif is_multiplayer_authority():
 		AUTHORITY_ORIGIN = parent.transform.origin
@@ -37,7 +38,8 @@ func _physics_process(_delta):
 		Authority_Angular_Velocity = parent.angular_velocity
 		Authority_Linear_Velocity = parent.linear_velocity
 		
-	else:
+	elif not parent.freeze:
+		
 		parent.transform.basis = AUTHORITY_BASIS
 		parent.angular_velocity = Authority_Angular_Velocity
 		
@@ -61,8 +63,8 @@ func predictive_correction():
 
 func parent_is_valid():
 	
-	if parent != null:
-		return true
+	if parent == null:
+		return false
 	elif parent is RigidBody3D:
 		return true
 	else:

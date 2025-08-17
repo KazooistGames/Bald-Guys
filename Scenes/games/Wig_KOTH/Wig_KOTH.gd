@@ -159,7 +159,15 @@ func get_players_in_hill() -> Array[Node3D]:
 func rpc_adjust_wig_size(path_to_bearer, progress : float):
 	
 	var bearer = get_node(path_to_bearer)
+	
+	if not bearer:
+		return
+		
 	var wig = session.wig_manager.get_wig(bearer)
+	
+	if not wig:
+		return
+		
 	wig.radius = lerp(wig_radii.x, wig_radii.y, progress)
 	
 
@@ -188,10 +196,11 @@ func rpc_play():
 	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
 	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
 	session.HUD.set_progress_label("Irrigating Scalp...")
-		
+	State = GameState.playing	
+	
 	if is_multiplayer_authority(): 
 		session.HUD.set_psa.rpc("Grow your Hair!", 3)
-		State = GameState.playing
+
 		
 		for value in session.Client_Screennames.values():
 			Scores[value] = 0
@@ -207,9 +216,7 @@ func rpc_finish():
 	
 	session.HUD.remove_nameplate("HILL")
 	session.HUD.find_child("Progress").visible = false
-		
-	if is_multiplayer_authority(): 
-		State = GameState.finished
+	State = GameState.finished
 
 		
 	

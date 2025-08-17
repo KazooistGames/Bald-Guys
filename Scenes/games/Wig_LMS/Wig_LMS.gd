@@ -74,12 +74,12 @@ func rpc_play():
 func rpc_finish():
 	
 	session.HUD.find_child("Progress").visible = false
+	State = GameState.finished
 	
 	if is_multiplayer_authority(): 
-
-		State = GameState.finished
 		
 		for humanoid in session.Humanoids:
+			
 			if humanoid != null:
 				humanoid.ragdolled.disconnect(damage_player)
 				humanoid.recover_disabled = false

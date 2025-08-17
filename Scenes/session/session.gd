@@ -89,9 +89,11 @@ func _physics_process(delta):
 		
 	
 	if State == SessionState.Lobby:
-		pass
+		HUD.find_child("Progress").visible = false
 		
 	elif State == SessionState.Vote:
+		
+		HUD.find_child("Progress").visible = false
 		
 		if countDown_value <= 0:
 			Level.get_vote()
@@ -229,7 +231,6 @@ func add_player(peer_id):
 	
 	rpc_CommissionSession.rpc_id(peer_id, session_rng.seed)
 	Level.init_for_new_client(peer_id)
-	wig_manager.handle_player_joining(peer_id)
 	
 	for game : Game in All_Games:	
 			
@@ -243,6 +244,8 @@ func add_player(peer_id):
 			game.rpc_finish.rpc_id(peer_id)
 			
 		game.handle_player_joining(peer_id)
+	
+	wig_manager.handle_player_joining(peer_id)
 	
 	return new_peer_humanoid
 
@@ -362,20 +365,30 @@ func fix_out_of_bounds():
 
 func node_is_in_bounds(node):
 	
+	var bounds = Level.room.Current_Size
+	
 	if not Level:
 		return true
+	elif abs(node.global_position.x) > bounds / 1.99:
+		return false
+	elif node.global_position.y > bounds or node.global_position.y < -1:
+		return false
+	elif abs(node.global_position.z) > bounds / 1.99:
+		return false	
+	else:
+		return true
 	
-	raycast.global_position = node.global_position + Vector3.DOWN #move raycast to node position
-	raycast.target_position = Vector3.UP * Level.Map_Size * 5 #shoot it up to the ceiling
-	raycast.force_raycast_update()	
-	var hit_the_ceiling = raycast.is_colliding()	
-	
-	raycast.global_position = node.global_position + Vector3.UP
-	raycast.target_position = Vector3.DOWN * Level.Map_Size * 5 #shoot it to the floor
-	raycast.force_raycast_update()	
-	var hit_the_floor = raycast.is_colliding()
-
-	return hit_the_ceiling and hit_the_floor #node is considered inside level if it hits one
+	#raycast.global_position = node.global_position + Vector3.DOWN #move raycast to node position
+	#raycast.target_position = Vector3.UP * Level.Map_Size * 5 #shoot it up to the ceiling
+	#raycast.force_raycast_update()	
+	#var hit_the_ceiling = raycast.is_colliding()	
+	#
+	#raycast.global_position = node.global_position + Vector3.UP
+	#raycast.target_position = Vector3.DOWN * Level.Map_Size * 5 #shoot it to the floor
+	#raycast.force_raycast_update()	
+	#var hit_the_floor = raycast.is_colliding()
+#
+	#return hit_the_ceiling and hit_the_floor #node is considered inside level if it hits one
 
 
 func local_screenname():

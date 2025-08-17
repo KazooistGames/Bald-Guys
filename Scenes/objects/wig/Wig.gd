@@ -98,4 +98,7 @@ func getRandomHairColor():
 func toggle_strobing(enable):
 	
 	strobing_enabled = enable
+	
+
+	
 		

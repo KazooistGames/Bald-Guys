@@ -22,10 +22,6 @@ signal fused(wig : RigidBody3D, humanoid : RigidBody3D)
 
 func _process(_delta : float) -> void:
 	
-	if not is_multiplayer_authority():
-		for wig in wigs:
-			print(wig.get_path())
-	
 	for index in range(wigs.size()):
 		
 		if index >= wigs.size():
@@ -40,7 +36,7 @@ func _process(_delta : float) -> void:
 			var ratio = (wigs[index].actual_radius - wig_radii.x) / (wig_radii.y - wig_radii.x)
 			wig_remotes[index].position = lerp(wig_start_offset, wig_end_offset, ratio)
 		
-		if wig.actual_radius < 0.0:
+		if wig.actual_radius < 0.0 and is_multiplayer_authority():
 			rpc_destroy_wig.rpc(wig.get_path())
 	
 
