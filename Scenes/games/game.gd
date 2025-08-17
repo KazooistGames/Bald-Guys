@@ -76,10 +76,10 @@ func handle_player_leaving(_client_id) -> void:
 
 func rarity_color() -> Color:
 	
-	var rarity_color : Color = RarityColors[classification]
-	rarity_color.a = 0.75
+	var return_color : Color = RarityColors[classification]
+	return_color.a = 0.75
 	
-	return rarity_color
+	return return_color
 	
 func rarity_parts() -> int:
 	

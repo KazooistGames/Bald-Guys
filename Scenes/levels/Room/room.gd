@@ -30,6 +30,7 @@ func _ready() -> void:
 func _process(delta:float) -> void:
 		
 	if not Resizing:
+		Current_Size = Next_Size
 		pass
 	
 	elif Current_Size == Next_Size or resize_timer == resize_period:	

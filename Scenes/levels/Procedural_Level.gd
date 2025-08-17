@@ -51,6 +51,7 @@ func _ready() -> void:
 func _process(_delta):
 
 	hoverboard_stager.Map_Size = room.Current_Size
+	mesa_grower.Map_Size = room.Current_Size
 	
 	if is_multiplayer_authority():
 		
@@ -276,11 +277,11 @@ func init_for_new_client(client_id) -> void:
 	
 	if state == level_state.voting:
 		hoverboard_stager.create_boards.rpc_id(client_id, 2, 5, 1, Vector2(0, 6))
-		hoverboard_stager.boards[0].position.x = 5
-		hoverboard_stager.boards[0].position.z = 5
-		hoverboard_stager.boards[1].position.x = -5
-		hoverboard_stager.boards[1].position.z = -5
-		hoverboard_stager.introduce_boards.rpc()
+		hoverboard_stager.introduce_boards.rpc_id(client_id)
+		
+		for game : Game in session.game_vote_options:	
+			rpc_create_vote_nameplates.rpc_id(client_id, game.Title, game.rarity_color())
+
 		return
 	
 	if hoverboard_stager.boards.size() > 0:

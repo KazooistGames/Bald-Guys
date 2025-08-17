@@ -20,7 +20,11 @@ signal dropped(wig : RigidBody3D, humanoid : RigidBody3D)
 signal fused(wig : RigidBody3D, humanoid : RigidBody3D)
 
 
-func _process(delta : float) -> void:
+func _process(_delta : float) -> void:
+	
+	if not is_multiplayer_authority():
+		for wig in wigs:
+			print(wig.get_path())
 	
 	for index in range(wigs.size()):
 		
@@ -266,7 +270,7 @@ func handle_player_joining(client_id) -> void:
 	for index in range(wigs.size()):
 		var wig = wigs[index]
 
-		var wig_path = wigs[index].get_path()
+		#var wig_path = wigs[index].get_path()
 		var bearer_path = null 
 		
 		if index < bearers.size():
