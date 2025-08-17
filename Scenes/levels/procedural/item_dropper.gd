@@ -108,5 +108,3 @@ func clear_all_items():
 			item.queue_free()
 	
 	all_items = {}
-
-

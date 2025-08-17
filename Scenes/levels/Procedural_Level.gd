@@ -63,7 +63,7 @@ func _process(_delta):
 			for index in range(hoverboard_stager.boards.size()):
 				var game : Game = session.game_vote_options[index]
 				var board = hoverboard_stager.boards[index]
-				session.HUD.update_nameplate(game.Title, board.position, game.Title)
+				rpc_update_vote_nameplates.rpc(game.Title, board.position)
 	
 func vote():
 	
@@ -77,9 +77,7 @@ func vote():
 	state = level_state.voting
 	
 	for game : Game in session.game_vote_options:	
-		session.HUD.add_nameplate(game.Title, game.Title)
-		session.HUD.modify_nameplate(game.Title, "theme_override_colors/font_color", game.rarity_color())
-		session.HUD.modify_nameplate(game.Title, "theme_override_font_sizes/font_size", 48)
+		rpc_create_vote_nameplates.rpc(game.Title, game.rarity_color())
 
 
 func get_vote():
@@ -89,7 +87,7 @@ func get_vote():
 	var highest_votes = 0
 	
 	for game : Game in session.game_vote_options:	
-		session.HUD.remove_nameplate(game.Title)
+		rpc_remove_vote_nameplates.rpc(game.Title)
 	
 	for index in range(hoverboard_stager.boards.size()):
 		var board = hoverboard_stager.boards[index]
@@ -332,5 +330,23 @@ func rpc_set_map_size(new_map_size):
 	Map_Size = new_map_size
 	room.request_size(new_map_size)
 	
+	
+@rpc("call_local", "reliable")
+func rpc_create_vote_nameplates(game_title : String, rarity_color : Color):
+	
+	session.HUD.add_nameplate(game_title, game_title)
+	session.HUD.modify_nameplate(game_title, "theme_override_colors/font_color", rarity_color)
+	session.HUD.modify_nameplate(game_title, "theme_override_colors/font_shadow_color", Color(0, 0, 0, 0))
+	session.HUD.modify_nameplate(game_title, "theme_override_font_sizes/font_size", 42)
 
 
+@rpc("call_local", "unreliable")
+func rpc_update_vote_nameplates(game_title : String, nameplate_position : Vector3):
+	
+	session.HUD.update_nameplate(game_title, nameplate_position, game_title)
+	
+	
+@rpc("call_local", "unreliable")
+func rpc_remove_vote_nameplates(game_title : String):
+	
+		session.HUD.remove_nameplate(game_title)	
