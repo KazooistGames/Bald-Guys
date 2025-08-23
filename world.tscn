@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://ccecv7ucyb87r"]
+[gd_scene load_steps=5 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
+[ext_resource type="Script" path="res://multiplayer_manager.gd" id="3_a0aua"]
 [ext_resource type="AudioStream" uid="uid://do2svkh5yqq6a" path="res://audio/Beas Mote2.wav" id="3_w7uwt"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_dnjxn"]
@@ -35,7 +36,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu"]
+[node name="margin" type="MarginContainer" parent="CanvasLayer/MainMenu"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -51,47 +52,82 @@ theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MainMenu/MarginContainer"]
+[node name="vbox" type="VBoxContainer" parent="CanvasLayer/MainMenu/margin"]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="Title" type="Label" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+[node name="Title" type="Label" parent="CanvasLayer/MainMenu/margin/vbox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 96
 text = "Bald Guys"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="NameEntry" type="LineEdit" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+[node name="standard_vbox" type="VBoxContainer" parent="CanvasLayer/MainMenu/margin/vbox"]
+visible = false
+layout_mode = 2
+
+[node name="NameEntry" type="LineEdit" parent="CanvasLayer/MainMenu/margin/vbox/standard_vbox"]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 placeholder_text = "Screen Name..."
 alignment = 1
 
-[node name="HostButton" type="Button" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+[node name="HostButton" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/standard_vbox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "HOST	"
 
-[node name="JoinButton" type="Button" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+[node name="JoinButton" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/standard_vbox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "JOIN	"
 
-[node name="AddressEntry" type="LineEdit" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+[node name="AddressEntry" type="LineEdit" parent="CanvasLayer/MainMenu/margin/vbox/standard_vbox"]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 placeholder_text = "Host Address..."
 alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer"]
+[node name="steam_vbox" type="VBoxContainer" parent="CanvasLayer/MainMenu/margin/vbox"]
+layout_mode = 2
+
+[node name="scroll" type="ScrollContainer" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
+layout_mode = 2
+
+[node name="list" type="ItemList" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll"]
+layout_mode = 2
+auto_height = true
+item_count = 2
+item_0/text = "Lobby 1"
+item_1/text = "Lobby 2"
+
+[node name="button_hbox" type="HBoxContainer" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
+layout_mode = 2
+theme_override_constants/separation = 100
+alignment = 1
+
+[node name="join_steam" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox/button_hbox"]
+layout_mode = 2
+text = "Join Lobby"
+
+[node name="create_steam" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox/button_hbox"]
+layout_mode = 2
+text = "Create Lobby"
+
+[node name="use_steam" type="CheckButton" parent="CanvasLayer/MainMenu/margin/vbox"]
+layout_mode = 2
+text = "use Steam"
+alignment = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu/margin/vbox"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 10
 
-[node name="QuitButton" type="Button" parent="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/MarginContainer"]
+[node name="QuitButton" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/MarginContainer"]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
@@ -156,7 +192,7 @@ offset_right = 275.0
 offset_bottom = 150.0
 color = Color(0.392157, 0.392157, 0.392157, 1)
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Popup"]
+[node name="margin" type="MarginContainer" parent="CanvasLayer/Popup"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -172,12 +208,12 @@ theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Popup/MarginContainer"]
+[node name="vbox" type="VBoxContainer" parent="CanvasLayer/Popup/margin"]
 layout_mode = 2
 size_flags_vertical = 8
 theme_override_constants/separation = 15
 
-[node name="Message" type="Label" parent="CanvasLayer/Popup/MarginContainer/VBoxContainer"]
+[node name="Message" type="Label" parent="CanvasLayer/Popup/margin/vbox"]
 custom_minimum_size = Vector2(500, 200)
 layout_mode = 2
 size_flags_vertical = 1
@@ -187,7 +223,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="Acknowledge" type="Button" parent="CanvasLayer/Popup/MarginContainer/VBoxContainer"]
+[node name="Acknowledge" type="Button" parent="CanvasLayer/Popup/margin/vbox"]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 size_flags_vertical = 8
@@ -207,8 +243,11 @@ volume_db = -72.0
 autoplay = true
 bus = &"muzic"
 
-[connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/HostButton" to="." method="start_host_lobby"]
-[connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/JoinButton" to="." method="join_lobby"]
-[connection signal="pressed" from="CanvasLayer/MainMenu/MarginContainer/VBoxContainer/MarginContainer/QuitButton" to="." method="quit"]
+[node name="multiplayer" type="Node" parent="."]
+script = ExtResource("3_a0aua")
+
+[connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/standard_vbox/HostButton" to="." method="start_host_lobby"]
+[connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/standard_vbox/JoinButton" to="." method="join_lobby"]
+[connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/MarginContainer/QuitButton" to="." method="quit"]
 [connection signal="pressed" from="CanvasLayer/PauseMenu/margin/vbox/LeaveButton" to="." method="leave_session"]
-[connection signal="pressed" from="CanvasLayer/Popup/MarginContainer/VBoxContainer/Acknowledge" to="." method="acknowledge_popup"]
+[connection signal="pressed" from="CanvasLayer/Popup/margin/vbox/Acknowledge" to="." method="acknowledge_popup"]

@@ -2,9 +2,9 @@ extends Node3D
 
 const session_Prefab = preload("res://Scenes/session/session.tscn")
 
-const PORT = 9999
+const PORT : int = 9999
 
-const MAX_CONNECTIONS = 8
+const MAX_CONNECTIONS : int = 8
 
 const ClientState = {
 	Menus = 0,
@@ -18,11 +18,18 @@ const ClientState = {
 @onready var pause_menu = $CanvasLayer/PauseMenu
 
 @onready var popup = $CanvasLayer/Popup
-@onready var popup_message = $CanvasLayer/Popup/MarginContainer/VBoxContainer/Message
-@onready var popup_acknowledge = $CanvasLayer/Popup/MarginContainer/VBoxContainer/Acknowledge
+@onready var popup_message = $CanvasLayer/Popup/margin/vbox/Message
+@onready var popup_acknowledge = $CanvasLayer/Popup/margin/vbox/Acknowledge
 
-@onready var address_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/AddressEntry
-@onready var screenname_entry = $CanvasLayer/MainMenu/MarginContainer/VBoxContainer/NameEntry
+@onready var standard_network_menu = $CanvasLayer/MainMenu/margin/vbox/standard_vbox
+@onready var address_entry = $CanvasLayer/MainMenu/margin/vbox/standard_vbox/AddressEntry
+@onready var screenname_entry = $CanvasLayer/MainMenu/margin/vbox/standard_vbox/NameEntry
+
+@onready var steam_network_menu = $CanvasLayer/MainMenu/margin/vbox/steam_vbox
+@onready var steam_lobbies = $CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll/list
+@onready var use_steam : CheckButton = $CanvasLayer/MainMenu/margin/vbox/use_steam
+
+@onready var mp_manager = $multiplayer
 
 @onready var sessionSpawner = $SessionSpawner
 
@@ -39,6 +46,9 @@ func _ready():
 	
 	multiplayer.connected_to_server.connect(introduce_myself_to_server)
 	multiplayer.connected_to_server.connect(acknowledge_popup)
+
+	use_steam.visible = SteamManager.is_valid
+	use_steam.button_pressed = SteamManager.is_valid
 	
 	
 func _unhandled_input(_event):
@@ -55,6 +65,8 @@ func _process(delta):
 	if State == ClientState.Menus:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		music.volume_db = move_toward(music.volume_db, -24, delta * 6)
+		steam_network_menu.visible = use_steam.button_pressed
+		standard_network_menu.visible = not steam_network_menu.visible
 		
 	elif pause_menu.visible:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -133,21 +145,14 @@ func join_lobby():
 		display_popup("Choose a screen name first!", null)
 		return
 		
-	#elif address_entry.text == "":
-		#display_popup("Enter Host Address!", null)
-		#return
-	
-	var enet_peer = ENetMultiplayerPeer.new()
 	main_menu.hide()
 	
 	var hostIP = "127.0.0.1" if address_entry.text == "" else address_entry.text
-	var error_code = enet_peer.create_client(hostIP, PORT)
+	var error_code = mp_manager.join(hostIP)
 	
 	if error_code:
 		display_popup("Could not join host,\n ERROR CODE: " + str(error_code), null)
 		return error_code
-	
-	multiplayer.multiplayer_peer = enet_peer
 
 	multiplayer.server_disconnected.connect(func (): display_popup("Server connection lost.", null))
 	multiplayer.server_disconnected.connect(leave_session)
