@@ -116,45 +116,51 @@ func _notification(what):
 
 
 func start_host_lobby():
-	
-	if get_screenname_entry() == '':
-		display_popup("Enter a screen name first!", null)
-		return
-	
-	var enet_peer = ENetMultiplayerPeer.new()
-	main_menu.hide()
-	var error_code = enet_peer.create_server(PORT, MAX_CONNECTIONS)
-	
-	if error_code:
-		display_popup("Could not start server,\n ERROR CODE: " + str(error_code), null)
-		return error_code
-	
-	multiplayer.multiplayer_peer = enet_peer
+
+	var error
+		
+	if use_steam.button_pressed:
+		error = SteamNetwork.create_host()
+		
+	elif screenname_entry.text == '':
+		error = "Enter a screen name first!"
+		
+	else:
+		error = EnetNetwork.create_host()
+		
+	if error:
+		display_popup("Could not start server,\n ERROR: " + str(error), null)
+		return error
 	
 	session = session_Prefab.instantiate()
 	viewPort.add_child(session)
-	
-	#multiplayer.peer_connected.connect(session.add_player)
 	multiplayer.peer_disconnected.connect(session.remove_player)
-	session.Client_Screennames[1] = get_screenname_entry()
-
+	session.Client_Screennames[1] = acquire_screenname()
 
 func join_lobby():
-	
-	if get_screenname_entry() == '':
-		display_popup("Choose a screen name first!", null)
-		return
 		
 	main_menu.hide()
 	
-	var hostIP = "127.0.0.1" if address_entry.text == "" else address_entry.text
-	var error_code = mp_manager.join(hostIP)
+	var error
 	
-	if error_code:
-		display_popup("Could not join host,\n ERROR CODE: " + str(error_code), null)
-		return error_code
+	if use_steam.button_pressed:
+		var lobby_id = 0
+		error = SteamNetwork.join_host(lobby_id)	
+		
+	elif screenname_entry.text  == '':
+		error = "Enter a screen name first!"
+		return
+	
+	else:
+		var hostIP = "127.0.0.1" if address_entry.text == "" else address_entry.text
+		error = EnetNetwork.join_host(hostIP)
 
-	multiplayer.server_disconnected.connect(func (): display_popup("Server connection lost.", null))
+	if error:
+		display_popup("Could not join host,\n ERROR: " + str(error), null)
+		return error
+
+	var msg = "Server connection lost."
+	multiplayer.server_disconnected.connect(func (): display_popup(msg, null))
 	multiplayer.server_disconnected.connect(leave_session)
 	
 
@@ -186,15 +192,24 @@ func quit():
 	get_tree().quit()
 	
 	
+func acquire_screenname():
+	
+	if use_steam.button_pressed:
+		return Steam.getPersonaName()
+	else:
+		return screenname_entry.text
+	
+	
 func introduce_myself_to_server():
 	
-	var player_name = get_screenname_entry()
+	var player_name
+	
+	if use_steam.button_pressed:
+		player_name = Steam.getPersonaName()
+	else:
+		player_name = screenname_entry.text
+		
 	rpc_set_client_screenname.rpc(player_name)
-	
-	
-func get_screenname_entry():
-	
-	return screenname_entry.text
 	
 	
 func display_popup(message, callback):
@@ -243,5 +258,6 @@ func rpc_set_client_screenname(player_name):
 	
 	if is_multiplayer_authority():
 		session.add_player(id)
+
 
 

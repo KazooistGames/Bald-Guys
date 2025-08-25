@@ -18,6 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 SteamManager="*res://steam_manager.gd"
+EnetNetwork="*res://enet_network.gd"
+SteamNetwork="*res://steam_network.gd"
 
 [input]
 

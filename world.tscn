@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://ccecv7ucyb87r"]
 
 [ext_resource type="Script" path="res://world.gd" id="1_j31cu"]
-[ext_resource type="Script" path="res://multiplayer_manager.gd" id="3_a0aua"]
+[ext_resource type="Script" path="res://enet_network.gd" id="3_a0aua"]
 [ext_resource type="AudioStream" uid="uid://do2svkh5yqq6a" path="res://audio/Beas Mote2.wav" id="3_w7uwt"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_dnjxn"]
@@ -248,6 +248,7 @@ script = ExtResource("3_a0aua")
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/standard_vbox/HostButton" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/standard_vbox/JoinButton" to="." method="join_lobby"]
+[connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/steam_vbox/button_hbox/create_steam" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/MarginContainer/QuitButton" to="." method="quit"]
 [connection signal="pressed" from="CanvasLayer/PauseMenu/margin/vbox/LeaveButton" to="." method="leave_session"]
 [connection signal="pressed" from="CanvasLayer/Popup/margin/vbox/Acknowledge" to="." method="acknowledge_popup"]
