@@ -137,14 +137,13 @@ func start_host_lobby():
 	multiplayer.peer_disconnected.connect(session.remove_player)
 	session.Client_Screennames[1] = acquire_screenname()
 
+
 func join_lobby():
-		
-	main_menu.hide()
 	
 	var error
 	
 	if use_steam.button_pressed:
-		var lobby_id = 0
+		var lobby_id = (76561198172612515)
 		error = SteamNetwork.join_host(lobby_id)	
 		
 	elif screenname_entry.text  == '':
@@ -162,7 +161,8 @@ func join_lobby():
 	var msg = "Server connection lost."
 	multiplayer.server_disconnected.connect(func (): display_popup(msg, null))
 	multiplayer.server_disconnected.connect(leave_session)
-	
+	main_menu.hide()
+
 
 func leave_session():
 		
@@ -174,18 +174,17 @@ func leave_session():
 	music.play()	
 	
 	if not multiplayer.has_multiplayer_peer():
-		pass	
-		
+		pass		
 	elif multiplayer.is_server():
-		#multiplayer.peer_connected.disconnect(session.add_player)
 		multiplayer.peer_disconnected.disconnect(session.remove_player)
-		
 	else:
 		multiplayer.server_disconnected.disconnect(leave_session)
 		
 	multiplayer.multiplayer_peer = null
-
 	
+	if use_steam.button_pressed:
+		SteamManager.leave_lobby()
+
 		
 func quit():
 	
