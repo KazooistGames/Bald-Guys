@@ -93,28 +93,21 @@ alignment = 1
 [node name="steam_vbox" type="VBoxContainer" parent="CanvasLayer/MainMenu/margin/vbox"]
 layout_mode = 2
 
-[node name="scroll" type="ScrollContainer" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
+[node name="create_steam" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
 layout_mode = 2
-
-[node name="list" type="ItemList" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-auto_height = true
-item_count = 2
-item_0/text = "Lobby 1"
-item_1/text = "Lobby 2"
+theme_override_font_sizes/font_size = 32
+text = "HOST"
 
 [node name="join_steam" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 32
 text = "JOIN"
 
-[node name="create_steam" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
+[node name="lobby_entry" type="LineEdit" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
-text = "HOST"
-
-[node name="button_hbox" type="HBoxContainer" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
-layout_mode = 2
-theme_override_constants/separation = 100
+theme_override_font_sizes/font_size = 32
+placeholder_text = "Enter Lobby ID"
 alignment = 1
 
 [node name="use_steam" type="CheckButton" parent="CanvasLayer/MainMenu/margin/vbox"]
@@ -248,8 +241,8 @@ script = ExtResource("3_a0aua")
 
 [connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/standard_vbox/HostButton" to="." method="start_host_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/standard_vbox/JoinButton" to="." method="join_lobby"]
-[connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/steam_vbox/join_steam" to="." method="join_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/steam_vbox/create_steam" to="." method="start_host_lobby"]
+[connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/steam_vbox/join_steam" to="." method="join_lobby"]
 [connection signal="pressed" from="CanvasLayer/MainMenu/margin/vbox/MarginContainer/QuitButton" to="." method="quit"]
 [connection signal="pressed" from="CanvasLayer/PauseMenu/margin/vbox/LeaveButton" to="." method="leave_session"]
 [connection signal="pressed" from="CanvasLayer/Popup/margin/vbox/Acknowledge" to="." method="acknowledge_popup"]

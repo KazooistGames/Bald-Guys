@@ -26,7 +26,6 @@ const ClientState = {
 @onready var screenname_entry = $CanvasLayer/MainMenu/margin/vbox/standard_vbox/NameEntry
 
 @onready var steam_network_menu = $CanvasLayer/MainMenu/margin/vbox/steam_vbox
-@onready var steam_lobbies = $CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll/list
 @onready var use_steam : CheckButton = $CanvasLayer/MainMenu/margin/vbox/use_steam
 
 @onready var mp_manager = $multiplayer
@@ -143,8 +142,9 @@ func join_lobby():
 	var error
 	
 	if use_steam.button_pressed:
-		var lobby_id = (76561198172612515)
-		error = SteamNetwork.join_host(lobby_id)	
+		var lobby_id =  $CanvasLayer/MainMenu/margin/vbox/steam_vbox/lobby_entry.text
+		var host_id = Steam.getLobbyOwner(int(lobby_id))
+		error = SteamNetwork.join_host(host_id)	
 		
 	elif screenname_entry.text  == '':
 		error = "Enter a screen name first!"

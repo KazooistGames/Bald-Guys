@@ -15,7 +15,6 @@ func create_host():
 	multiplayer.multiplayer_peer = enet_peer
 	
 
-
 func join_host(lobby_id):
 	
 	var enet_peer : ENetMultiplayerPeer = ENetMultiplayerPeer.new()
