@@ -80,7 +80,9 @@ func perform_rollback(time_to_rollback, blacklist : Array = [], whitelist : Arra
 
 func get_rollback_index(time_to_rollback):
 	
-	return floor(time_to_rollback / get_physics_process_delta_time())
+	var desired_frame : int = floor(time_to_rollback / get_physics_process_delta_time())
+	var oldest_frame : int = previous_states.size() - 1
+	return min(desired_frame, desired_frame)
 
 	
 func get_rollback_state(time_to_rollback):

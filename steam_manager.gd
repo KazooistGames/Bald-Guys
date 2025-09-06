@@ -76,17 +76,19 @@ func _on_lobby_match_list(these_lobbies: Array) -> void:
 	
 	print(these_lobbies)
 	
+	var list : VBoxContainer = get_node("/root/World/CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll/list")
+	
 	for this_lobby in these_lobbies:
 		var lobby_name: String = Steam.getLobbyData(this_lobby, "name")
 		var lobby_mode: String = Steam.getLobbyData(this_lobby, "mode")
 		var lobby_num_members: int = Steam.getNumLobbyMembers(this_lobby)
 		var lobby_button: Button = Button.new()
 		lobby_button.set_text("Lobby %s: %s [%s] - %s Player(s)" % [this_lobby, lobby_name, lobby_mode, lobby_num_members])
-		lobby_button.set_size(Vector2(800, 50))
+		#lobby_button.set_size(Vector2(800, 50))
 		lobby_button.set_name("lobby_%s" % this_lobby)
 		lobby_button.connect("pressed", Callable(self, "join_lobby").bind(this_lobby))
 		## Add the new lobby to the list
-		$CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll/list.add_child(lobby_button)
+		list.add_child(lobby_button)
 				
 				
 func create_lobby() -> void:
