@@ -39,16 +39,12 @@ var session : Session
 
 func _ready():
 	
-	music.play()
-	
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-	
-	multiplayer.connected_to_server.connect(introduce_myself_to_server)
-	multiplayer.connected_to_server.connect(acknowledge_popup)
-
+	music.play()
 	use_steam.visible = SteamManager.is_valid
 	use_steam.button_pressed = SteamManager.is_valid
-	
+	multiplayer.connected_to_server.connect(introduce_myself_to_server)
+	multiplayer.connected_to_server.connect(acknowledge_popup)
 	
 func _unhandled_input(_event):
 	
@@ -143,8 +139,7 @@ func join_lobby():
 	
 	if use_steam.button_pressed:
 		var lobby_id =  $CanvasLayer/MainMenu/margin/vbox/steam_vbox/lobby_entry.text
-		var host_id = Steam.getLobbyOwner(int(lobby_id))
-		error = SteamNetwork.join_host(host_id)	
+		SteamManager.join_lobby(int(lobby_id))
 		
 	elif screenname_entry.text  == '':
 		error = "Enter a screen name first!"

@@ -19,7 +19,6 @@ var is_valid : bool = false
 
 
 func _init() -> void:
-	
 	print("Initializing Steam Module")	
 	var init_response : Dictionary = Steam.steamInitEx(APP_ID)
 
@@ -28,13 +27,12 @@ func _init() -> void:
 		get_tree().quit()
 		
 	else:	
+		print(Steam.getBetaInfo())
 		user_id = Steam.getSteamID()
 		username = Steam.getPersonaName()
 		is_valid = Steam.isSubscribed()
 		print("Logged in as UserID %s" % user_id + ', ' + username)
 
-	print(Steam.getBetaInfo())
-	
 	
 func _ready() -> void:
 	
@@ -44,6 +42,7 @@ func _ready() -> void:
 	Steam.lobby_match_list.connect(_on_lobby_match_list)
 	#Steam.lobby_data_update.connect(_on_lobby_data_update)
 	check_command_line()	
+	list_lobbies()
 	
 	
 func _process(delta) -> void:
@@ -87,7 +86,7 @@ func _on_lobby_match_list(these_lobbies: Array) -> void:
 		lobby_button.set_name("lobby_%s" % this_lobby)
 		lobby_button.connect("pressed", Callable(self, "join_lobby").bind(this_lobby))
 		## Add the new lobby to the list
-		#$CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll/list.add_child(lobby_button)
+		$CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll/list.add_child(lobby_button)
 				
 				
 func create_lobby() -> void:
@@ -102,8 +101,8 @@ func _on_lobby_created(connect: int, this_lobby_id: int) -> void:
 		lobby_id = this_lobby_id
 		print("Created a lobby: %s" % lobby_id)
 		Steam.setLobbyJoinable(lobby_id, true)
-		Steam.setLobbyData(lobby_id, "name", "KazooistGames test lobby")
-		Steam.setLobbyData(lobby_id, "mode", "GodotSteam test")
+		Steam.setLobbyData(lobby_id, "name", username)
+		Steam.setLobbyData(lobby_id, "mode", "KazooistGames test")
 		# Allow P2P connections to fallback to being relayed through Steam if needed
 		var set_relay: bool = Steam.allowP2PPacketRelay(true)
 		print("Allowing Steam to be relay backup: %s" % set_relay)
@@ -123,6 +122,8 @@ func _on_lobby_joined(remote_lobby_id: int, _permissions: int, _locked: bool, re
 	if response == Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
 		lobby_id = remote_lobby_id
 		get_lobby_members()
+		var host_id = Steam.getLobbyOwner(int(lobby_id))
+		SteamNetwork.join_host(host_id)	
 
 	else:
 		print("Failed to join this chat room: %s" % response)

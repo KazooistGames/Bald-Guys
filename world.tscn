@@ -103,16 +103,15 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "JOIN"
 
-[node name="lobby_entry" type="LineEdit" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
-custom_minimum_size = Vector2(0, 100)
+[node name="scroll" type="ScrollContainer" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
-placeholder_text = "Enter Lobby ID"
-alignment = 1
+
+[node name="list" type="VBoxContainer" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll"]
+layout_mode = 2
 
 [node name="use_steam" type="CheckButton" parent="CanvasLayer/MainMenu/margin/vbox"]
 layout_mode = 2
-text = "use Steam"
+text = "Steam Networking"
 alignment = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu/margin/vbox"]
