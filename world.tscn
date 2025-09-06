@@ -99,6 +99,7 @@ theme_override_font_sizes/font_size = 32
 text = "HOST"
 
 [node name="join_steam" type="Button" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "JOIN"
@@ -107,6 +108,7 @@ text = "JOIN"
 layout_mode = 2
 
 [node name="list" type="VBoxContainer" parent="CanvasLayer/MainMenu/margin/vbox/steam_vbox/scroll"]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 
 [node name="use_steam" type="CheckButton" parent="CanvasLayer/MainMenu/margin/vbox"]

@@ -123,7 +123,9 @@ func _on_lobby_joined(remote_lobby_id: int, _permissions: int, _locked: bool, re
 		lobby_id = remote_lobby_id
 		get_lobby_members()
 		var host_id = Steam.getLobbyOwner(int(lobby_id))
-		SteamNetwork.join_host(host_id)	
+		
+		if host_id != SteamManager.user_id: #lobby joined gets called if you create the lobby, avoid crashing!
+			SteamNetwork.join_host(host_id)	
 
 	else:
 		print("Failed to join this chat room: %s" % response)

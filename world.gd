@@ -161,6 +161,9 @@ func join_lobby():
 
 func leave_session():
 		
+	if use_steam.button_pressed:
+		SteamManager.leave_lobby()
+		
 	if session != null:
 		session.queue_free()
 		 	
@@ -177,8 +180,7 @@ func leave_session():
 		
 	multiplayer.multiplayer_peer = null
 	
-	if use_steam.button_pressed:
-		SteamManager.leave_lobby()
+
 
 		
 func quit():
