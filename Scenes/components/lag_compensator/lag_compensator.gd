@@ -1,12 +1,5 @@
 extends Node
 
-static var SERVER_PING = 0.0 :
-	get:
-		return SERVER_PING
-	set(value):
-		SERVER_PING = lerpf(SERVER_PING, value, 0.5)
-		
-static var CLIENT_PINGS = { 1 : 0}
 
 var remaining_time_to_being_rectified = 0.0
 var max_rectification_scalar = 1.1
@@ -39,19 +32,19 @@ func compensated_delta(delta):
 func reset(client_id = 1):
 	
 	if is_multiplayer_authority():
-		if CLIENT_PINGS.has(client_id):
-			remaining_time_to_being_rectified = CLIENT_PINGS[client_id] / 1000.0
+		if Lag.CLIENT_PINGS.has(client_id):
+			remaining_time_to_being_rectified = Lag.CLIENT_PINGS[client_id] / 1000.0
 	else:
-		remaining_time_to_being_rectified = SERVER_PING / 1000.0
+		remaining_time_to_being_rectified = Lag.SERVER_PING / 1000.0
 		
 		
 func reset_full_duplex(client_id = 1):
 	
 	if is_multiplayer_authority():
-		if CLIENT_PINGS.has(client_id):
-			remaining_time_to_being_rectified = CLIENT_PINGS[client_id] / 500.0
+		if Lag.CLIENT_PINGS.has(client_id):
+			remaining_time_to_being_rectified = Lag.CLIENT_PINGS[client_id] / 500.0
 	else:
-		remaining_time_to_being_rectified = SERVER_PING / 500.0
+		remaining_time_to_being_rectified = Lag.SERVER_PING / 500.0
 
 
 func parent_state():
