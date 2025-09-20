@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 SteamManager="*res://steam_manager.gd"
 EnetNetwork="*res://enet_network.gd"
 SteamNetwork="*res://steam_network.gd"
+Lag="*res://Lag.gd"
 
 [input]
 

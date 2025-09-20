@@ -23,8 +23,8 @@ var Active_Game : Game
 @onready var HUD : Hud = $HUD
 @onready var humanoidSpawner : MultiplayerSpawner = $HumanoidSpawner
 @onready var raycast : RayCast3D = $RayCast3D
-@onready var pinger : Node = $PingTimer
-@onready var unlagger : Node= $LagCompensator
+@onready var periodic_checks : Node = $PingTimer
+#@onready var unlagger : Node= $LagCompensator
 @onready var wig_manager : WigManager = $wig_manager
 
 signal Created_Humanoid
@@ -45,8 +45,7 @@ var game_vote_options : Array[Game] = []
 func _ready():
 		
 	if is_multiplayer_authority():
-		pinger.timeout.connect(ping_clients)
-		pinger.timeout.connect(fix_out_of_bounds)
+		periodic_checks.timeout.connect(fix_out_of_bounds)
 		add_player(1)
 	
 	humanoidSpawner.spawned.connect(handle_new_humanoid)
@@ -218,7 +217,7 @@ func add_player(peer_id):
 		return
 	
 	print(str(peer_id) + " joined")
-	unlagger.CLIENT_PINGS[peer_id] = 0
+	#unlagger.CLIENT_PINGS[peer_id] = 0
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
@@ -310,37 +309,6 @@ func rpc_CommissionSession(Seed):
 	Commissioned = true
 			
 	  
-func ping_clients():
-	
-	var local_server_time = Time.get_unix_time_from_system()
-	ping.rpc(local_server_time)
-				
-	
-@rpc("any_peer", "call_remote")
-func ping(passthrough_time : float):  
-
-	var sender_id = multiplayer.get_remote_sender_id()
-	pong.rpc_id(sender_id, passthrough_time)
-	
-	if not is_multiplayer_authority():
-		var local_client_time = Time.get_unix_time_from_system()
-		ping.rpc_id(get_multiplayer_authority(), local_client_time)
-		
-		
-@rpc("any_peer", "call_remote")
-func pong(ping_timestamp : float): #responding RPC call that passes back initial timestamp to original pinger
-
-	var local_timestamp = Time.get_unix_time_from_system()
-	var ping_ms = (local_timestamp - ping_timestamp) * 1000.0 / 2.0
-	
-	if is_multiplayer_authority():
-		unlagger.CLIENT_PINGS[multiplayer.get_remote_sender_id()] = ping_ms
-		
-	else:
-		unlagger.SERVER_PING = ping_ms
-		HUD.set_ping_indicator(ping_ms)	
-		unlagger.reset()
-	
 	
 func update_nameplate_for_ragdoll(ragdoll_state, node):
 	
