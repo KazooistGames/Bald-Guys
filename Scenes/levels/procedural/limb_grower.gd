@@ -16,7 +16,7 @@ enum Configuration
 @export var configuration = Configuration.inert
 @onready var rng = RandomNumberGenerator.new()
 @onready var previous_rng_state = rng.state
-@onready var unlagger = $LagCompensator
+#@onready var unlagger = $LagCompensator
 
 var in_position = false
 
@@ -31,7 +31,7 @@ var limb_freq = 0.4
 
 func _physics_process(delta):
 	
-	delta *= unlagger.delta_scalar(delta)
+	#delta *= unlagger.delta_scalar(delta)
 	
 	in_position = true
 	
@@ -115,7 +115,7 @@ func extend_limbs():
 		print('limbs extending')
 		configuration = Configuration.extending
 		in_position = false
-		unlagger.reset()
+		#unlagger.reset()
 		
 		if limbs.size() == 0:
 			finished_extending.emit()	
@@ -131,7 +131,7 @@ func retract_limbs():
 		print('limbs retracting')
 		configuration = Configuration.retracting
 		in_position = false
-		unlagger.reset()
+		#unlagger.reset()
 		
 		for limb in limbs:
 			limb.preference = limb.Preference.deep 

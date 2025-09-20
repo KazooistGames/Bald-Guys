@@ -16,7 +16,7 @@ enum Configuration
 
 @onready var rng = RandomNumberGenerator.new()
 @onready var previous_rng_state = rng.state
-@onready var unlagger = $LagCompensator
+#@onready var unlagger = $LagCompensator
 
 var ramps = []
 var heights = []
@@ -35,7 +35,7 @@ signal finished_collapsing
 
 func _physics_process(delta):
 	
-	delta *= unlagger.delta_scalar(delta)
+	#delta *= unlagger.delta_scalar(delta)
 	in_position = true
 	
 	if configuration == Configuration.inert or ramps.size() == 0:
@@ -159,7 +159,7 @@ func lift():
 	if configuration != Configuration.lifting:
 		print('ramps lifting')
 		configuration = Configuration.lifting
-		unlagger.reset()
+		#unlagger.reset()
 		
 		if ramps.size() == 0:
 			finished_lifting.emit()
@@ -174,7 +174,7 @@ func collapse():
 	if configuration != Configuration.collapsing:
 		print('ramps collapsing')
 		configuration = Configuration.collapsing
-		unlagger.reset()
+		#unlagger.reset()
 		
 		if ramps.size() == 0:
 			finished_collapsing.emit()

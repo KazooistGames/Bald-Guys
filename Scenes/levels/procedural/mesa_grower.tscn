@@ -1,9 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bihhmgl2g08o3"]
+[gd_scene load_steps=2 format=3 uid="uid://bihhmgl2g08o3"]
 
 [ext_resource type="Script" path="res://Scenes/levels/procedural/Mesa_Grower.gd" id="1_4cqld"]
-[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="2_7xh0o"]
 
 [node name="Mesa_Grower" type="Node3D"]
 script = ExtResource("1_4cqld")
-
-[node name="LagCompensator" parent="." instance=ExtResource("2_7xh0o")]

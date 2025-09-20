@@ -1,6 +1,6 @@
 extends Node
 
-static var SERVER_PING = 0.0 :
+static var SERVER_PING : float = 0.0 :
 	get:
 		return SERVER_PING
 	set(value):
@@ -17,7 +17,7 @@ func _physics_process(delta) -> void:
 		send_timestamp.rpc(local_server_time)
 	else:
 		#print("sending ", local_server_time)
-		send_timestamp.rpc_id(0, local_server_time)
+		send_timestamp.rpc_id(1, local_server_time)
 				
 	
 @rpc("any_peer", "call_remote")

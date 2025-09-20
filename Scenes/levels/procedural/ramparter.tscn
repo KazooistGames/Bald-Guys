@@ -1,9 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bxvldmj0gbd3m"]
+[gd_scene load_steps=2 format=3 uid="uid://bxvldmj0gbd3m"]
 
 [ext_resource type="Script" path="res://Scenes/levels/procedural/ramparter.gd" id="1_1cb03"]
-[ext_resource type="PackedScene" uid="uid://cqxg301a2m50j" path="res://Scenes/components/lag_compensator/lag_compensator.tscn" id="2_qya1q"]
 
 [node name="Ramparter" type="Node3D"]
 script = ExtResource("1_1cb03")
-
-[node name="LagCompensator" parent="." instance=ExtResource("2_qya1q")]
