@@ -1,6 +1,5 @@
 extends WorldEnvironment
 
-
 #	"ZSF" = zero / span / frequency
 #	used with fluctuating variables
 
@@ -30,7 +29,7 @@ var geometry_material = preload("res://Materials/geometry.tres")
 
 @onready var sun = $DirectionalLight3D
 
-@onready var timer = randi()
+@onready var phase = Time.get_unix_time_from_system()
 
 	
 func _process(delta):
@@ -40,14 +39,14 @@ func _process(delta):
 	elif not is_multiplayer_authority():
 		return
 		
-	timer += delta
-	set_environment_phase.rpc(timer)	
+	phase = Time.get_unix_time_from_system()
+	set_environment_phase(phase)	
+	#set_light_phase(phase)
 	
 	#update post processing shader to use the directional lights actual point direction
 	var light_dir = Vector3(cos(sun.rotation.y), sun.rotation.x, sin(sun.rotation.y)).normalized()
 	postprocessing_material.set_shader_parameter("light_direction", light_dir)
 	
-
 	
 func get_zsf_instant(phase, zsf, offset = 0):
 	
@@ -66,9 +65,9 @@ func set_environment_phase(phase):
 	var ambient_green = get_zsf_instant(phase, ambient_green_zsf)	
 	var ambient_blue = get_zsf_instant(phase, ambient_blue_zsf)	
 
-	#environment.volumetric_fog_emission_energy = get_zsf_instant(timer, fog_density_zsf)	
+	#environment.volumetric_fog_emission_energy = get_zsf_instant(phase, fog_density_zsf)	
 	environment.ambient_light_color = Color(ambient_red, ambient_green, ambient_blue)
-	environment.ambient_light_energy = get_zsf_instant(timer, ambient_energy_zsf)
+	environment.ambient_light_energy = get_zsf_instant(phase, ambient_energy_zsf)
 	
 	geometry_material.metallic = get_zsf_instant(phase, geometry_metallic_zsf)
 	geometry_material.roughness = get_zsf_instant(phase, geometry_roughness_zsf)
@@ -83,7 +82,7 @@ func set_environment_phase(phase):
 @export var light_wave_period = 60
 @export var light_energy_max = 1.2
 @export var light_energy_min = 0.0
-@rpc("call_local")
+
 func set_light_phase(phase):
 	
 	var raw_wave = sin (phase / light_wave_period)

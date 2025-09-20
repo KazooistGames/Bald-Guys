@@ -180,7 +180,8 @@ func toggle_physical_bone_collider(bone_name, value):
 			bone.get_child(0).disabled = not value
 
 
-func sync_loose_bones():
+var sync_timer : float = 0.0
+func sync_loose_bones(delta):
 	
 	if not multiplayer.has_multiplayer_peer():
 		pass
@@ -188,13 +189,17 @@ func sync_loose_bones():
 	elif not is_multiplayer_authority():
 		return
 	
-	#rpc_set_bone_physics.rpc(rootBone.get_path(), rootBone.transform, rootBone.linear_velocity)
-	for bone : PhysicalBone3D in physicalBones:	
-		var path = bone.get_path()
-		rpc_set_bone_physics.rpc(path, bone.transform, bone.linear_velocity)
+	elif sync_timer >= 0.5:	
+		#rpc_set_bone_physics.rpc(rootBone.get_path(), rootBone.transform, rootBone.linear_velocity)
+		for bone : PhysicalBone3D in physicalBones:	
+			sync_timer -= 0.5
+			var path = bone.get_path()
+			rpc_set_bone_physics.rpc(path, bone.transform, bone.linear_velocity)
+	else:
+		sync_timer += delta
 		
 		
-@rpc("call_remote", "authority")
+@rpc("call_remote", "authority", "unreliable_ordered")
 func rpc_set_bone_physics(bone_path : NodePath, new_transform : Transform3D, new_velocity : Vector3):
 	
 	var bone : PhysicsBody3D = get_node(bone_path)

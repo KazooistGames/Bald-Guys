@@ -5669,6 +5669,9 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_l8k7m")
+}
 tree_root = ExtResource("3_1nlf8")
 anim_player = NodePath("../AnimationPlayer")
 parameters/Add2/add_amount = 1.0

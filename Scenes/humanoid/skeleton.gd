@@ -17,7 +17,7 @@ func _physics_process(delta):
 	rotation.y = fmod(rotation.y, 2 * PI)
 	
 	if RAGDOLLED:
-		ragdollSkeleton.sync_loose_bones()
+		ragdollSkeleton.sync_loose_bones(delta)
 	else:
 		ragdollSkeleton.animate_physical_bones(delta)
 
