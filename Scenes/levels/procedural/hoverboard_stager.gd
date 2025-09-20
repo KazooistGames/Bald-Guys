@@ -20,7 +20,6 @@ enum Configuration
 
 @onready var rng = RandomNumberGenerator.new()
 @onready var previous_rng_state = rng.state
-@onready var unlagger = $LagCompensator
 
 var sync_cooldown_progress = 0.0
 var sync_cooldown_rate = 1.0
@@ -36,7 +35,6 @@ func _physics_process(delta):
 	
 	#print(configuration)
 	sync_cooldown_progress += delta * sync_cooldown_rate
-	delta *= unlagger.delta_scalar(delta)
 	
 	if not multiplayer.has_multiplayer_peer():
 		pass
@@ -147,7 +145,6 @@ func introduce_boards():
 		print('boards being introduced')
 		configuration = Configuration.introducing
 		all_boards_in_position = false
-		unlagger.reset()
 		
 		if boards.size() == 0:
 			finished_introducing.emit()
@@ -172,7 +169,6 @@ func retreat_boards():
 		print('boards being retreated')
 		configuration = Configuration.retreating
 		all_boards_in_position = false
-		unlagger.reset()
 		
 		if boards.size() == 0:
 			finished_retreating.emit()
@@ -193,8 +189,7 @@ func retreat_boards():
 func bounce_boards():
 	
 	if configuration != Configuration.bouncing:
-		configuration = Configuration.bouncing
-		unlagger.reset()	
+		configuration = Configuration.bouncing	
 		previous_rng_state = rng.state
 		
 		for board in boards:
@@ -214,8 +209,7 @@ func stop_boards():
 	
 	if configuration != Configuration.inert:
 		print('boards stopped')
-		configuration = Configuration.inert
-		unlagger.reset()	
+		configuration = Configuration.inert	
 		
 		for board in boards:
 			board.status = 0			
@@ -258,9 +252,8 @@ func sync_board_positions(server_positions : PackedVector3Array, server_trajecto
 	for index in range(boards.size()):
 		if index >= server_positions.size() or index >= server_trajectories.size():
 			continue
-		boards[index].position = server_positions[index] + unlagger.SERVER_PING / 2000.0 * server_trajectories[index]
+		boards[index].position = server_positions[index] + Lag.SERVER_PING / 2000.0 * server_trajectories[index]
 		boards[index].trajectory = server_trajectories[index]
-	unlagger.reset()
 
 
 @rpc("call_local", "authority", "reliable")	
