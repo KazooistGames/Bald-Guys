@@ -24,7 +24,7 @@ var Active_Game : Game
 @onready var humanoidSpawner : MultiplayerSpawner = $HumanoidSpawner
 @onready var raycast : RayCast3D = $RayCast3D
 @onready var periodic_checks : Node = $PingTimer
-@onready var unlagger : Node= $LagCompensator
+#@onready var unlagger : Node= $LagCompensator
 @onready var wig_manager : WigManager = $wig_manager
 
 signal Created_Humanoid
@@ -217,7 +217,7 @@ func add_player(peer_id):
 		return
 	
 	print(str(peer_id) + " joined")
-	unlagger.CLIENT_PINGS[peer_id] = 0
+	#unlagger.CLIENT_PINGS[peer_id] = 0
 	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)

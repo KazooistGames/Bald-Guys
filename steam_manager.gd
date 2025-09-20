@@ -24,7 +24,7 @@ func _init() -> void:
 
 	if init_response['status'] > 0:
 		print("failed to init steam!")
-		get_tree().quit()
+		#get_tree().quit()
 		
 	else:	
 		print(Steam.getBetaInfo())
