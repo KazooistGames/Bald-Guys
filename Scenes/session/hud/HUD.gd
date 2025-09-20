@@ -40,7 +40,7 @@ func _process(delta):
 	else:
 		PSA.text = ""
 		
-	var server_lag = Lag.SERVER_PING / 1000.0
+	var server_lag = Lag.SERVER_PING
 	ping.text = "%.2f" % server_lag
 		
 		

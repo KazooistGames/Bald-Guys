@@ -8,14 +8,22 @@ static var SERVER_PING : float = 0.0 :
 		
 static var CLIENT_PINGS = { 1 : 0}
 	
+var ping_timer = 0.0
+const ping_period = 0.25
 	
 func _physics_process(delta) -> void:
-		
+	
+
+	
+	print(Time.get_unix_time_from_system())
 	var local_server_time = Time.get_ticks_msec()
-		
+	
 	if not multiplayer.has_multiplayer_peer():
 		pass
+	elif ping_timer < ping_period:
+		ping_timer += delta
 	elif is_multiplayer_authority():
+		ping_timer -= ping_period
 		send_timestamp.rpc(local_server_time)
 				
 	
@@ -35,10 +43,10 @@ func send_timestamp(passthrough_time : float):
 func return_timestamp(original_timestamp : float):
 	
 	var local_timestamp = Time.get_ticks_msec()
-	var RTT = (local_timestamp - original_timestamp) / 1000.0
+	var RTT = (local_timestamp - original_timestamp)
 	
 	if is_multiplayer_authority():
 		CLIENT_PINGS[multiplayer.get_remote_sender_id()] = RTT / 2.0	
 	else:
-		#print("receiving ", local_timestamp)
+		#print("receiving ", original_timestamp)
 		SERVER_PING = RTT / 2.0
