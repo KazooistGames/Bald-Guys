@@ -38,11 +38,12 @@ func _process(_delta):
 				
 	if theme.get_playback_position() < beas_mote_transition:
 		theme.seek(beas_mote_transition)
-
+		
+	#session.HUD.nameplate_visible["WIG"] = active_wig and not active_bearer
 
 func _physics_process(delta):
 	
-	if session.wig_manager.wigs.size() <= 0:
+	if session.wig_manager.wigs.size() <= 0 or State != GameState.playing:
 		active_wig = null
 		active_bearer = null
 		

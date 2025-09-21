@@ -128,9 +128,9 @@ func start_host_lobby():
 		return error
 	
 	session = session_Prefab.instantiate()
+	session.Client_Screennames[1] = acquire_screenname()
 	viewPort.add_child(session)
 	multiplayer.peer_disconnected.connect(session.remove_player)
-	session.Client_Screennames[1] = acquire_screenname()
 
 
 func join_lobby():

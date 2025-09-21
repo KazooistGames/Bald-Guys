@@ -24,23 +24,18 @@ var Active_Game : Game
 @onready var humanoidSpawner : MultiplayerSpawner = $HumanoidSpawner
 @onready var raycast : RayCast3D = $RayCast3D
 @onready var periodic_checks : Node = $PingTimer
-#@onready var unlagger : Node= $LagCompensator
 @onready var wig_manager : WigManager = $wig_manager
 
 signal Created_Humanoid
 signal Destroying_Humanoid
-
 signal Started_Round
 signal Ended_Round
 
 var local_ping_ms = 0.0
-		
 var countDown_timer = 0
 var countDown_value = 0
-
-
-
 var game_vote_options : Array[Game] = []
+
 
 func _ready():
 		
@@ -58,8 +53,7 @@ func _ready():
 		if node == null:
 			pass
 		elif node is Game:
-			All_Games.append(node)
-			
+			All_Games.append(node)	
 
 
 func _process(_delta):
@@ -143,7 +137,6 @@ func Try_Vote():
 	game_vote_options.append(get_eligible_game())
 	game_vote_options.append(get_eligible_game())
 
-	
 	Level.vote()
 	countDown_timer = 0
 	countDown_value = 60
@@ -218,15 +211,14 @@ func add_player(peer_id):
 		return
 	
 	print(str(peer_id) + " joined")
-	#unlagger.CLIENT_PINGS[peer_id] = 0
-	
 	var new_peer_humanoid = Humanoid_Prefab.instantiate()
 	new_peer_humanoid.name = str(peer_id)
 	new_peer_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
 	Humanoids.append(new_peer_humanoid)
 	add_child(new_peer_humanoid)
 	rpc_respawn_player.rpc(new_peer_humanoid.get_path())
-	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name, new_peer_humanoid.find_child('*head').get_path())
+	var screenname = get_humanoids_screenname(new_peer_humanoid)
+	HUD.add_nameplate(new_peer_humanoid.name, screenname, new_peer_humanoid.find_child('*head').get_path())
 	Created_Humanoid.emit(new_peer_humanoid)	
 	
 	rpc_CommissionSession.rpc_id(peer_id, session_rng.seed)
@@ -253,7 +245,8 @@ func add_player(peer_id):
 func handle_new_humanoid(new_humanoid):
 	
 	new_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
-	HUD.add_nameplate(new_humanoid.name, new_humanoid.name, new_humanoid.find_child('*head').get_path())
+	var screenname = get_humanoids_screenname(new_humanoid)
+	HUD.add_nameplate(new_humanoid.name, screenname, new_humanoid.find_child('*head').get_path())
 	
 
 func remove_player(peer_id):
@@ -317,11 +310,15 @@ func update_nameplate_for_ragdoll(ragdoll_state, node):
 		pass
 		
 	elif ragdoll_state:
-		HUD.modify_nameplate(node.name, {"theme_override_colors/font_color" : Color.GRAY})
-		HUD.modify_nameplate(node.name, {"theme_override_font_sizes/font_size" : 16})
+		HUD.modify_nameplate(node.name, {
+			"theme_override_colors/font_color" : Color.GRAY, 
+			"theme_override_font_sizes/font_size" : 16
+			})
 	else:
-		HUD.modify_nameplate(node.name, {"theme_override_colors/font_color" : Color.WHITE})
-		HUD.modify_nameplate(node.name, {"theme_override_font_sizes/font_size" : 20})
+		HUD.modify_nameplate(node.name, {
+			"theme_override_colors/font_color" : Color.WHITE,
+			"theme_override_font_sizes/font_size" : 20
+			})
 
 
 func fix_out_of_bounds():

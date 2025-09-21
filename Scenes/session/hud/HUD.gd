@@ -49,12 +49,15 @@ func _process(delta):
 	var camera = get_viewport().get_camera_3d()
 	
 	for nameplate in nameplates.get_children():
-		#var nameplate = nameplates.find_child(str(key), false, false)	
+		
 		if nameplate == null or camera == null:
 			continue
+		elif not nameplate_owners.has(nameplate.name):
+			continue
+			
+		var owner  = nameplate_owners[nameplate.name]
 		
-		if nameplate_owners[nameplate.name]:
-			var owner : Node3D = nameplate_owners[nameplate.name]
+		if owner != null:
 			var screen_coordinates = camera.unproject_position(owner.global_position)
 			var screen_size = DisplayServer.screen_get_size()
 			var screen_offset = Vector2(0, screen_size.y / 50.0)	
