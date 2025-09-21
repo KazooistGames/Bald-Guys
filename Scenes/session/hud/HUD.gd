@@ -7,6 +7,9 @@ var Scores : Dictionary = {}
 var Goal : float = 0.0
 var ProgressPercent = 0
 
+var nameplate_owners : Dictionary = {}
+var nameplate_visible : Dictionary = {}
+
 @onready var scoreboard = $Scoreboard
 @onready var names_text = $Scoreboard/Names/Rows/Values
 @onready var scores_text = $Scoreboard/Scores/Rows/Values
@@ -42,6 +45,25 @@ func _process(delta):
 		
 	var server_lag = Lag.SERVER_PING * 1000.0
 	ping.text = "%.2f" % server_lag
+	
+	var camera = get_viewport().get_camera_3d()
+	
+	for nameplate in nameplates.get_children():
+		#var nameplate = nameplates.find_child(str(key), false, false)	
+		if nameplate == null or camera == null:
+			continue
+		
+		if nameplate_owners[nameplate.name]:
+			var owner : Node3D = nameplate_owners[nameplate.name]
+			var screen_coordinates = camera.unproject_position(owner.global_position)
+			var screen_size = DisplayServer.screen_get_size()
+			var screen_offset = Vector2(0, screen_size.y / 50.0)	
+			var label_size = nameplate.size / 2.0
+			var position_target = screen_coordinates - screen_offset - label_size
+			var position_delta = position_target - nameplate.position
+			var step = pow(position_delta.length(), 2.0) / 75
+			nameplate.position = nameplate.position.move_toward(position_target, step)	
+			nameplate.visible = not camera.is_position_behind(owner.global_position) and nameplate_visible[nameplate.name]
 		
 		
 func update_scoreboard(_delta) -> void:
@@ -76,29 +98,9 @@ func set_psa(message = "", ttl = 1):
 func get_psa():
 
 	return PSA.text
-
-	
-func update_nameplate(key, coordinates, label, invisible = false):
-	
-	var nameplate = nameplates.find_child(str(key), false, false)
-	var camera = get_viewport().get_camera_3d()
-	
-	if nameplate == null or camera == null:
-		pass
-	else:
-		var screen_coordinates = camera.unproject_position(coordinates)
-		var screen_size = DisplayServer.screen_get_size()
-		var screen_offset = Vector2(0, screen_size.y / 50.0)	
-		var label_size = nameplate.size / 2.0
-		var position_target = screen_coordinates - screen_offset - label_size
-		var position_delta = position_target - nameplate.position
-		var step = pow(position_delta.length(), 2.0) / 75
-		nameplate.position = nameplate.position.move_toward(position_target, step)
-		nameplate.visible = not camera.is_position_behind(coordinates) and not invisible
-		nameplate.text = label
 	
 
-func add_nameplate(key, label):
+func add_nameplate(key, label, owner_path : NodePath):
 	
 	var new_nameplate = Label.new()
 	new_nameplate.name = key
@@ -108,6 +110,8 @@ func add_nameplate(key, label):
 	new_nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	new_nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	nameplates.add_child(new_nameplate)
+	nameplate_owners[key] = get_node(owner_path)
+	nameplate_visible[key] = true
 	return new_nameplate
 	
 	
@@ -117,14 +121,18 @@ func remove_nameplate(key):
 	
 	if nameplate != null:
 		nameplate.queue_free()
+		nameplate_owners.erase(key)
 	
 	
-func modify_nameplate(key, variable, value):
+func modify_nameplate(plate_key, values : Dictionary):
 	
-	var nameplate = nameplates.find_child(str(key), false, false)
+	var nameplate = nameplates.find_child(str(plate_key), false, false)
 	
-	if nameplate != null:
-		nameplate.set(variable, value)
+	if nameplate == null:
+		return
+		
+	for key in values.keys():
+		nameplate.set(key, values[key])
 	
 	
 func set_ping_indicator(value):
@@ -144,14 +152,6 @@ func set_ping_indicator(value):
 		
 	ping.add_theme_color_override("font_color", ping_color_grade)
 	ping.text = str(value) + " ms"
-	
-	#
-#func set_player_score(player_id : int) -> void:
-	#pass
-	#
-	#
-#func get_player_score(player_id : int) -> float:
-	#return 0.0
 
 
 func set_progress_label(label : String) -> void:

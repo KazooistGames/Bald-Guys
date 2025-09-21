@@ -44,10 +44,10 @@ func _ready():
 func _process(delta):
 	
 	resize_hill(Hill_Size, delta)	
-	session.HUD.update_nameplate("HILL", Hill.global_position, "GEL")	
+	#session.HUD.update_nameplate("HILL", Hill.global_position, "GEL")	
 	var scoring_players : Array[Node3D] = get_players_in_hill()
 	var indicator_color = Color.GREEN_YELLOW if scoring_players.size() == 0 else Color.ORANGE_RED
-	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", indicator_color)
+	session.HUD.modify_nameplate("HILL", {"theme_override_colors/font_color" :  indicator_color})
 	
 	if State == GameState.playing:
 		session.HUD.find_child("Progress").visible = scoring_players.has(session.local_humanoid()) and Hill.visible
@@ -192,9 +192,12 @@ func rpc_play():
 	
 	Hill.visible = true
 	hill_collider.disabled = false
-	session.HUD.add_nameplate("HILL", "GEL")
-	session.HUD.modify_nameplate("HILL", "theme_override_colors/font_color", Color.GREEN_YELLOW)
-	session.HUD.modify_nameplate("HILL", "theme_override_font_sizes/font_size", 24)
+	session.HUD.add_nameplate("HILL", "GEL", Hill.get_path())
+	var values = {
+		"theme_override_colors/font_color" : Color.GREEN_YELLOW,
+		"theme_override_font_sizes/font_size" : 24
+	}
+	session.HUD.modify_nameplate("HILL", values)
 	session.HUD.set_progress_label("Irrigating Scalp...")
 	State = GameState.playing	
 	

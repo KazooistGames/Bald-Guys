@@ -33,17 +33,10 @@ var geometry_material = preload("res://Materials/geometry.tres")
 
 	
 func _process(delta):
-	
-	if not multiplayer.has_multiplayer_peer():
-		return	
-	elif not is_multiplayer_authority():
-		return
 		
 	phase = Time.get_unix_time_from_system()
 	set_environment_phase(phase)	
 	#set_light_phase(phase)
-	
-	#update post processing shader to use the directional lights actual point direction
 	var light_dir = Vector3(cos(sun.rotation.y), sun.rotation.x, sin(sun.rotation.y)).normalized()
 	postprocessing_material.set_shader_parameter("light_direction", light_dir)
 	

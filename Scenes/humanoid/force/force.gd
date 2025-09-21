@@ -17,8 +17,8 @@ enum Action {
 	charging = 2,
 	cooldown = -1,
 }
-@export var action = Action.inert
 
+@export var action = Action.inert
 @export var charge_armed = false
 @export var charge_ready = true
 @export var base_position = Vector3.ZERO

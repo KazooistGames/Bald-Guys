@@ -72,7 +72,8 @@ func _process(_delta):
 		if Client_Screennames.has(peer_id):
 			var head_position = humanoid.position + humanoid.head_position() + Vector3.UP * 0.25
 			var screenname = Client_Screennames[peer_id]
-			HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
+			#HUD.update_nameplate(humanoid.name, head_position, screenname, not humanoid.RUNNING)
+			#HUD.modify_nameplate(humanoid.name, {'visible' : humanoid.RUNNING})
 		
 	for game : Game in All_Games:
 		game.map_size = Level.room.Current_Size
@@ -225,7 +226,7 @@ func add_player(peer_id):
 	Humanoids.append(new_peer_humanoid)
 	add_child(new_peer_humanoid)
 	rpc_respawn_player.rpc(new_peer_humanoid.get_path())
-	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name)
+	HUD.add_nameplate(new_peer_humanoid.name, new_peer_humanoid.name, new_peer_humanoid.find_child('*head').get_path())
 	Created_Humanoid.emit(new_peer_humanoid)	
 	
 	rpc_CommissionSession.rpc_id(peer_id, session_rng.seed)
@@ -252,7 +253,7 @@ func add_player(peer_id):
 func handle_new_humanoid(new_humanoid):
 	
 	new_humanoid.ragdoll_change.connect(update_nameplate_for_ragdoll)
-	HUD.add_nameplate(new_humanoid.name, new_humanoid.name)
+	HUD.add_nameplate(new_humanoid.name, new_humanoid.name, new_humanoid.find_child('*head').get_path())
 	
 
 func remove_player(peer_id):
@@ -316,11 +317,11 @@ func update_nameplate_for_ragdoll(ragdoll_state, node):
 		pass
 		
 	elif ragdoll_state:
-		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.GRAY)
-		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 16)
+		HUD.modify_nameplate(node.name, {"theme_override_colors/font_color" : Color.GRAY})
+		HUD.modify_nameplate(node.name, {"theme_override_font_sizes/font_size" : 16})
 	else:
-		HUD.modify_nameplate(node.name, "theme_override_colors/font_color", Color.WHITE)
-		HUD.modify_nameplate(node.name, "theme_override_font_sizes/font_size", 20)
+		HUD.modify_nameplate(node.name, {"theme_override_colors/font_color" : Color.WHITE})
+		HUD.modify_nameplate(node.name, {"theme_override_font_sizes/font_size" : 20})
 
 
 func fix_out_of_bounds():

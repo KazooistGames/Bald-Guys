@@ -29,13 +29,9 @@ func _process(_delta):
 		
 	elif active_wig:
 		session.HUD.find_child("Progress").visible = active_bearer_is_local_player()
-		session.HUD.update_nameplate("WIG", active_wig.global_position, "WIG")
 		whispers.global_position = active_wig.global_position
 		whispers.stream_paused = active_bearer_is_local_player()
-		theme.stream_paused = not active_bearer_is_local_player()
-		
-		if active_bearer != null:
-			session.HUD.modify_nameplate("WIG", "visible", false)	
+		theme.stream_paused = not active_bearer_is_local_player()	
 		
 	if whispers.get_playback_position() >= beas_mote_transition:
 		whispers.seek(0)
@@ -46,12 +42,20 @@ func _process(_delta):
 
 func _physics_process(delta):
 	
-	if session.wig_manager.wigs.size() > 0:
-		active_wig = session.wig_manager.wigs.back()
-		active_bearer = session.wig_manager.bearers.back()
-	else:
+	if session.wig_manager.wigs.size() <= 0:
 		active_wig = null
 		active_bearer = null
+		
+	elif active_wig == null:
+		active_wig = session.wig_manager.wigs.back()
+		session.HUD.add_nameplate("WIG", "WIG", active_wig.get_path())
+		var values = {
+			"theme_override_colors/font_color" : Color.GREEN_YELLOW,
+			"theme_override_font_sizes/font_size" : 24,
+		}	
+		session.HUD.modify_nameplate("WIG", values)
+	else:
+		active_bearer = session.wig_manager.bearers.back()
 		
 	if not multiplayer.has_multiplayer_peer():
 		pass
@@ -146,19 +150,18 @@ func rpc_reset():
 			continue
 			
 		else:	
-			session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
-			session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 20)
+			var values = {
+				"theme_override_colors/font_color" : Color.WHITE,
+				"theme_override_font_sizes/font_size" : 20
+			}	
+			session.HUD.modify_nameplate(bearer.name, values)
 
 		
 
 @rpc("call_local", "reliable")
 func rpc_play():
 	
-	
-	session.HUD.set_progress_label("Installing Wig...")
-	session.HUD.add_nameplate("WIG", "WIG")
-	session.HUD.modify_nameplate("WIG", "theme_override_colors/font_color", Color.GREEN_YELLOW)
-	session.HUD.modify_nameplate("WIG", "theme_override_font_sizes/font_size", 24)
+	session.HUD.set_progress_label("Installing Wig...")	
 	theme.seek(beas_mote_transition)		
 	session.wig_manager.dawned.connect(handle_mount)
 	session.wig_manager.dropped.connect(handle_dismount)
@@ -178,9 +181,12 @@ func rpc_finish():
 	session.HUD.remove_nameplate("WIG")
 	State = GameState.finished	
 	
-	if active_bearer:			
-		session.HUD.modify_nameplate(active_bearer.name, "theme_override_colors/font_color", Color.WHITE)
-		session.HUD.modify_nameplate(active_bearer.name, "theme_override_font_sizes/font_size", 20)
+	if active_bearer:		
+		var values = {
+			"theme_override_colors/font_color" : Color.WHITE,
+			"theme_override_font_sizes/font_size" : 20
+		}	
+		session.HUD.modify_nameplate("WIG", values)
 		
 	if is_multiplayer_authority(): 
 		session.wig_manager.fuse_wig(active_bearer)
@@ -203,14 +209,21 @@ func handle_player_joining(client_id) -> void:
 
 func handle_mount(_wig, bearer):
 	
-	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.ORANGE_RED)
-	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 24)
-	
+	var values = {
+		"theme_override_colors/font_color" : Color.ORANGE_RED,
+		"theme_override_font_sizes/font_size" : 24
+	}	
+	session.HUD.modify_nameplate(bearer.name, values)
+	session.HUD.nameplate_visible["WIG"] = false
 	
 func handle_dismount(_wig, bearer):
 	
-	session.HUD.modify_nameplate(bearer.name, "theme_override_colors/font_color", Color.WHITE)
-	session.HUD.modify_nameplate(bearer.name, "theme_override_font_sizes/font_size", 20)
+	var values = {
+		"theme_override_colors/font_color" : Color.WHITE,
+		"theme_override_font_sizes/font_size" : 20
+	}	
+	session.HUD.modify_nameplate(bearer.name, values)
+	session.HUD.nameplate_visible["WIG"] = true
 	
 
 		
