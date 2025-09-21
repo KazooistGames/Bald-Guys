@@ -71,8 +71,8 @@ func _physics_process(_delta):
 		continuous_inputs['look'] = look
 		continuous_inputs['wasd'] = Input.get_vector("left", "right", "forward", "backward")
 		continuous_inputs['run'] = not Input.is_action_pressed("run")
-		var timestamp = Time.get_ticks_msec()
-		rpc_update_Continuous_inputs.rpc(continuous_inputs, timestamp)
+		var timestamp = Time.get_unix_time_from_system()
+		rpc_update_Continuous_inputs.rpc(continuous_inputs)
 		WASD = continuous_inputs['wasd']
 		humanoid.RUNNING = continuous_inputs['run']
 		
@@ -110,13 +110,13 @@ func _input(event):
 	
 	
 @rpc("any_peer", "call_local", "unreliable_ordered")
-func rpc_update_Continuous_inputs(inputs, timestamp):
+func rpc_update_Continuous_inputs(inputs):
 	
 	if not is_multiplayer_authority():
 		return
 		
 	var action_committed = false
-	var rollback_lag = (Time.get_ticks_msec() - timestamp) / 1000.0
+	var rollback_lag = Lag.CLIENT_PINGS[multiplayer.get_remote_sender_id()]
 	#rollback_lag = 0.15
 	
 	if just_changed('wasd', inputs):
@@ -148,7 +148,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	if not is_multiplayer_authority():
 		return
 		
-	var rollback_lag = (Time.get_ticks_msec() - timestamp) / 1000.0
+	var rollback_lag = Lag.CLIENT_PINGS[multiplayer.get_remote_sender_id()]
 	#rollback_lag = .15
 	var action_committed = false
 
