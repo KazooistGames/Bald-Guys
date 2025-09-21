@@ -1,21 +1,14 @@
 extends Node
 
-static var SERVER_PING : float = 0.0 :
-	get:
-		return SERVER_PING
-	set(value):
-		SERVER_PING = lerpf(SERVER_PING, value, 0.5)
+static var SERVER_PING : float = 0.0
 		
 static var CLIENT_PINGS = { 1 : 0}
 	
 var ping_timer = 0.0
-const ping_period = 0.25
+const ping_period = 0.1
 	
 func _physics_process(delta) -> void:
 	
-
-	
-	print(Time.get_unix_time_from_system())
 	var local_server_time = Time.get_ticks_msec()
 	
 	if not multiplayer.has_multiplayer_peer():
@@ -27,7 +20,7 @@ func _physics_process(delta) -> void:
 		send_timestamp.rpc(local_server_time)
 				
 	
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_remote", "unreliable_ordered")
 func send_timestamp(passthrough_time : float):  
 
 	var sender_id = multiplayer.get_remote_sender_id()
@@ -39,7 +32,7 @@ func send_timestamp(passthrough_time : float):
 		send_timestamp.rpc_id(get_multiplayer_authority(), local_client_time)
 		
 		
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_remote", "unreliable_ordered")
 func return_timestamp(original_timestamp : float):
 	
 	var local_timestamp = Time.get_ticks_msec()
