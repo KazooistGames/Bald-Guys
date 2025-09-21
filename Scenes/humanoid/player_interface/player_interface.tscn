@@ -1,20 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://jdvdhg8sqgv1"]
+[gd_scene load_steps=3 format=3 uid="uid://jdvdhg8sqgv1"]
 
 [ext_resource type="Script" path="res://Scenes/humanoid/player_interface/player_interface.gd" id="1_cqm6g"]
 [ext_resource type="PackedScene" uid="uid://dgdro4aicbogg" path="res://Scenes/humanoid/player_interface/recovery_minigame/recovery_minigame.tscn" id="2_skb7k"]
-
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_o6ouy"]
-properties/0/path = NodePath(".:WASD")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-properties/1/path = NodePath(".:look")
-properties/1/spawn = true
-properties/1/replication_mode = 1
 
 [node name="player_interface" type="Node3D"]
 script = ExtResource("1_cqm6g")
 
 [node name="RecoveryMinigame" parent="." instance=ExtResource("2_skb7k")]
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_o6ouy")
