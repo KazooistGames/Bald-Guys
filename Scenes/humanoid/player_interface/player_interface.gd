@@ -116,7 +116,7 @@ func rpc_update_Continuous_inputs(inputs, timestamp):
 		return
 		
 	var action_committed = false
-	var rollback_lag = Time.get_ticks_msec() - timestamp
+	var rollback_lag = (Time.get_ticks_msec() - timestamp) / 1000.0
 	#rollback_lag = 0.15
 	
 	if just_changed('wasd', inputs):
@@ -148,7 +148,7 @@ func rpc_update_Discrete_inputs(inputs : Dictionary, timestamp):
 	if not is_multiplayer_authority():
 		return
 		
-	var rollback_lag = Time.get_ticks_msec() - timestamp
+	var rollback_lag = (Time.get_ticks_msec() - timestamp) / 1000.0
 	#rollback_lag = .15
 	var action_committed = false
 
