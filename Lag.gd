@@ -36,7 +36,7 @@ func send_timestamp(passthrough_time : float):
 func return_timestamp(original_timestamp : float):
 	
 	var local_timestamp = Time.get_ticks_msec()
-	var RTT = (local_timestamp - original_timestamp)
+	var RTT = (local_timestamp - original_timestamp) / 1000.0
 	
 	if is_multiplayer_authority():
 		CLIENT_PINGS[multiplayer.get_remote_sender_id()] = RTT / 2.0	

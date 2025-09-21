@@ -54,7 +54,7 @@ func _physics_process(_delta):
 
 func predictive_correction():
 
-	var step_size = Lag.SERVER_PING / 1000.0
+	var step_size = Lag.SERVER_PING
 	Authority_Linear_Velocity -= Vector3.UP * 9.8 * step_size
 	AUTHORITY_ORIGIN += Authority_Linear_Velocity * step_size
 	
